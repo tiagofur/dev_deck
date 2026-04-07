@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { motion, useMotionValue, useTransform, type PanInfo } from 'framer-motion'
 import { ExternalLink, GitFork, Star } from 'lucide-react'
 import type { Repo } from '../../features/repos/types'
@@ -19,6 +20,7 @@ const SWIPE_THRESHOLD = 120
  * unmounts on action and a new card replaces this one).
  */
 export function SwipeCard({ repo, onSwipe }: Props) {
+  const [imgError, setImgError] = useState(false)
   const x = useMotionValue(0)
   const y = useMotionValue(0)
 
@@ -78,12 +80,13 @@ export function SwipeCard({ repo, onSwipe }: Props) {
       </motion.div>
 
       <header className="flex items-start gap-4 mb-6">
-        {repo.avatar_url ? (
+        {repo.avatar_url && !imgError ? (
           <img
             src={repo.avatar_url}
             alt=""
             className="w-20 h-20 border-3 border-ink shrink-0"
             draggable={false}
+            onError={() => setImgError(true)}
           />
         ) : (
           <div className="w-20 h-20 border-3 border-ink bg-accent-yellow flex items-center justify-center font-display font-black text-3xl shrink-0">

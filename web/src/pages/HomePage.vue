@@ -20,6 +20,11 @@ const query = ref('')
 const selectedTag = ref<string | null>(null)
 const selectedLang = ref<string | null>(null)
 
+const brokenImgs = ref<Record<string, boolean>>({})
+function onImgError(id: string) {
+  brokenImgs.value = { ...brokenImgs.value, [id]: true }
+}
+
 const filteredRepos = computed(() => {
   let items = repos.repos
   if (query.value) {
@@ -228,8 +233,9 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
               :style="{ transform: `rotate(${cardRotation(repo.id)}deg)` }"
             >
               <header class="flex items-start gap-3 mb-3">
-                <img v-if="repo.avatar_url" :src="repo.avatar_url" alt=""
-                  class="w-12 h-12 border-2 border-ink shrink-0 bg-bg-elevated" loading="lazy" />
+                <img v-if="repo.avatar_url && !brokenImgs[repo.id]" :src="repo.avatar_url" alt=""
+                  class="w-12 h-12 border-2 border-ink shrink-0 bg-bg-elevated" loading="lazy"
+                  @error="onImgError(repo.id)" />
                 <div v-else
                   class="w-12 h-12 border-2 border-ink shrink-0 bg-accent-yellow flex items-center justify-center font-display font-black text-xl">
                   {{ (repo.name[0] ?? '?').toUpperCase() }}

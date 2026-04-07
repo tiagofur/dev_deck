@@ -89,6 +89,7 @@
 }
 .markdown th { @apply bg-accent-yellow font-display font-bold uppercase text-xs; }
 .markdown hr { @apply border-t-3 border-ink my-4; }
+.markdown img { @apply max-w-full border-2 border-ink my-3; }
 
 /* ─────────────────────────────────────────
    Syntax highlighting for code blocks in README

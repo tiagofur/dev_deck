@@ -3,6 +3,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCheatsheetsStore, type Entry } from '../stores/cheatsheets'
 import Button from '../components/Button.vue'
+import { hashIndex } from '../lib/hash'
+import { showToast } from '../lib/toast'
 
 const route = useRoute()
 const router = useRouter()
@@ -19,7 +21,8 @@ const editingEntry = ref<Entry | null>(null)
 const entryLabel = ref('')
 const entryCommand = ref('')
 const entryDescription = ref('')
-const entryTagsStr = ref('')
+const entryTags = ref<string[]>([])
+const entryTagDraft = ref('')
 const entrySaving = ref(false)
 const entryError = ref<string | null>(null)
 
@@ -50,7 +53,8 @@ function openCreate() {
   entryLabel.value = ''
   entryCommand.value = ''
   entryDescription.value = ''
-  entryTagsStr.value = ''
+  entryTags.value = []
+  entryTagDraft.value = ''
   entryError.value = null
   modalOpen.value = true
 }
@@ -60,9 +64,30 @@ function openEdit(entry: Entry) {
   entryLabel.value = entry.label
   entryCommand.value = entry.command
   entryDescription.value = entry.description || ''
-  entryTagsStr.value = entry.tags.join(', ')
+  entryTags.value = [...entry.tags]
+  entryTagDraft.value = ''
   entryError.value = null
   modalOpen.value = true
+}
+
+function addEntryTag(raw: string) {
+  const t = raw.trim().toLowerCase().replace(/\s+/g, '-')
+  entryTagDraft.value = ''
+  if (!t || entryTags.value.includes(t)) return
+  entryTags.value = [...entryTags.value, t]
+}
+
+function removeEntryTag(tag: string) {
+  entryTags.value = entryTags.value.filter(t => t !== tag)
+}
+
+function onEntryTagKey(e: KeyboardEvent) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault()
+    addEntryTag(entryTagDraft.value)
+  } else if (e.key === 'Backspace' && entryTagDraft.value === '' && entryTags.value.length) {
+    removeEntryTag(entryTags.value[entryTags.value.length - 1])
+  }
 }
 
 async function submitEntry() {
@@ -74,7 +99,9 @@ async function submitEntry() {
       label: entryLabel.value.trim(),
       command: entryCommand.value.trim(),
       description: entryDescription.value.trim(),
-      tags: entryTagsStr.value.split(',').map(t => t.trim()).filter(Boolean),
+      tags: entryTagDraft.value.trim()
+        ? [...entryTags.value, entryTagDraft.value.trim().toLowerCase().replace(/\s+/g, '-')]
+        : entryTags.value,
     }
     if (editingEntry.value) {
       await store.updateEntry(id, editingEntry.value.id, input)
@@ -95,7 +122,7 @@ async function deleteEntry(entry: Entry) {
   try {
     await store.deleteEntry(id, entry.id)
   } catch (e: any) {
-    alert(e.message)
+    showToast(e.message || 'Error inesperado', 'error')
   }
 }
 
@@ -235,9 +262,28 @@ onMounted(async () => {
               class="w-full border-3 border-ink p-2 font-mono text-sm focus:outline-none focus:bg-accent-yellow/20 resize-none" />
           </div>
           <div>
-            <label class="block font-display font-bold text-xs uppercase tracking-wider mb-1">Tags (separados por coma)</label>
-            <input v-model="entryTagsStr" placeholder="commit, staging, basic"
-              class="w-full border-3 border-ink p-2 font-mono text-sm focus:outline-none focus:bg-accent-yellow/20" />
+            <label class="block font-display font-bold text-xs uppercase tracking-wider mb-1">Tags</label>
+            <div class="flex flex-wrap gap-2 mb-2 min-h-[28px]">
+              <p v-if="!entryTags.length" class="font-mono text-sm text-ink-soft italic">— sin tags —</p>
+              <span v-for="tag in entryTags" :key="tag"
+                :class="[
+                  'inline-flex items-center gap-1 pl-2 pr-1 py-0.5 text-xs font-mono font-semibold border-2 border-ink shadow-hard-sm',
+                  ['bg-accent-yellow','bg-accent-cyan','bg-accent-lime','bg-accent-lavender','bg-accent-orange'][Math.abs(hashIndex(tag)) % 5]
+                ]">
+                {{ tag }}
+                <button type="button" @click="removeEntryTag(tag)"
+                  class="border-l-2 border-ink/40 ml-1 pl-1 hover:text-danger transition-colors">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <input v-model="entryTagDraft" type="text" placeholder="agregar tag (Enter)"
+                @keydown="onEntryTagKey"
+                @blur="entryTagDraft.trim() && addEntryTag(entryTagDraft)"
+                class="flex-1 border-2 border-ink px-2 py-1 font-mono text-sm focus:outline-none focus:bg-accent-yellow/10" />
+            </div>
           </div>
         </div>
 

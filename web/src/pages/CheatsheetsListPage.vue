@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCheatsheetsStore, type Cheatsheet } from '../stores/cheatsheets'
 import Button from '../components/Button.vue'
+import { showToast } from '../lib/toast'
 
 const router = useRouter()
 const store = useCheatsheetsStore()
@@ -85,7 +86,7 @@ async function deleteCheatsheet(e: MouseEvent, id: string) {
   try {
     await store.deleteCheatsheet(id)
   } catch (e: any) {
-    alert(e.message)
+    showToast(e.message || 'Error al borrar', 'error')
   }
 }
 
@@ -221,10 +222,14 @@ onMounted(async () => {
           </div>
           <div>
             <label class="block font-display font-bold text-xs uppercase tracking-wider mb-1">Categoría *</label>
-            <select v-model="form.category"
-              class="w-full border-3 border-ink p-2 font-mono text-sm focus:outline-none focus:bg-accent-yellow/20 bg-bg-card">
-              <option v-for="[val, label] in categoryOptions" :key="val" :value="val">{{ label }}</option>
-            </select>
+            <div class="flex flex-wrap gap-2">
+              <button v-for="[val, label] in categoryOptions" :key="val" type="button"
+                @click="form.category = val"
+                :class="['px-2 py-1 text-xs font-mono font-bold uppercase border-2 border-ink transition-colors',
+                  form.category === val ? 'bg-accent-yellow shadow-hard-sm' : 'bg-bg-card hover:bg-bg-elevated']">
+                {{ label }}
+              </button>
+            </div>
           </div>
           <div>
             <label class="block font-display font-bold text-xs uppercase tracking-wider mb-1">Descripción</label>

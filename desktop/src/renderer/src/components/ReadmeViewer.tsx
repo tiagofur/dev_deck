@@ -1,5 +1,6 @@
 import ReactMarkdown from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
+import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import { FileText } from 'lucide-react'
 import { useReadme } from '../features/repos/api'
@@ -7,13 +8,26 @@ import { useReadme } from '../features/repos/api'
 interface Props {
   repoId: string
   source: 'github' | 'generic'
+  repoUrl?: string
 }
 
-export function ReadmeViewer({ repoId, source }: Props) {
-  // Only github repos have a README via the API. Skip the request entirely
-  // for generic sources to avoid an unnecessary 404.
+// https://github.com/owner/repo  →  https://raw.githubusercontent.com/owner/repo/HEAD/
+function getRawBase(repoUrl?: string): string {
+  if (!repoUrl) return ''
+  const m = repoUrl.match(/github\.com\/([^/?#]+\/[^/?#]+)/)
+  return m ? `https://raw.githubusercontent.com/${m[1]}/HEAD/` : ''
+}
+
+function resolveUrl(base: string, url: string): string {
+  if (!url || !base) return url
+  if (/^https?:\/\//i.test(url) || url.startsWith('//') || url.startsWith('data:')) return url
+  try { return new URL(url, base).href } catch { return url }
+}
+
+export function ReadmeViewer({ repoId, source, repoUrl }: Props) {
   const enabled = source === 'github'
   const { data, isLoading, error } = useReadme(repoId, enabled)
+  const rawBase = getRawBase(repoUrl)
 
   if (!enabled) {
     return (
@@ -40,7 +54,8 @@ export function ReadmeViewer({ repoId, source }: Props) {
       <div className="markdown">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeHighlight]}
+          rehypePlugins={[rehypeRaw, rehypeHighlight]}
+          urlTransform={(url) => resolveUrl(rawBase, url)}
         >
           {data.content}
         </ReactMarkdown>

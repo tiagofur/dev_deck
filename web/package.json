@@ -11,11 +11,15 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "dompurify": "^3.3.3",
+    "highlight.js": "^11.11.1",
+    "marked": "^18.0.0",
     "pinia": "^2.1.7",
     "vue": "^3.4.15",
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
+    "@types/dompurify": "^3.2.0",
     "@vitejs/plugin-vue": "^5.0.3",
     "autoprefixer": "^10.4.17",
     "postcss": "^8.4.33",

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { GitFork, Star, ExternalLink } from 'lucide-react'
 import type { Repo } from '../features/repos/types'
 import { formatCount } from '../lib/format'
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function RepoCard({ repo, onClick }: Props) {
+  const [imgError, setImgError] = useState(false)
   // Tiny deterministic rotation for personality (-1°, 0°, +1°)
   const rotation = (repo.id.charCodeAt(0) % 3) - 1
   const title = repo.owner ? `${repo.owner}/${repo.name}` : repo.name
@@ -23,12 +25,13 @@ export function RepoCard({ repo, onClick }: Props) {
       style={{ transform: `rotate(${rotation}deg)` }}
     >
       <header className="flex items-start gap-3 mb-3">
-        {repo.avatar_url ? (
+        {repo.avatar_url && !imgError ? (
           <img
             src={repo.avatar_url}
             alt=""
             className="w-12 h-12 border-2 border-ink shrink-0 bg-bg-elevated"
             loading="lazy"
+            onError={() => setImgError(true)}
           />
         ) : (
           <div className="w-12 h-12 border-2 border-ink shrink-0 bg-accent-yellow flex items-center justify-center font-display font-black text-xl">

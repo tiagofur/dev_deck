@@ -1,0 +1,46 @@
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Root/node workspaces
+node_modules/
+
+# Go backend
+backend/bin/
+backend/tmp/
+backend/*.exe
+backend/coverage.out
+
+# Web (Vite/Vue)
+web/node_modules/
+web/dist/
+web/.vite/
+web/coverage/
+
+# Desktop (Electron + Vite)
+desktop/node_modules/
+desktop/dist/
+desktop/out/
+desktop/.vite/
+
+# Build artifacts
+*.tsbuildinfo
+
+# Runtime data
+*.pid
+*.seed
+*.pid.lock

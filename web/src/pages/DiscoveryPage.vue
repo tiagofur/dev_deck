@@ -7,9 +7,11 @@ const router = useRouter()
 const repo = ref<any>(null)
 const loading = ref(true)
 const skipping = ref(false)
+const cardImgError = ref(false)
 
 async function loadNext() {
   loading.value = true
+  cardImgError.value = false
   try {
     repo.value = await api.get('/discovery/next')
   } catch { repo.value = null }
@@ -68,7 +70,10 @@ onMounted(loadNext)
         <div :class="['bg-bg-card border-5 border-ink shadow-hard-xl p-8 transition-all duration-300',
           skipping ? 'translate-x-[120%] rotate-12 opacity-0' : '']">
           <div class="flex items-start gap-4 mb-4">
-            <img v-if="repo.avatar_url || repo.owner?.avatar_url" :src="repo.avatar_url || repo.owner?.avatar_url" class="w-16 h-16 border-3 border-ink" />
+            <img v-if="(repo.avatar_url || repo.owner?.avatar_url) && !cardImgError"
+              :src="repo.avatar_url || repo.owner?.avatar_url"
+              class="w-16 h-16 border-3 border-ink"
+              @error="cardImgError = true" />
             <div v-else class="w-16 h-16 border-3 border-ink bg-accent-yellow flex items-center justify-center font-display font-black text-2xl">
               {{ (repo.name || repo.full_name || '?')[0].toUpperCase() }}
             </div>

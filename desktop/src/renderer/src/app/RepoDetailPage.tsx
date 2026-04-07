@@ -53,6 +53,7 @@ export function RepoDetailPage() {
   const [cmdModalOpen, setCmdModalOpen] = useState(false)
   const [editingCmd, setEditingCmd] = useState<RepoCommand | null>(null)
   const [importModalOpen, setImportModalOpen] = useState(false)
+  const [heroImgError, setHeroImgError] = useState(false)
 
   const { data: repo, isLoading, error } = useRepo(id)
   const updateRepo = useUpdateRepo()
@@ -245,11 +246,12 @@ export function RepoDetailPage() {
           {/* Hero */}
           <section className="bg-bg-card border-3 border-ink shadow-hard p-6">
             <div className="flex items-start gap-4">
-              {repo.avatar_url ? (
+              {repo.avatar_url && !heroImgError ? (
                 <img
                   src={repo.avatar_url}
                   alt=""
                   className="w-20 h-20 border-3 border-ink shrink-0"
+                  onError={() => setHeroImgError(true)}
                 />
               ) : (
                 <div className="w-20 h-20 border-3 border-ink bg-accent-yellow flex items-center justify-center font-display font-black text-3xl shrink-0">
@@ -350,7 +352,7 @@ export function RepoDetailPage() {
             </div>
           )}
 
-          {tab === 'readme' && <ReadmeViewer repoId={repo.id} source={repo.source} />}
+          {tab === 'readme' && <ReadmeViewer repoId={repo.id} source={repo.source} repoUrl={repo.url} />}
 
           {tab === 'commands' && (
             <div>

@@ -8,7 +8,9 @@ import AddCommandModal from '../components/AddCommandModal.vue'
 import ImportScriptsModal from '../components/ImportScriptsModal.vue'
 import Button from '../components/Button.vue'
 import TagChip from '../components/TagChip.vue'
+import MarkdownRenderer from '../components/MarkdownRenderer.vue'
 import { hashIndex } from '../lib/hash'
+import { showToast } from '../lib/toast'
 
 const route = useRoute()
 const router = useRouter()
@@ -20,13 +22,14 @@ const tab = ref<'overview' | 'readme' | 'commands'>('overview')
 const loading = ref(true)
 const error = ref<string | null>(null)
 
-// notes / tags editing
+// notes editing
 const editingNotes = ref(false)
 const notesValue = ref('')
 const savingNotes = ref(false)
-const editingTags = ref(false)
-const tagsValue = ref('')
-const savingTags = ref(false)
+
+// tags inline editing
+const tagDraft = ref('')
+const tagSaving = ref(false)
 
 // command modals
 const cmdModalOpen = ref(false)
@@ -46,23 +49,45 @@ async function saveNotes() {
     await store.updateRepo(id, { notes: notesValue.value })
     editingNotes.value = false
   } catch (e: any) {
-    alert(e.message)
+    showToast(e.message || 'Error inesperado', 'error')
   } finally {
     savingNotes.value = false
   }
 }
 
-async function saveTags() {
-  if (!store.currentRepo) return
-  savingTags.value = true
+async function addTag(raw: string) {
+  const t = raw.trim().toLowerCase().replace(/\s+/g, '-')
+  tagDraft.value = ''
+  if (!t || store.currentRepo?.tags?.includes(t)) return
+  tagSaving.value = true
   try {
-    const tags = tagsValue.value.split(',').map(t => t.trim()).filter(Boolean)
-    await store.updateRepo(id, { tags })
-    editingTags.value = false
+    await store.updateRepo(id, { tags: [...(store.currentRepo?.tags ?? []), t] })
   } catch (e: any) {
-    alert(e.message)
+    showToast(e.message || 'Error inesperado', 'error')
   } finally {
-    savingTags.value = false
+    tagSaving.value = false
+  }
+}
+
+async function removeTag(tag: string) {
+  if (!store.currentRepo) return
+  tagSaving.value = true
+  try {
+    await store.updateRepo(id, { tags: store.currentRepo.tags.filter(t => t !== tag) })
+  } catch (e: any) {
+    showToast(e.message || 'Error inesperado', 'error')
+  } finally {
+    tagSaving.value = false
+  }
+}
+
+function onTagKey(e: KeyboardEvent) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault()
+    void addTag(tagDraft.value)
+  } else if (e.key === 'Backspace' && tagDraft.value === '' && store.currentRepo?.tags?.length) {
+    const tags = store.currentRepo.tags
+    void removeTag(tags[tags.length - 1])
   }
 }
 
@@ -93,7 +118,7 @@ async function handleDeleteCmd(cmd: Command) {
   try {
     await store.deleteCommand(id, cmd.id)
   } catch (e: any) {
-    alert(e.message)
+    showToast(e.message || 'Error inesperado', 'error')
   }
 }
 
@@ -101,7 +126,7 @@ async function handleReorder(order: string[]) {
   try {
     await store.reorderCommands(id, order)
   } catch (e: any) {
-    alert(e.message)
+    showToast(e.message || 'Error inesperado', 'error')
   }
 }
 
@@ -147,7 +172,7 @@ async function toggleArchive() {
   try {
     await store.updateRepo(id, { archived: !store.currentRepo.archived })
   } catch (e: any) {
-    alert(e.message)
+    showToast(e.message || 'Error inesperado', 'error')
   }
 }
 
@@ -158,15 +183,45 @@ async function deleteRepo() {
     await store.deleteRepo(id)
     router.push('/')
   } catch (e: any) {
-    alert(e.message)
+    showToast(e.message || 'Error inesperado', 'error')
+  }
+}
+
+const refreshing = ref(false)
+const heroImgError = ref(false)
+
+async function copyToClipboard(text: string) {
+  try {
+    await navigator.clipboard.writeText(text)
+    showToast('Copiado al portapapeles', 'success')
+  } catch {
+    showToast('No se pudo copiar', 'error')
   }
 }
 
 async function refreshRepo() {
+  refreshing.value = true
   try {
     await store.refreshRepo(id)
   } catch (e: any) {
-    alert(e.message)
+    showToast(e.message || 'Error inesperado', 'error')
+  } finally {
+    refreshing.value = false
+  }
+}
+
+async function shareRepo() {
+  if (!store.currentRepo) return
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: store.currentRepo.name,
+        text: store.currentRepo.description ?? store.currentRepo.name,
+        url: store.currentRepo.url,
+      })
+    } catch { /* user canceled */ }
+  } else {
+    await navigator.clipboard.writeText(store.currentRepo.url)
   }
 }
 
@@ -180,7 +235,6 @@ onMounted(async () => {
       store.fetchReadme(id),
     ])
     notesValue.value = store.currentRepo?.notes || ''
-    tagsValue.value = (store.currentRepo?.tags || []).join(', ')
   } catch (e: any) {
     error.value = e.message
   } finally {
@@ -216,8 +270,9 @@ onMounted(async () => {
         <!-- Hero -->
         <section class="bg-bg-card border-3 border-ink shadow-hard p-6">
           <div class="flex items-start gap-4">
-            <img v-if="store.currentRepo.avatar_url" :src="store.currentRepo.avatar_url"
-              class="w-20 h-20 border-3 border-ink shrink-0 bg-bg-elevated" />
+            <img v-if="store.currentRepo.avatar_url && !heroImgError" :src="store.currentRepo.avatar_url"
+              class="w-20 h-20 border-3 border-ink shrink-0 bg-bg-elevated"
+              @error="heroImgError = true" />
             <div v-else
               class="w-20 h-20 border-3 border-ink bg-accent-yellow flex items-center justify-center font-display font-black text-3xl shrink-0">
               {{ store.currentRepo.name[0]?.toUpperCase() }}
@@ -282,68 +337,113 @@ onMounted(async () => {
         </div>
 
         <!-- Overview -->
-        <div v-if="tab === 'overview'" class="bg-bg-card border-3 border-ink p-6 space-y-6">
-          <!-- Notes -->
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="font-display font-bold uppercase">Notas</h3>
-              <Button v-if="!editingNotes" size="sm" variant="ghost"
-                @click="editingNotes = true; notesValue = store.currentRepo?.notes || ''">
-                Editar
-              </Button>
-            </div>
-            <div v-if="editingNotes">
-              <textarea v-model="notesValue" rows="6"
-                class="w-full border-3 border-ink px-3 py-2 font-mono text-sm focus:outline-none focus:bg-accent-yellow/20 resize-none mb-3" />
-              <div class="flex gap-2">
-                <Button size="sm" variant="secondary" @click="editingNotes = false">Cancelar</Button>
-                <Button size="sm" @click="saveNotes" :disabled="savingNotes">
-                  {{ savingNotes ? 'Guardando…' : 'Guardar' }}
+        <template v-if="tab === 'overview'">
+
+          <!-- Notes card -->
+          <div class="bg-bg-card border-3 border-ink shadow-hard p-5">
+            <!-- Edit mode header -->
+            <template v-if="editingNotes">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-display font-black uppercase text-sm tracking-widest">Editando notas</h3>
+                <div class="flex items-center gap-2">
+                  <Button type="button" variant="secondary" size="sm"
+                    @click="editingNotes = false" :disabled="savingNotes">
+                    <span class="flex items-center gap-1.5">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                      Cancelar
+                    </span>
+                  </Button>
+                  <Button type="button" variant="accent" size="sm"
+                    @click="saveNotes" :disabled="savingNotes">
+                    <span class="flex items-center gap-1.5">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v13a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                      {{ savingNotes ? 'Guardando…' : 'Guardar' }}
+                    </span>
+                  </Button>
+                </div>
+              </div>
+              <textarea v-model="notesValue" autofocus rows="10"
+                placeholder="Escribí tus notas en markdown…&#10;&#10;Tip: # heading, **bold**, `code`, - lista"
+                class="w-full border-2 border-ink p-3 font-mono text-sm focus:outline-none focus:bg-accent-yellow/10 resize-y" />
+            </template>
+
+            <!-- View mode -->
+            <template v-else>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-display font-black uppercase text-sm tracking-widest">Notas</h3>
+                <Button type="button" variant="secondary" size="sm"
+                  @click="editingNotes = true; notesValue = store.currentRepo?.notes || ''">
+                  <span class="flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Editar
+                  </span>
                 </Button>
               </div>
-            </div>
-            <p v-else class="font-mono text-sm whitespace-pre-wrap text-ink-soft">
-              {{ store.currentRepo?.notes || 'Sin notas.' }}
-            </p>
+              <button v-if="!store.currentRepo?.notes?.trim()"
+                @click="editingNotes = true; notesValue = ''"
+                class="w-full text-left font-mono text-sm text-ink-soft italic border-2 border-dashed border-ink/30 p-4 hover:bg-accent-yellow/10 transition-colors">
+                <svg class="w-3.5 h-3.5 inline mr-2" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                Sin notas. Click para empezar a escribir.
+              </button>
+              <MarkdownRenderer v-else :content="store.currentRepo.notes!" />
+            </template>
           </div>
 
-          <!-- Tags -->
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="font-display font-bold uppercase">Tags</h3>
-              <Button v-if="!editingTags" size="sm" variant="ghost"
-                @click="editingTags = true; tagsValue = (store.currentRepo?.tags || []).join(', ')">
-                Editar
-              </Button>
+          <!-- Tags card -->
+          <div class="bg-bg-card border-3 border-ink shadow-hard p-5">
+            <h3 class="font-display font-black uppercase text-sm tracking-widest mb-3">Tags</h3>
+
+            <div class="flex flex-wrap gap-2 mb-3">
+              <p v-if="!store.currentRepo?.tags?.length" class="font-mono text-sm text-ink-soft italic">— sin tags —</p>
+              <span v-for="tag in store.currentRepo?.tags" :key="tag"
+                :class="[
+                  'inline-flex items-center gap-1 pl-2 pr-1 py-0.5 text-xs font-mono font-semibold border-2 border-ink shadow-hard-sm',
+                  ['bg-accent-yellow','bg-accent-cyan','bg-accent-lime','bg-accent-lavender','bg-accent-orange'][Math.abs(hashIndex(tag)) % 5]
+                ]">
+                {{ tag }}
+                <button type="button" @click="removeTag(tag)" :disabled="tagSaving"
+                  class="border-l-2 border-ink/40 ml-1 pl-1 hover:text-danger transition-colors"
+                  :aria-label="`Quitar ${tag}`">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+              </span>
             </div>
-            <div v-if="editingTags">
-              <input v-model="tagsValue" type="text" placeholder="frontend, vue, personal"
-                class="w-full border-3 border-ink px-3 py-2 font-mono text-sm focus:outline-none focus:bg-accent-yellow/20 mb-3" />
-              <div class="flex gap-2">
-                <Button size="sm" variant="secondary" @click="editingTags = false">Cancelar</Button>
-                <Button size="sm" @click="saveTags" :disabled="savingTags">
-                  {{ savingTags ? 'Guardando…' : 'Guardar' }}
-                </Button>
-              </div>
-            </div>
-            <div v-else class="flex flex-wrap gap-2">
-              <TagChip
-                v-for="tag in store.currentRepo?.tags" :key="tag"
-                :label="tag" :colorIndex="hashIndex(tag)"
-              />
-              <span v-if="!store.currentRepo?.tags?.length" class="font-mono text-xs text-ink-soft">Sin tags.</span>
+
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <input v-model="tagDraft" type="text" placeholder="agregar tag (Enter)"
+                :disabled="tagSaving"
+                @keydown="onTagKey"
+                @blur="tagDraft.trim() && addTag(tagDraft)"
+                class="flex-1 border-2 border-ink px-2 py-1 font-mono text-sm focus:outline-none focus:bg-accent-yellow/10" />
             </div>
           </div>
-        </div>
+
+        </template>
 
         <!-- README -->
-        <div v-if="tab === 'readme'">
-          <div v-if="store.readme"
-            class="bg-bg-card border-3 border-ink p-6 font-mono text-sm whitespace-pre-wrap overflow-auto max-h-[70vh]">
-            {{ store.readme }}
+        <template v-if="tab === 'readme'">
+          <!-- Non-GitHub repo -->
+          <div v-if="store.currentRepo.source !== 'github'"
+            class="bg-bg-card border-3 border-ink shadow-hard p-10 text-center">
+            <svg class="w-12 h-12 mx-auto mb-4 text-ink-soft" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            <h3 class="font-display font-black uppercase text-lg mb-2">Solo repos de GitHub</h3>
+            <p class="font-mono text-sm text-ink-soft">Este repo no es de GitHub — no hay README disponible.</p>
           </div>
-          <div v-else class="text-center py-16 font-mono text-ink-soft">No hay README disponible.</div>
-        </div>
+
+          <!-- GitHub but no README -->
+          <div v-else-if="!store.readme"
+            class="bg-bg-card border-3 border-ink shadow-hard p-12 text-center">
+            <svg class="w-12 h-12 mx-auto mb-4 text-ink-soft" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <h3 class="font-display font-black uppercase text-lg mb-2">Sin README</h3>
+            <p class="font-mono text-sm text-ink-soft">Este repo no tiene un archivo README.md.</p>
+          </div>
+
+          <!-- Rendered README -->
+          <div v-else class="bg-bg-card border-3 border-ink shadow-hard p-6">
+            <MarkdownRenderer :content="store.readme" :repoUrl="store.currentRepo.url" />
+          </div>
+        </template>
 
         <!-- Commands -->
         <div v-if="tab === 'commands'">
@@ -379,72 +479,81 @@ onMounted(async () => {
       </div>
 
       <!-- ─── Actions sidebar (1/3, sticky) ────────────── -->
-      <aside class="lg:sticky lg:top-6 space-y-3">
-        <div class="bg-bg-card border-3 border-ink shadow-hard p-4 space-y-2">
-          <h3 class="font-display font-black text-xs uppercase tracking-widest mb-3">Acciones</h3>
+      <aside class="lg:sticky lg:top-6">
+        <div class="bg-bg-card border-3 border-ink shadow-hard p-5">
+          <h3 class="font-display font-black uppercase text-sm tracking-widest mb-4">Acciones</h3>
 
-          <a v-if="store.currentRepo.url" :href="store.currentRepo.url" target="_blank" rel="noopener"
-            class="flex items-center gap-2 w-full border-3 border-ink px-3 py-2 font-display font-bold uppercase text-xs shadow-hard bg-bg-card
-                   hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg hover:bg-accent-lime
-                   active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm transition-all duration-150">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-            </svg>
-            Abrir en browser
-          </a>
-
-          <button @click="() => navigator.clipboard.writeText(store.currentRepo!.url)"
-            class="flex items-center gap-2 w-full border-3 border-ink px-3 py-2 font-display font-bold uppercase text-xs shadow-hard bg-bg-card
-                   hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg hover:bg-accent-yellow
-                   active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm transition-all duration-150">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-              <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-            </svg>
-            Copiar URL
-          </button>
-
-          <button @click="() => navigator.clipboard.writeText(`git clone ${store.currentRepo!.url}`)"
-            class="flex items-center gap-2 w-full border-3 border-ink px-3 py-2 font-display font-bold uppercase text-xs shadow-hard bg-bg-card
-                   hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg hover:bg-accent-cyan
-                   active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm transition-all duration-150">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-              <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
-            </svg>
-            Copiar git clone
-          </button>
-
-          <div class="border-t-2 border-ink/10 pt-2 space-y-2">
-            <button @click="refreshRepo"
-              class="flex items-center gap-2 w-full border-3 border-ink px-3 py-2 font-display font-bold uppercase text-xs shadow-hard bg-bg-card
-                     hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg hover:bg-accent-lavender
-                     active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm transition-all duration-150">
+          <div class="grid grid-cols-1 gap-2">
+            <!-- Abrir en browser — primary (pink) -->
+            <a v-if="store.currentRepo.url" :href="store.currentRepo.url" target="_blank" rel="noopener"
+              class="flex items-center justify-center gap-2 w-full border-3 border-ink px-5 py-3 text-sm
+                     bg-accent-pink font-display font-bold uppercase tracking-wide shadow-hard
+                     hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg
+                     active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
+                     transition-all duration-150 ease-out">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>
+              Abrir en browser
+            </a>
+
+            <!-- Copiar URL — secondary -->
+            <Button variant="secondary" class="w-full flex items-center justify-center gap-2"
+              @click="copyToClipboard(store.currentRepo!.url)">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+              </svg>
+              Copiar URL
+            </Button>
+
+            <!-- Copiar git clone — secondary -->
+            <Button variant="secondary" class="w-full flex items-center justify-center gap-2"
+              @click="copyToClipboard(store.currentRepo!.source === 'github' ? `git clone ${store.currentRepo!.url}.git` : `git clone ${store.currentRepo!.url}`)">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+              </svg>
+              Copiar git clone
+            </Button>
+
+            <!-- Compartir — secondary -->
+            <Button variant="secondary" class="w-full flex items-center justify-center gap-2" @click="shareRepo">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+              Compartir
+            </Button>
+
+            <!-- Refrescar — accent (yellow) -->
+            <Button variant="accent" class="w-full flex items-center justify-center gap-2"
+              @click="refreshRepo" :disabled="refreshing">
+              <svg :class="['w-4 h-4', refreshing ? 'animate-spin' : '']" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                 <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
               </svg>
-              Refrescar metadata
-            </button>
+              {{ refreshing ? 'Refrescando…' : 'Refrescar metadata' }}
+            </Button>
 
-            <button @click="toggleArchive"
-              class="flex items-center gap-2 w-full border-3 border-ink px-3 py-2 font-display font-bold uppercase text-xs shadow-hard bg-bg-card
-                     hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg hover:bg-accent-orange
-                     active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm transition-all duration-150">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+            <div class="border-t-2 border-ink/20 my-1" />
+
+            <!-- Archivar — secondary -->
+            <Button variant="secondary" class="w-full flex items-center justify-center gap-2" @click="toggleArchive">
+              <svg v-if="store.currentRepo.archived" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                <polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/>
+                <polyline points="10 12 12 14 14 12"/>
+              </svg>
+              <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                 <polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/>
               </svg>
               {{ store.currentRepo.archived ? 'Desarchivar' : 'Archivar' }}
-            </button>
-          </div>
+            </Button>
 
-          <div class="border-t-2 border-ink/10 pt-2">
-            <button @click="deleteRepo"
-              class="flex items-center gap-2 w-full border-3 border-ink px-3 py-2 font-display font-bold uppercase text-xs shadow-hard bg-bg-card
-                     hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg hover:bg-danger hover:text-white
-                     active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm transition-all duration-150">
+            <!-- Borrar — danger (red) -->
+            <Button variant="danger" class="w-full flex items-center justify-center gap-2" @click="deleteRepo">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                 <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
               </svg>
               Borrar repo
-            </button>
+            </Button>
           </div>
         </div>
       </aside>
