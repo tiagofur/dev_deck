@@ -1,0 +1,16 @@
+# Skip everything that doesn't belong in the build context
+.env
+.env.*
+*.log
+*.exe
+bin/
+tmp/
+out/
+dist/
+coverage.out
+.git
+.gitignore
+.idea
+.vscode
+README.md
+Makefile

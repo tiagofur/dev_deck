@@ -1,0 +1,70 @@
+{
+  "slug": "ssh",
+  "title": "SSH",
+  "category": "tool",
+  "icon": "🔐",
+  "color": "#4A90D9",
+  "description": "Secure Shell protocol for encrypted remote access, tunneling, and file transfer.",
+  "entries": [
+    {
+      "label": "Connect to remote host",
+      "command": "ssh user@host",
+      "description": "Opens an encrypted shell session on a remote machine. Port 22 by default.",
+      "tags": ["connect", "remote", "login"]
+    },
+    {
+      "label": "Generate SSH key pair",
+      "command": "ssh-keygen -t ed25519 -C \"your@email.com\"",
+      "description": "Creates a new Ed25519 key pair. Preferred over RSA for security and performance.",
+      "tags": ["keygen", "keys", "authentication"]
+    },
+    {
+      "label": "Copy public key to server",
+      "command": "ssh-copy-id user@host",
+      "description": "Installs your public key into the remote authorized_keys for passwordless login.",
+      "tags": ["key", "auth", "setup"]
+    },
+    {
+      "label": "Local port forwarding",
+      "command": "ssh -L 8080:localhost:80 user@host",
+      "description": "Forwards local port 8080 to remote port 80. Access remote services as if local.",
+      "tags": ["tunnel", "port-forward", "proxy"]
+    },
+    {
+      "label": "Copy file to remote",
+      "command": "scp file.txt user@host:/path/to/dest",
+      "description": "Securely copies a file to a remote host over SSH. Use -r for directories.",
+      "tags": ["transfer", "copy", "file"]
+    },
+    {
+      "label": "SSH config file",
+      "command": "Host alias\n  HostName example.com\n  User deploy\n  IdentityFile ~/.ssh/id_ed25519",
+      "description": "Define host aliases in ~/.ssh/config for quick connection with custom settings.",
+      "tags": ["config", "alias", "settings"]
+    },
+    {
+      "label": "Start SSH agent",
+      "command": "eval \"$(ssh-agent -s)\" && ssh-add ~/.ssh/id_ed25519",
+      "description": "Starts the agent and loads your private key. Avoids repeated passphrase prompts.",
+      "tags": ["agent", "keys", "session"]
+    },
+    {
+      "label": "Proxy jump through bastion",
+      "command": "ssh -J bastion_user@bastion host_user@target",
+      "description": "Connects to a target host through a jump server/bastion. No config file needed.",
+      "tags": ["proxy", "bastion", "jump"]
+    },
+    {
+      "label": "Remote port forwarding",
+      "command": "ssh -R 9090:localhost:3000 user@host",
+      "description": "Exposes your local port 3000 on the remote host's port 9090.",
+      "tags": ["tunnel", "reverse", "expose"]
+    },
+    {
+      "label": "Remove stale host key",
+      "command": "ssh-keygen -R hostname",
+      "description": "Removes a host's entry from known_hosts after a key change or reinstall.",
+      "tags": ["known-hosts", "fix", "security"]
+    }
+  ]
+}

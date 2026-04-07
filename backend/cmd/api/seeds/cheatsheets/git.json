@@ -1,0 +1,70 @@
+{
+  "slug": "git-essential",
+  "title": "Git Essential Commands",
+  "category": "vcs",
+  "icon": "🔀",
+  "color": "#F05032",
+  "description": "Essential git commands for daily workflow — commit, rebase, stash, and more.",
+  "entries": [
+    {
+      "label": "Stage & Commit",
+      "command": "git add -A && git commit -m \"<msg>\"",
+      "description": "Stage all changes and commit with a message",
+      "tags": ["commit", "staging", "basic"]
+    },
+    {
+      "label": "Amend Last Commit",
+      "command": "git commit --amend -m \"<msg>\"",
+      "description": "Edit the last commit message or add missed changes",
+      "tags": ["commit", "fix", "amend"]
+    },
+    {
+      "label": "Push to Remote",
+      "command": "git push origin <branch>",
+      "description": "Push local commits to the remote branch",
+      "tags": ["remote", "push", "sync"]
+    },
+    {
+      "label": "Pull with Rebase",
+      "command": "git pull --rebase origin <branch>",
+      "description": "Fetch and rebase local commits on top of remote",
+      "tags": ["remote", "pull", "rebase"]
+    },
+    {
+      "label": "Interactive Rebase",
+      "command": "git rebase -i HEAD~<n>",
+      "description": "Squash, reorder, or edit the last n commits",
+      "tags": ["rebase", "history", "rewrite"]
+    },
+    {
+      "label": "Stash Changes",
+      "command": "git stash push -m \"<desc>\"",
+      "description": "Temporarily shelve uncommitted changes",
+      "tags": ["stash", "temp", "workflow"]
+    },
+    {
+      "label": "Pretty Log",
+      "command": "git log --oneline --graph --decorate --all",
+      "description": "Compact visual graph of all branches and commits",
+      "tags": ["log", "history", "visual"]
+    },
+    {
+      "label": "Cherry-Pick Commit",
+      "command": "git cherry-pick <sha>",
+      "description": "Apply a specific commit from another branch",
+      "tags": ["cherry-pick", "merge", "selective"]
+    },
+    {
+      "label": "Bisect (Find Bug)",
+      "command": "git bisect start && git bisect bad && git bisect good <sha>",
+      "description": "Binary search to find the commit that introduced a bug",
+      "tags": ["debug", "bisect", "history"]
+    },
+    {
+      "label": "Diff Staged Changes",
+      "command": "git diff --cached",
+      "description": "Show changes that are staged for the next commit",
+      "tags": ["diff", "staged", "review"]
+    }
+  ]
+}

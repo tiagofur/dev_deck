@@ -1,0 +1,29 @@
+# Caddyfile — DevDeck reverse proxy with automatic HTTPS
+#
+# {$DOMAIN} comes from the environment (set in .env / docker-compose).
+# Caddy provisions a Let's Encrypt cert automatically the first time
+# the domain resolves to this server.
+
+{$DOMAIN} {
+    encode gzip zstd
+
+    # Health check is public; everything else hits the API which enforces auth.
+    handle /healthz {
+        reverse_proxy api:8080
+    }
+
+    handle /api/* {
+        reverse_proxy api:8080
+    }
+
+    # Anything else gets a 404 from Caddy (we don't serve a web client yet).
+    handle {
+        respond "DevDeck API" 200
+    }
+
+    log {
+        output stdout
+        format console
+        level INFO
+    }
+}

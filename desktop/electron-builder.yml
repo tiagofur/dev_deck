@@ -1,0 +1,69 @@
+# DevDeck — electron-builder config
+#
+# Run:
+#   npm run build:win    → Windows installer (NSIS)
+#   npm run build:mac    → macOS DMG (need to run on macOS)
+#   npm run build:linux  → Linux AppImage
+#
+# Artifacts land in dist/
+
+appId: com.devdeck.app
+productName: DevDeck
+copyright: Copyright © 2026 DevDeck
+
+directories:
+  output: dist
+  buildResources: build
+
+# Files included in the final package.
+# We only ship the compiled output of electron-vite, not the source.
+files:
+  - out/**/*
+  - package.json
+
+# Strip native module artifacts we don't use
+asarUnpack:
+  - resources/**
+
+# ─── Windows ───
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: ${productName}-${version}-Setup.${ext}
+  # Optional icon: drop a 256×256 .ico at build/icon.ico
+  # icon: build/icon.ico
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: DevDeck
+  artifactName: ${productName}-${version}-Setup.${ext}
+
+# ─── macOS ───
+mac:
+  target:
+    - target: dmg
+      arch:
+        - arm64
+        - x64
+  category: public.app-category.developer-tools
+  artifactName: ${productName}-${version}-${arch}.${ext}
+  # icon: build/icon.icns
+
+# ─── Linux ───
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  category: Development
+  artifactName: ${productName}-${version}.${ext}
+  # icon: build/icon.png
+
+# Don't try to publish to GitHub releases automatically
+publish: null

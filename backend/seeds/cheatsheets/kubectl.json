@@ -1,0 +1,70 @@
+{
+  "slug": "kubectl",
+  "title": "kubectl",
+  "category": "cloud",
+  "icon": "☸️",
+  "color": "#326CE5",
+  "description": "Command-line tool for communicating with a Kubernetes cluster API server.",
+  "entries": [
+    {
+      "label": "List pods",
+      "command": "kubectl get pods -A",
+      "description": "Lists all pods across all namespaces. Drop -A for current namespace only.",
+      "tags": ["pods", "list", "status"]
+    },
+    {
+      "label": "Apply a manifest",
+      "command": "kubectl apply -f manifest.yaml",
+      "description": "Creates or updates resources defined in a YAML manifest. Use -k for kustomize.",
+      "tags": ["deploy", "apply", "manifest"]
+    },
+    {
+      "label": "Stream pod logs",
+      "command": "kubectl logs -f <pod> -c <container>",
+      "description": "Streams logs from a pod. Use -f to follow, -c to pick a specific container.",
+      "tags": ["logs", "debug", "streaming"]
+    },
+    {
+      "label": "Describe a resource",
+      "command": "kubectl describe pod <pod>",
+      "description": "Shows detailed info including events, limits, and status for troubleshooting.",
+      "tags": ["inspect", "debug", "details"]
+    },
+    {
+      "label": "Exec into a pod",
+      "command": "kubectl exec -it <pod> -- /bin/sh",
+      "description": "Opens an interactive shell inside a running pod for debugging.",
+      "tags": ["exec", "shell", "debug"]
+    },
+    {
+      "label": "Port forward to local",
+      "command": "kubectl port-forward svc/<name> 8080:80",
+      "description": "Forwards a local port to a service/pod port. Useful for local debugging.",
+      "tags": ["port-forward", "debug", "networking"]
+    },
+    {
+      "label": "Rollout restart deployment",
+      "command": "kubectl rollout restart deployment <name>",
+      "description": "Triggers a rolling restart of all pods in a deployment with zero downtime.",
+      "tags": ["restart", "deploy", "rollout"]
+    },
+    {
+      "label": "Scale a deployment",
+      "command": "kubectl scale deployment <name> --replicas=3",
+      "description": "Changes the number of running pod replicas for a deployment.",
+      "tags": ["scale", "replicas", "capacity"]
+    },
+    {
+      "label": "Resource usage metrics",
+      "command": "kubectl top pods -A",
+      "description": "Shows CPU and memory usage per pod. Requires metrics-server to be installed.",
+      "tags": ["metrics", "monitoring", "resources"]
+    },
+    {
+      "label": "Switch context",
+      "command": "kubectl config use-context <context-name>",
+      "description": "Switches the active kubeconfig context to target a different cluster.",
+      "tags": ["config", "context", "cluster"]
+    }
+  ]
+}

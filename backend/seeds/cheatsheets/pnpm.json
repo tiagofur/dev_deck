@@ -1,0 +1,70 @@
+{
+  "slug": "pnpm",
+  "title": "pnpm",
+  "category": "package-manager",
+  "icon": "⚡",
+  "color": "#F69220",
+  "description": "Fast, disk space efficient package manager for JavaScript projects.",
+  "entries": [
+    {
+      "label": "Install all dependencies",
+      "command": "pnpm install",
+      "description": "Installs all dependencies from lockfile. Uses content-addressable store.",
+      "tags": ["install", "deps", "setup"]
+    },
+    {
+      "label": "Add a package",
+      "command": "pnpm add <pkg>",
+      "description": "Adds a package to dependencies. Use -D for devDependencies, -w for workspace root.",
+      "tags": ["add", "dependency", "install"]
+    },
+    {
+      "label": "Run a script",
+      "command": "pnpm run <script>",
+      "description": "Runs a script defined in package.json. Use pnpm <script> as shorthand.",
+      "tags": ["script", "run", "npm-run"]
+    },
+    {
+      "label": "Build the project",
+      "command": "pnpm build",
+      "description": "Runs the build script. Recursively builds all workspace packages with --recursive.",
+      "tags": ["build", "compile", "bundle"]
+    },
+    {
+      "label": "Prune store",
+      "command": "pnpm store prune",
+      "description": "Removes unreferenced packages from the content-addressable store to free disk space.",
+      "tags": ["store", "cleanup", "disk-space"]
+    },
+    {
+      "label": "Why is a package installed",
+      "command": "pnpm why <pkg>",
+      "description": "Shows which packages depend on the given package and why it was installed.",
+      "tags": ["debug", "dependency-tree", "investigate"]
+    },
+    {
+      "label": "Check for outdated packages",
+      "command": "pnpm outdated",
+      "description": "Lists packages that have newer versions available. Supports --long format.",
+      "tags": ["update", "versions", "audit"]
+    },
+    {
+      "label": "Audit for vulnerabilities",
+      "command": "pnpm audit",
+      "description": "Checks installed packages for known security vulnerabilities. Use --fix to auto-resolve.",
+      "tags": ["security", "vulnerability", "audit"]
+    },
+    {
+      "label": "Run without installing",
+      "command": "pnpm dlx <pkg>",
+      "description": "Runs a package command without installing it globally. Like npx but for pnpm.",
+      "tags": ["one-off", "execute", "npx"]
+    },
+    {
+      "label": "Run in all workspace packages",
+      "command": "pnpm --recursive --filter <pattern> run <script>",
+      "description": "Runs a script across workspace packages matching a filter pattern.",
+      "tags": ["monorepo", "workspace", "recursive"]
+    }
+  ]
+}

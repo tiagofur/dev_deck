@@ -1,0 +1,46 @@
+package enricher
+
+// languageColors is a curated subset of the GitHub linguist palette.
+// Used to set repos.language_color when the API returns a language we know.
+// We keep this short on purpose — the frontend can have its own fuller map
+// if needed; this just covers the common case.
+var languageColors = map[string]string{
+	"Go":         "#00ADD8",
+	"TypeScript": "#3178C6",
+	"JavaScript": "#F1E05A",
+	"Python":     "#3572A5",
+	"Rust":       "#DEA584",
+	"Ruby":       "#701516",
+	"Java":       "#B07219",
+	"Kotlin":     "#A97BFF",
+	"Swift":      "#F05138",
+	"C":          "#555555",
+	"C++":        "#F34B7D",
+	"C#":         "#178600",
+	"PHP":        "#4F5D95",
+	"HTML":       "#E34C26",
+	"CSS":        "#563D7C",
+	"SCSS":       "#C6538C",
+	"Vue":        "#41B883",
+	"Svelte":     "#FF3E00",
+	"Shell":      "#89E051",
+	"Lua":        "#000080",
+	"Dart":       "#00B4AB",
+	"Elixir":     "#6E4A7E",
+	"Erlang":     "#B83998",
+	"Haskell":    "#5E5086",
+	"Scala":      "#C22D40",
+	"Clojure":    "#DB5855",
+	"Zig":        "#EC915C",
+	"Nix":        "#7E7EFF",
+	"OCaml":      "#3BE133",
+	"Crystal":    "#000100",
+	"Julia":      "#A270BA",
+	"R":          "#198CE7",
+	"Perl":       "#0298C3",
+	"Markdown":   "#083FA1",
+	"Dockerfile": "#384D54",
+	"Makefile":   "#427819",
+	"Vim Script": "#199F4B",
+	"Jupyter Notebook": "#DA5B0B",
+}

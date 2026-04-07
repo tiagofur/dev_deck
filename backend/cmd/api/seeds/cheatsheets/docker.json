@@ -1,0 +1,70 @@
+{
+  "slug": "docker-essential",
+  "title": "Docker Essential Commands",
+  "category": "tool",
+  "icon": "🐳",
+  "color": "#2496ED",
+  "description": "Core Docker commands for building, running, and managing containers.",
+  "entries": [
+    {
+      "label": "Build Image",
+      "command": "docker build -t <name>:<tag> .",
+      "description": "Build an image from a Dockerfile in the current directory",
+      "tags": ["build", "image", "create"]
+    },
+    {
+      "label": "Run Container",
+      "command": "docker run -d -p <host>:<container> --name <name> <image>",
+      "description": "Run a container in detached mode with port mapping",
+      "tags": ["run", "container", "detached"]
+    },
+    {
+      "label": "Compose Up",
+      "command": "docker compose up -d --build",
+      "description": "Start all services defined in docker-compose.yml",
+      "tags": ["compose", "services", "orchestration"]
+    },
+    {
+      "label": "Exec into Container",
+      "command": "docker exec -it <container> sh",
+      "description": "Open an interactive shell inside a running container",
+      "tags": ["exec", "shell", "debug"]
+    },
+    {
+      "label": "View Logs",
+      "command": "docker logs -f --tail 100 <container>",
+      "description": "Follow the last 100 lines of a container's logs",
+      "tags": ["logs", "monitoring", "debug"]
+    },
+    {
+      "label": "List Containers",
+      "command": "docker ps -a",
+      "description": "List all containers including stopped ones",
+      "tags": ["list", "containers", "status"]
+    },
+    {
+      "label": "Stop Container",
+      "command": "docker stop <container>",
+      "description": "Gracefully stop a running container",
+      "tags": ["stop", "container", "lifecycle"]
+    },
+    {
+      "label": "Remove Container",
+      "command": "docker rm -f <container>",
+      "description": "Force remove a container even if running",
+      "tags": ["remove", "cleanup", "container"]
+    },
+    {
+      "label": "System Prune",
+      "command": "docker system prune -af --volumes",
+      "description": "Remove all unused containers, images, and volumes",
+      "tags": ["prune", "cleanup", "disk"]
+    },
+    {
+      "label": "List Networks",
+      "command": "docker network ls",
+      "description": "Show all Docker networks available",
+      "tags": ["network", "list", "config"]
+    }
+  ]
+}

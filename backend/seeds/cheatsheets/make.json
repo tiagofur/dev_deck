@@ -1,0 +1,70 @@
+{
+  "slug": "make",
+  "title": "GNU Make",
+  "category": "tool",
+  "icon": "🔧",
+  "color": "#6D8086",
+  "description": "Build automation tool that uses Makefiles to define tasks, dependencies, and recipes.",
+  "entries": [
+    {
+      "label": "Run a specific target",
+      "command": "make build",
+      "description": "Executes the recipe for the given target. Runs first target if none specified.",
+      "tags": ["run", "target", "execute"]
+    },
+    {
+      "label": "Dry run",
+      "command": "make -n build",
+      "description": "Shows what commands would run without executing them. Great for debugging.",
+      "tags": ["dry-run", "preview", "debug"]
+    },
+    {
+      "label": "Parallel execution",
+      "command": "make -j4",
+      "description": "Runs up to 4 independent jobs in parallel. Speeds up builds with independent targets.",
+      "tags": ["parallel", "performance", "jobs"]
+    },
+    {
+      "label": "Override variables",
+      "command": "make build ENV=prod",
+      "description": "Passes or overrides variables from the command line. Overrides Makefile defaults.",
+      "tags": ["variables", "config", "override"]
+    },
+    {
+      "label": "Conditional execution",
+      "command": "ifeq ($(ENV),prod)\n  FLAGS := --minify\nelse\n  FLAGS :=\nendif",
+      "description": "Conditionally sets variables based on conditions. Supports ifeq, ifdef, ifndef.",
+      "tags": ["conditional", "logic", "config"]
+    },
+    {
+      "label": "Declare phony targets",
+      "command": ".PHONY: clean build test",
+      "description": "Marks targets as phony so Make skips filesystem checks. Always re-runs the recipe.",
+      "tags": ["phony", "best-practice", "targets"]
+    },
+    {
+      "label": "Wildcard file matching",
+      "command": "SOURCES := $(wildcard src/*.c)",
+      "description": "Expands to matching filenames at parse time. Useful for dynamic source lists.",
+      "tags": ["wildcard", "files", "dynamic"]
+    },
+    {
+      "label": "Automatic variables",
+      "command": "build/main.o: src/main.c\n\tgcc -c $< -o $@",
+      "description": "$@ is the target, $< is the first prerequisite, $^ is all prerequisites.",
+      "tags": ["automatic", "variables", "shortcuts"]
+    },
+    {
+      "label": "Include other makefiles",
+      "command": "include env.mk common.mk",
+      "description": "Imports variables and targets from other files. Missing files use -include to skip.",
+      "tags": ["include", "modular", "shared"]
+    },
+    {
+      "label": "Debug makefile",
+      "command": "make -d build",
+      "description": "Prints detailed debug output showing why each target is (re)built or skipped.",
+      "tags": ["debug", "verbose", "troubleshoot"]
+    }
+  ]
+}

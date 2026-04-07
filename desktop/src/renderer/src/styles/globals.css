@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────
+   DevDeck design tokens (also exported as
+   CSS vars for inline-style edge cases)
+   ───────────────────────────────────────── */
+:root {
+  --bg-primary:    #FFFBF0;
+  --bg-card:       #FFFFFF;
+  --bg-elevated:   #F4F0E0;
+  --ink:           #0A0A0A;
+  --ink-soft:      #4A4A4A;
+  --accent-pink:     #FF5C8A;
+  --accent-yellow:   #FFD23F;
+  --accent-cyan:     #4DD0E1;
+  --accent-lime:     #7CFF6B;
+  --accent-lavender: #B388FF;
+  --accent-orange:   #FF8A3D;
+  --danger:  #FF3B30;
+  --success: #00C853;
+}
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-bg-primary text-ink font-body;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  *:focus-visible {
+    outline: 3px solid #4DD0E1;
+    outline-offset: 2px;
+  }
+  /* Native scrollbar that matches the brutalist vibe */
+  ::-webkit-scrollbar { width: 12px; height: 12px; }
+  ::-webkit-scrollbar-track { background: #FFFBF0; }
+  ::-webkit-scrollbar-thumb {
+    background: #0A0A0A;
+    border: 3px solid #FFFBF0;
+  }
+}
+
+@layer utilities {
+  /* Truncate to N lines (used by RepoCard description) */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* ─────────────────────────────────────────
+   Markdown rendering (NotesEditor view mode)
+   Tailwind preflight strips defaults; we
+   re-add only what we need with brutalist vibe.
+   ───────────────────────────────────────── */
+.markdown {
+  @apply font-body text-ink leading-relaxed;
+}
+.markdown h1 { @apply font-display font-black text-2xl uppercase mt-4 mb-2; }
+.markdown h2 { @apply font-display font-black text-xl uppercase mt-4 mb-2; }
+.markdown h3 { @apply font-display font-bold text-lg mt-3 mb-1; }
+.markdown p  { @apply mb-3; }
+.markdown a  { @apply text-ink underline decoration-2 underline-offset-2 hover:bg-accent-yellow; }
+.markdown ul { @apply list-disc pl-6 mb-3 space-y-1; }
+.markdown ol { @apply list-decimal pl-6 mb-3 space-y-1; }
+.markdown blockquote {
+  @apply border-l-4 border-ink pl-3 my-3 italic text-ink-soft bg-bg-elevated py-2;
+}
+.markdown code {
+  @apply font-mono text-sm bg-bg-elevated border-2 border-ink/30 px-1.5 py-0.5;
+}
+.markdown pre {
+  @apply font-mono text-sm bg-ink text-bg-primary p-3 my-3 border-3 border-ink overflow-x-auto;
+}
+.markdown pre code {
+  @apply bg-transparent border-0 text-bg-primary p-0;
+}
+.markdown table {
+  @apply border-3 border-ink my-3 w-full;
+}
+.markdown th, .markdown td {
+  @apply border-2 border-ink px-2 py-1 text-sm;
+}
+.markdown th { @apply bg-accent-yellow font-display font-bold uppercase text-xs; }
+.markdown hr { @apply border-t-3 border-ink my-4; }
+
+/* ─────────────────────────────────────────
+   Syntax highlighting for code blocks in README
+   (rehype-highlight uses highlight.js classes)
+   Custom brutalist palette — no theme import.
+   ───────────────────────────────────────── */
+.markdown pre code.hljs { display: block; padding: 0; }
+.markdown .hljs-comment, .markdown .hljs-quote { color: #888; font-style: italic; }
+.markdown .hljs-keyword, .markdown .hljs-selector-tag, .markdown .hljs-literal,
+.markdown .hljs-section, .markdown .hljs-link { color: #FFD23F; font-weight: 700; }
+.markdown .hljs-string, .markdown .hljs-symbol, .markdown .hljs-bullet,
+.markdown .hljs-attr { color: #7CFF6B; }
+.markdown .hljs-number, .markdown .hljs-regexp, .markdown .hljs-meta { color: #FF8A3D; }
+.markdown .hljs-name, .markdown .hljs-attribute, .markdown .hljs-built_in,
+.markdown .hljs-builtin-name, .markdown .hljs-type { color: #4DD0E1; }
+.markdown .hljs-title, .markdown .hljs-class .hljs-title { color: #FF5C8A; font-weight: 700; }
+.markdown .hljs-tag { color: #B388FF; }
+.markdown .hljs-variable, .markdown .hljs-template-variable { color: #FFB1CC; }
+.markdown .hljs-emphasis { font-style: italic; }
+.markdown .hljs-strong { font-weight: 700; }
+
+/* ─────────────────────────────────────────
+   Toast slide-in animation
+   ───────────────────────────────────────── */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+  }
+}
+.animate-toast-in {
+  animation: toast-in 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}

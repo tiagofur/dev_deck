@@ -1,0 +1,70 @@
+{
+  "slug": "npm-essential",
+  "title": "npm Essential Commands",
+  "category": "package-manager",
+  "icon": "📦",
+  "color": "#CB3837",
+  "description": "Must-know npm commands for managing Node.js packages and workflows.",
+  "entries": [
+    {
+      "label": "Install Dependencies",
+      "command": "npm install",
+      "description": "Install all dependencies listed in package.json",
+      "tags": ["install", "dependencies", "setup"]
+    },
+    {
+      "label": "Run Script",
+      "command": "npm run <script>",
+      "description": "Execute a script defined in package.json",
+      "tags": ["scripts", "run", "build"]
+    },
+    {
+      "label": "Init Project",
+      "command": "npm init -y",
+      "description": "Create a package.json with default values",
+      "tags": ["init", "scaffold", "setup"]
+    },
+    {
+      "label": "Publish Package",
+      "command": "npm publish --access public",
+      "description": "Publish the package to the npm registry",
+      "tags": ["publish", "registry", "release"]
+    },
+    {
+      "label": "Audit Vulnerabilities",
+      "command": "npm audit",
+      "description": "Check for known security vulnerabilities in deps",
+      "tags": ["security", "audit", "vulnerabilities"]
+    },
+    {
+      "label": "Check Outdated",
+      "command": "npm outdated",
+      "description": "List packages that have newer versions available",
+      "tags": ["update", "versions", "maintenance"]
+    },
+    {
+      "label": "List Dependencies",
+      "command": "npm ls --depth=0",
+      "description": "Show top-level installed dependencies",
+      "tags": ["list", "tree", "dependencies"]
+    },
+    {
+      "label": "Clean Cache",
+      "command": "npm cache clean --force",
+      "description": "Force clear the npm cache to fix install issues",
+      "tags": ["cache", "cleanup", "troubleshoot"]
+    },
+    {
+      "label": "Bump Version",
+      "command": "npm version <patch|minor|major>",
+      "description": "Bump the package version and create a git tag",
+      "tags": ["version", "release", "semver"]
+    },
+    {
+      "label": "Link Package",
+      "command": "npm link <package>",
+      "description": "Symlink a local package for development testing",
+      "tags": ["link", "local", "development"]
+    }
+  ]
+}

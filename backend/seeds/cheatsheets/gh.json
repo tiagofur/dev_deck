@@ -1,0 +1,70 @@
+{
+  "slug": "gh",
+  "title": "GitHub CLI",
+  "category": "tool",
+  "icon": "🐙",
+  "color": "#6E40C9",
+  "description": "GitHub's official CLI for managing repos, PRs, issues, releases, and more from the terminal.",
+  "entries": [
+    {
+      "label": "Clone a repository",
+      "command": "gh repo clone owner/repo",
+      "description": "Clones a GitHub repository. Works with your own repos or public ones.",
+      "tags": ["clone", "repo", "download"]
+    },
+    {
+      "label": "Create a pull request",
+      "command": "gh pr create --title \"feat: add X\" --body \"Description\"",
+      "description": "Creates a PR from the current branch. Use --draft for draft, --web to open in browser.",
+      "tags": ["pr", "pull-request", "create"]
+    },
+    {
+      "label": "Checkout a PR locally",
+      "command": "gh pr checkout <number>",
+      "description": "Checks out the PR branch locally. Fetches and switches in one command.",
+      "tags": ["pr", "checkout", "review"]
+    },
+    {
+      "label": "List open issues",
+      "command": "gh issue list --label bug --state open",
+      "description": "Lists issues with optional filters for labels, assignees, and state.",
+      "tags": ["issues", "list", "filter"]
+    },
+    {
+      "label": "Create a release",
+      "command": "gh release create v1.0.0 --title \"v1.0.0\" --notes \"Release notes\"",
+      "description": "Creates a new release with tag, title, and notes. Attach files with --assets.",
+      "tags": ["release", "version", "publish"]
+    },
+    {
+      "label": "Create a gist",
+      "command": "gh gist create file.txt --public",
+      "description": "Creates a GitHub gist from a file. Use --public for public, default is secret.",
+      "tags": ["gist", "snippet", "share"]
+    },
+    {
+      "label": "Make an API call",
+      "command": "gh api repos/owner/repo/pulls --jq '.[].title'",
+      "description": "Calls any GitHub REST/GraphQL endpoint. Use --jq for jq-style filtering.",
+      "tags": ["api", "rest", "graphql"]
+    },
+    {
+      "label": "Authenticate",
+      "command": "gh auth login",
+      "description": "Interactive login to GitHub. Supports token, browser, and device code auth.",
+      "tags": ["auth", "login", "token"]
+    },
+    {
+      "label": "View repo info",
+      "command": "gh repo view owner/repo",
+      "description": "Shows repo description, stats, and README. Use --web to open in browser.",
+      "tags": ["repo", "info", "view"]
+    },
+    {
+      "label": "Watch workflow runs",
+      "command": "gh run watch",
+      "description": "Watches the latest GitHub Actions run in real-time with live step output.",
+      "tags": ["actions", "ci", "watch"]
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "slug": "tmux-essential",
+  "title": "tmux Essential Commands",
+  "category": "shell",
+  "icon": "🖥️",
+  "color": "#1BB91F",
+  "description": "Key tmux commands for session and pane management.",
+  "entries": [
+    {
+      "label": "New Session",
+      "command": "tmux new -s <name>",
+      "description": "Create a new named tmux session",
+      "tags": ["session", "create", "start"]
+    },
+    {
+      "label": "Split Pane Horizontal",
+      "command": "Ctrl+b \"",
+      "description": "Split the current pane horizontally (top/bottom)",
+      "tags": ["split", "pane", "horizontal"]
+    },
+    {
+      "label": "Split Pane Vertical",
+      "command": "Ctrl+b %",
+      "description": "Split the current pane vertically (left/right)",
+      "tags": ["split", "pane", "vertical"]
+    },
+    {
+      "label": "Navigate Panes",
+      "command": "Ctrl+b <arrow-key>",
+      "description": "Move focus between panes in the given direction",
+      "tags": ["navigate", "pane", "focus"]
+    },
+    {
+      "label": "Detach Session",
+      "command": "Ctrl+b d",
+      "description": "Detach from the current session (keeps it running)",
+      "tags": ["detach", "session", "background"]
+    },
+    {
+      "label": "Attach Session",
+      "command": "tmux attach -t <name>",
+      "description": "Reattach to a detached tmux session",
+      "tags": ["attach", "session", "resume"]
+    },
+    {
+      "label": "List Sessions",
+      "command": "tmux ls",
+      "description": "Show all active tmux sessions",
+      "tags": ["list", "sessions", "status"]
+    },
+    {
+      "label": "Rename Session",
+      "command": "Ctrl+b $",
+      "description": "Rename the current session",
+      "tags": ["rename", "session", "organize"]
+    },
+    {
+      "label": "Resize Pane",
+      "command": "Ctrl+b :resize-pane -<D|U|L|R> <n>",
+      "description": "Resize the active pane by n cells in a direction",
+      "tags": ["resize", "pane", "layout"]
+    },
+    {
+      "label": "Copy Mode",
+      "command": "Ctrl+b [",
+      "description": "Enter copy mode to scroll and select text",
+      "tags": ["copy", "scroll", "select"]
+    }
+  ]
+}

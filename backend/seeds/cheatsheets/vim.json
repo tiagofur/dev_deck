@@ -1,0 +1,70 @@
+{
+  "slug": "vim-essential",
+  "title": "Vim Essential Motions & Commands",
+  "category": "editor",
+  "icon": "📝",
+  "color": "#019733",
+  "description": "Core Vim commands and motions for efficient text editing.",
+  "entries": [
+    {
+      "label": "Save & Quit",
+      "command": ":wq  or  :x",
+      "description": "Write the file and exit Vim",
+      "tags": ["save", "quit", "basic"]
+    },
+    {
+      "label": "Visual Mode",
+      "command": "v  (char)  |  V  (line)  |  Ctrl+v  (block)",
+      "description": "Select text by character, line, or block",
+      "tags": ["visual", "select", "mode"]
+    },
+    {
+      "label": "Search & Replace",
+      "command": ":%s/<pattern>/<replacement>/g",
+      "description": "Replace all occurrences of pattern in the file",
+      "tags": ["search", "replace", "substitute"]
+    },
+    {
+      "label": "Horizontal Split",
+      "command": ":sp <file>  or  :vsp <file>",
+      "description": "Split the window horizontally or vertically",
+      "tags": ["split", "window", "layout"]
+    },
+    {
+      "label": "Yank & Paste",
+      "command": "yy (yank line)  |  p (paste after)  |  P (paste before)",
+      "description": "Copy and paste lines in Vim",
+      "tags": ["yank", "paste", "copy"]
+    },
+    {
+      "label": "Go to Line",
+      "command": ":<n>  or  <n>G",
+      "description": "Jump to line number n",
+      "tags": ["navigation", "line", "jump"]
+    },
+    {
+      "label": "Record Macro",
+      "command": "q<a> ... q  |  @a  |  @@",
+      "description": "Record, replay, and re-replay a macro into register a",
+      "tags": ["macro", "automation", "repeat"]
+    },
+    {
+      "label": "Substitute on Line",
+      "command": ":s/<old>/<new>/g",
+      "description": "Replace all matches on the current line",
+      "tags": ["substitute", "line", "edit"]
+    },
+    {
+      "label": "Delete Around",
+      "command": "diw  |  da(  |  di\"  |  dap",
+      "description": "Delete inside/around word, parens, quotes, or paragraph",
+      "tags": ["delete", "text-object", "motion"]
+    },
+    {
+      "label": "Undo & Redo",
+      "command": "u  (undo)  |  Ctrl+r  (redo)",
+      "description": "Undo the last change or redo an undone change",
+      "tags": ["undo", "redo", "basic"]
+    }
+  ]
+}

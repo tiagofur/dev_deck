@@ -1,0 +1,87 @@
+# DevDeck production stack — runs on the VPS.
+#
+# Three services:
+#   db     — Postgres 16, persistent volume
+#   api    — Go API, built from ../backend/Dockerfile
+#   caddy  — Reverse proxy with automatic Let's Encrypt TLS
+#
+# Setup:
+#   1. cp .env.example .env  &&  edit values
+#   2. docker compose up -d
+#   3. (first time only) apply migration:
+#      docker compose exec -T db psql -U devdeck devdeck < ../backend/migrations/0001_init.sql
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: devdeck-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: devdeck
+      POSTGRES_PASSWORD: ${PG_PASS}
+      POSTGRES_DB: devdeck
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devdeck -d devdeck"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # Not exposed publicly — only the api container talks to it
+    networks:
+      - internal
+
+  api:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    image: devdeck-api:latest
+    container_name: devdeck-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: "8080"
+      DB_URL: postgres://devdeck:${PG_PASS}@db:5432/devdeck?sslmode=disable
+      AUTH_MODE: token
+      API_TOKEN: ${API_TOKEN}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      CORS_ORIGINS: ${CORS_ORIGINS:-app://.}
+      REFRESH_INTERVAL_HOURS: ${REFRESH_INTERVAL_HOURS:-168}
+    expose:
+      - "8080"
+    networks:
+      - internal
+      - web
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: devdeck-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # HTTP/3
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+    networks:
+      - web
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:
+    driver: bridge
+  web:
+    driver: bridge

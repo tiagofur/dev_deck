@@ -1,0 +1,72 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: devdeck-db-local
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: devdeck
+      POSTGRES_PASSWORD: ${PG_PASS}
+      POSTGRES_DB: devdeck
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_local:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devdeck -d devdeck"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    image: postgres:16-alpine
+    container_name: devdeck-migrate
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${PG_PASS}
+    volumes:
+      - ../backend/migrations:/migrations:ro
+    # Extract only the +goose Up section (stop at +goose Down) before running.
+    # This avoids running the rollback section when using plain psql -f.
+    command: >
+      sh -c "
+        run() { awk '/-- [+]goose Down/{exit} {print}' /migrations/$$1 | psql -h db -U devdeck -d devdeck; }
+        run 0001_init.sql &&
+        run 0002_commands.sql &&
+        run 0003_cheatsheets.sql &&
+        run 0004_auth_users_sessions.sql &&
+        echo All migrations applied.
+      "
+    restart: on-failure
+
+  api:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    image: devdeck-api:latest
+    container_name: devdeck-api-local
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      PORT: "8080"
+      DB_URL: postgres://devdeck:${PG_PASS}@db:5432/devdeck?sslmode=disable
+      AUTH_MODE: ${AUTH_MODE:-token}
+      API_TOKEN: ${API_TOKEN}
+      JWT_SECRET: ${JWT_SECRET:-}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      OAUTH_REDIRECT_URL: ${OAUTH_REDIRECT_URL:-http://localhost:5173/auth/callback}
+      ALLOWED_GITHUB_LOGINS: ${ALLOWED_GITHUB_LOGINS:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      CORS_ORIGINS: ${CORS_ORIGINS:-app://.,http://localhost:5173,http://localhost:4173}
+      REFRESH_INTERVAL_HOURS: ${REFRESH_INTERVAL_HOURS:-168}
+      SEED_CHEATSHEETS: ${SEED_CHEATSHEETS:-true}
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata_local:
