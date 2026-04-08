@@ -1,6 +1,12 @@
 # DevDeck — Roadmap
 
+> 🌐 [devdeck.ai](https://devdeck.ai) — Tu memoria externa para desarrollo, asistida por IA.
+
 ## Estado actual: Ola 4 completa ✅ (Fase 12-15 ✅, Fase 16 pendiente)
+
+### Próximo: Ola 5 — Item types expandidos + Runbooks
+### Siguiente: Ola 6 — IA real (auto-summary, auto-tags, búsqueda semántica)
+### Futuro: Ola 7 — Multiusuario + Sync offline-first + Decks compartibles
 
 ---
 
@@ -204,6 +210,136 @@
 | Markdown | react-markdown + remark-gfm + rehype-highlight |
 | Iconos | Lucide React |
 | Backend | Go + Chi + pgx v5 |
-| Base de datos | Postgres 16 + pg_trgm |
+| Base de datos | Postgres 16 + pg_trgm + pgvector (Ola 6) |
 | Deploy | Docker Compose + Caddy (TLS automático) |
 | Web (Ola 4) | Vue 3 + Vite + Pinia + Vue Router |
+| IA (Ola 6) | OpenAI embeddings / Ollama (opt-in) + pgvector |
+
+---
+
+## 🌊 Ola 5 — Item types expandidos + Runbooks
+
+### Visión
+DevDeck deja de ser "directorio de repos" y pasa a ser **knowledge OS para devs**.
+El modelo central evoluciona de `Repo` a `Item` con `item_type`.
+
+### Fase 17 — Modelo de items genérico (backend)
+- `migrations/0005_items.sql`: tabla `items` polimórfica con `item_type` enum
+  - Tipos: `repo` / `cli` / `plugin` / `prompt` / `agent` / `shortcut` / `workflow` / `snippet` / `note` / `tool` / `article`
+  - Campos comunes: `title`, `url`, `description`, `notes`, `tags`, `item_type`, `stack`, `use_case`, `why_saved`
+  - Campos específicos: JSONB `meta` para datos tipo-específicos (stars, language, etc. para repos)
+- Migración backward-compatible: repos existentes se migran a `items` con `item_type='repo'`
+- CRUD endpoints genéricos: `GET|POST /api/items`, `GET|PATCH|DELETE /api/items/:id`
+- Filtros: `?type=cli`, `?stack=go`, `?use_case=debugging`, `?q=...`
+- Endpoint de quick capture: `POST /api/items/capture` — URL/texto → item con metadata básica (enrich async)
+- Enricher genérico por tipo: GitHub (repos), scraper OG (tools/articles), sin enrich (shortcuts/prompts)
+
+### Fase 18 — Item types UI (Electron + Vue)
+- Cards adaptadas por tipo: icono por `item_type`, color de categoría
+- Filtros top-level por tipo: Repos / CLIs / Plugins / Prompts / Shortcuts / Workflows / Notas
+- Filtros por stack: Go / Node / Python / macOS / Docker / AI / etc.
+- Filtros por use case: debugging / deploy / productivity / onboarding
+- Quick capture modal: pegar URL o texto → guardar → IA completa en background
+- Campo "¿Por qué lo guardé?" prominente en add/edit
+- Empty state por tipo con call-to-action contextual
+
+### Fase 19 — Runbooks
+- `migrations/0006_runbooks.sql`: tabla `runbooks` con `item_id`, pasos ordenados (checklist)
+- Cada paso: `label`, `command` (opcional), `description`, `position`, `checked` (local state)
+- CRUD endpoints: `GET|POST /api/items/:id/runbooks`, `PATCH|DELETE /api/items/:id/runbooks/:runbookId`
+- Reorder de pasos con drag & drop
+- Templates por stack: Node, Go, Rails, Python, Docker
+- Import desde README: detectar secciones "Getting started" / "Installation" → proponer pasos
+- UI: tab "Runbook" en item detail, con checklist interactivo y modo "run mode"
+
+### Fase 20 — Vistas de redescubrimiento expandidas
+- "Forgotten gems": items con `last_seen_at > 30d` — vista dedicada
+- "Recently saved": timeline de últimos N items guardados
+- Discovery mode extendido a todos los tipos (no solo repos)
+- "Por stack": landing de Go / Node / Python / etc. con items, cheatsheets y runbooks del stack
+- Cross-linking: desde un item, ver items relacionados por tags/stack
+- Mascota: nudges por tipo ("tenés 5 CLIs sin abrir hace meses")
+
+---
+
+## 🌊 Ola 6 — IA real que justifica `.ai`
+
+### Visión
+IA para **memoria, organización y recuperación** — no chatbot genérico.
+Cada feature resuelve un dolor concreto de los devs.
+
+### Fase 21 — Auto-summary y auto-tagging
+- `migrations/0007_ai_metadata.sql`: columnas `ai_summary`, `ai_tags`, `ai_type_suggestion`, `embedding` (vector) en `items`
+- Background job: al guardar un item, encola enrich IA
+- Prompt para summary: "qué es, para qué sirve, cuándo usarlo, qué stack toca, alternativas"
+- Prompt para tagging: tipo sugerido, stack, propósito, nivel (beginner/advanced), categorías
+- UI: badge "IA" en campos auto-generados, con opción de editar o aceptar
+- Config: `OPENAI_API_KEY` en settings (opt-in); sin key → feature deshabilitada con aviso claro
+- Alternativa local: Ollama compatible (mismo endpoint OpenAI-compatible)
+- Privacy notice: qué se envía (título + descripción + primeros 500 chars de README)
+
+### Fase 22 — Búsqueda semántica
+- `pgvector` extension en Postgres
+- Embeddings generados al guardar/actualizar items (async, background)
+- Búsqueda híbrida: `pg_trgm` (fuzzy text) + pgvector cosine similarity + fusión RRF
+- Sin API key: búsqueda fuzzy clásica (comportamiento actual)
+- Con API key: búsqueda semántica activada automáticamente
+- UI: sin cambios para el usuario — misma barra de búsqueda; resultados mejoran
+- Ejemplos funcionales: "herramientas para agents en terminal", "atajos de mac para moverme rápido", "debugging en Go"
+
+### Fase 23 — Related items
+- Al ver un item: panel "Items relacionados" con ≤ 5 sugerencias
+- Basado en: tags compartidos + stack compartido + similitud semántica (si hay embeddings)
+- Fallback sin IA: basado solo en tags y stack
+- UI: sección al final del item detail, cards mini con tipo + título + tag principal
+- "También guardaste": cheatsheets y runbooks relacionados
+
+### Fase 24 — Content → Knowledge + Ask DevDeck
+- **Content → Knowledge:**
+  - Input: URL o texto pegado en modal
+  - Output: resumen, tags sugeridos, tipo detectado, comandos extraídos, prerrequisitos
+  - "Guardar como cheatsheet" / "Guardar como item" / "Guardar como runbook"
+- **Ask DevDeck:**
+  - Input: pregunta en lenguaje natural sobre tu base de conocimiento
+  - Backend: retrieval sobre embeddings propios → context → LLM → respuesta citando tus items
+  - Ejemplos: "¿qué tools tengo para agents?", "¿qué guardé para debugging en Go?", "¿tenía algo de Docker + pnpm?"
+  - UI: modal dedicado (Cmd+Shift+K o botón en sidebar)
+  - Restricción: solo responde sobre TU base de conocimiento (no sobre el mundo)
+  - Empty state: "Guardá ≥ 20 items para activar Ask DevDeck"
+
+---
+
+## 🌊 Ola 7 — Multiusuario + Sync + Offline-first
+
+### Visión
+El mismo usuario en múltiples dispositivos. Luego, múltiples usuarios.
+Offline-first garantizado. Decks compartibles.
+
+### Fase 25 — Offline-first local (SQLite)
+- SQLite local en Electron (mejor-lite o similar)
+- Cola de cambios: operaciones se guardan locales primero, sync en background
+- Conflict resolution: last-write-wins con `updated_at`
+- Status sync en UI: indicador "syncing..." / "offline" / "up to date"
+- Funciona sin conexión: lectura y escritura local; sync cuando vuelve internet
+
+### Fase 26 — Multi-device sync
+- `migrations/0008_sync.sql`: tabla `sync_log` con `device_id`, `entity_type`, `entity_id`, `action`, `payload`, `synced_at`
+- Sync engine Go: pull changes desde servidor, push local changes
+- Resolución de conflictos campo por campo (no solo last-write-wins)
+- API: `GET /api/sync?since=<timestamp>`, `POST /api/sync/push`
+- Desktop: background sync cada 30s cuando hay conexión
+- Web: sync en mount + on focus
+
+### Fase 27 — Multi-user real
+- Allowlist expandida o abierta (configuración del owner)
+- Cada user tiene su propio namespace de items
+- Permisos: privado (default) / público (compartible)
+- UI: perfil, settings de privacidad
+
+### Fase 28 — Decks compartibles
+- `Deck`: colección curada de items con título, descripción, color
+- URL compartible: `devdeck.ai/deck/<slug>`
+- Preview rico con Open Graph: og:image generado con card del deck
+- Import deck: "Agregar todos a mi colección" o item por item
+- Embed: snippet de código para embedir en README/blog
+- Landing pública del deck (sin login requerido para ver)
