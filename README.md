@@ -29,24 +29,48 @@ DevDeck es tu **colección curada de conocimiento dev** — con IA que hace que 
 
 ---
 
+## Screenshots
+
+> 📸 _TODO: agregar GIFs/screenshots de Home, RepoDetail, Discovery y Cheatsheets. Parte de Fase 16.5._
+
+---
+
 ## Documentación
 
+### Producto y visión
 | Doc | Contenido |
 |-----|-----------|
-| [docs/PRD.md](docs/PRD.md) | Producto, features, user stories, scope por olas, constraints y decisiones |
-| [docs/VISION.md](docs/VISION.md) | Visión de producto, posicionamiento, diferenciadores y roadmap de posicionamiento |
-| [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) | Análisis competitivo detallado (GitHub Stars, Raindrop, Notion, Pieces, etc.) |
-| [docs/LANDING_COPY.md](docs/LANDING_COPY.md) | Copy de landing page **en inglés** (audiencia global) |
-| [docs/LANDING.md](docs/LANDING.md) | Copy de landing page **en español** (audiencia hispanohablante) |
-| [docs/TECHNICAL_ROADMAP_AI_OFFLINE.md](docs/TECHNICAL_ROADMAP_AI_OFFLINE.md) | Roadmap técnico detallado: offline-first, sync, multi-usuario, IA |
-| [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | Tokens, paleta, tipografía, componentes |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Diagrama, stack, decisiones, schema DB |
+| [docs/VISION.md](docs/VISION.md) | Visión, posicionamiento, diferenciadores |
+| [docs/PRD.md](docs/PRD.md) | Producto, features, user stories, scope por olas |
+| [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) | Análisis competitivo detallado |
+| [docs/LANDING.md](docs/LANDING.md) · [docs/LANDING_COPY.md](docs/LANDING_COPY.md) | Copy de landing (ES / EN) |
+
+### Arquitectura y decisiones
+| Doc | Contenido |
+|-----|-----------|
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Diagrama, stack, schema DB |
 | [docs/API.md](docs/API.md) | OpenAPI spec |
+| [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | Tokens, paleta, tipografía |
+| [docs/TECHNICAL_ROADMAP_AI_OFFLINE.md](docs/TECHNICAL_ROADMAP_AI_OFFLINE.md) | Roadmap técnico: offline, sync, IA |
+| [docs/adr/0001-items-polymorphism.md](docs/adr/0001-items-polymorphism.md) | ADR: modelo polimórfico de items |
+| [docs/adr/0002-sync-strategy.md](docs/adr/0002-sync-strategy.md) | ADR: estrategia de sync offline-first |
+
+### Operación y contribución
+| Doc | Contenido |
+|-----|-----------|
+| [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md) | Guía paso a paso para self-host |
+| [docs/CAPTURE.md](docs/CAPTURE.md) | Spec de canales de captura (extensión, CLI, paste, share) |
+| [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | Plan de tests y CI |
+| [docs/REVIEW_2026_04.md](docs/REVIEW_2026_04.md) | **Review técnico de abril 2026** — motiva Ola 4.5 |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Cómo contribuir |
+| [SECURITY.md](SECURITY.md) | Política de seguridad |
 
 ---
 
 ## Estado
 
-🚧 **Olas 1–4 completas.** Próximo: Ola 5 (Items generales + IA) y Ola 6 (Offline-first + Sync + Multi-usuario).
+🚧 **Olas 1–4 completas.** **Ola 4.5 (Hardening & Capture) en curso** — red de seguridad (tests + CI) y canales de captura (CLI + extensión + paste). Ver [docs/REVIEW_2026_04.md](docs/REVIEW_2026_04.md) para el análisis que la motiva.
+
+Próximo: Ola 5 (Items generales + IA) → Ola 6 (Offline-first + Sync + Multi-usuario).
 
 Roadmap completo en [ROADMAP.md](ROADMAP.md).

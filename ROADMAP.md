@@ -1,12 +1,95 @@
 # DevDeck — Roadmap
 
 > 🌐 [devdeck.ai](https://devdeck.ai) — Tu memoria externa para desarrollo, asistida por IA.
+>
+> 📝 **Actualizado 2026-04-08:** insertada **Ola 4.5 (Hardening & Capture)** como bloqueante antes de Ola 5. Ver `docs/REVIEW_2026_04.md` para el análisis que motivó los cambios, y los ADRs en `docs/adr/` para decisiones formalizadas.
 
 ## Estado actual: Ola 4 completa ✅ (Fase 12-15 ✅, Fase 16 pendiente)
 
+### 🔴 Bloqueante: Ola 4.5 — Hardening & Capture (red de seguridad + canales de captura)
 ### Próximo: Ola 5 — Item types expandidos + Runbooks
 ### Siguiente: Ola 6 — IA real (auto-summary, auto-tags, búsqueda semántica)
 ### Futuro: Ola 7 — Multiusuario + Sync offline-first + Decks compartibles
+
+---
+
+## 🌊 Ola 4.5 — Hardening & Capture (NUEVO)
+
+> **Por qué existe esta ola:** la review de abril 2026 (ver `docs/REVIEW_2026_04.md`) identificó dos riesgos bloqueantes para Ola 5: (1) cero tests, (2) captura con fricción. Esta ola atiende ambos en ~4 semanas y deja la base lista para iterar rápido.
+
+### Fase 16.5 — Higiene de repo ⏳
+- Remover `backend/api.exe` y agregar `*.exe`, `api`, `api.bin` a `.gitignore`.
+- Reconciliar duplicación de Ola 5/6 en este mismo ROADMAP (ver secciones más abajo marcadas como `[DEPRECATED: ver arriba]`).
+- Agregar screenshots y GIFs al `README.md` (home, detail, discovery, cheatsheets).
+- Crear `CONTRIBUTING.md`, `SECURITY.md`, `docs/SELF_HOSTING.md`. ✅
+- Crear `docs/TESTING_STRATEGY.md` y `docs/CAPTURE.md`. ✅
+- Crear `docs/adr/0001-items-polymorphism.md` y `docs/adr/0002-sync-strategy.md`. ✅
+
+### Fase 16.6 — Red de seguridad (tests + CI) ⏳
+- Backend: `internal/testutil/postgres.go` con `testcontainers-go`. Tests de handlers: `repos`, `commands`, `cheatsheets`, `auth`, `search`, `stats`. Target: 60–75% cobertura en `handlers` y `store`.
+- Enricher: tests con `httptest.Server` mockeando GitHub + HTML de ejemplo. **Incluye tests de SSRF guard** rechazando IPs privadas.
+- Desktop: Vitest + `@testing-library/react` para components críticos. Playwright E2E con 5 flows: login, add repo, detail+notas, search, discovery.
+- Web: Vitest + `@vue/test-utils` para components/stores. Playwright E2E con los mismos 5 flows.
+- GitHub Actions: workflow `ci.yml` con jobs `backend`, `desktop`, `web`, `e2e`. Branch protection en `main`: status checks obligatorios + review requerido.
+- Ver `docs/TESTING_STRATEGY.md` para el plan sprint-by-sprint.
+
+### Fase 16.7 — Observability mínima ⏳
+- `slog` estructurado en backend (Go 1.23 stdlib). Reemplazar `fmt.Println` y `log.Printf`.
+- Endpoint `/metrics` Prometheus con: latencias por handler, contadores de errores, contador de enrich jobs.
+- Tracing opcional con OpenTelemetry (noop si no hay endpoint configurado).
+- Logging específico de IA (cuando se active): costo por request, latencia, provider, user.
+
+### Fase 16.8 — SSRF guard + rate limiting ⏳
+- `internal/enricher/generic.go`: whitelist de esquemas (`http`/`https`), resolver DNS previo, bloquear rangos RFC1918/RFC6598/RFC3927/loopback/link-local.
+- `internal/enricher/github.go`: validar owner/repo por regex antes de llamar GitHub.
+- Middleware de rate limiting global en `/api` con `github.com/go-chi/httprate` (60 req/min por IP + 20 req/min por user autenticado).
+- Rate limits específicos en endpoints de IA cuando existan (ver Ola 6).
+
+### Fase 16.9 — Endpoint unificado de captura ⏳
+- `POST /api/items/capture` con detección automática de tipo (spec en `docs/CAPTURE.md §Endpoint unificado`).
+- Detección de duplicados por URL normalizada.
+- Enriquecimiento encolado en background (sin bloquear la response).
+- Response incluye `duplicate_of` cuando aplica y `enrichment_status`.
+- Tests end-to-end del endpoint con los 9 tipos de input (url github, url article, comando, shortcut, snippet, etc.).
+
+### Fase 16.10 — CLI `devdeck` (P0) ⏳
+- Nuevo subproyecto `cli/` en el repo (Go, `cobra`, binario único).
+- Comandos P0: `login`, `config`, `add <url|text>`, `search <q>`, `list`, `open <id>`, `status`.
+- Token en OS keychain via `zalando/go-keyring`.
+- Config en `~/.config/devdeck/config.toml`.
+- SQLite local en `~/.local/share/devdeck/` para queue offline y cache.
+- Distribución: `go install`, Homebrew tap, Scoop manifest.
+- Ver `docs/CAPTURE.md §Canal 2` para spec completa.
+
+### Fase 16.11 — Extensión de browser (P0) ⏳
+- Nuevo subproyecto `extension/` (manifest v3, Chrome + Firefox).
+- P0: atajo `Cmd/Ctrl+Shift+D` captura tab activa → `POST /api/items/capture`.
+- Popup React con preview, `why_saved` textarea, tags sugeridos, Save button.
+- OAuth flow con redirect al popup, token en `chrome.storage.local`.
+- Offline queue con reintentos.
+- Configurable backend URL para self-hosters.
+- Ver `docs/CAPTURE.md §Canal 1`.
+
+### Fase 16.12 — Paste inteligente + importador GitHub Stars ⏳
+- Electron y Vue: listener global de `paste` fuera de inputs → toast flotante "¿Guardar esto?".
+- Detección de tipo heurística client-side (coincide con la del backend).
+- Atajo `Cmd/Ctrl+Shift+V` abre modal con clipboard content prefill.
+- CLI: `devdeck import github-stars` usa GitHub API paginada y batch POST al endpoint de captura.
+
+### Criterio de salida de Ola 4.5
+- [ ] CI verde en cada push, bloqueante para merge.
+- [ ] ≥ 60% cobertura en `backend/internal/http/handlers` y `backend/internal/store`.
+- [ ] ≥ 5 flows E2E pasando en Electron y Web.
+- [ ] Endpoint `/api/items/capture` en producción con tests.
+- [ ] CLI `devdeck` en release 0.1.0 con los comandos P0.
+- [ ] Extensión Chrome en Chrome Web Store (o sideload con instructions claras).
+- [ ] README con screenshots.
+- [ ] `api.exe` fuera del repo.
+- [ ] ADRs 0001 y 0002 con decisión final (no "propuesto").
+
+**Solo después de cumplir estos criterios, arrancar Ola 5.**
+
+---
 
 ---
 
@@ -200,6 +283,14 @@
 
 ## 🌊 Ola 5 — Items generales + IA real
 
+> **⚠️ NOTA DE RECONCILIACIÓN (2026-04-08):** existían dos versiones de Ola 5 y Ola 6 en este documento. La versión canónica es la que sigue ("Items generales + IA real" + "Offline-first + Sync"). La segunda descripción más abajo (marcada como `[DEPRECATED]`) se conserva temporalmente solo como referencia histórica — será removida cuando Ola 5 arranque.
+>
+> **Decisiones formalizadas antes de arrancar Ola 5:**
+> - Modelo polimórfico de `items`: **Opción A (single-table + JSONB + generated columns)**. Ver `docs/adr/0001-items-polymorphism.md`.
+> - Quick capture: endpoint `POST /api/items/capture` ya existe desde Ola 4.5. Ola 5 solo expande tipos soportados.
+> - IA: Ollama como default, OpenAI opt-in. Rate limits obligatorios desde el primer endpoint (ver Fase 18).
+> - Búsqueda híbrida: RRF (Reciprocal Rank Fusion), no ponderación lineal. Ver `docs/REVIEW_2026_04.md §3.2`.
+
 > **Objetivo:** convertir DevDeck de directorio de repos a knowledge OS para developers. Justificar el `.ai` con features de IA que resuelven fricción real, no decorativas.
 
 ### Fase 17 — Modelo de items extendido
@@ -311,7 +402,9 @@
 
 ---
 
-## 🌊 Ola 5 — Item types expandidos + Runbooks
+## 🌊 Ola 5 — Item types expandidos + Runbooks  `[DEPRECATED — ver Ola 5 canónica arriba]`
+
+> ⚠️ Esta sección quedó duplicada de una edición anterior. Se conserva temporalmente como referencia histórica. La versión vigente es la de arriba ("Items generales + IA real"). **No usar para planificar.**
 
 ### Visión
 DevDeck deja de ser "directorio de repos" y pasa a ser **knowledge OS para devs**.
@@ -356,7 +449,9 @@ El modelo central evoluciona de `Repo` a `Item` con `item_type`.
 
 ---
 
-## 🌊 Ola 6 — IA real que justifica `.ai`
+## 🌊 Ola 6 — IA real que justifica `.ai`  `[DEPRECATED — ver Ola 6 canónica arriba]`
+
+> ⚠️ Duplicada. La versión vigente es la de arriba. **No usar para planificar.**
 
 ### Visión
 IA para **memoria, organización y recuperación** — no chatbot genérico.
@@ -403,7 +498,9 @@ Cada feature resuelve un dolor concreto de los devs.
 
 ---
 
-## 🌊 Ola 7 — Multiusuario + Sync + Offline-first
+## 🌊 Ola 7 — Multiusuario + Sync + Offline-first  `[DEPRECATED — ver Ola 6 canónica arriba llamada "Ola 6" / "Offline-first + Sync + Multi-usuario"]`
+
+> ⚠️ Duplicada. La versión vigente es la que aparece como "Ola 6 — Offline-first + Sync + Multi-usuario" arriba. Las fases 21–24 de esa ola reemplazan a las 25–28 de abajo. Estrategia de sync definida en `docs/adr/0002-sync-strategy.md`. **No usar para planificar.**
 
 ### Visión
 El mismo usuario en múltiples dispositivos. Luego, múltiples usuarios.
