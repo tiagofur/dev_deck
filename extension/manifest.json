@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "DevDeck — Quick Capture",
+  "description": "Guardá la tab activa en tu DevDeck con Cmd/Ctrl+Shift+D. Memoria externa para dev, desde el browser.",
+  "version": "0.1.0",
+  "action": {
+    "default_title": "Guardar en DevDeck",
+    "default_popup": "src/popup.html"
+  },
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "options_ui": {
+    "page": "src/options.html",
+    "open_in_tab": true
+  },
+  "permissions": ["activeTab", "storage", "alarms"],
+  "host_permissions": ["<all_urls>"],
+  "commands": {
+    "capture-tab": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+D",
+        "mac": "Command+Shift+D"
+      },
+      "description": "Capturar la tab activa en DevDeck"
+    }
+  }
+}

@@ -1,8 +1,8 @@
 # ADR 0001 — Modelo polimórfico de `items`
 
-- **Estado:** Propuesto · 2026-04-08
-- **Decisión pendiente de:** owner
-- **Contexto de ola:** bloqueante para Ola 5
+- **Estado:** Aceptada · 2026-04-08
+- **Implementada en:** Wave 4.5 §16.9 — `backend/migrations/0005_items.sql` + `internal/domain/items/` + `internal/store/items.go`
+- **Contexto de ola:** desbloquea Ola 5 (items + IA)
 
 ---
 

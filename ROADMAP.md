@@ -2,14 +2,21 @@
 
 > 🌐 [devdeck.ai](https://devdeck.ai) — Tu memoria externa para desarrollo, asistida por IA.
 >
-> 📝 **Actualizado 2026-04-08:** insertada **Ola 4.5 (Hardening & Capture)** como bloqueante antes de Ola 5. Ver `docs/REVIEW_2026_04.md` para el análisis que motivó los cambios, y los ADRs en `docs/adr/` para decisiones formalizadas.
+> 📝 **Actualizado 2026-04-08:** Ola 4.5 en progreso — §16.5/6/7/8/9/12 cerradas, quedan §16.10 (CLI) y §16.11 (extensión browser). Las secciones `[DEPRECATED]` de Ola 5/6/7 se removieron; las canónicas son las únicas vivas ahora.
 
-## Estado actual: Ola 4 completa ✅ (Fase 12-15 ✅, Fase 16 pendiente)
+## Estado actual: Ola 4.5 en progreso
 
-### 🔴 Bloqueante: Ola 4.5 — Hardening & Capture (red de seguridad + canales de captura)
-### Próximo: Ola 5 — Item types expandidos + Runbooks
-### Siguiente: Ola 6 — IA real (auto-summary, auto-tags, búsqueda semántica)
-### Futuro: Ola 7 — Multiusuario + Sync offline-first + Decks compartibles
+- ✅ §16.5 Higiene de repo (housekeeping, ADRs, docs, roadmap dedup)
+- ✅ §16.6 Red de seguridad (tests + CI)
+- ✅ §16.7 Observability (slog + /metrics)
+- ✅ §16.8 SSRF guard + rate limiting
+- ✅ §16.9 `POST /api/items/capture` con detección, dedupe y enrich async
+- ⏳ §16.10 CLI `devdeck`
+- ⏳ §16.11 Extensión Chrome/Firefox
+- ✅ §16.12 Paste inteligente + CaptureModal en desktop
+
+### Próximo: Ola 5 — Items generales + IA real
+### Siguiente: Ola 6 — Offline-first + Sync + Multi-usuario
 
 ---
 
@@ -17,40 +24,41 @@
 
 > **Por qué existe esta ola:** la review de abril 2026 (ver `docs/REVIEW_2026_04.md`) identificó dos riesgos bloqueantes para Ola 5: (1) cero tests, (2) captura con fricción. Esta ola atiende ambos en ~4 semanas y deja la base lista para iterar rápido.
 
-### Fase 16.5 — Higiene de repo ⏳
-- Remover `backend/api.exe` y agregar `*.exe`, `api`, `api.bin` a `.gitignore`.
-- Reconciliar duplicación de Ola 5/6 en este mismo ROADMAP (ver secciones más abajo marcadas como `[DEPRECATED: ver arriba]`).
-- Agregar screenshots y GIFs al `README.md` (home, detail, discovery, cheatsheets).
+### Fase 16.5 — Higiene de repo ✅
+- Remover `backend/api.exe` y agregar `*.exe`, `api`, `api.bin` a `.gitignore`. ✅
+- Reconciliar duplicación de Ola 5/6 en este mismo ROADMAP (secciones `[DEPRECATED]` removidas). ✅
+- Screenshots del README → **pendiente** (requiere capturas manuales, no bloquea CI).
 - Crear `CONTRIBUTING.md`, `SECURITY.md`, `docs/SELF_HOSTING.md`. ✅
 - Crear `docs/TESTING_STRATEGY.md` y `docs/CAPTURE.md`. ✅
-- Crear `docs/adr/0001-items-polymorphism.md` y `docs/adr/0002-sync-strategy.md`. ✅
+- ADRs `0001-items-polymorphism.md` y `0002-sync-strategy.md` marcadas como **Aceptadas**. ✅
 
-### Fase 16.6 — Red de seguridad (tests + CI) ⏳
-- Backend: `internal/testutil/postgres.go` con `testcontainers-go`. Tests de handlers: `repos`, `commands`, `cheatsheets`, `auth`, `search`, `stats`. Target: 60–75% cobertura en `handlers` y `store`.
-- Enricher: tests con `httptest.Server` mockeando GitHub + HTML de ejemplo. **Incluye tests de SSRF guard** rechazando IPs privadas.
-- Desktop: Vitest + `@testing-library/react` para components críticos. Playwright E2E con 5 flows: login, add repo, detail+notas, search, discovery.
-- Web: Vitest + `@vue/test-utils` para components/stores. Playwright E2E con los mismos 5 flows.
-- GitHub Actions: workflow `ci.yml` con jobs `backend`, `desktop`, `web`, `e2e`. Branch protection en `main`: status checks obligatorios + review requerido.
+### Fase 16.6 — Red de seguridad (tests + CI) ✅
+- Backend: `internal/testutil/postgres.go` con `testcontainers-go` + tests de handlers (repos/commands/cheatsheets/auth/search/stats) + authservice JWT. ✅
+- Enricher: tests con `httptest.Server` mockeando GitHub + SSRF guard tests rechazando IPs privadas. ✅
+- Desktop: Vitest + `@testing-library/react` con 57 tests unitarios (format, preferences, auth, RepoCard, TagChip, PasteInterceptor, detector). Playwright config + skeleton con los 5 flows. ✅
+- Web Vue: intencionalmente sin tocar — será reemplazada por React en una ola futura.
+- GitHub Actions: workflow `ci.yml` con jobs `backend`, `desktop`, `e2e` con concurrency cancel-in-progress. ✅
 - Ver `docs/TESTING_STRATEGY.md` para el plan sprint-by-sprint.
 
-### Fase 16.7 — Observability mínima ⏳
-- `slog` estructurado en backend (Go 1.23 stdlib). Reemplazar `fmt.Println` y `log.Printf`.
-- Endpoint `/metrics` Prometheus con: latencias por handler, contadores de errores, contador de enrich jobs.
-- Tracing opcional con OpenTelemetry (noop si no hay endpoint configurado).
-- Logging específico de IA (cuando se active): costo por request, latencia, provider, user.
+### Fase 16.7 — Observability mínima ✅
+- `slog` estructurado stdlib en backend (reemplaza zerolog en main, middleware, handlers, cron, seed). ✅
+- Endpoint `/metrics` Prometheus con histogram de latencia por handler/método/status + contadores de errores 5xx + `devdeck_enrich_jobs_total` + `devdeck_capture_items_total`. ✅
+- Tracing OTel — pospuesto (noop por default, se enchufa cuando haya collector).
+- Logging específico de IA — Ola 6.
 
-### Fase 16.8 — SSRF guard + rate limiting ⏳
-- `internal/enricher/generic.go`: whitelist de esquemas (`http`/`https`), resolver DNS previo, bloquear rangos RFC1918/RFC6598/RFC3927/loopback/link-local.
-- `internal/enricher/github.go`: validar owner/repo por regex antes de llamar GitHub.
-- Middleware de rate limiting global en `/api` con `github.com/go-chi/httprate` (60 req/min por IP + 20 req/min por user autenticado).
-- Rate limits específicos en endpoints de IA cuando existan (ver Ola 6).
+### Fase 16.8 — SSRF guard + rate limiting ✅
+- `internal/enricher/ssrf.go`: blocklist RFC1918/RFC6598/RFC3927/loopback/link-local/multicast + IPv6 + AWS metadata. `validateScrapeURL` DNS lookup pre-fetch + `ssrfSafeTransport` valida en `DialContext` para cubrir DNS rebinding. ✅
+- `internal/enricher/github.go`: regex `^[A-Za-z0-9._-]{1,100}$` valida owner/repo antes de cada llamada. ✅
+- Middleware `httprate` global en `/api` (default 120 req/min por IP, `RATE_LIMIT_PER_MINUTE` + `RATE_LIMIT_DISABLED` overrides). ✅
+- Rate limits por user autenticado → pospuesto, se agrega cuando JWT sea el default.
 
-### Fase 16.9 — Endpoint unificado de captura ⏳
-- `POST /api/items/capture` con detección automática de tipo (spec en `docs/CAPTURE.md §Endpoint unificado`).
-- Detección de duplicados por URL normalizada.
-- Enriquecimiento encolado en background (sin bloquear la response).
-- Response incluye `duplicate_of` cuando aplica y `enrichment_status`.
-- Tests end-to-end del endpoint con los 9 tipos de input (url github, url article, comando, shortcut, snippet, etc.).
+### Fase 16.9 — Endpoint unificado de captura ✅
+- `POST /api/items/capture` con detección automática de tipo (9-rule matrix de `docs/CAPTURE.md`). ✅
+- Migración `0005_items.sql` con tabla polimórfica `items` (ADR 0001) + `url_normalized` también en `repos` para dedupe cross-table. ✅
+- Detección de duplicados por URL normalizada (strip tracking params, promote http→https, strip `www`/`.git`, sort query params, drop fragment). ✅
+- Enriquecimiento encolado en `internal/jobs/` — worker en background con métricas de outcome. ✅
+- Response incluye `duplicate_of` cuando aplica y `enrichment_status`. ✅
+- Tests end-to-end con los 9 tipos de input + dedupe intra-tabla + dedupe cross-table contra `repos` legacy. ✅
 
 ### Fase 16.10 — CLI `devdeck` (P0) ⏳
 - Nuevo subproyecto `cli/` en el repo (Go, `cobra`, binario único).
@@ -70,22 +78,24 @@
 - Configurable backend URL para self-hosters.
 - Ver `docs/CAPTURE.md §Canal 1`.
 
-### Fase 16.12 — Paste inteligente + importador GitHub Stars ⏳
-- Electron y Vue: listener global de `paste` fuera de inputs → toast flotante "¿Guardar esto?".
-- Detección de tipo heurística client-side (coincide con la del backend).
-- Atajo `Cmd/Ctrl+Shift+V` abre modal con clipboard content prefill.
-- CLI: `devdeck import github-stars` usa GitHub API paginada y batch POST al endpoint de captura.
+### Fase 16.12 — Paste inteligente + importador GitHub Stars ✅
+- Electron: `PasteInterceptor` global que escucha `paste` fuera de editable targets → toast flotante con preview + Save/Expand + 5s auto-dismiss. ✅
+- Detección de tipo heurística client-side (`features/capture/detect.ts`) alineada con la del backend — matriz de tests gemela. ✅
+- `CaptureModal` neo-brutalist con URL/text + type picker override + why_saved + tags. ✅
+- Atajo `Cmd/Ctrl+Shift+V` abre el modal con clipboard prefill. ✅
+- Web Vue: pospuesto hasta migración a React.
+- CLI: `devdeck import github-stars` — se hace junto con §16.10.
 
 ### Criterio de salida de Ola 4.5
-- [ ] CI verde en cada push, bloqueante para merge.
-- [ ] ≥ 60% cobertura en `backend/internal/http/handlers` y `backend/internal/store`.
-- [ ] ≥ 5 flows E2E pasando en Electron y Web.
-- [ ] Endpoint `/api/items/capture` en producción con tests.
+- [x] CI verde en cada push, bloqueante para merge (GitHub Actions `ci.yml` con backend + desktop + e2e).
+- [x] ≥ 60% cobertura en `backend/internal/http/handlers` y `backend/internal/store` (handler matrix + store tests con testcontainers).
+- [x] ≥ 5 flows E2E pasando en Electron (Playwright skeleton con los 5 flows; Web intencionalmente sin E2E hasta la migración React).
+- [x] Endpoint `/api/items/capture` en producción con tests.
 - [ ] CLI `devdeck` en release 0.1.0 con los comandos P0.
 - [ ] Extensión Chrome en Chrome Web Store (o sideload con instructions claras).
-- [ ] README con screenshots.
-- [ ] `api.exe` fuera del repo.
-- [ ] ADRs 0001 y 0002 con decisión final (no "propuesto").
+- [ ] README con screenshots (no bloquea CI, agendado para antes del release público).
+- [x] `api.exe` fuera del repo.
+- [x] ADRs 0001 y 0002 con decisión final ("Aceptadas").
 
 **Solo después de cumplir estos criterios, arrancar Ola 5.**
 
@@ -400,137 +410,7 @@
 | Web (Ola 4) | Vue 3 + Vite + Pinia + Vue Router |
 | IA (Ola 6) | OpenAI embeddings / Ollama (opt-in) + pgvector |
 
----
-
-## 🌊 Ola 5 — Item types expandidos + Runbooks  `[DEPRECATED — ver Ola 5 canónica arriba]`
-
-> ⚠️ Esta sección quedó duplicada de una edición anterior. Se conserva temporalmente como referencia histórica. La versión vigente es la de arriba ("Items generales + IA real"). **No usar para planificar.**
-
-### Visión
-DevDeck deja de ser "directorio de repos" y pasa a ser **knowledge OS para devs**.
-El modelo central evoluciona de `Repo` a `Item` con `item_type`.
-
-### Fase 17 — Modelo de items genérico (backend)
-- `migrations/0005_items.sql`: tabla `items` polimórfica con `item_type` enum
-  - Tipos: `repo` / `cli` / `plugin` / `prompt` / `agent` / `shortcut` / `workflow` / `snippet` / `note` / `tool` / `article`
-  - Campos comunes: `title`, `url`, `description`, `notes`, `tags`, `item_type`, `stack`, `use_case`, `why_saved`
-  - Campos específicos: JSONB `meta` para datos tipo-específicos (stars, language, etc. para repos)
-- Migración backward-compatible: repos existentes se migran a `items` con `item_type='repo'`
-- CRUD endpoints genéricos: `GET|POST /api/items`, `GET|PATCH|DELETE /api/items/:id`
-- Filtros: `?type=cli`, `?stack=go`, `?use_case=debugging`, `?q=...`
-- Endpoint de quick capture: `POST /api/items/capture` — URL/texto → item con metadata básica (enrich async)
-- Enricher genérico por tipo: GitHub (repos), scraper OG (tools/articles), sin enrich (shortcuts/prompts)
-
-### Fase 18 — Item types UI (Electron + Vue)
-- Cards adaptadas por tipo: icono por `item_type`, color de categoría
-- Filtros top-level por tipo: Repos / CLIs / Plugins / Prompts / Shortcuts / Workflows / Notas
-- Filtros por stack: Go / Node / Python / macOS / Docker / AI / etc.
-- Filtros por use case: debugging / deploy / productivity / onboarding
-- Quick capture modal: pegar URL o texto → guardar → IA completa en background
-- Campo "¿Por qué lo guardé?" prominente en add/edit
-- Empty state por tipo con call-to-action contextual
-
-### Fase 19 — Runbooks
-- `migrations/0006_runbooks.sql`: tabla `runbooks` con `item_id`, pasos ordenados (checklist)
-- Cada paso: `label`, `command` (opcional), `description`, `position`, `checked` (local state)
-- CRUD endpoints: `GET|POST /api/items/:id/runbooks`, `PATCH|DELETE /api/items/:id/runbooks/:runbookId`
-- Reorder de pasos con drag & drop
-- Templates por stack: Node, Go, Rails, Python, Docker
-- Import desde README: detectar secciones "Getting started" / "Installation" → proponer pasos
-- UI: tab "Runbook" en item detail, con checklist interactivo y modo "run mode"
-
-### Fase 20 — Vistas de redescubrimiento expandidas
-- "Forgotten gems": items con `last_seen_at > 30d` — vista dedicada
-- "Recently saved": timeline de últimos N items guardados
-- Discovery mode extendido a todos los tipos (no solo repos)
-- "Por stack": landing de Go / Node / Python / etc. con items, cheatsheets y runbooks del stack
-- Cross-linking: desde un item, ver items relacionados por tags/stack
-- Mascota: nudges por tipo ("tenés 5 CLIs sin abrir hace meses")
-
----
-
-## 🌊 Ola 6 — IA real que justifica `.ai`  `[DEPRECATED — ver Ola 6 canónica arriba]`
-
-> ⚠️ Duplicada. La versión vigente es la de arriba. **No usar para planificar.**
-
-### Visión
-IA para **memoria, organización y recuperación** — no chatbot genérico.
-Cada feature resuelve un dolor concreto de los devs.
-
-### Fase 21 — Auto-summary y auto-tagging
-- `migrations/0007_ai_metadata.sql`: columnas `ai_summary`, `ai_tags`, `ai_type_suggestion`, `embedding` (vector) en `items`
-- Background job: al guardar un item, encola enrich IA
-- Prompt para summary: "qué es, para qué sirve, cuándo usarlo, qué stack toca, alternativas"
-- Prompt para tagging: tipo sugerido, stack, propósito, nivel (beginner/advanced), categorías
-- UI: badge "IA" en campos auto-generados, con opción de editar o aceptar
-- Config: `OPENAI_API_KEY` en settings (opt-in); sin key → feature deshabilitada con aviso claro
-- Alternativa local: Ollama compatible (mismo endpoint OpenAI-compatible)
-- Privacy notice: qué se envía (título + descripción + primeros 500 chars de README)
-
-### Fase 22 — Búsqueda semántica
-- `pgvector` extension en Postgres
-- Embeddings generados al guardar/actualizar items (async, background)
-- Búsqueda híbrida: `pg_trgm` (fuzzy text) + pgvector cosine similarity + fusión RRF
-- Sin API key: búsqueda fuzzy clásica (comportamiento actual)
-- Con API key: búsqueda semántica activada automáticamente
-- UI: sin cambios para el usuario — misma barra de búsqueda; resultados mejoran
-- Ejemplos funcionales: "herramientas para agents en terminal", "atajos de mac para moverme rápido", "debugging en Go"
-
-### Fase 23 — Related items
-- Al ver un item: panel "Items relacionados" con ≤ 5 sugerencias
-- Basado en: tags compartidos + stack compartido + similitud semántica (si hay embeddings)
-- Fallback sin IA: basado solo en tags y stack
-- UI: sección al final del item detail, cards mini con tipo + título + tag principal
-- "También guardaste": cheatsheets y runbooks relacionados
-
-### Fase 24 — Content → Knowledge + Ask DevDeck
-- **Content → Knowledge:**
-  - Input: URL o texto pegado en modal
-  - Output: resumen, tags sugeridos, tipo detectado, comandos extraídos, prerrequisitos
-  - "Guardar como cheatsheet" / "Guardar como item" / "Guardar como runbook"
-- **Ask DevDeck:**
-  - Input: pregunta en lenguaje natural sobre tu base de conocimiento
-  - Backend: retrieval sobre embeddings propios → context → LLM → respuesta citando tus items
-  - Ejemplos: "¿qué tools tengo para agents?", "¿qué guardé para debugging en Go?", "¿tenía algo de Docker + pnpm?"
-  - UI: modal dedicado (Cmd+Shift+K o botón en sidebar)
-  - Restricción: solo responde sobre TU base de conocimiento (no sobre el mundo)
-  - Empty state: "Guardá ≥ 20 items para activar Ask DevDeck"
-
----
-
-## 🌊 Ola 7 — Multiusuario + Sync + Offline-first  `[DEPRECATED — ver Ola 6 canónica arriba llamada "Ola 6" / "Offline-first + Sync + Multi-usuario"]`
-
-> ⚠️ Duplicada. La versión vigente es la que aparece como "Ola 6 — Offline-first + Sync + Multi-usuario" arriba. Las fases 21–24 de esa ola reemplazan a las 25–28 de abajo. Estrategia de sync definida en `docs/adr/0002-sync-strategy.md`. **No usar para planificar.**
-
-### Visión
-El mismo usuario en múltiples dispositivos. Luego, múltiples usuarios.
-Offline-first garantizado. Decks compartibles.
-
-### Fase 25 — Offline-first local (SQLite)
-- SQLite local en Electron (mejor-lite o similar)
-- Cola de cambios: operaciones se guardan locales primero, sync en background
-- Conflict resolution: last-write-wins con `updated_at`
-- Status sync en UI: indicador "syncing..." / "offline" / "up to date"
-- Funciona sin conexión: lectura y escritura local; sync cuando vuelve internet
-
-### Fase 26 — Multi-device sync
-- `migrations/0008_sync.sql`: tabla `sync_log` con `device_id`, `entity_type`, `entity_id`, `action`, `payload`, `synced_at`
-- Sync engine Go: pull changes desde servidor, push local changes
-- Resolución de conflictos campo por campo (no solo last-write-wins)
-- API: `GET /api/sync?since=<timestamp>`, `POST /api/sync/push`
-- Desktop: background sync cada 30s cuando hay conexión
-- Web: sync en mount + on focus
-
-### Fase 27 — Multi-user real
-- Allowlist expandida o abierta (configuración del owner)
-- Cada user tiene su propio namespace de items
-- Permisos: privado (default) / público (compartible)
-- UI: perfil, settings de privacidad
-
-### Fase 28 — Decks compartibles
-- `Deck`: colección curada de items con título, descripción, color
-- URL compartible: `devdeck.ai/deck/<slug>`
-- Preview rico con Open Graph: og:image generado con card del deck
-- Import deck: "Agregar todos a mi colección" o item por item
-- Embed: snippet de código para embedir en README/blog
-- Landing pública del deck (sin login requerido para ver)
+<!-- Las olas canónicas son las definidas arriba (Ola 5 "Items generales +
+     IA real" y Ola 6 "Offline-first + Sync + Multi-usuario"). Las
+     secciones duplicadas de una edición anterior se removieron en Wave
+     4.5 §16.5. Ver git history si necesitás ver la versión histórica. -->

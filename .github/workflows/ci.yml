@@ -57,6 +57,37 @@ jobs:
           path: backend/coverage.out
           retention-days: 7
 
+  cli:
+    name: CLI (Go)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cli
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+          cache-dependency-path: cli/go.sum
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: Build
+        run: go build ./...
+
+      - name: Run tests
+        run: go test -race -timeout=5m ./...
+
+      - name: Build binary
+        run: go build -o /tmp/devdeck ./cmd/devdeck
+
+      - name: Smoke test (--help)
+        run: /tmp/devdeck --help
+
   desktop:
     name: Desktop (Vitest + typecheck + build)
     runs-on: ubuntu-latest
@@ -78,15 +109,40 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
-        # Mascot.tsx has a pre-existing framer-motion type drift; do not block
-        # the build on it. Remove this once the upstream type is fixed.
-        continue-on-error: true
 
       - name: Vitest unit tests
         run: npm test
 
       - name: Build (electron-vite)
         run: npm run build
+
+  extension:
+    name: Extension (Manifest v3 + node:test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate manifest.json
+        run: node -e "JSON.parse(require('fs').readFileSync('manifest.json','utf8'))"
+
+      - name: Syntax-check JS sources
+        run: |
+          node --check src/background.js
+          node --check src/popup.js
+          node --check src/options.js
+          node --check src/lib/api.js
+          node --check src/lib/storage.js
+
+      - name: Run unit tests
+        run: npm test
 
   e2e:
     name: E2E (Playwright + live backend)

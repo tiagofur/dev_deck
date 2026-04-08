@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DevDeck · Opciones</title>
+    <link rel="stylesheet" href="popup.css" />
+    <style>
+      body {
+        width: 480px;
+      }
+      main {
+        gap: 14px;
+      }
+      .field-text {
+        font-size: 12px;
+        opacity: 0.8;
+      }
+      .success {
+        background: var(--accent-lime);
+        border: 3px solid var(--ink);
+        padding: 7px;
+        font-size: 11px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="head">
+        <h1>DevDeck · Opciones</h1>
+      </header>
+
+      <label class="field">
+        <span>Backend URL</span>
+        <input id="api-url" type="url" placeholder="http://localhost:8080" />
+        <span class="field-text">
+          La raíz de tu backend DevDeck. Si sos self-hoster apuntá a tu instancia.
+        </span>
+      </label>
+
+      <label class="field">
+        <span>API Token</span>
+        <input id="token" type="password" placeholder="sk_live_xxx" autocomplete="off" />
+        <span class="field-text">
+          Se guarda en <code>chrome.storage.local</code>. Solo vos (y extensiones que
+          vos instales) pueden leerlo.
+        </span>
+      </label>
+
+      <div id="error" class="error" hidden></div>
+      <div id="success" class="success" hidden></div>
+
+      <footer class="actions">
+        <button id="verify" class="btn btn-secondary" type="button">Probar conexión</button>
+        <button id="save" class="btn" type="button">Guardar</button>
+      </footer>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

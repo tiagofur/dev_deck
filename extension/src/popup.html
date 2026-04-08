@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DevDeck · Quick Capture</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main id="root">
+      <header class="head">
+        <h1>DevDeck</h1>
+        <a id="options-link" href="#" title="Opciones">⚙</a>
+      </header>
+
+      <section id="preview" class="card">
+        <p class="label">Capturar esta tab</p>
+        <p id="preview-title" class="title">…</p>
+        <p id="preview-url" class="url">…</p>
+      </section>
+
+      <label class="field">
+        <span>¿Por qué lo guardás?</span>
+        <input id="why" type="text" placeholder="opcional" />
+      </label>
+
+      <label class="field">
+        <span>Tags (coma)</span>
+        <input id="tags" type="text" placeholder="opcional" />
+      </label>
+
+      <div id="error" class="error" hidden></div>
+
+      <footer class="actions">
+        <button id="cancel" class="btn btn-secondary" type="button">Cancelar</button>
+        <button id="save" class="btn" type="button">Guardar</button>
+      </footer>
+
+      <p id="queue-status" class="queue" hidden></p>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, type Variants } from 'framer-motion'
+import { AnimatePresence, motion, type TargetAndTransition } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { useStats } from '../../features/stats/api'
 import type { MascotMood } from '../../features/stats/types'
@@ -9,8 +9,14 @@ import { pickMessage } from './messages'
 /**
  * Per-mood Framer Motion animation. Idle and sleeping loop forever;
  * the others play once when the mood changes.
+ *
+ * NOTE: we type this as `TargetAndTransition` rather than
+ * `Variants['animate']` (= `Variant`) because `Variant` is a union that
+ * includes `TargetResolver` (a function variant), which is NOT assignable
+ * to the `animate` prop on a motion element. All the values below are
+ * plain target objects, so `TargetAndTransition` is the precise type.
  */
-const moodAnimations: Record<MascotMood, Variants['animate']> = {
+const moodAnimations: Record<MascotMood, TargetAndTransition> = {
   idle: {
     scale: [1, 1.03, 1],
     transition: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
