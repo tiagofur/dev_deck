@@ -33,8 +33,11 @@ DevDeck es tu **colección curada de conocimiento dev** — con IA que hace que 
 
 | Doc | Contenido |
 |-----|-----------|
-| [docs/PRD.md](docs/PRD.md) | Producto, features, user stories, scope por olas |
-| [docs/LANDING_COPY.md](docs/LANDING_COPY.md) | Copy y estructura de contenido para devdeck.ai |
+| [docs/PRD.md](docs/PRD.md) | Producto, features, user stories, scope por olas, constraints y decisiones |
+| [docs/VISION.md](docs/VISION.md) | Visión de producto, posicionamiento, diferenciadores y roadmap de posicionamiento |
+| [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) | Análisis competitivo detallado (GitHub Stars, Raindrop, Notion, Pieces, etc.) |
+| [docs/LANDING_COPY.md](docs/LANDING_COPY.md) | Copy de landing page **en inglés** (audiencia global) |
+| [docs/LANDING.md](docs/LANDING.md) | Copy de landing page **en español** (audiencia hispanohablante) |
 | [docs/TECHNICAL_ROADMAP_AI_OFFLINE.md](docs/TECHNICAL_ROADMAP_AI_OFFLINE.md) | Roadmap técnico detallado: offline-first, sync, multi-usuario, IA |
 | [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | Tokens, paleta, tipografía, componentes |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Diagrama, stack, decisiones, schema DB |

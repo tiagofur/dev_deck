@@ -1,9 +1,12 @@
-# DevDeck — Copy para landing devdeck.ai
+# DevDeck — Copy para landing devdeck.ai (versión en español)
 
 > Versión: 1.0 · Última actualización: 2026-04-08
 >
-> Este documento contiene el copy completo para la landing page de [devdeck.ai](https://devdeck.ai).
+> Este documento contiene el copy completo **en español** para la landing page de [devdeck.ai](https://devdeck.ai).
 > Incluye: hero, secciones de features, social proof, pricing y CTA.
+>
+> **Idioma:** español rioplatense (para audiencia hispanohablante / versión ES del sitio).
+> Para la versión en inglés (audiencia global), ver [LANDING_COPY.md](LANDING_COPY.md).
 
 ---
 

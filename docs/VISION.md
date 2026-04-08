@@ -1,6 +1,6 @@
 # DevDeck — Visión de producto y posicionamiento
 
-> Versión: 1.0 · Última actualización: 2026-04-08
+> Versión: 1.1 · Última actualización: 2026-04-08
 
 ---
 
@@ -46,144 +46,19 @@ DevDeck rompe ese ciclo con **captura rápida, contexto automático y recuperaci
 
 ---
 
-## Landscape competitivo
+## Landscape competitivo (resumen)
 
-### Competidores directos
+El análisis competitivo completo (con tablas de pros/contras y diferenciación por tool) está en [COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md).
 
-#### GitHub Stars
-**Lo que hace:** marca repos como favoritos en GitHub.
+**Competidores principales:**
 
-| A favor | En contra |
-|---------|-----------|
-| Integrado con GitHub | Solo repos de GitHub |
-| Zero setup | Sin notas propias, sin tags personalizados |
-| | Sin búsqueda útil (solo nombre exacto) |
-| | Sin contexto ("¿para qué lo guardé?") |
-| | No incluye CLIs, plugins, atajos, prompts |
-| | Sin modo discovery |
-
-**Posicionamiento vs DevDeck:** GitHub Stars es el punto de partida que DevDeck reemplaza. DevDeck cubre GitHub repos + todo lo demás, con contexto real.
-
----
-
-#### Raindrop.io
-**Lo que hace:** bookmark manager visual multiplataforma.
-
-| A favor | En contra |
-|---------|-----------|
-| UI hermosa | Genérico (no foco dev) |
-| Colecciones, tags | Sin commands per item |
-| Colaborativo | Sin runbooks |
-| Web + mobile + desktop | Sin búsqueda semántica real |
-| | Sin enrichment automático dev-specific |
-| | Sin mascota 😉 |
-
-**Posicionamiento vs DevDeck:** Raindrop es excelente para bookmarks generales. DevDeck es Raindrop especializado para developers, con commands, runbooks, cheatsheets integrados y metadata dev-specific auto-generada.
-
----
-
-#### Pocket / Instapaper
-**Lo que hace:** "read later" para artículos.
-
-| A favor | En contra |
-|---------|-----------|
-| Simple, rápido | Solo artículos/texto |
-| Offline reading | Sin features dev |
-| | Sin metadata de repos/tools |
-| | Sin commands/shortcuts |
-
-**Posicionamiento vs DevDeck:** Pocket resuelve "leer después". DevDeck resuelve "usar después". Complementarios, no excluyentes.
-
----
-
-#### Notion
-**Lo que hace:** workspace all-in-one (docs, bases de datos, wikis).
-
-| A favor | En contra |
-|---------|-----------|
-| Extremadamente flexible | Requiere trabajo manual enorme |
-| Colaborativo | Sin metadata automática |
-| Múltiples vistas | No está pensado para dev tools |
-| | Sin commands/runbooks nativos |
-| | Sin búsqueda semántica sobre assets dev |
-| | Pesado para captura rápida |
-
-**Posicionamiento vs DevDeck:** Notion es el "hago todo manualmente en una base de datos". DevDeck es "guardo en 3 segundos y la IA completa el contexto". Para developers que quieren captura rápida con metadata auto-generada.
-
----
-
-#### Obsidian
-**Lo que hace:** PKM (Personal Knowledge Management) con notas en Markdown.
-
-| A favor | En contra |
-|---------|-----------|
-| Local-first | Sin foco dev-specific |
-| Muy extensible | Sin commands/runbooks nativos |
-| Excelente para notas largas | Captura lenta (requiere crear archivo) |
-| Graph view | Sin metadata de repos/CLIs auto-generada |
-| | Sin discovery mode |
-
-**Posicionamiento vs DevDeck:** Obsidian es para "escribir y conectar conocimiento en profundidad". DevDeck es para "capturar y recuperar herramientas y recursos dev rápidamente". Se complementan: podés linkear desde Obsidian a DevDeck items.
-
----
-
-#### Raycast
-**Lo que hace:** launcher de macOS con extensiones.
-
-| A favor | En contra |
-|---------|-----------|
-| Velocidad brutal | macOS only |
-| Extensiones poderosas | No persiste contexto largo plazo |
-| Quick actions | Sin knowledge base personal |
-| AI integrada | No guarda "por qué guardé esto" |
-
-**Posicionamiento vs DevDeck:** Raycast es el launcher que ejecuta. DevDeck es la knowledge base que recuerda. Integración posible: extensión de Raycast que abre DevDeck items.
-
----
-
-#### Linear / Jira (backlog personal)
-**Lo que hace:** gestión de proyectos.
-
-**Posicionamiento vs DevDeck:** No compiten. Linear/Jira son para tareas y proyectos. DevDeck es para conocimiento y herramientas.
-
----
-
-### Herramientas adyacentes (no competidores directos)
-
-| Tool | Relación con DevDeck |
-|------|---------------------|
-| **VS Code / JetBrains** | DevDeck puede lanzarlos ("abrir en IDE") |
-| **Terminal (iTerm/Warp)** | DevDeck guarda comandos que se copian al terminal |
-| **Warp** | Warp tiene AI en terminal; DevDeck tiene AI para knowledge; complementarios |
-| **Pieces.app** | Guardar snippets con IA; similar pero más enfocado en código inline |
-| **Fig / Warp AI** | Autocompletado en terminal; DevDeck guarda el conocimiento que los alimenta |
-
----
-
-### Análisis de Pieces.app (el más similar)
-
-[Pieces.app](https://pieces.dev) es quizás el competidor más directo emergente.
-
-**Qué hace Pieces:**
-- Guarda snippets de código con IA
-- Contexto automático (de dónde viene el snippet)
-- Búsqueda semántica de snippets
-- Integración con IDEs
-- AI assistant local/cloud
-
-**Diferencias clave con DevDeck:**
-
-| Aspecto | Pieces | DevDeck |
-|---------|--------|---------|
-| Foco | Snippets de código | Todo el conocimiento dev (repos, CLIs, tools, shortcuts, workflows) |
-| Captura | Desde el IDE | Desde cualquier lado (URL, texto, quick capture) |
-| Runbooks | No | Sí (planeado Ola 5) |
-| Discovery | No | Sí (modo Tinder, forgotten gems) |
-| Personalidad | Corporativa | Neo-brutalist + mascota |
-| Precio | Freemium → pago | Open-source / self-hosted |
-| Multi-tipo | Solo snippets | 12 tipos de items |
-
-**Conclusión:** Pieces y DevDeck se solapan en búsqueda semántica y contexto IA, pero DevDeck es mucho más amplio en tipos de items y tiene features únicas (discovery mode, runbooks, mascota, self-hosted).
+| Tool | Por qué no es suficiente para devs | Relación con DevDeck |
+|------|------------------------------------|----------------------|
+| **GitHub Stars** | Solo repos de GitHub; sin contexto; sin búsqueda útil | DevDeck lo reemplaza y expande |
+| **Raindrop / Pocket** | Genéricos; sin foco dev; sin commands ni runbooks | DevDeck es el Raindrop especializado para devs |
+| **Notion / Obsidian** | Trabajo manual total; sin metadata automática; captura lenta | DevDeck complementa (captura rápida + IA) |
+| **Raycast / Alfred** | Launchers; no persisten contexto largo plazo | DevDeck es la knowledge base; Raycast la ejecuta |
+| **Pieces.app** | Solo snippets de código; sin repos, CLIs, shortcuts, workflows | DevDeck es más amplio en tipos de items |
 
 ---
 

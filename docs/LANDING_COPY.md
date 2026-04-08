@@ -1,9 +1,12 @@
-# DevDeck — Copy y estructura de contenido para devdeck.ai
+# DevDeck — Copy y estructura de contenido para devdeck.ai (versión en inglés)
 
 > Versión: 1.0 · Última actualización: 2026-04-08
 >
 > Este documento define el contenido, copy y estructura de secciones para la landing page de **devdeck.ai**.
 > Está pensado para implementarse en Astro o Next.js, desplegado en Vercel o Cloudflare Pages.
+>
+> **Idioma:** inglés (para la landing pública con audiencia global de devs).
+> Para la versión en español (mercado hispanohablante), ver [LANDING.md](LANDING.md).
 
 ---
 
