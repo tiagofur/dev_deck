@@ -1,0 +1,10 @@
+{
+  "name": "devdeck-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DevDeck browser extension (Manifest v3, Chrome + Firefox).",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/storage.test.js tests/api.test.js"
+  }
+}

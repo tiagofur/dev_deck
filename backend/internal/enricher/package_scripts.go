@@ -21,7 +21,10 @@ type PackageScript struct {
 //
 //	GET https://api.github.com/repos/{owner}/{repo}/contents/package.json
 func (g *GitHubEnricher) FetchPackageScripts(ctx context.Context, owner, repo string) ([]PackageScript, error) {
-	apiURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/contents/package.json", owner, repo)
+	if err := validateOwnerRepo(owner, repo); err != nil {
+		return nil, err
+	}
+	apiURL := fmt.Sprintf("%s/repos/%s/%s/contents/package.json", g.apiBase, owner, repo)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
 	if err != nil {
 		return nil, err

@@ -5,10 +5,12 @@ import { CheatsheetDetailPage } from './app/CheatsheetDetailPage'
 import { CheatsheetsListPage } from './app/CheatsheetsListPage'
 import { DiscoveryPage } from './app/DiscoveryPage'
 import { HomePage } from './app/HomePage'
+import { ItemsPage } from './app/ItemsPage'
 import { RepoDetailPage } from './app/RepoDetailPage'
 import { SettingsPage } from './app/SettingsPage'
 import { ConfirmHost } from './components/ConfirmHost'
 import { PageTransition } from './components/PageTransition'
+import { PasteInterceptor } from './components/PasteInterceptor'
 import { Toaster } from './components/Toaster'
 
 const queryClient = new QueryClient({
@@ -31,6 +33,14 @@ function AnimatedRoutes() {
           element={
             <PageTransition>
               <HomePage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/items"
+          element={
+            <PageTransition>
+              <ItemsPage />
             </PageTransition>
           }
         />
@@ -87,6 +97,8 @@ export function App() {
       </HashRouter>
       <Toaster />
       <ConfirmHost />
+      {/* Wave 4.5 §16.12 — global paste listener + Cmd/Ctrl+Shift+V shortcut. */}
+      <PasteInterceptor />
     </QueryClientProvider>
   )
 }

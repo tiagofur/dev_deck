@@ -1,8 +1,8 @@
 # ADR 0002 — Estrategia de sync offline-first
 
-- **Estado:** Propuesto · 2026-04-08
-- **Decisión pendiente de:** owner
-- **Contexto de ola:** bloqueante para Ola 7
+- **Estado:** Aceptada · 2026-04-08
+- **Contexto de ola:** bloqueante para Ola 6 (Offline-first + Sync + Multi-usuario)
+- **Nota:** la implementación concreta (SQLite local + cola + sync engine) aterriza en Ola 6 Fases 21–22. Este ADR solo fija el approach; cualquier ajuste menor durante la implementación se documenta aquí como addendum.
 
 ## Contexto
 
