@@ -3,11 +3,33 @@ package enricher
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 
 	"devdeck/internal/domain/repos"
 )
+
+// ErrInvalidGitHubIdentifier is returned when owner/repo doesn't match
+// the GitHub-allowed character set. Rejecting early keeps us from
+// issuing requests for user-supplied garbage and incidentally blocks
+// path-traversal attempts like "../../secrets".
+var ErrInvalidGitHubIdentifier = errors.New("invalid github owner/repo")
+
+// githubIdentRE is the character class GitHub allows for owner/repo
+// names: letters, digits, dot, dash, underscore. Length is capped at
+// 100 to match what GitHub actually accepts.
+var githubIdentRE = regexp.MustCompile(`^[A-Za-z0-9._-]{1,100}$`)
+
+// validateOwnerRepo rejects any identifier that doesn't match the GitHub
+// character set. Used by Fetch, FetchReadme, and FetchPackageScripts.
+func validateOwnerRepo(owner, repo string) error {
+	if !githubIdentRE.MatchString(owner) || !githubIdentRE.MatchString(repo) {
+		return ErrInvalidGitHubIdentifier
+	}
+	return nil
+}
 
 type GitHubEnricher struct {
 	token   string
@@ -30,6 +52,9 @@ type ghRepoResp struct {
 }
 
 func (g *GitHubEnricher) Fetch(ctx context.Context, owner, repo string) (*repos.Metadata, error) {
+	if err := validateOwnerRepo(owner, repo); err != nil {
+		return nil, err
+	}
 	apiURL := fmt.Sprintf("%s/repos/%s/%s", g.apiBase, owner, repo)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
 	if err != nil {

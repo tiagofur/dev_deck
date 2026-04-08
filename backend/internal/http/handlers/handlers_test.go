@@ -62,12 +62,15 @@ func newTestServer(t *testing.T) *testServer {
 	}))
 	t.Cleanup(gh.Close)
 
-	en := enricher.NewWithGitHubBase("", gh.URL)
+	// NewForTest bypasses the SSRF guard so handler tests can point the
+	// generic enricher at 127.0.0.1 httptest.Server URLs.
+	en := enricher.NewForTest(gh.URL)
 
 	cfg := config.Config{
-		Port:     "0",
-		AuthMode: "token",
-		APIToken: testToken,
+		Port:              "0",
+		AuthMode:          "token",
+		APIToken:          testToken,
+		RateLimitDisabled: true, // so burst tests don't hit 429 on the shared IP
 	}
 	router := httpapi.NewRouter(cfg, st, en, nil)
 	return &testServer{

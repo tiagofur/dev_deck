@@ -25,6 +25,14 @@ type Config struct {
 	// SeedCheatsheets: when true, loads seed cheatsheets from seeds/cheatsheets/*.json on boot.
 	SeedCheatsheets bool `env:"SEED_CHEATSHEETS" envDefault:"false"`
 
+	// ─── Wave 4.5: Rate limiting ───
+	// RateLimitPerMinute caps requests per IP on the authenticated /api
+	// routes. The cap is generous by default so local dev feels snappy,
+	// but high-fanout clients (browser extension on cold start) won't
+	// hit it in normal use.
+	RateLimitPerMinute int  `env:"RATE_LIMIT_PER_MINUTE" envDefault:"120"`
+	RateLimitDisabled  bool `env:"RATE_LIMIT_DISABLED" envDefault:"false"`
+
 	// ─── Wave 4: Auth ───
 	JWTSecret           string `env:"JWT_SECRET"`
 	GitHubClientID      string `env:"GITHUB_CLIENT_ID"`

@@ -8,12 +8,11 @@ package cron
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"time"
 
 	"devdeck/internal/enricher"
 	"devdeck/internal/store"
-
-	"github.com/rs/zerolog/log"
 )
 
 type Refresher struct {
@@ -49,7 +48,7 @@ func (r *Refresher) Start(ctx context.Context) {
 		for {
 			select {
 			case <-ctx.Done():
-				log.Info().Msg("refresher: shutting down")
+				slog.Info("refresher: shutting down")
 				return
 			case <-t.C:
 				r.runOnce(ctx)
@@ -62,14 +61,14 @@ func (r *Refresher) runOnce(ctx context.Context) {
 	before := time.Now().Add(-r.staleAfter)
 	stale, err := r.store.ListStaleRepos(ctx, before, r.batchSize)
 	if err != nil {
-		log.Error().Err(err).Msg("refresher: list stale failed")
+		slog.Error("refresher: list stale failed", "err", err)
 		return
 	}
 	if len(stale) == 0 {
-		log.Debug().Msg("refresher: no stale repos")
+		slog.Debug("refresher: no stale repos")
 		return
 	}
-	log.Info().Int("count", len(stale)).Msg("refresher: refreshing stale repos")
+	slog.Info("refresher: refreshing stale repos", "count", len(stale))
 
 	ok, fail := 0, 0
 	for _, repo := range stale {
@@ -79,16 +78,16 @@ func (r *Refresher) runOnce(ctx context.Context) {
 		md, err := r.enricher.Enrich(ctx, repo.URL)
 		if err != nil {
 			fail++
-			lvl := log.Warn()
+			level := slog.LevelWarn
 			if errors.Is(err, enricher.ErrNotFound) {
-				lvl = log.Info()
+				level = slog.LevelInfo
 			}
-			lvl.Err(err).Str("url", repo.URL).Msg("refresher: enrich failed")
+			slog.Log(ctx, level, "refresher: enrich failed", "err", err, "url", repo.URL)
 			continue
 		}
 		if _, err := r.store.UpdateMetadata(ctx, repo.ID, md); err != nil {
 			fail++
-			log.Warn().Err(err).Str("url", repo.URL).Msg("refresher: update failed")
+			slog.Warn("refresher: update failed", "err", err, "url", repo.URL)
 			continue
 		}
 		ok++
@@ -99,5 +98,5 @@ func (r *Refresher) runOnce(ctx context.Context) {
 		case <-time.After(r.throttle):
 		}
 	}
-	log.Info().Int("ok", ok).Int("fail", fail).Msg("refresher: batch done")
+	slog.Info("refresher: batch done", "ok", ok, "fail", fail)
 }

@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -13,7 +14,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/rs/zerolog/log"
 )
 
 type ReposHandler struct {
@@ -60,9 +60,9 @@ func (h *ReposHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// Best-effort enrichment
 	if h.enricher != nil {
 		if md, err := h.enricher.Enrich(r.Context(), repo.URL); err != nil {
-			log.Warn().Err(err).Str("url", repo.URL).Msg("create: enrich failed (continuing)")
+			slog.Warn("create: enrich failed (continuing)", "err", err, "url", repo.URL)
 		} else if updated, err := h.store.UpdateMetadata(r.Context(), repo.ID, md); err != nil {
-			log.Warn().Err(err).Str("url", repo.URL).Msg("create: update metadata failed")
+			slog.Warn("create: update metadata failed", "err", err, "url", repo.URL)
 		} else {
 			repo = updated
 		}

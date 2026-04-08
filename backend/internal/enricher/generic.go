@@ -14,9 +14,22 @@ import (
 
 type OpenGraphEnricher struct {
 	httpc *http.Client
+	// allowInternal disables the SSRF guard. Set to true only from
+	// tests that spin up an httptest.Server on 127.0.0.1.
+	allowInternal bool
 }
 
 func (e *OpenGraphEnricher) Fetch(ctx context.Context, rawURL string) (*repos.Metadata, error) {
+	// Wave 4.5 §16.8 — SSRF guard. Reject blocked schemes / private IPs
+	// before issuing the request so we don't leak an internal service.
+	// An `allowInternal` transport may bypass this at dial time (tests
+	// set it via OpenGraphEnricher.allowInternal).
+	if !e.allowInternal {
+		if err := validateScrapeURL(ctx, rawURL); err != nil {
+			return nil, err
+		}
+	}
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
 		return nil, err

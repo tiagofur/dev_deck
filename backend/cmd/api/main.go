@@ -5,9 +5,11 @@ import (
 	"embed"
 	"errors"
 	"io/fs"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -16,29 +18,30 @@ import (
 	"devdeck/internal/cron"
 	"devdeck/internal/enricher"
 	httpapi "devdeck/internal/http"
+	"devdeck/internal/jobs"
 	"devdeck/internal/seed"
 	"devdeck/internal/store"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 //go:embed seeds/cheatsheets/*.json
 var seedsFS embed.FS
 
 func main() {
-	// Pretty console logging in dev, JSON in prod (toggle via env later if needed)
-	zerolog.TimeFieldFormat = time.RFC3339
+	// Boot the logger as early as possible so we can log config errors.
+	logger := newLogger(os.Getenv("LOG_LEVEL"), os.Getenv("LOG_FORMAT"))
+	slog.SetDefault(logger)
 
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatal().Err(err).Msg("config load failed")
+		logger.Error("config load failed", "err", err)
+		os.Exit(1)
 	}
 
-	if lvl, err := zerolog.ParseLevel(cfg.LogLevel); err == nil {
-		zerolog.SetGlobalLevel(lvl)
-	}
+	// If the config specified a level (default "info"), apply it now.
+	logger = newLogger(cfg.LogLevel, os.Getenv("LOG_FORMAT"))
+	slog.SetDefault(logger)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -46,17 +49,19 @@ func main() {
 	// DB pool
 	pool, err := pgxpool.New(ctx, cfg.DBURL)
 	if err != nil {
-		log.Fatal().Err(err).Msg("db connect failed")
+		logger.Error("db connect failed", "err", err)
+		os.Exit(1)
 	}
 	defer pool.Close()
 
 	pingCtx, pingCancel := context.WithTimeout(ctx, 5*time.Second)
 	if err := pool.Ping(pingCtx); err != nil {
 		pingCancel()
-		log.Fatal().Err(err).Msg("db ping failed")
+		logger.Error("db ping failed", "err", err)
+		os.Exit(1)
 	}
 	pingCancel()
-	log.Info().Msg("connected to postgres")
+	logger.Info("connected to postgres")
 
 	st := store.New(pool)
 	en := enricher.New(cfg.GithubToken)
@@ -65,10 +70,11 @@ func main() {
 	var authService *authservice.Service
 	if cfg.AuthMode == "jwt" {
 		if cfg.JWTSecret == "" {
-			log.Fatal().Msg("JWT_SECRET is required when AUTH_MODE=jwt")
+			logger.Error("JWT_SECRET is required when AUTH_MODE=jwt")
+			os.Exit(1)
 		}
 		authService = authservice.New(cfg.JWTSecret, 30*24*time.Hour, 90*24*time.Hour) // 30d access, 90d refresh
-		log.Info().Msg("JWT auth initialized")
+		logger.Info("JWT auth initialized")
 	}
 
 	// Seed cheatsheets if enabled (idempotent — safe on every boot).
@@ -76,24 +82,34 @@ func main() {
 	if cfg.SeedCheatsheets {
 		subFS, subErr := fs.Sub(seedsFS, "seeds")
 		if subErr != nil {
-			log.Warn().Err(subErr).Msg("seed fs.Sub failed (continuing)")
+			logger.Warn("seed fs.Sub failed (continuing)", "err", subErr)
 		} else {
 			if err := seed.LoadCheatsheets(ctx, st, subFS); err != nil {
-				log.Warn().Err(err).Msg("seed cheatsheets failed (continuing)")
+				logger.Warn("seed cheatsheets failed (continuing)", "err", err)
 			}
 		}
 	}
 
-	router := httpapi.NewRouter(cfg, st, en, authService)
+	// Background enrich queue (Wave 4.5 §16.9) — handlers that need
+	// async metadata fetches (capture + create repo) push jobs here.
+	enrichQueue := jobs.NewEnrichQueue(st, en, 128)
+	enrichQueue.Start(ctx)
+
+	router := httpapi.NewRouterWithDeps(cfg, httpapi.Deps{
+		Store:       st,
+		Enricher:    en,
+		AuthService: authService,
+		EnrichQueue: enrichQueue,
+	})
 
 	// Background refresher: re-enriches stale repos so stars/desc don't drift.
 	staleAfter := time.Duration(cfg.RefreshIntervalHours) * time.Hour
 	refresher := cron.NewRefresher(st, en, staleAfter)
 	refresher.Start(ctx)
-	log.Info().
-		Dur("stale_after", staleAfter).
-		Bool("github_token", cfg.GithubToken != "").
-		Msg("enricher + refresher initialized")
+	logger.Info("enricher + refresher initialized",
+		"stale_after", staleAfter,
+		"github_token", cfg.GithubToken != "",
+	)
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,
@@ -104,9 +120,10 @@ func main() {
 
 	// Graceful shutdown
 	go func() {
-		log.Info().Str("addr", srv.Addr).Str("auth_mode", cfg.AuthMode).Msg("server starting")
+		logger.Info("server starting", "addr", srv.Addr, "auth_mode", cfg.AuthMode)
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatal().Err(err).Msg("server error")
+			logger.Error("server error", "err", err)
+			os.Exit(1)
 		}
 	}()
 
@@ -114,11 +131,36 @@ func main() {
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop
 
-	log.Info().Msg("shutdown signal received")
+	logger.Info("shutdown signal received")
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer shutdownCancel()
 	if err := srv.Shutdown(shutdownCtx); err != nil {
-		log.Error().Err(err).Msg("shutdown error")
+		logger.Error("shutdown error", "err", err)
 	}
-	log.Info().Msg("bye")
+	logger.Info("bye")
+}
+
+// newLogger builds a slog.Logger. Format is controlled by LOG_FORMAT
+// (either "json" or "text", default "text" in dev, "json" when stdout isn't
+// a TTY). Level comes from LOG_LEVEL ("debug"|"info"|"warn"|"error").
+func newLogger(level, format string) *slog.Logger {
+	var lvl slog.Level
+	switch strings.ToLower(level) {
+	case "debug":
+		lvl = slog.LevelDebug
+	case "warn", "warning":
+		lvl = slog.LevelWarn
+	case "error":
+		lvl = slog.LevelError
+	default:
+		lvl = slog.LevelInfo
+	}
+	opts := &slog.HandlerOptions{Level: lvl}
+	var handler slog.Handler
+	if strings.ToLower(format) == "json" {
+		handler = slog.NewJSONHandler(os.Stdout, opts)
+	} else {
+		handler = slog.NewTextHandler(os.Stdout, opts)
+	}
+	return slog.New(handler)
 }

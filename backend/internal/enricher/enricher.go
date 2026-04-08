@@ -42,11 +42,30 @@ func New(githubToken string) *Service {
 // NewWithGitHubBase is a constructor that allows overriding the GitHub REST
 // API root URL. Tests use it to point at an httptest.Server. Production code
 // should use New, which defaults to the real api.github.com.
+//
+// The returned Service uses the SSRF-hardened transport for the generic
+// Open Graph scraper. GitHub calls use a separate client because they
+// always target api.github.com and never see user-supplied hosts.
 func NewWithGitHubBase(githubToken, githubAPIBase string) *Service {
+	genericClient := &http.Client{
+		Timeout:   10 * time.Second,
+		Transport: ssrfSafeTransport(10 * time.Second),
+	}
+	githubClient := &http.Client{Timeout: 10 * time.Second}
+	return &Service{
+		github:  newGitHubEnricher(githubToken, githubAPIBase, githubClient),
+		generic: &OpenGraphEnricher{httpc: genericClient},
+	}
+}
+
+// NewForTest constructs a Service whose generic scraper allows loopback /
+// private IPs, so httptest-backed tests can point Enrich at 127.0.0.1
+// without tripping the SSRF guard. NEVER call from production code.
+func NewForTest(githubAPIBase string) *Service {
 	httpc := &http.Client{Timeout: 10 * time.Second}
 	return &Service{
-		github:  newGitHubEnricher(githubToken, githubAPIBase, httpc),
-		generic: &OpenGraphEnricher{httpc: httpc},
+		github:  newGitHubEnricher("", githubAPIBase, httpc),
+		generic: &OpenGraphEnricher{httpc: httpc, allowInternal: true},
 	}
 }
 

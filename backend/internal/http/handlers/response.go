@@ -2,9 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
-
-	"github.com/rs/zerolog/log"
 )
 
 type errBody struct {
@@ -20,7 +19,7 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(v); err != nil {
-		log.Error().Err(err).Msg("encode response")
+		slog.Error("encode response", "err", err)
 	}
 }
 
@@ -29,6 +28,6 @@ func writeError(w http.ResponseWriter, status int, code, msg string) {
 }
 
 func writeInternal(w http.ResponseWriter, err error) {
-	log.Error().Err(err).Msg("internal error")
+	slog.Error("internal error", "err", err)
 	writeError(w, http.StatusInternalServerError, "INTERNAL", "internal server error")
 }

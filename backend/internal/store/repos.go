@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"devdeck/internal/domain/items"
 	"devdeck/internal/domain/repos"
 
 	"github.com/google/uuid"
@@ -17,6 +18,11 @@ import (
 const repoColumns = `id, url, source, owner, name, description, language, language_color,
 	stars, forks, avatar_url, og_image_url, homepage, topics, notes, tags,
 	archived, added_at, last_fetched_at, last_seen_at`
+
+// repoColumnsQ is repoColumns as a qualified list so it works inside
+// INSERT … RETURNING with a trailing url_normalized we want to set but
+// don't want to return.
+
 
 func scanRepo(row pgx.Row) (*repos.Repo, error) {
 	var r repos.Repo
@@ -43,11 +49,14 @@ func (s *Store) CreateRepo(ctx context.Context, in repos.CreateInput) (*repos.Re
 		in.Tags = []string{}
 	}
 
+	// Backfill url_normalized so /api/items/capture dedupes cross-table.
+	norm := items.NormalizeURL(in.URL)
+
 	row := s.pool.QueryRow(ctx, `
-		INSERT INTO repos (url, source, owner, name, notes, tags)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO repos (url, source, owner, name, notes, tags, url_normalized)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING `+repoColumns,
-		in.URL, source, nilIfEmpty(owner), name, in.Notes, in.Tags,
+		in.URL, source, nilIfEmpty(owner), name, in.Notes, in.Tags, norm,
 	)
 	r, err := scanRepo(row)
 	if err != nil {

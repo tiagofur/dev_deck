@@ -9,13 +9,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"path/filepath"
 	"sort"
 
 	"devdeck/internal/domain/cheatsheets"
 	"devdeck/internal/store"
-
-	"github.com/rs/zerolog/log"
 )
 
 // LoadCheatsheets reads all .json files from the embedded seeds directory
@@ -39,32 +38,32 @@ func LoadCheatsheets(ctx context.Context, st *store.Store, seedsFS fs.FS) error 
 		}
 		raw, err := fs.ReadFile(seedsFS, "cheatsheets/"+e.Name())
 		if err != nil {
-			log.Warn().Err(err).Str("file", e.Name()).Msg("seed: read failed")
+			slog.Warn("seed: read failed", "err", err, "file", e.Name())
 			continue
 		}
 		var sc cheatsheets.SeedCheatsheet
 		if err := json.Unmarshal(raw, &sc); err != nil {
-			log.Warn().Err(err).Str("file", e.Name()).Msg("seed: parse failed")
+			slog.Warn("seed: parse failed", "err", err, "file", e.Name())
 			continue
 		}
 		if sc.Slug == "" {
-			log.Warn().Str("file", e.Name()).Msg("seed: missing slug, skipping")
+			slog.Warn("seed: missing slug, skipping", "file", e.Name())
 			continue
 		}
 
 		before, _ := st.GetCheatsheetBySlug(ctx, sc.Slug)
 		if err := st.SeedCheatsheet(ctx, sc); err != nil {
-			log.Warn().Err(err).Str("slug", sc.Slug).Msg("seed: insert failed")
+			slog.Warn("seed: insert failed", "err", err, "slug", sc.Slug)
 			continue
 		}
 		if before == nil {
 			loaded++
-			log.Info().Str("slug", sc.Slug).Int("entries", len(sc.Entries)).Msg("seed: loaded")
+			slog.Info("seed: loaded", "slug", sc.Slug, "entries", len(sc.Entries))
 		} else {
 			skipped++
 		}
 	}
 
-	log.Info().Int("loaded", loaded).Int("skipped", skipped).Msg("seed: cheatsheets done")
+	slog.Info("seed: cheatsheets done", "loaded", loaded, "skipped", skipped)
 	return nil
 }
