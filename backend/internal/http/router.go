@@ -94,6 +94,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	commandsH := handlers.NewCommandsHandler(st)
 	cheatsH := handlers.NewCheatsheetsHandler(st)
 	captureH := handlers.NewCaptureHandler(st, deps.EnrichQueue)
+	itemsH := handlers.NewItemsHandler(st)
 
 	r.Route("/api", func(api chi.Router) {
 		api.Use(mw.TokenAuth(cfg, as))
@@ -160,8 +161,14 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		api.Get("/discovery/next", discoveryH.Next)
 
 		// 🌊4.5 §16.9 — unified capture endpoint
+		// 🌊5   §17   — items CRUD on top of the polymorphic `items` table
 		api.Route("/items", func(ir chi.Router) {
 			ir.Post("/capture", captureH.Capture)
+			ir.Get("/", itemsH.List)
+			ir.Get("/{id}", itemsH.Get)
+			ir.Patch("/{id}", itemsH.Update)
+			ir.Delete("/{id}", itemsH.Delete)
+			ir.Post("/{id}/seen", itemsH.MarkSeen)
 		})
 	})
 

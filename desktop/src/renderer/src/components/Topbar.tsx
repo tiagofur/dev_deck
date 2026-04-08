@@ -1,4 +1,4 @@
-import { BookOpen, Plus, Search, Settings as SettingsIcon, Sparkles } from 'lucide-react'
+import { BookOpen, Boxes, Plus, Search, Settings as SettingsIcon, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from './Button'
 
@@ -57,6 +57,19 @@ export function Topbar({
         <span className="flex items-center gap-2">
           <Search size={16} strokeWidth={3} />
           <span className="hidden sm:inline">Search</span>
+        </span>
+      </Button>
+
+      <Button
+        onClick={() => navigate('/items')}
+        size="sm"
+        variant="secondary"
+        className="whitespace-nowrap"
+        title="Todos los items (Ola 5)"
+      >
+        <span className="flex items-center gap-2">
+          <Boxes size={16} strokeWidth={3} />
+          <span className="hidden sm:inline">Items</span>
         </span>
       </Button>
 

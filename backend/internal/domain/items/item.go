@@ -85,6 +85,48 @@ type Item struct {
 	LastSeenAt       *time.Time             `json:"last_seen_at"`
 }
 
+// UpdateInput is the PATCH /api/items/:id body. All fields are
+// optional; nil / unset = unchanged. Mirrors the "edit the item you
+// just saved" flow in the desktop detail view.
+type UpdateInput struct {
+	Title       *string  `json:"title"`
+	Notes       *string  `json:"notes"`
+	Tags        []string `json:"tags"`
+	WhySaved    *string  `json:"why_saved"`
+	WhenToUse   *string  `json:"when_to_use"`
+	Archived    *bool    `json:"archived"`
+	// ItemType lets the user reclassify an item (e.g. a snippet that
+	// was mis-detected as a note). It's optional and validated against
+	// IsValid before hitting the store.
+	ItemType *string `json:"item_type"`
+}
+
+// ListParams drives GET /api/items. All filters are additive.
+type ListParams struct {
+	// Type narrows to a single item_type. Empty = all types.
+	Type string
+	// Tag narrows to items that contain the given tag.
+	Tag string
+	// Q is a fuzzy text filter over title + description + tags.
+	Q string
+	// Archived: nil = hide archived (default), true = archived only,
+	// false = active only. Mirrors the repos list semantics.
+	Archived *bool
+	// Sort order. Accepts "added_desc" (default), "added_asc",
+	// "updated_desc", "title_asc".
+	Sort string
+	// Limit caps the number of rows returned (1..500; default 100).
+	Limit int
+	// Offset for pagination.
+	Offset int
+}
+
+// ListResult is the paginated response for GET /api/items.
+type ListResult struct {
+	Total int     `json:"total"`
+	Items []*Item `json:"items"`
+}
+
 // CaptureInput is the POST /api/items/capture body. All fields are
 // optional except that either url or text must be present — the
 // handler enforces that and returns 422 otherwise.

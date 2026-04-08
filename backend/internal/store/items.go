@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"devdeck/internal/domain/items"
 	"devdeck/internal/domain/repos"
@@ -165,6 +166,183 @@ func (s *Store) UpdateItemEnrichmentStatus(ctx context.Context, id uuid.UUID, st
 	tag, err := s.pool.Exec(ctx,
 		`UPDATE items SET enrichment_status = $1, updated_at = NOW() WHERE id = $2`,
 		string(status), id)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+// ListItems runs the paginated list query for GET /api/items with the
+// filters from p. Archived items are hidden by default to match the
+// repos list semantics — callers pass ListParams.Archived = &true to
+// see an archive view.
+func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListResult, error) {
+	if p.Limit <= 0 || p.Limit > 500 {
+		p.Limit = 100
+	}
+	if p.Offset < 0 {
+		p.Offset = 0
+	}
+
+	where := []string{"1=1"}
+	args := []any{}
+	idx := 1
+
+	if p.Archived != nil {
+		where = append(where, fmt.Sprintf("archived = $%d", idx))
+		args = append(args, *p.Archived)
+		idx++
+	} else {
+		where = append(where, "archived = false")
+	}
+	if p.Type != "" {
+		where = append(where, fmt.Sprintf("item_type = $%d", idx))
+		args = append(args, p.Type)
+		idx++
+	}
+	if p.Tag != "" {
+		where = append(where, fmt.Sprintf("$%d = ANY(tags)", idx))
+		args = append(args, p.Tag)
+		idx++
+	}
+	if p.Q != "" {
+		where = append(where, fmt.Sprintf(
+			"(title || ' ' || COALESCE(description,'') || ' ' || COALESCE(array_to_string(tags,' '),'')) %% $%d",
+			idx,
+		))
+		args = append(args, p.Q)
+		idx++
+	}
+
+	orderBy := "created_at DESC"
+	switch p.Sort {
+	case "added_asc":
+		orderBy = "created_at ASC"
+	case "updated_desc":
+		orderBy = "updated_at DESC"
+	case "title_asc":
+		orderBy = "title ASC"
+	}
+
+	whereSQL := strings.Join(where, " AND ")
+
+	var total int
+	if err := s.pool.QueryRow(ctx,
+		"SELECT COUNT(*) FROM items WHERE "+whereSQL, args...).Scan(&total); err != nil {
+		return nil, err
+	}
+
+	listArgs := append(args, p.Limit, p.Offset)
+	listSQL := fmt.Sprintf(
+		"SELECT %s FROM items WHERE %s ORDER BY %s LIMIT $%d OFFSET $%d",
+		itemColumns, whereSQL, orderBy, idx, idx+1,
+	)
+	rows, err := s.pool.Query(ctx, listSQL, listArgs...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	out := []*items.Item{}
+	for rows.Next() {
+		it, err := scanItem(rows)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, it)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return &items.ListResult{Total: total, Items: out}, nil
+}
+
+// UpdateItem applies the non-nil fields of UpdateInput. Returns the
+// updated row. ErrNotFound if no row with that id.
+func (s *Store) UpdateItem(ctx context.Context, id uuid.UUID, in items.UpdateInput) (*items.Item, error) {
+	sets := []string{}
+	args := []any{}
+	idx := 1
+
+	if in.Title != nil {
+		sets = append(sets, fmt.Sprintf("title = $%d", idx))
+		args = append(args, *in.Title)
+		idx++
+	}
+	if in.Notes != nil {
+		sets = append(sets, fmt.Sprintf("notes = $%d", idx))
+		args = append(args, *in.Notes)
+		idx++
+	}
+	if in.Tags != nil {
+		sets = append(sets, fmt.Sprintf("tags = $%d", idx))
+		args = append(args, in.Tags)
+		idx++
+	}
+	if in.WhySaved != nil {
+		sets = append(sets, fmt.Sprintf("why_saved = $%d", idx))
+		args = append(args, *in.WhySaved)
+		idx++
+	}
+	if in.WhenToUse != nil {
+		sets = append(sets, fmt.Sprintf("when_to_use = $%d", idx))
+		args = append(args, *in.WhenToUse)
+		idx++
+	}
+	if in.Archived != nil {
+		sets = append(sets, fmt.Sprintf("archived = $%d", idx))
+		args = append(args, *in.Archived)
+		idx++
+	}
+	if in.ItemType != nil {
+		sets = append(sets, fmt.Sprintf("item_type = $%d", idx))
+		args = append(args, *in.ItemType)
+		idx++
+	}
+
+	if len(sets) == 0 {
+		return s.GetItem(ctx, id)
+	}
+
+	// Always bump updated_at so the "recently edited" sort works.
+	sets = append(sets, "updated_at = NOW()")
+
+	args = append(args, id)
+	q := fmt.Sprintf(
+		"UPDATE items SET %s WHERE id = $%d RETURNING %s",
+		strings.Join(sets, ", "), idx, itemColumns,
+	)
+	row := s.pool.QueryRow(ctx, q, args...)
+	it, err := scanItem(row)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	return it, nil
+}
+
+// DeleteItem removes a row. ErrNotFound if the id didn't exist.
+func (s *Store) DeleteItem(ctx context.Context, id uuid.UUID) error {
+	tag, err := s.pool.Exec(ctx, `DELETE FROM items WHERE id = $1`, id)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+// MarkItemSeen bumps last_seen_at so discovery-mode rotation works on
+// items the same way it does on repos.
+func (s *Store) MarkItemSeen(ctx context.Context, id uuid.UUID) error {
+	tag, err := s.pool.Exec(ctx,
+		`UPDATE items SET last_seen_at = NOW() WHERE id = $1`, id)
 	if err != nil {
 		return err
 	}

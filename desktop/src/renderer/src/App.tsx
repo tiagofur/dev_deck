@@ -5,6 +5,7 @@ import { CheatsheetDetailPage } from './app/CheatsheetDetailPage'
 import { CheatsheetsListPage } from './app/CheatsheetsListPage'
 import { DiscoveryPage } from './app/DiscoveryPage'
 import { HomePage } from './app/HomePage'
+import { ItemsPage } from './app/ItemsPage'
 import { RepoDetailPage } from './app/RepoDetailPage'
 import { SettingsPage } from './app/SettingsPage'
 import { ConfirmHost } from './components/ConfirmHost'
@@ -32,6 +33,14 @@ function AnimatedRoutes() {
           element={
             <PageTransition>
               <HomePage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/items"
+          element={
+            <PageTransition>
+              <ItemsPage />
             </PageTransition>
           }
         />
