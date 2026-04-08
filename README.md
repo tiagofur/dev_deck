@@ -1,4 +1,4 @@
-# DevDeck
+# DevDeck.ai
 
 > **Tu memoria externa asistida por IA para el trabajo de desarrollo.**
 
@@ -25,6 +25,7 @@ DevDeck es tu **colección curada de conocimiento dev** — con IA que hace que 
 - **IA:** OpenAI API / Ollama (local)
 - **Offline:** SQLite local (Electron) + sql.js/OPFS (Web)
 - **Deploy:** VPS propio · Docker Compose · Caddy (TLS automático)
+- **Dominio:** [devdeck.ai](https://devdeck.ai) · `app.devdeck.ai` · `api.devdeck.ai`
 
 ---
 
