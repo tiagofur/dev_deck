@@ -9,6 +9,7 @@ import { RepoDetailPage } from './app/RepoDetailPage'
 import { SettingsPage } from './app/SettingsPage'
 import { ConfirmHost } from './components/ConfirmHost'
 import { PageTransition } from './components/PageTransition'
+import { PasteInterceptor } from './components/PasteInterceptor'
 import { Toaster } from './components/Toaster'
 
 const queryClient = new QueryClient({
@@ -87,6 +88,8 @@ export function App() {
       </HashRouter>
       <Toaster />
       <ConfirmHost />
+      {/* Wave 4.5 §16.12 — global paste listener + Cmd/Ctrl+Shift+V shortcut. */}
+      <PasteInterceptor />
     </QueryClientProvider>
   )
 }
