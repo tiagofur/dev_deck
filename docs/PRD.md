@@ -65,6 +65,7 @@ No son solo repos. Son:
 - Comandos de setup que siempre buscás en Google
 
 ### Por qué lo existente no alcanza
+
 | Solución | Por qué falla |
 |----------|---------------|
 | Bookmarks del browser | Sin contexto dev, sin metadata, sin búsqueda semántica |
@@ -76,7 +77,7 @@ No son solo repos. Son:
 
 ---
 
-## 3. Usuario objetivo
+## 3. Usuarios objetivo
 
 **Perfil:** Developer activo (el owner + otros devs). Guarda y redescubre herramientas continuamente. Trabaja en múltiples stacks. Quiere una app que se vuelva más valiosa a medida que agrega items.
 
@@ -151,7 +152,7 @@ Ver [ROADMAP.md](../ROADMAP.md) para detalle completo. Resumen:
 | V5 | **"Recently saved"** | Timeline de lo último guardado |
 | V6 | **Cross-linking** | Desde un item, ver items relacionados guardados por el usuario |
 
----
+**Privacidad:** toda llamada a IA es opt-in y explícita en la UI. Se puede configurar usar modelo local (Ollama) o cloud (OpenAI/Anthropic). Lo que se envía al modelo se muestra claramente al usuario.
 
 ### 🌊 Ola 6 — IA real que justifica `.ai`
 

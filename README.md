@@ -1,4 +1,4 @@
-# DevDeck
+# DevDeck.ai
 
 > 🌐 [devdeck.ai](https://devdeck.ai) — Tu memoria externa para desarrollo, asistida por IA.
 
