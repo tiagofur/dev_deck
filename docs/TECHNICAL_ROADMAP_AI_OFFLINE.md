@@ -156,6 +156,7 @@ AI_OPT_IN_DEFAULT  bool    // default: false (usuarios deben activar explícitam
 You are a developer tool classifier. Given an item a developer saved,
 return a JSON object with:
 - item_type: one of [repo, cli, plugin, shortcut, snippet, agent, prompt, article, tool, workflow, note]
+  (Note: this list must match the ItemType enum in internal/domain/items/item.go)
 - tags: array of 3-7 lowercase tags (stack, purpose, platform, level)
 - stack: primary technology stack (e.g. "Go", "React", "macOS", "terminal")
 - purpose: primary use case (e.g. "testing", "productivity", "deploy", "debugging")
@@ -191,6 +192,10 @@ Description: {{.Description}}
 ```sql
 CREATE EXTENSION IF NOT EXISTS vector;
 
+-- Dimensión 1536 corresponde a OpenAI text-embedding-3-small.
+-- Si se usa Ollama nomic-embed-text (dimensión 768), cambiar a vector(768).
+-- La dimensión debe ser consistente: no se pueden mezclar embeddings de distinta dimensión
+-- en la misma columna. Definir AI_EMBED_DIM en config y usarla en la migración.
 ALTER TABLE repos ADD COLUMN embedding vector(1536);
 
 -- Índice HNSW para búsqueda aproximada eficiente
@@ -449,7 +454,7 @@ export class SyncEngine {
   private async applyDelta(delta: DeltaResponse): Promise<void> {
     for (const item of delta.items) {
       const local = await this.db.getItem(item.id);
-      if (local && local.updated_at > item.updated_at) {
+      if (local && new Date(local.updated_at) > new Date(item.updated_at)) {
         // Local es más nuevo → mantener local, no sobreescribir
         // (el server ya tiene la versión local porque se la mandamos en el push)
         continue;
@@ -545,6 +550,12 @@ CREATE INDEX idx_sync_log_user_id ON sync_log(user_id);
 
 ```go
 // internal/sync/resolver.go
+//
+// Nota: la resolución de conflictos a nivel de campo requiere que el Item tenga
+// timestamps por campo (FieldUpdatedAt map[string]time.Time). Esta estructura
+// debe agregarse al schema de la tabla items como columnas JSONB o columnas
+// individuales (e.g. title_updated_at, notes_updated_at, etc.).
+// Migración sugerida: ALTER TABLE repos ADD COLUMN field_timestamps JSONB DEFAULT '{}';
 func ResolveConflict(server Item, client Item) (Item, ConflictDetail) {
     resolved := server // base: versión del server
 
@@ -584,12 +595,15 @@ func ResolveConflict(server Item, client Item) (Item, ConflictDetail) {
 CREATE TABLE decks (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  slug        TEXT NOT NULL UNIQUE,
+  -- slug único por usuario (no globalmente): permite que dos usuarios tengan "my-go-setup"
+  -- La URL pública incluye el username: devdeck.ai/@username/deck/slug
+  slug        TEXT NOT NULL,
   title       TEXT NOT NULL,
   description TEXT,
   is_public   BOOLEAN DEFAULT false,
   created_at  TIMESTAMPTZ DEFAULT now(),
-  updated_at  TIMESTAMPTZ DEFAULT now()
+  updated_at  TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (user_id, slug)  -- único por usuario, no globalmente
 );
 
 CREATE TABLE deck_items (

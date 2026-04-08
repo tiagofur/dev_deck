@@ -228,7 +228,7 @@ Headline: The things you saved but forgot.
 Body:
 Discovery mode shows you items you haven't opened in months.
 Swipe to keep or archive. It's how you turn a growing vault
-into a actually useful collection.
+into an actually useful collection.
 
 Snarkel, the DevDeck mascot, will nudge you when things go
 unvisited for too long.
