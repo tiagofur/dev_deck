@@ -19,13 +19,33 @@ DevDeck es tu **colección curada de conocimiento dev** — con IA que hace que 
 ## Stack
 
 - **Desktop:** Electron + React 18 + TypeScript + Tailwind + Framer Motion
-- **Web:** Vue 3 + Vite + Pinia + Vue Router
+- **Web:** React 18 + Vite + React Router + TanStack Query (comparte 100% de pages y componentes con Desktop)
 - **Backend:** Go + Chi + pgx + pgvector
 - **DB:** Postgres 16 (con `pg_trgm` + `pgvector` para búsqueda fuzzy y semántica)
 - **IA:** OpenAI API / Ollama (local)
 - **Offline:** SQLite local (Electron) + sql.js/OPFS (Web)
 - **Deploy:** VPS propio · Docker Compose · Caddy (TLS automático)
 - **Dominio:** [devdeck.ai](https://devdeck.ai) · `app.devdeck.ai` · `api.devdeck.ai`
+
+### Layout del repo (monorepo pnpm workspaces)
+
+```
+dev_deck/
+├── apps/
+│   ├── desktop/          # Electron app (React renderer)
+│   └── web/              # Web app (React + BrowserRouter)
+├── packages/
+│   ├── ui/               # Design system: Button, TagChip, Toaster, tailwind-preset
+│   ├── api-client/       # Fetch wrapper + TanStack Query hooks + auth adapters
+│   └── features/         # Pages + componentes de dominio (compartidos entre apps)
+├── backend/              # Go API
+├── cli/                  # CLI `devdeck` (Go)
+├── extension/            # Browser extension (Manifest v3)
+├── deploy/               # Docker Compose + Caddy
+└── docs/                 # Documentación
+```
+
+Ambas apps importan pages y componentes del package `@devdeck/features` — solo difieren en el shell (HashRouter + PasteInterceptor en desktop, BrowserRouter + AuthGuard en web). Ver [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md).
 
 ---
 
@@ -54,6 +74,7 @@ DevDeck es tu **colección curada de conocimiento dev** — con IA que hace que 
 | [docs/TECHNICAL_ROADMAP_AI_OFFLINE.md](docs/TECHNICAL_ROADMAP_AI_OFFLINE.md) | Roadmap técnico: offline, sync, IA |
 | [docs/adr/0001-items-polymorphism.md](docs/adr/0001-items-polymorphism.md) | ADR: modelo polimórfico de items |
 | [docs/adr/0002-sync-strategy.md](docs/adr/0002-sync-strategy.md) | ADR: estrategia de sync offline-first |
+| [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md) | ADR: monorepo pnpm workspaces + React en web |
 
 ### Operación y contribución
 | Doc | Contenido |

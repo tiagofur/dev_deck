@@ -2,18 +2,19 @@
 
 > 🌐 [devdeck.ai](https://devdeck.ai) — Tu memoria externa para desarrollo, asistida por IA.
 >
-> 📝 **Actualizado 2026-04-08:** Ola 4.5 en progreso — §16.5/6/7/8/9/12 cerradas, quedan §16.10 (CLI) y §16.11 (extensión browser). Las secciones `[DEPRECATED]` de Ola 5/6/7 se removieron; las canónicas son las únicas vivas ahora.
+> 📝 **Actualizado 2026-04-08:** Ola 4.5 casi cerrada — §16.5/6/7/8/9/12/13 listas, quedan §16.10 (CLI release) y §16.11 (extensión browser release). Las secciones `[DEPRECATED]` de Ola 5/6/7 se removieron; las canónicas son las únicas vivas ahora.
 
-## Estado actual: Ola 4.5 en progreso
+## Estado actual: Ola 4.5 casi cerrada
 
 - ✅ §16.5 Higiene de repo (housekeeping, ADRs, docs, roadmap dedup)
 - ✅ §16.6 Red de seguridad (tests + CI)
 - ✅ §16.7 Observability (slog + /metrics)
 - ✅ §16.8 SSRF guard + rate limiting
 - ✅ §16.9 `POST /api/items/capture` con detección, dedupe y enrich async
-- ⏳ §16.10 CLI `devdeck`
-- ⏳ §16.11 Extensión Chrome/Firefox
+- ⏳ §16.10 CLI `devdeck` (scaffold + P0 commands listos; falta release 0.1.0)
+- ⏳ §16.11 Extensión Chrome/Firefox (P0 listo; falta publicar)
 - ✅ §16.12 Paste inteligente + CaptureModal en desktop
+- ✅ §16.13 Monorepo pnpm workspaces + Web Vue → React (ver ADR 0003)
 
 ### Próximo: Ola 5 — Items generales + IA real
 ### Siguiente: Ola 6 — Offline-first + Sync + Multi-usuario
@@ -36,8 +37,8 @@
 - Backend: `internal/testutil/postgres.go` con `testcontainers-go` + tests de handlers (repos/commands/cheatsheets/auth/search/stats) + authservice JWT. ✅
 - Enricher: tests con `httptest.Server` mockeando GitHub + SSRF guard tests rechazando IPs privadas. ✅
 - Desktop: Vitest + `@testing-library/react` con 57 tests unitarios (format, preferences, auth, RepoCard, TagChip, PasteInterceptor, detector). Playwright config + skeleton con los 5 flows. ✅
-- Web Vue: intencionalmente sin tocar — será reemplazada por React en una ola futura.
-- GitHub Actions: workflow `ci.yml` con jobs `backend`, `desktop`, `e2e` con concurrency cancel-in-progress. ✅
+- Web Vue: intencionalmente sin tocar en Wave 4.5 inicial; **reemplazada por React 18 en §16.13** (ver abajo). Post-migración los 57 tests se redistribuyeron en los nuevos packages: 39 en `@devdeck/api-client`, 5 en `@devdeck/ui`, 18 en `@devdeck/features`, 5 en `apps/desktop` = **67 tests totales**. ✅
+- GitHub Actions: workflow `ci.yml` con jobs `backend`, `desktop`, `e2e` con concurrency cancel-in-progress. ✅ (TODO post-migración: agregar job `web` con `pnpm -F @devdeck/web typecheck && build`)
 - Ver `docs/TESTING_STRATEGY.md` para el plan sprint-by-sprint.
 
 ### Fase 16.7 — Observability mínima ✅
@@ -83,19 +84,43 @@
 - Detección de tipo heurística client-side (`features/capture/detect.ts`) alineada con la del backend — matriz de tests gemela. ✅
 - `CaptureModal` neo-brutalist con URL/text + type picker override + why_saved + tags. ✅
 - Atajo `Cmd/Ctrl+Shift+V` abre el modal con clipboard prefill. ✅
-- Web Vue: pospuesto hasta migración a React.
+- Web: cubierto en §16.13 con la migración a React (el `CaptureModal` ahora vive en `@devdeck/features` y lo consume tanto desktop como web sin duplicación).
 - CLI: `devdeck import github-stars` — se hace junto con §16.10.
 
+### Fase 16.13 — Monorepo pnpm workspaces + Web React ✅
+
+> **Por qué existe:** con Ola 5 arrancando, cada feature de IA (auto-tagging, semantic search, capture IA) tenía que implementarse dos veces — una en desktop React y otra en web Vue. La deriva era insostenible. Esta fase unifica ambas apps en un monorepo pnpm workspaces donde las pages y componentes viven exactamente una vez.
+
+- Estructura del repo: `apps/{desktop,web}` + `packages/{ui,api-client,features}`. ✅
+- Web client **migrado de Vue 3 a React 18** reutilizando 100% de pages y componentes del desktop. ✅
+- Tres packages compartidos:
+  - `@devdeck/ui` — design system (Button, TagChip, EmptyState, PageTransition, Toaster, ConfirmHost, toast/confirm singletons, `tailwind-preset.cjs`, `globals.css`). ✅
+  - `@devdeck/api-client` — fetch wrapper + TanStack Query hooks + auth con `TokenStorage` pluggable (`localStorageAdapter` para web, `electronSafeStorageAdapter` para desktop) + config runtime (`configureApiClient`). ✅
+  - `@devdeck/features` — las 7 pages + todos los componentes de dominio (Topbar, Sidebar, RepoCard, ItemCard, Commands, Discovery, Mascot, modales). ✅
+- Dependency graph estricto y acíclico: `apps → features → ui → api-client`. ✅
+- Tailwind preset compartido; Vite aliases en ambas apps; tsconfig paths en `tsconfig.base.json`. ✅
+- Refactors clave:
+  - `api-client` ya no lee `import.meta.env.*` — usa `getConfig()` inyectado por cada app en `main.tsx` (bundler-agnóstico). ✅
+  - `auth.ts` ya no hace branching `isElectron` runtime — inyección de `TokenStorage` vía `setTokenStorage()`. ✅
+  - Pinia stores de Vue reemplazados por los hooks TanStack Query ya existentes en el desktop. ✅
+- Pages web nuevas (Electron no las tiene): `LoginPage` (OAuth GitHub + token fallback), `AuthCallbackPage` (acepta `?token=&refresh_token=` o URL fragment), `NotFoundPage`, `AuthGuard`. ✅
+- Desktop mantiene `HashRouter` + `PasteInterceptor` (Electron-only); web usa `BrowserRouter` + `AuthGuard`. ✅
+- **Side effect:** se removieron 3.444 archivos de `web/node_modules/` erróneamente trackeados en HEAD.
+- **Verificación:** `pnpm typecheck` ✅ · `pnpm test` 67 tests ✅ · `pnpm -F @devdeck/desktop build` ✅ · `pnpm -F @devdeck/web build` ✅
+- Ver [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md) para la decisión completa y [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §2.0/2.1/2.2 para la arquitectura actualizada.
+- Commit: `698b432 feat(monorepo): pnpm workspaces + Vue→React web migration` en branch `claude/setup-react-web-app-LVWhi`.
+
 ### Criterio de salida de Ola 4.5
-- [x] CI verde en cada push, bloqueante para merge (GitHub Actions `ci.yml` con backend + desktop + e2e).
+- [x] CI verde en cada push, bloqueante para merge (GitHub Actions `ci.yml` con backend + desktop + e2e). Post-§16.13 falta agregar job `web`.
 - [x] ≥ 60% cobertura en `backend/internal/http/handlers` y `backend/internal/store` (handler matrix + store tests con testcontainers).
-- [x] ≥ 5 flows E2E pasando en Electron (Playwright skeleton con los 5 flows; Web intencionalmente sin E2E hasta la migración React).
+- [x] ≥ 5 flows E2E pasando en Electron (Playwright skeleton con los 5 flows).
 - [x] Endpoint `/api/items/capture` en producción con tests.
+- [x] Web client migrado a React y compartiendo código con desktop (§16.13).
 - [ ] CLI `devdeck` en release 0.1.0 con los comandos P0.
 - [ ] Extensión Chrome en Chrome Web Store (o sideload con instructions claras).
 - [ ] README con screenshots (no bloquea CI, agendado para antes del release público).
 - [x] `api.exe` fuera del repo.
-- [x] ADRs 0001 y 0002 con decisión final ("Aceptadas").
+- [x] ADRs 0001, 0002 y 0003 con decisión final ("Aceptadas").
 
 **Solo después de cumplir estos criterios, arrancar Ola 5.**
 
@@ -220,7 +245,9 @@
 
 ---
 
-## 🌊 Ola 4 — Web client (Vue) + Auth real
+## 🌊 Ola 4 — Web client (Vue, luego React) + Auth real
+
+> **Nota histórica:** las fases 14 y 15 describen el skeleton Vue 3 original del web client. En Wave 4.5 §16.13 ese cliente fue **migrado completo a React 18** y restructurado a monorepo pnpm workspaces. La paridad de features se mantuvo via `@devdeck/features` (un solo codebase compartido con desktop). Ver `docs/adr/0003-monorepo-pnpm-workspaces.md`.
 
 ### Fase 12 — Auth backend ✅
 - `migrations/0004_auth_users_sessions.sql`: tablas `users` + `refresh_sessions`
@@ -311,7 +338,7 @@
 - Nuevos campos: `why_saved` (string), `when_to_use` (string), `ai_summary` (text), `ai_tags` (array), `embedding` (vector)
 - Endpoint `POST /api/items` — acepta URL o texto libre; detecta tipo automáticamente
 - Endpoint `GET /api/items` — lista con filtro por `item_type`
-- Frontend (Electron + Vue): renombrar "repos" → "items" en UX; cards adaptadas por tipo; formulario "por qué lo guardé"
+- Frontend (ambas apps via `@devdeck/features`): renombrar "repos" → "items" en UX; cards adaptadas por tipo; formulario "por qué lo guardé". Post-§16.13 esto se implementa una sola vez en el package y aparece en desktop y web.
 
 ### Fase 18 — Auto-tagging + Auto-summary (IA)
 
@@ -397,17 +424,18 @@
 
 | Capa | Tecnología |
 |------|-----------|
-| Desktop | Electron + React 18 + TypeScript + electron-vite |
-| Estilos | Tailwind CSS + CSS variables (neo-brutalist) |
-| State/cache | TanStack Query v5 |
+| Monorepo | pnpm workspaces (`apps/{desktop,web}` + `packages/{ui,api-client,features}`) desde Wave 4.5 §16.13 |
+| Desktop | Electron 32 + React 18 + TypeScript + electron-vite + HashRouter |
+| Web | Vite + React 18 + TypeScript + react-router-dom (BrowserRouter) + AuthGuard (§16.13 — reemplaza el Vue 3 + Pinia original) |
+| Estilos | Tailwind CSS + CSS variables (neo-brutalist) — preset compartido en `@devdeck/ui/tailwind-preset.cjs` |
+| State/cache | TanStack Query v5 (hooks en `@devdeck/api-client`) |
 | Animaciones | framer-motion |
 | Drag & drop | @dnd-kit/core + @dnd-kit/sortable |
-| Markdown | react-markdown + remark-gfm + rehype-highlight |
+| Markdown | react-markdown + remark-gfm + rehype-highlight + rehype-raw |
 | Iconos | Lucide React |
 | Backend | Go + Chi + pgx v5 |
 | Base de datos | Postgres 16 + pg_trgm + pgvector (Ola 6) |
 | Deploy | Docker Compose + Caddy (TLS automático) |
-| Web (Ola 4) | Vue 3 + Vite + Pinia + Vue Router |
 | IA (Ola 6) | OpenAI embeddings / Ollama (opt-in) + pgvector |
 
 <!-- Las olas canónicas son las definidas arriba (Ola 5 "Items generales +

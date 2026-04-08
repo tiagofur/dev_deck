@@ -27,7 +27,10 @@
 
 | Archivo | Descripción |
 |---------|-------------|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | **Arquitectura del sistema.** Diagrama de alto nivel, stack técnico (Go + Chi + Postgres + pgvector, Electron + React, Vue 3), decisiones de arquitectura y schema de la base de datos. |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | **Arquitectura del sistema.** Diagrama de alto nivel, stack técnico (Go + Chi + Postgres + pgvector, monorepo pnpm workspaces con Electron + React desktop y React web que comparten `@devdeck/ui` / `@devdeck/api-client` / `@devdeck/features`), decisiones de arquitectura y schema de la base de datos. |
+| [adr/0001-items-polymorphism.md](adr/0001-items-polymorphism.md) | **ADR 0001.** Modelo polimórfico de `items` (single-table + JSONB + generated columns). |
+| [adr/0002-sync-strategy.md](adr/0002-sync-strategy.md) | **ADR 0002.** Estrategia de sync offline-first. |
+| [adr/0003-monorepo-pnpm-workspaces.md](adr/0003-monorepo-pnpm-workspaces.md) | **ADR 0003.** Monorepo pnpm workspaces + migración del web client de Vue 3 a React 18 (Wave 4.5 §16.13). |
 | [TECHNICAL_ROADMAP_AI_OFFLINE.md](TECHNICAL_ROADMAP_AI_OFFLINE.md) | **Roadmap técnico detallado.** Plan de implementación de las Olas 5–7: offline-first con SQLite local + sync engine, embeddings + búsqueda vectorial, multi-usuario. |
 | [API.md](API.md) | **Referencia de API REST.** Especificación OpenAPI de todos los endpoints (`/api/repos`, `/api/cheatsheets`, `/api/search`, `/api/auth`, etc.). |
 | [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) | **Design system.** Tokens CSS, paleta de colores neo-brutalist, tipografía, componentes, estados de la mascota Snarkel y principios de diseño de la UI. |

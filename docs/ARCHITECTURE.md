@@ -1,10 +1,16 @@
 # DevDeck — Architecture
 
-> Versión: 0.2 · Última actualización: 2026-04-07
+> Versión: 0.3 · Última actualización: 2026-04-08
 >
 > **Importante:** este doc cubre las 4 olas del producto. Las secciones marcadas
 > con 🌊2/🌊3/🌊4 indican a qué ola corresponden. Ola 1 (MVP) excluye todo lo
 > marcado con 🌊2+.
+>
+> **Cambio en 0.3 (Wave 4.5 §16.13):** el repo es ahora un **monorepo pnpm workspaces**
+> con `apps/desktop`, `apps/web` y tres packages compartidos (`@devdeck/ui`,
+> `@devdeck/api-client`, `@devdeck/features`). El web client pasó de Vue 3 a
+> React 18 para compartir pages y componentes con el desktop. Ver
+> [adr/0003-monorepo-pnpm-workspaces.md](adr/0003-monorepo-pnpm-workspaces.md).
 
 ---
 
@@ -13,12 +19,19 @@
 ```
 ┌─────────────────────────────┐
 │   Electron Desktop Client   │ ───┐
-│   (React + TS)              │    │
+│   (React 18 + TS)           │    │
+│   HashRouter +              │    │
+│   PasteInterceptor          │    │
 └─────────────────────────────┘    │
-                                   │  HTTPS
-┌─────────────────────────────┐    │  Auth: Bearer token (Ola 1)
-│   Vue 3 Web Client   🌊4    │ ───┤        JWT (Ola 4+)
-│   (browser)                 │    │
+         │ both import:            │
+         │  @devdeck/features      │  HTTPS
+         │  @devdeck/ui            │  Auth: Bearer token (Ola 1)
+         │  @devdeck/api-client    │        JWT (Ola 4+)
+┌─────────────────────────────┐    │
+│   Web Client  🌊4           │ ───┤
+│   (React 18 + BrowserRouter │    │
+│    + AuthGuard)             │    │
+│   browser                   │    │
 └─────────────────────────────┘    │
                                    ▼
                           ┌────────────────────┐
@@ -62,98 +75,142 @@
 
 ## 2. Componentes
 
-### 2.0 Web Client (Vue 3)  🌊4
+### 2.0 Monorepo — pnpm workspaces  🌊4.5
 
-| Capa | Tecnología | Responsabilidad |
-|------|------------|-----------------|
-| Framework | Vue 3 (Composition API) + TypeScript | UI |
-| Build | Vite | Dev server, build prod |
-| Estado | Pinia | Stores reactivos |
-| Routing | Vue Router 4 | SPA navigation |
-| HTTP | `@tanstack/vue-query` | Cache, mutations, retries |
-| Estilos | Tailwind + tokens CSS compartidos | Mismo design system |
-| Animaciones | `@vueuse/motion` o `motion-v` | Equivalente a Framer Motion |
-| Markdown | `markdown-it` + `shiki` | Notas y READMEs con highlight |
-| Iconos | `lucide-vue-next` | Mismos iconos que Electron |
-| Auth flow | `pinia-plugin-persistedstate` | JWT en localStorage cifrado |
+Desde Wave 4.5 §16.13 el repo es un monorepo con la siguiente estructura:
 
-**Estructura `web/`:**
 ```
-src/
-  views/                 # routed pages
-  components/            # presentational
-  composables/           # use* hooks
-  stores/                # pinia
-  router/
-  api/                   # axios/fetch wrapper
-  styles/
-    tokens.css           # ⚠️ symlink/copia desde shared/
-  main.ts
+dev_deck/
+├── apps/
+│   ├── desktop/              # Electron (React renderer)
+│   └── web/                  # Vite + React
+├── packages/
+│   ├── ui/                   # Design system primitives + toast/confirm + tailwind-preset
+│   ├── api-client/           # Fetch wrapper + TanStack Query hooks + auth adapters
+│   └── features/             # Pages + componentes de dominio compartidos
+├── backend/                  # Go API (no toca el monorepo JS)
+├── cli/ extension/ deploy/
+├── pnpm-workspace.yaml
+├── tsconfig.base.json        # paths @devdeck/ui, @devdeck/api-client, @devdeck/features
+└── package.json              # scripts dev:desktop, dev:web, typecheck, test
 ```
 
-**Compartido entre Electron y Web:**
-- `shared/tokens.css` — design tokens (single source of truth)
-- `shared/openapi.yaml` — contrato API → genera tipos TS para ambos
-- NO se comparten componentes (a propósito — cada framework tiene su idiomática)
+**Dependency graph (estricto, acíclico):**
+
+```
+apps/desktop ─┐
+              ├──► @devdeck/features ──► @devdeck/ui ──► @devdeck/api-client
+apps/web ─────┘
+```
+
+**Qué vive en cada package:**
+
+- **`@devdeck/ui`** — primitivos del design system: `Button`, `TagChip`, `EmptyState`, `PageTransition`, `Toaster`, `ConfirmHost`. Incluye los singletons `toast` y `confirm` (pub-sub stores puros, sin fetch) y el `tailwind-preset.cjs` + `styles/globals.css`. **Zero imports a api-client o features.**
+
+- **`@devdeck/api-client`** — fetch wrapper, TanStack Query hooks (`useRepos`, `useItems`, `useCommands`, `useCheatsheets`, `useCapture`, `useStats`), auth helpers (`getAccessToken`, `setTokens`, `parseTokensFromQuery`), utilidades (`formatCount`, `usePreferences`), adapters de storage (`TokenStorage` interface + `localStorageAdapter` + `electronSafeStorageAdapter`), y config runtime (`configureApiClient`). **No depende de React UI internos; solo `react` + `@tanstack/react-query` como peer.**
+
+- **`@devdeck/features`** — las 7 pages (`HomePage`, `ItemsPage`, `RepoDetailPage`, `DiscoveryPage`, `SettingsPage`, `CheatsheetsListPage`, `CheatsheetDetailPage`) + componentes de dominio: `Topbar`, `Sidebar`, `RepoCard`, `RepoGrid`, `ItemCard`, `AddRepoModal`, `CaptureModal`, `GlobalSearchModal`, `ShortcutsModal`, `NotesEditor`, `TagsEditor`, `ReadmeViewer`, `ActionsBar`, `Commands/*`, `Discovery/SwipeCard`, `Mascot/*`. Importa de `@devdeck/ui` y `@devdeck/api-client`.
+
+**Resolución de aliases:**
+
+- TypeScript: `tsconfig.base.json` → `paths: { "@devdeck/ui": ["packages/ui/src/index.ts"], ... }`
+- Vite/electron-vite: alias explícito en cada `{app}/vite.config.ts` apuntando a `packages/*/src/index.ts`
+- Tailwind: cada app extiende `packages/ui/tailwind-preset.cjs` y declara `content: ['./src/**/*.{ts,tsx}', '../../packages/ui/src/**/*.{ts,tsx}', '../../packages/features/src/**/*.{ts,tsx}']`
+
+**Zero build step** para los packages internos. Vite resuelve los aliases directo al source TypeScript.
 
 ---
 
-### 2.1 Desktop Client (Electron + React)
+### 2.1 Web Client (`apps/web`)  🌊4
 
 | Capa | Tecnología | Responsabilidad |
 |------|------------|-----------------|
-| Main | Electron | Window, IPC, deeplinks `devdeck://`, secure token storage (`safeStorage`) |
-| Preload | Electron | Bridge seguro entre main y renderer |
-| Renderer | React 18 + TS | UI completa, routing, animaciones |
-| Build | electron-vite | Dev server rápido, HMR, build de producción |
+| Framework | React 18 + TypeScript | UI |
+| Build | Vite | Dev server (`:5173`), build prod |
+| Routing | `react-router-dom` v6 (`BrowserRouter`) | SPA navigation con deep links |
+| HTTP / Estado servidor | `@tanstack/react-query` v5 (via `@devdeck/api-client`) | Cache, mutations, retries |
+| Estado UI local | `useState` / `useReducer` | Modales, filtros, toggles |
+| Estilos | Tailwind + `@devdeck/ui/styles/globals.css` | Design system compartido |
+| Animaciones | `framer-motion` | PageTransition, SwipeCard, Mascot |
+| Markdown | `react-markdown` + `rehype-highlight` + `rehype-raw` + `remark-gfm` | Via `ReadmeViewer` de `@devdeck/features` |
+| Iconos | `lucide-react` | Mismos iconos que desktop |
+| Auth storage | `localStorageAdapter` (inyectado via `setTokenStorage()`) | JWT en localStorage |
+| Auth guard | `AuthGuard` wrapper — `isLoggedIn() ? children : <Navigate to="/login">` | Protección de rutas |
 
-**Librerías clave:**
-- `@tanstack/react-query` — fetching, cache, mutations, optimistic updates
-- `zustand` — estado UI local (filtros, modal abierto, modo discovery)
-- `react-router-dom` — `/`, `/repo/:id`, `/discovery`, `/settings`
-- `tailwindcss` + CSS variables — design tokens
-- `framer-motion` — animaciones de cards, swipes, mascota
-- `lottie-react` o `@rive-app/react-canvas` — mascota
-- `react-markdown` + `remark-gfm` — notas
+**Estructura `apps/web/`:**
+```
+src/
+  main.tsx                 # configureApiClient + setTokenStorage + mount App
+  App.tsx                  # BrowserRouter + AnimatedRoutes + AuthGuard
+  pages/
+    LoginPage.tsx          # brutalist card + "Sign in with GitHub"
+    AuthCallbackPage.tsx   # parseTokensFromQuery/Fragment → navigate /
+    NotFoundPage.tsx       # 404
+  env.d.ts
+index.html
+vite.config.ts             # plugin react + aliases @devdeck/* + proxy /api → :8080
+tailwind.config.ts         # extends @devdeck/ui preset
+package.json               # name: @devdeck/web
+```
+
+**Rutas:**
+- `/login` (público) — LoginPage
+- `/auth/callback` (público) — AuthCallbackPage
+- `/`, `/items`, `/repo/:id`, `/discovery`, `/settings`, `/cheatsheets`, `/cheatsheets/:id` (protegidas via `<AuthGuard>`) — las 7 pages de `@devdeck/features`
+- `*` — NotFoundPage
+
+**Nota importante:** todas las pages protegidas se importan de `@devdeck/features` — no hay versiones web de esas pages. La diferencia entre web y desktop es únicamente el shell (router type + guard + ausencia de PasteInterceptor).
+
+---
+
+### 2.2 Desktop Client (Electron + React, `apps/desktop`)
+
+| Capa | Tecnología | Responsabilidad |
+|------|------------|-----------------|
+| Main | Electron 32 | Window, IPC, deeplinks `devdeck://`, secure token storage (`safeStorage`), OS global shortcuts |
+| Preload | Electron contextBridge | Expone `window.electronAPI.store.*` al renderer |
+| Renderer | React 18 + TS | UI completa, routing via HashRouter, animaciones |
+| Build | electron-vite + Vite | Dev server rápido, HMR, build de producción, Rollup output para main/preload/renderer |
+
+**Librerías clave** (peers consumidos desde los packages):
+- `@tanstack/react-query` v5 — fetching, cache, mutations (via `@devdeck/api-client`)
+- `react-router-dom` v6 con `HashRouter` — obligatorio por `file://` en producción
+- `framer-motion` — animaciones de cards, swipes, mascota, PageTransition
+- `@dnd-kit/*` — drag & drop para reordenar comandos
+- `react-markdown` + `rehype-highlight` + `rehype-raw` + `remark-gfm` — notas y READMEs
 - `lucide-react` — iconos
 
-**Estructura `desktop/src/`:**
+**Estructura `apps/desktop/`:**
 ```
-electron/
-  main.ts
-  preload.ts
+electron.vite.config.ts        # aliases @devdeck/*, plugin react, 3 build targets
+electron-builder.yml           # packaging multi-plataforma (Win/Mac/Linux)
+playwright.config.ts           # E2E flows
+tailwind.config.ts             # extends @devdeck/ui preset
+vitest.config.ts               # unit tests con aliases @devdeck/*
+vitest.setup.ts                # configureApiClient + setTokenStorage(localStorageAdapter)
 src/
-  app/
-    routes.tsx
-    App.tsx
-  components/
-    Button.tsx
-    RepoCard.tsx
-    RepoGrid.tsx
-    AddRepoModal.tsx
-    TagChip.tsx
-    Toast.tsx
-    EmptyState.tsx
-    Mascot/
-      Mascot.tsx
-      moods.ts
-    Discovery/
-      DiscoveryDeck.tsx
-      SwipeCard.tsx
-  features/
-    repos/
-      api.ts          # query/mutation hooks
-      types.ts
-    discovery/
-    mascot/
-    stats/
-  lib/
-    api-client.ts     # axios/fetch wrapper con bearer token
-    queryClient.ts
-  styles/
-    tokens.css
-    globals.css
+  main/index.ts                # Electron main process (window, IPC, safeStorage, global shortcuts)
+  preload/index.ts             # contextBridge exponiendo window.electronAPI.store.*
+  renderer/
+    index.html
+    src/
+      main.tsx                 # configureApiClient + setTokenStorage(electronSafeStorageAdapter) + mount App
+      App.tsx                  # HashRouter + AnimatedRoutes + PasteInterceptor
+      components/
+        PasteInterceptor.tsx   # ⚠️ desktop-only: global paste listener + Cmd+Shift+V
+        PasteInterceptor.test.tsx
+      types/
+        electron.d.ts          # window.electronAPI type
+tests/
+  e2e/                         # Playwright flows
 ```
+
+**Qué es desktop-only** (vive en `apps/desktop`, NO en `@devdeck/features`):
+- `PasteInterceptor.tsx` — usa listener global de `paste` + shortcut OS-level `Cmd/Ctrl+Shift+V`. Por diseño, este comportamiento no se expone en web.
+- Main process + preload + electron-builder + Playwright.
+- `main.tsx` adicionalmente registra el `electronSafeStorageAdapter` (via `window.electronAPI`) vs. `localStorageAdapter` en web.
+
+**Todo lo demás** (las 7 pages, topbar, sidebar, modales, mascot, cards, etc.) vive en `@devdeck/features` y se importa en `App.tsx` directamente.
 
 ### 2.2 Backend (Go API)
 

@@ -12,8 +12,8 @@
 ### Estado al entrar a Ola 5
 - ✅ Backend Go + Chi + Postgres 16 + pgx v5
 - ✅ Auth: token estático (Ola 1) + JWT + GitHub OAuth (Ola 4)
-- ✅ Entidades: repos, commands, cheatsheets, users, sessions
-- ✅ Clientes: Electron (React) + Web (Vue)
+- ✅ Entidades: repos, commands, cheatsheets, users, sessions, items (polymorphic, Wave 4.5 §16.9)
+- ✅ Clientes: Electron (React) + Web (React) — **monorepo pnpm workspaces post-§16.13**, ambos comparten pages y hooks via `@devdeck/ui` / `@devdeck/api-client` / `@devdeck/features`. Las features de IA de Ola 5 se implementan UNA sola vez y aparecen en ambas apps.
 - ✅ Deploy: Docker Compose + Caddy en VPS
 
 ### Principios técnicos para las nuevas olas

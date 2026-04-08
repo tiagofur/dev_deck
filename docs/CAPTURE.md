@@ -188,7 +188,7 @@ cli/
 ## Canal 3 — Paste inteligente en la app
 
 ### Spec
-En `HomePage` de Electron y Vue, escuchar `paste` global (no dentro de inputs).
+En `PasteInterceptor` (mounted globally en `apps/desktop/src/renderer/src/App.tsx`), escuchar `paste` global (no dentro de inputs). Este componente es **Electron-only por diseño** — el web client no monta `PasteInterceptor` porque el comportamiento global-paste no encaja bien en browser. El `CaptureModal` en sí vive en `@devdeck/features` y sí se usa en ambas apps (web lo dispara desde un botón en Topbar / `ItemsPage`).
 
 - Si clipboard es URL → abrir `AddItemModal` con URL pre-rellenada y tipo detectado.
 - Si clipboard es texto que parece comando → modal con `type=cli` y el comando en el body.
@@ -208,10 +208,10 @@ Si el user no hace nada en 5 segundos, desaparece. Esto respeta el flujo sin ser
 
 ---
 
-## Canal 4 — Share target (PWA Vue)
+## Canal 4 — Share target (PWA React)
 
 ### Spec
-Cuando el web client sea PWA, registrar share target en el `manifest.webmanifest`:
+Cuando el web client sea PWA (post-Ola 6), registrar share target en el `manifest.webmanifest`:
 
 ```json
 {
@@ -228,7 +228,7 @@ Cuando el web client sea PWA, registrar share target en el `manifest.webmanifest
 }
 ```
 
-En móvil, aparece "DevDeck" en el menú nativo de Share. La ruta `/share` del Vue app recibe los params y llama a `/api/items/capture`.
+En móvil, aparece "DevDeck" en el menú nativo de Share. La ruta `/share` del React web app recibe los params y llama a `/api/items/capture` (vía `useCapture()` de `@devdeck/api-client`).
 
 Esto evita tener que construir una app nativa iOS/Android para el caso más común (compartir link desde browser móvil).
 
@@ -290,7 +290,7 @@ Chrome/Firefox exportan HTML bookmarks. Mismo parser que Pocket.
 4. **Extensión Chrome P0:** tab activa → save.
 5. **Importador GitHub Stars** en el CLI.
 6. **Extensión Firefox** + selección + right-click.
-7. **Paste inteligente** en Vue.
+7. **Botón "Capturar" en web** (React — el `CaptureModal` ya vive en `@devdeck/features`, solo hay que disparar desde Topbar / ItemsPage; no se implementa `PasteInterceptor` en web por decisión de alcance — ver nota en Canal 3).
 8. **PWA share target.**
 9. **Sugerencias de `why_saved` con IA** (requiere Ola 6 en pie).
 
