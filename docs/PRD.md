@@ -1,250 +1,304 @@
 # DevDeck — Product Requirements Document
 
-> Versión: 0.2 · Owner: tfurt · Última actualización: 2026-04-07
+> Versión: 1.0 · Owner: tfurt · Última actualización: 2026-04-08
 
 ---
 
-## 0. Naming (a decidir)
+## 0. Reposicionamiento del producto
 
-El nombre `DevDeck` se queda chico. Esto ya no es solo un cofre de repos — es un **multi-tool de programación**: repos, comandos por repo, cheatsheets globales, eventualmente web. Propuestas:
+**DevDeck.ai** deja de ser un directorio personal de repos y se convierte en la **memoria externa asistida por IA para desarrolladores**: un lugar donde guardar, organizar y redescubrir cualquier cosa útil para el trabajo diario — repos, CLIs, plugins, atajos, comandos, cheatsheets, workflows, agentes y más — disponible en cualquier dispositivo, incluso sin conexión.
 
-| Nombre | Vibe | Por qué |
-|--------|------|---------|
-| **DevDeck** ⭐ | Multi-tool, organizado, divertido | "Deck" sugiere baraja de herramientas + es corto, .com probablemente caro pero el subdominio importa más |
-| **Toolbelt** | Práctico, directo | Honesto sobre lo que es; familiar para devs |
-| **Stash** | Personal, secreto, git-aware | Referencia a `git stash`, suena a "mi colección personal" |
-| **Forge** | Constructivo, fuerte | Donde forjás tu setup; quizás demasiado serio |
-| **Quiver** | Tu arsenal de flechas (herramientas) | Distintivo, memorable, encaja con la mascota |
+> **"Tu knowledge OS para developers. Guarda todo lo útil. Encuéntralo cuando lo necesitás."**
 
-**Recomendado:** **DevDeck** o **Quiver**. Decisión final del owner — mientras tanto el código sigue como `repos_directory` / `repovault` hasta el rename oficial.
+El dominio `.ai` se justifica porque la inteligencia artificial cumple una función real: clasifica automáticamente, resume el propósito de cada item, permite búsqueda por intención y sugiere contenido relacionado. No hay chat decorativo; la IA trabaja en silencio para que vos no tengas que organizar nada a mano.
 
 ---
 
 ## 1. Visión
 
-Una app personal donde guardar, organizar y redescubrir las herramientas que un dev usa todos los días: **repositorios** que un amigo te recomendó, **comandos rápidos** para cada uno, y **cheatsheets** universales (git, docker, vim, npm…) que siempre olvidás.
+Una app **multiusuario, offline-first y multiplataforma** donde los developers guardan y redescubren todo lo que encuentran útil: repositorios recomendados por amigos, CLIs que descubriste en un hilo de Twitter, plugins para tu IDE, atajos de macOS que nunca recordás, comandos por proyecto, cheatsheets de stack y workflows de equipos.
 
-> "Tu multi-tool de programación. Hermoso, divertido, siempre a mano."
-
-No es un bookmark manager. No es Notion. Es un **museo personal de herramientas + un cinturón de utilidades** — diseñado para que **quieras volver a entrar**.
+La IA actúa como curador silencioso: etiqueta, resume, conecta y recupera — para que cuando lo necesites, lo encuentres.
 
 **Pilares del producto:**
-1. **Repos** — guardar, preview rico, búsqueda, tags, redescubrimiento
-2. **Comandos por repo** — los `npm run X`, `make Y`, `docker Z` que siempre olvidás de cada herramienta
-3. **Cheatsheets globales** — comandos universales por categoría (git, docker, OS, lenguajes…)
-4. **Acceso desde cualquier lado** — desktop primero, web después
+
+1. **Assets de conocimiento** — cualquier tipo de item útil para un dev: repos, CLIs, plugins, atajos, snippets, notas, workflows, agentes/prompts, artículos
+2. **IA útil de verdad** — auto-tagging, auto-summary, búsqueda semántica, items relacionados
+3. **Offline-first con sync** — todo funciona sin conexión; se sincroniza con el VPS cuando hay red
+4. **Multiusuario** — cada developer tiene su propia colección; en el futuro, decks compartibles
+5. **Multiplataforma** — desktop (Electron: Win/Mac/Linux) + web app (`app.devdeck.ai`)
 
 ---
 
 ## 2. Problema
 
 ### El dolor real
-1. Conocidos comparten repos útiles en grupos de chat.
-2. Si no me los reenvío a mí mismo, los pierdo.
-3. Cuando aparece el problema que ese repo solucionaba, ya no me acuerdo de él.
-4. Termino sufriendo en cosas que tenían solución hace meses.
+
+1. Descubrís herramientas útiles (repos, CLIs, plugins, shortcuts) pero las perdés en el ruido de Slack/Twitter/grupos de chat.
+2. Cuando el problema aparece, no recordás que tenías la solución guardada en algún lado.
+3. Los comandos de cada proyecto, los atajos de macOS, las funciones de terminal por lenguaje — los buscás de cero cada vez.
+4. No hay un lugar que centralice **todo** el conocimiento práctico de un developer.
 
 ### Por qué lo existente no alcanza
+
 | Solución | Por qué falla |
 |----------|---------------|
-| Bookmarks del browser | No tienen contexto, ni preview rico, ni tags propios, ni búsqueda decente |
-| GitHub Stars | Solo sirve para repos de GitHub que tengas que loggear, sin tags personales ni notas |
-| Notion / Notes | Trabajo manual: copy/paste, sin metadata automática, feo |
-| Raindrop / Pocket | Genéricos, sin foco en repos, sin personalidad |
+| Bookmarks del browser | Sin contexto, sin preview, sin búsqueda semántica, sin tags útiles |
+| GitHub Stars | Solo repos de GitHub, sin notas personales, sin comandos, sin acceso offline |
+| Notion / Notes | Trabajo manual: copy/paste, sin metadata automática, sin IA, sin offline real |
+| Raindrop / Pocket | Genéricos, sin foco en devs, sin cheatsheets, sin comandos, sin IA de developer |
+| ChatGPT | Responde sobre el mundo, no sobre **tu** colección personal |
 
 ---
 
-## 3. Usuario objetivo
+## 3. Usuarios objetivo
 
-**Perfil:** Desarrollador (yo). Single-user. Win11. Usa la app a diario, idealmente como "primera parada" cuando recuerda haber visto algo útil.
+### Usuario primario: Developer individual
+- Guarda repos recomendados, tools, CLIs, plugins, atajos, snippets y cheatsheets.
+- Usa la app como "primera parada" cuando recuerda haber visto algo útil.
+- Necesita que funcione offline (avión, café sin wifi, VPN lenta).
+- Plataformas: macOS, Windows, Linux + navegador web.
 
-**No-objetivos:** Multi-tenant. Equipos. Compartir colecciones públicas. Versión web pública. (Todo eso queda para v2+.)
+### Usuario secundario (v2+): Equipos pequeños / comunidades
+- Comparten "decks" curados de herramientas por stack o proyecto.
+- Importan los decks de otros; mantienen uno actualizado para el equipo.
 
 ---
 
-## 4. Scope por fases
+## 4. Modelo de datos — de `Repo` a `Item`
 
-El producto crece en **3 olas**, cada una con valor independiente.
+El concepto central deja de ser un `Repo` y pasa a ser un `Item` (también llamado "asset"):
 
-### 🌊 Ola 1 — MVP (Repos + Personalidad)
+| Tipo | Ejemplos |
+|------|---------|
+| `repo` | github.com/supabase/supabase, github.com/pocketbase/pocketbase |
+| `cli` | ripgrep, fzf, bat, gh, atuin, zoxide |
+| `plugin` | Copilot Chat, Cursor, Continue.dev, vim-surround |
+| `cheatsheet` | git, docker, tmux, kubectl, zsh |
+| `shortcut` | Atajos de macOS, VS Code, Raycast, terminal |
+| `snippet` | Funciones de terminal por lenguaje/framework |
+| `workflow` | Setup local de proyecto, deploy, debug, reset DB |
+| `agent` | Prompts/skills para Copilot, Claude, Cursor agents |
+| `article` | Posts, docs, guías cortas con contexto personal |
+| `note` | Notas libres: "por qué elegimos X", "gotchas de Y" |
 
-#### 4.1.A Core repos (must)
+Todos comparten un modelo base: `título`, `url` (opcional), `descripción`, `tags`, `tipo`, `stack`, `notas personales`, `fecha de guardado`, `última vista`.
+
+---
+
+## 5. Features de IA — lo que justifica el `.ai`
+
+La IA no es un chatbot. Hace 4 cosas concretas que atacan el dolor real:
+
+### AI-1 — Auto-tagging y auto-categorización
+
+Al guardar un item (URL, texto, repo), la IA propone:
+- **tipo**: repo / cli / plugin / shortcut / cheatsheet / agent / …
+- **stack**: Go / React / Next / Python / Rust / macOS / terminal / AI tooling / …
+- **propósito**: testing / deploy / auth / productivity / agents / editor / …
+- **nivel**: beginner / advanced
+- **contexto de uso**: local dev / infra / debugging / AI coding / …
+
+El usuario confirma o ajusta con un click. Nunca empieza desde cero.
+
+### AI-2 — Auto-summary: "¿para qué sirve esto?"
+
+Cada item recibe un resumen generado automáticamente:
+- Qué es y para qué sirve
+- Cuándo usarlo (caso de uso concreto)
+- Por qué podría interesarte dado tu stack habitual
+- Herramientas relacionadas o alternativas
+
+Ataca directamente el dolor: *"guardé esto pero ya no recuerdo por qué era útil"*.
+
+### AI-3 — Búsqueda semántica / por intención
+
+En vez de buscar por título exacto o tag, el dev puede buscar con lenguaje natural:
+- *"herramientas para agentes en terminal"*
+- *"atajos de mac para moverme más rápido"*
+- *"cosas útiles para debugging en Go"*
+- *"plugins de IDE con IA que vi hace meses"*
+- *"comandos que uso en proyectos React"*
+
+Requiere embeddings sobre los items guardados (título + descripción + notas + tags). Se puede implementar con búsqueda vectorial server-side o local (sqlite-vec).
+
+### AI-4 — "Items relacionados"
+
+Al ver un item, DevDeck sugiere automáticamente:
+- Items del mismo stack o propósito
+- Cheatsheets o comandos que complementan este repo
+- Shortcuts relevantes si el item es un editor o CLI
+- Herramientas alternativas o complementarias
+
+Ejemplo: ves un repo de `sqlc` → DevDeck sugiere cheatsheet de Postgres, repo de `pgx`, comandos de migraciones y atajos de terminal útiles para trabajo con DB.
+
+### AI-5 — Quick capture con enriquecimiento automático
+
+Pegar una URL, un texto o un nombre de CLI → la IA completa:
+- Título y descripción
+- Tags y categoría
+- Resumen de propósito
+- Comandos detectados (si hay README/docs)
+
+El usuario guarda en 3 segundos; la IA organiza en segundo plano.
+
+---
+
+## 6. Scope por fases (actualizado)
+
+### 🌊 Ola 1–4 — Completado ✅
+
+Ver ROADMAP.md. Las olas 1–4 están completas: MVP repos, comandos, cheatsheets, web Vue y auth GitHub OAuth.
+
+---
+
+### 🌊 Ola 5 — Evolución a "Item" + IA básica
+
+#### Objetivo
+Transformar DevDeck de directorio de repos en knowledge OS para developers, con IA que organiza y resume de forma transparente.
+
+#### 5.A — Modelo `Item` (must)
 
 | # | Feature | Descripción |
 |---|---------|-------------|
-| F1 | **Add repo** | Pegar URL → backend resuelve metadata automáticamente → guarda |
-| F2 | **Lista / grid** | Ver todos los repos como cards visuales |
-| F3 | **Preview rico** | Avatar del owner, nombre, descripción, stars, lenguaje (con color), topics, og:image |
-| F4 | **Buscar** | Búsqueda fuzzy por nombre, descripción y tags (Postgres pg_trgm) |
-| F5 | **Filtrar** | Por lenguaje, por tag, por archivado/activo |
-| F6 | **Tags personales** | El usuario etiqueta libremente (`cli`, `learning`, `frontend`, etc.) |
-| F7 | **Notas markdown** | Nota corta personal por repo ("para cuando necesite parser X") |
-| F8 | **Acciones** | Abrir en browser, copiar URL, copiar `git clone`, compartir, archivar, borrar |
-| F9 | **Refresh metadata** | Manual on-demand + cron 7d para mantener stars/desc actualizadas |
+| I1 | **Tipos de item** | Extender el modelo de `Repo` a `Item` con campo `type`: repo, cli, plugin, shortcut, snippet, workflow, agent, article, note |
+| I2 | **Campo "por qué lo guardé"** | Campo `why_saved` visible y fácil de completar en el momento de guardar |
+| I3 | **Quick capture mejorado** | Pegar URL → IA completa tipo, descripción, tags y resumen. El usuario solo confirma |
+| I4 | **Vistas por intención** | Además de lista: "AI tools", "Terminal", "Shortcuts", "By stack", "Forgotten gems" |
 
-#### 4.1.B Personalidad (must)
+#### 5.B — IA (must)
 
 | # | Feature | Descripción |
 |---|---------|-------------|
-| P1 | **Mascota animada** | Personaje en esquina con 4–5 estados (idle, happy, sleeping, judging, celebrating) |
-| P2 | **Modo descubrimiento** | Vista fullscreen tipo Tinder para revisitar repos olvidados |
+| AI1 | **Auto-tagging** | Al guardar, propone tipo + stack + propósito + nivel. Opt-in configurable |
+| AI2 | **Auto-summary** | Genera resumen de 2–3 líneas: qué es, para qué sirve, cuándo usarlo |
+| AI3 | **Búsqueda semántica** | Búsqueda por intención natural sobre la colección del usuario |
+| AI4 | **Items relacionados** | Al ver un item, sugiere items del mismo stack/propósito |
 
-**Plataforma Ola 1:** Electron solo. Auth: token estático.
+**Privacidad:** toda llamada a IA es opt-in y explícita en la UI. Se puede configurar usar modelo local (Ollama) o cloud (OpenAI/Anthropic). Lo que se envía al modelo se muestra claramente al usuario.
 
----
-
-### 🌊 Ola 2 — Repo Detail + Comandos por repo
-
-#### 4.2.A Repo Detail Page (must)
+#### 5.C — Offline-first real (must)
 
 | # | Feature | Descripción |
 |---|---------|-------------|
-| F10 | **Vista de detalle completa** | Click en card → pantalla full con toda la info: README rendereado, stats (stars, forks, issues abiertos, último commit, contributors top), topics, languages bar (% por lenguaje), license, link al issue tracker |
-| F11 | **README inline** | Backend trae el README.md vía GitHub API; cliente lo renderiza con `react-markdown` + syntax highlighting |
-| F12 | **Quick links GitHub** | Atajos a: Issues, PRs, Releases, Wiki, Discussions, Actions — solo si el repo los tiene |
+| O1 | **SQLite local** | Base de datos local completa en Electron y PWA (OPFS) |
+| O2 | **Cola de cambios** | Operaciones offline se encolan y sincronizan cuando vuelve la red |
+| O3 | **Conflictos simples** | Last-write-wins por campo al inicio; merge manual explícito si se detecta conflicto real |
+| O4 | **Indicador de sync** | UI clara: "Sincronizado", "Cambios pendientes (3)", "Sin conexión — modo local" |
 
-#### 4.2.B Comandos por repo (must)
-
-| # | Feature | Descripción |
-|---|---------|-------------|
-| C1 | **Crear comando custom** | Por cada repo, agregar 'cards' de comandos: `label`, `command` (string para copiar), `description` opcional, `category` opcional (`install`, `dev`, `test`, `deploy`, etc.) |
-| C2 | **Ejecutar/copiar con un click** | Click → copia al clipboard + toast confirmando. Visualmente: cada comando es un card mini neo-brutalist con botón copy |
-| C3 | **Reordenar** | Drag & drop para ordenar los comandos |
-| C4 | **Importar desde `package.json`** | Si es repo Node y hay README/package.json detectable, sugerir importar `scripts` automáticamente. (Nice-to-have de la ola.) |
-| C5 | **Linkear cheatsheets relevantes** | Desde el detail del repo, "linkear" a cheatsheets globales: "este repo usa pnpm + docker → ver cheatsheets pnpm, docker" |
-
----
-
-### 🌊 Ola 3 — Cheatsheets globales
+#### 5.D — Multiusuario (must)
 
 | # | Feature | Descripción |
 |---|---------|-------------|
-| CH1 | **Pestaña Cheatsheets** | Nueva sección top-level: lista de cheatsheets. Cada uno tiene: `title`, `slug`, `category` (`vcs`, `os`, `language`, `framework`, `tool`, `package-manager`, `editor`, etc.), `icon`, `color` |
-| CH2 | **Entries dentro del cheatsheet** | Cada cheatsheet es una colección de comandos: `label`, `command`, `description`, `tags`. Markdown soportado en description |
-| CH3 | **Búsqueda global de comandos** | Search bar global: tipear "rebase" busca en cheatsheets + comandos por repo |
-| CH4 | **Cheatsheets curados pre-cargados** | Seed inicial: git, docker, npm, pnpm, vim, tmux, ssh, find, grep, kubectl, gh CLI… (~10 al instalar) |
-| CH5 | **Crear/editar/borrar propios** | El usuario puede agregar sus propios cheatsheets y entries. Markdown editor inline |
-| CH6 | **Compartir cheatsheet** | Exportar a JSON/markdown para compartir con colegas (post-MVP de la ola) |
+| M1 | **Colecciones por usuario** | Cada cuenta GitHub tiene su propia colección aislada en el backend |
+| M2 | **Allowlist → registro abierto** | Migrar de allowlist única a registro abierto con rate limiting y plan gratuito |
+| M3 | **Plan gratuito / pro** | Free: hasta 500 items + sync 1 device. Pro: ilimitado + sync multi-device + IA |
 
 ---
 
-### 🌊 Ola 4 — Web + Auth real
+### 🌊 Ola 6 — Decks compartibles + comunidad
 
 | # | Feature | Descripción |
 |---|---------|-------------|
-| W1 | **Cliente web Vue 3** | Vue 3 + Vite + TypeScript + Pinia + Vue Router. Comparte el backend Go. Mismo design system (tokens CSS) |
-| W2 | **GitHub OAuth login** | "Sign in with GitHub" → backend valida que el username esté en allowlist (vos) → emite JWT de 30 días |
-| W3 | **Migración Electron a JWT** | Electron ahora también usa JWT en vez de token estático: en primer arranque, abre browser para OAuth (electron deeplink callback) |
-| W4 | **Refresh tokens** | Refresh token de 90 días, rotación automática |
-| W5 | **Logout / sesión** | Endpoint para invalidar; UI para ver sesiones activas (post-MVP de la ola) |
-
-**Por qué Vue y no React (otra vez):** explorar otro framework, evitar code reuse fácil entre clientes (mejor disciplina API), y porque el owner quiere experimentar.
+| D1 | **Decks públicos** | Colección curada con URL pública en `devdeck.ai/deck/...` |
+| D2 | **Importar deck** | Ver un deck de otro dev y agregar items a tu colección |
+| D3 | **Open Graph** | Preview rico de decks al compartir en Twitter/Slack/Discord |
+| D4 | **Embed de item** | Card embed para blogs y docs |
 
 ---
 
-### 4.X Out of scope (post Ola 4)
+### 🌊 Ola 7 — Plataforma
 
-- Stats dashboard / achievements / streaks visibles
-- Importar masivo desde GitHub stars / CSV / OPML
-- Backup/export JSON manual
-- Atajos globales del SO (Cmd+Shift+R desde cualquier app)
-- Compartir colecciones públicas
-- Mobile app
-- Multi-user real (más de 1 username en allowlist)
-- AI: "explicame este comando", sugerencia de cheatsheets, etc.
+| # | Feature | Descripción |
+|---|---------|-------------|
+| PL1 | **PWA completa** | Web app instalable con soporte offline (OPFS + service worker) |
+| PL2 | **Mobile (iOS/Android)** | React Native o Capacitor reutilizando lógica del cliente web |
+| PL3 | **CLI de DevDeck** | `deck add <url>`, `deck search <query>`, `deck open <item>` desde terminal |
+| PL4 | **Extensión de browser** | Guardar cualquier página/repo/tool con 1 click desde el browser |
+| PL5 | **Raycast extension** | Buscar y capturar items desde Raycast |
 
 ---
 
-## 5. User stories
+## 7. User stories (actualizadas)
 
-### Ola 1 — MVP
-```
-US-01  Pegar URL de GitHub y que resuelva metadata sola.
-US-02  Ver mis repos como cards con preview rico.
-US-03  Búsqueda fuzzy por nombre, descripción y tags.
-US-04  Tags personales por repo.
-US-05  Notas markdown personales por repo.
-US-06  Open in browser, copy clone, share, archive, delete.
-US-07  Modo descubrimiento para reencontrar repos olvidados.
-US-08  Mascota con personalidad que reacciona a mi uso.
-```
+### Ola 5 — Items + IA
 
-### Ola 2 — Repo Detail + Comandos
 ```
-US-09  Click en una card abre vista detalle con TODO: README,
-       stats, contributors, links a issues/PRs/releases.
-US-10  En el detalle, agregar mis propios comandos
-       (`pnpm dev`, `make migrate`, etc.) con label y descripción.
-US-11  Click en un comando lo copia al clipboard al instante.
-US-12  Reordenar mis comandos por drag & drop.
-US-13  Linkear un repo a cheatsheets globales relevantes.
+US-22  Guardar una URL de un CLI y que DevDeck detecte automáticamente
+       que es un CLI, su stack y para qué sirve.
+US-23  Al ver un item guardado hace 3 meses, entender en 5 segundos
+       por qué lo guardé y cuándo usarlo.
+US-24  Buscar "herramientas para agentes en terminal" y encontrar
+       los items relevantes de mi colección sin recordar cómo los etiqueté.
+US-25  Ver un repo y que DevDeck me sugiera cheatsheets y comandos
+       relacionados de mi propia colección.
+US-26  Agregar un item en 3 segundos (pegar URL → confirmar → listo).
+US-27  Usar la app sin conexión y que mis cambios se sincronicen
+       automáticamente cuando vuelve la red.
+US-28  Hacer login con mi cuenta y encontrar mi colección igual
+       desde la app de escritorio y desde el browser.
 ```
 
-### Ola 3 — Cheatsheets
-```
-US-14  Pestaña 'Cheatsheets' con colecciones por tema.
-US-15  Buscar 'rebase' y encontrar el comando aunque no
-       recuerde si está en mi cheatsheet de git o en algún repo.
-US-16  Cheatsheets pre-cargados al instalar (git, docker, npm…).
-US-17  Crear cheatsheets propios con markdown.
-```
+### Ola 6 — Decks compartibles
 
-### Ola 4 — Web + Auth
 ```
-US-18  Acceder a mi vault desde cualquier browser.
-US-19  Login con GitHub, sin passwords.
-US-20  Mi sesión persiste 30 días, refresh automático.
-US-21  Si alguien que NO soy yo intenta loguear, queda fuera.
+US-29  Crear un deck "AI coding tools" con mis items favoritos
+       y compartir el link con mi equipo.
+US-30  Recibir un link de deck de un colega e importar
+       los items que me interesan a mi propia colección.
 ```
 
 ---
 
-## 6. Métricas de éxito
+## 8. Métricas de éxito (v2)
 
-| Métrica | Target MVP |
-|---------|------------|
-| Repos guardados primer mes | ≥ 30 |
-| Días que abro la app por semana | ≥ 4 |
-| Tiempo desde "abro la app" a "agrego un repo" | < 10s |
-| Cantidad de repos viejos redescubiertos vía discovery mode | ≥ 5 / semana |
-| Veces que pierdo un repo por NO usar la app | 0 |
-
----
-
-## 7. Constraints
-
-- **Plataforma primaria:** Windows 11 (instalador `.exe` vía electron-builder)
-- **Idioma UI:** Español (rioplatense, casual) — opción de toggle inglés en v2
-- **Conexión:** requerida (backend en VPS). Manejar offline con mensaje claro y cache local de la última lista vista
-- **Performance:** lista con 500 repos debe renderizar en < 200ms; búsqueda < 100ms
+| Métrica | Target |
+|---------|--------|
+| Items guardados por usuario en el primer mes | ≥ 50 |
+| Días de uso por semana | ≥ 4 |
+| Tiempo de captura de un nuevo item | < 10 segundos |
+| Items redescubiertos vía discovery o búsqueda semántica | ≥ 5 / semana |
+| % de items con auto-summary aprobado sin edición | ≥ 70% |
+| % de búsquedas semánticas con resultado relevante en top-3 | ≥ 80% |
+| Usuarios activos mensuales al lanzar Ola 5 | ≥ 50 |
 
 ---
 
-## 8. Decisiones de producto explícitas
+## 9. Constraints (actualizados)
 
-1. **MVP (Ola 1): token estático.** Solo Electron. Auth real llega con Ola 4.
-2. **Web (Ola 4): GitHub OAuth + allowlist.** Único username permitido = el owner. Backend valida y emite JWT. Cero passwords.
-3. **La mascota NO es opcional en MVP.** Toggle off llega en v1.1 si molesta.
-4. **Discovery mode es feature de primera clase.**
-5. **Notas y descripciones son markdown**, no rich text.
-6. **Sin categorías jerárquicas** — solo tags planos.
-7. **Sin favoritos** — si está acá, ya es favorito.
-8. **Comandos por repo y cheatsheets son entidades SEPARADAS pero VINCULABLES.** Un repo puede linkear a 0..N cheatsheets globales. Esto evita la mezcla conceptual y permite reuse.
-9. **Vue para web (no React).** Decisión deliberada: explorar otro framework, mejor disciplina de API.
-10. **Mismo backend Go para Electron y Web.** El cliente no importa: mismo contrato REST.
+- **Plataformas:** Windows, macOS, Linux (Electron) + web app (`app.devdeck.ai`)
+- **Offline-first:** toda la funcionalidad core disponible sin conexión
+- **Privacidad IA:** opt-in explícito; el usuario controla qué se envía y a qué modelo
+- **Idioma UI:** Español (rioplatense, casual) como default; toggle inglés en configuración
+- **Performance:** lista con 2000 items en < 200ms; búsqueda local < 100ms; búsqueda semántica < 1s
+- **Stack IA:** configurable — modelo local (Ollama) o cloud (OpenAI / Anthropic) via API key del usuario
 
 ---
 
-## 9. Riesgos de producto
+## 10. Decisiones de producto actualizadas
+
+1. **La entidad central pasa de `Repo` a `Item`.** Los repos siguen siendo el tipo más común, pero ya no son el único.
+2. **IA es opt-in y transparente.** Siempre se muestra qué datos se envían al modelo. El usuario puede usar modelo local.
+3. **Offline-first es no-negociable.** Si no funciona sin internet, no se lanza la ola.
+4. **Multiusuario con plan freemium.** Registro abierto con GitHub OAuth. Plan free generoso; plan pro para sync multi-device e IA ilimitada.
+5. **La mascota Snarkel sigue siendo feature de primera clase.** Se adapta al nuevo contexto ("tenés 5 items sin ver hace meses", "encontré 3 cosas relacionadas a lo que buscás").
+6. **Búsqueda semántica server-side en primera instancia.** Con posibilidad de mover embeddings al cliente (sqlite-vec) cuando la privacidad lo requiera.
+7. **Vue para web (no React).** Se mantiene la decisión de Ola 4.
+8. **Mismo backend Go para todos los clientes.** El contrato REST/JSON no cambia; se extiende.
+9. **Decks compartibles en Ola 6, no antes.** Primero IA individual; después social.
+10. **CLI y extensión de browser en Ola 7.** El core del producto va primero.
+
+---
+
+## 11. Riesgos de producto (actualizados)
 
 | Riesgo | Impacto | Mitigación |
 |--------|---------|------------|
-| Mascota se siente gimmick y molesta | Alto (rompe la propuesta) | Iterar diseño hasta que sea sutil; toggle off temprano si hace falta |
-| Discovery mode se usa 1 vez y nunca más | Medio | Notificación gentil de la mascota: "tenés 12 repos sin ver hace meses" |
-| El usuario olvida que existe la app | Crítico | Atajo global en v1.1; recordatorio sutil en system tray |
-| Preview pobre en sitios no-GitHub | Bajo | Permitir editar título/descripción manualmente |
-| **Cheatsheets se vuelven un cementerio** sin curaduría | Alto en Ola 3 | Seed inicial sólido + UI que muestra "los más usados últimamente" arriba |
-| **Comandos por repo se duplican** con cheatsheets globales | Medio | UI clarísima de la diferencia: "comandos de ESTE repo" vs "linkeado: cheatsheet docker" |
-| **Auth migración rompe Electron existente** | Alto en Ola 4 | Mantener token estático como fallback durante 1 release; flag `AUTH_MODE=token\|jwt` en backend |
-| **OAuth callback en Electron es complejo** | Medio en Ola 4 | Usar `electron-deeplinks` con `repovault://callback`; documentar bien |
-| **Bundle Vue se duplica con Electron** | Bajo | Aceptado: son apps distintas, no comparten código UI (solo design tokens) |
+| IA se percibe como "humo" si el auto-summary es malo | Alto | Lanzar solo cuando accuracy ≥ 70% en muestra propia; mostrar siempre cómo editarlo |
+| Búsqueda semántica lenta o irrelevante | Alto | Fallback a búsqueda fuzzy siempre activo; semántica como "mejora" progresiva |
+| Usuarios no entienden la diferencia con Notion/Raindrop | Alto | Copy y onboarding muy claros: "no es para todo, es para devs" |
+| Migración de `Repo` a `Item` rompe datos existentes | Medio | Migración aditiva: `type = 'repo'` por defecto en items existentes |
+| Sync offline genera conflictos difíciles | Medio | Iniciar con last-write-wins; documentar limitaciones; merge manual explícito |
+| Modelo freemium desmotiva el uso | Medio | Plan free suficientemente generoso (500 items, sync 1 device) para el usuario promedio |
+| Privacidad: usuarios preocupados por enviar código/URLs a OpenAI | Medio | Soporte de Ollama local desde día 1 de las features IA |
+| Churn si la IA es opt-in y nadie la activa | Bajo | Onboarding que muestra el valor con 3 ejemplos concretos antes de pedir activación |

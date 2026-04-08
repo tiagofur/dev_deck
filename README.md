@@ -1,16 +1,17 @@
-# DevDeck
+# DevDeck.ai
 
-> Antes conocido como "RepoVault" durante el planning.
+> Tu knowledge OS para developers. Guarda todo lo útil. Encuéntralo cuando lo necesitás. Con IA que organiza, no que charla.
 
-> Tu directorio personal de repos. Hermoso, divertido, y diseñado para que **nunca más pierdas un repo que un amigo te recomendó**.
+Una app **multiusuario, offline-first y multiplataforma** donde los developers guardan y redescubren todo lo que encuentran útil: repos recomendados, CLIs, plugins de IDE, atajos de macOS, comandos por proyecto, cheatsheets de stack, workflows y más. La IA clasifica, resume y hace todo buscable por intención.
 
-Una app de escritorio (Electron + React) con backend Go + Postgres, en estilo **neo-brutalist colorido**, con preview rico tipo WhatsApp/Open Graph, búsqueda fuzzy, tags personales, modo descubrimiento tipo Tinder y una mascota animada que te juzga gentilmente.
+Disponible como app de escritorio (Electron, Win/Mac/Linux) y web app en [`app.devdeck.ai`](https://app.devdeck.ai).
 
 ---
 
 ## Stack
 
 - **Desktop:** Electron + React 18 + TypeScript + Tailwind + Framer Motion
+- **Web:** Vue 3 + Vite + Pinia + Vue Router + TypeScript
 - **Backend:** Go + Chi + pgx + sqlc
 - **DB:** Postgres 16 (con `pg_trgm` para fuzzy search)
 - **Deploy:** VPS propio · Docker Compose · Caddy (TLS automático)
@@ -21,7 +22,8 @@ Una app de escritorio (Electron + React) con backend Go + Postgres, en estilo **
 
 | Doc | Contenido |
 |-----|-----------|
-| [docs/PRD.md](docs/PRD.md) | Producto, features, user stories, scope MVP |
+| [docs/PRD.md](docs/PRD.md) | Visión del producto, features, user stories, scope por olas |
+| [docs/LANDING_COPY.md](docs/LANDING_COPY.md) | Copy de landing page para devdeck.ai (en español) |
 | [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | Tokens, paleta, tipografía, componentes |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Diagrama, stack, decisiones, schema DB |
 | [docs/API.md](docs/API.md) | OpenAPI spec |
@@ -30,6 +32,8 @@ Una app de escritorio (Electron + React) con backend Go + Postgres, en estilo **
 
 ## Estado
 
-🚧 **En construcción.** Fase 0 (docs) completa. Próximo: backend mínimo.
+🚀 **Olas 1–4 completas.** Desktop + web + auth + cheatsheets + comandos por repo.
 
-Roadmap completo en el plan original.
+Próximo: **Ola 5** — evolución a modelo `Item` (repos, CLIs, plugins, atajos, agentes…) + features de IA (auto-tagging, auto-summary, búsqueda semántica, items relacionados) + offline-first real + multiusuario abierto.
+
+Roadmap completo en [ROADMAP.md](ROADMAP.md).
