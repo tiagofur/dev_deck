@@ -25,17 +25,16 @@ backend/tmp/
 backend/*.exe
 backend/coverage.out
 
-# Web (Vite/Vue)
-web/node_modules/
-web/dist/
-web/.vite/
-web/coverage/
-
-# Desktop (Electron + Vite)
-desktop/node_modules/
-desktop/dist/
-desktop/out/
-desktop/.vite/
+# Monorepo apps + packages build artifacts
+apps/*/node_modules/
+apps/*/dist/
+apps/*/out/
+apps/*/.vite/
+apps/*/coverage/
+apps/desktop/build/icon.*
+packages/*/node_modules/
+packages/*/dist/
+packages/*/coverage/
 
 # Build artifacts
 *.tsbuildinfo
