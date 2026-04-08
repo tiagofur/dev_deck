@@ -1,6 +1,6 @@
 # DevDeck — Product Requirements Document
 
-> Versión: 0.5 · Owner: tfurt · Última actualización: 2026-04-08
+> Versión: 0.6 · Owner: tfurt · Última actualización: 2026-04-08
 >
 > **Cambio clave en 0.5:** el web client migró de Vue 3 a React 18 en un monorepo pnpm workspaces que comparte pages y componentes con el desktop. Ver [adr/0003-monorepo-pnpm-workspaces.md](adr/0003-monorepo-pnpm-workspaces.md).
 
@@ -184,7 +184,7 @@ Ver [ROADMAP.md](../ROADMAP.md) para el detalle técnico completo de implementac
 
 ---
 
-### 🌊 Ola 5 — Items generales + Features de utilidad
+### 🌊 Ola 5 — Items generales + Features de utilidad ⏳ En curso
 
 Esta ola convierte DevDeck de "directorio de repos" a **knowledge OS para developers**.
 

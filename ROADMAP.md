@@ -2,10 +2,11 @@
 
 > 🌐 [devdeck.ai](https://devdeck.ai) — Tu memoria externa para desarrollo, asistida por IA.
 >
-> 📝 **Actualizado 2026-04-08:** Ola 4.5 casi cerrada — §16.5/6/7/8/9/12/13 listas, quedan §16.10 (CLI release) y §16.11 (extensión browser release). Las secciones `[DEPRECATED]` de Ola 5/6/7 se removieron; las canónicas son las únicas vivas ahora.
+> 📝 **Actualizado 2026-04-08:** Ola 4.5 cerrada. Ola 5 arrancó — Fase 17 completa. Próximo: Fase 18 (Auto-tagging + Auto-summary IA).
 
-## Estado actual: Ola 4.5 casi cerrada
+## Estado actual: Ola 5 en curso — Fase 17 completa
 
+### Ola 4.5 — cerrada
 - ✅ §16.5 Higiene de repo (housekeeping, ADRs, docs, roadmap dedup)
 - ✅ §16.6 Red de seguridad (tests + CI)
 - ✅ §16.7 Observability (slog + /metrics)
@@ -16,7 +17,13 @@
 - ✅ §16.12 Paste inteligente + CaptureModal en desktop
 - ✅ §16.13 Monorepo pnpm workspaces + Web Vue → React (ver ADR 0003)
 
-### Próximo: Ola 5 — Items generales + IA real
+### Ola 5 — en curso
+- ✅ Fase 17 — Modelo de items extendido + CRUD + ItemsPage
+- ⏳ Fase 18 — Auto-tagging + Auto-summary (IA)
+- 🔲 Fase 19 — Búsqueda semántica (pgvector)
+- 🔲 Fase 20 — Items relacionados + "Ask DevDeck"
+
+### Próximo: Fase 18 — Auto-tagging + Auto-summary (IA)
 ### Siguiente: Ola 6 — Offline-first + Sync + Multi-usuario
 
 ---
@@ -330,15 +337,15 @@
 
 > **Objetivo:** convertir DevDeck de directorio de repos a knowledge OS para developers. Justificar el `.ai` con features de IA que resuelven fricción real, no decorativas.
 
-### Fase 17 — Modelo de items extendido
+### Fase 17 — Modelo de items extendido ✅
 
-- `migrations/0005_items.sql`: migrar tabla `repos` al modelo extendido `items` con campo `item_type` (`repo`, `cli`, `plugin`, `shortcut`, `snippet`, `agent`, `prompt`, `article`, `tool`, `workflow`, `note`)
-- `internal/domain/items/`: domain types extendidos, backwards-compatible con repos existentes
-- `internal/store/items.go`: CRUD extendido con soporte para todos los tipos
-- Nuevos campos: `why_saved` (string), `when_to_use` (string), `ai_summary` (text), `ai_tags` (array), `embedding` (vector)
-- Endpoint `POST /api/items` — acepta URL o texto libre; detecta tipo automáticamente
-- Endpoint `GET /api/items` — lista con filtro por `item_type`
-- Frontend (ambas apps via `@devdeck/features`): renombrar "repos" → "items" en UX; cards adaptadas por tipo; formulario "por qué lo guardé". Post-§16.13 esto se implementa una sola vez en el package y aparece en desktop y web.
+- `migrations/0005_items.sql`: tabla polimórfica `items` con `item_type` (`repo`, `cli`, `plugin`, `shortcut`, `snippet`, `agent`, `prompt`, `article`, `tool`, `workflow`, `note`) + `url_normalized` en `repos` para dedupe cross-table. ✅
+- `internal/domain/items/item.go`: domain types completos — `Item`, `Type`, `AllTypes`, `EnrichmentStatus`, `CaptureInput`, `CaptureResponse`, `ListParams`, `ListResult`, `UpdateInput`. ✅
+- `internal/store/items.go`: `CreateItem`, `ListItems`, `GetItem`, `UpdateItem`, `DeleteItem`, `MarkItemSeen` con soporte completo de filtros (`type`, `tag`, `q`, `archived`, `sort`, `limit`, `offset`). ✅
+- Campos: `why_saved`, `when_to_use`, `ai_summary`, `ai_tags` — todos presentes. `embedding` (vector) queda para Fase 19. ✅
+- `POST /api/items/capture` — hereda de §16.9; detecta tipo automáticamente. ✅
+- `GET /api/items`, `GET /api/items/:id`, `PATCH /api/items/:id`, `DELETE /api/items/:id`, `POST /api/items/:id/seen`. ✅
+- Frontend (`@devdeck/features`): `ItemsPage` con grid por tipo + filtros de tipo + search + empty state; `ItemCard` adaptada por tipo; `CaptureModal` con `why_saved` + type override. Funciona en desktop y web sin duplicación. ✅
 
 ### Fase 18 — Auto-tagging + Auto-summary (IA)
 

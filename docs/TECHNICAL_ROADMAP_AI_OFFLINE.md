@@ -1,6 +1,6 @@
 # DevDeck — Roadmap Técnico: Offline-first + Sync + Multi-usuario + IA
 
-> Versión: 1.0 · Última actualización: 2026-04-08
+> Versión: 1.1 · Última actualización: 2026-04-08
 >
 > Este documento es el roadmap técnico detallado para las Olas 5 y 6 del producto.
 > Para la visión de producto ver [PRD.md](PRD.md). Para el roadmap general ver [../ROADMAP.md](../ROADMAP.md).
@@ -15,6 +15,10 @@
 - ✅ Entidades: repos, commands, cheatsheets, users, sessions, items (polymorphic, Wave 4.5 §16.9)
 - ✅ Clientes: Electron (React) + Web (React) — **monorepo pnpm workspaces post-§16.13**, ambos comparten pages y hooks via `@devdeck/ui` / `@devdeck/api-client` / `@devdeck/features`. Las features de IA de Ola 5 se implementan UNA sola vez y aparecen en ambas apps.
 - ✅ Deploy: Docker Compose + Caddy en VPS
+
+### Estado actual dentro de Ola 5
+- ✅ **Fase 17 completa:** tabla `items` polimórfica, CRUD completo backend + frontend, `ItemsPage` con filtros por tipo, `ItemCard`, `CaptureModal` integrado. Ver `ROADMAP.md §Fase 17`.
+- ⏳ **Fase 18 siguiente:** módulo `internal/ai/` con `Classifier` + `Summarizer`. Ver sección 1.2 abajo.
 
 ### Principios técnicos para las nuevas olas
 1. **Offline-first no es opcional.** La app debe ser 100% funcional sin red. La sync es eventual y no bloquea ninguna operación.
@@ -677,55 +681,56 @@ func SanitizeForAI(item Item) ClassifyInput {
 
 ---
 
-## 3. Plan de implementación sugerido
+## 3. Plan de implementación
 
-### Sprint 1 (Semanas 1-2): Modelo extendido + Quick capture
-- Migración `0005_items_extended.sql`
-- Actualizar endpoints existentes para aceptar `item_type` (backwards-compatible)
-- Frontend: formulario de nuevo item con selector de tipo + campo "por qué lo guardé"
-- Quick capture: modal simplificado (solo URL + enter; tipo y tags después)
+### ✅ Sprint 1 — Modelo extendido + Quick capture (Fase 17 — COMPLETO)
+- `migrations/0005_items.sql` — tabla `items` polimórfica + `url_normalized` en `repos`. ✅
+- `internal/domain/items/`, `internal/store/items.go`, `internal/http/handlers/items.go`. ✅
+- Endpoints: `GET /api/items`, `GET /api/items/:id`, `PATCH /api/items/:id`, `DELETE /api/items/:id`, `POST /api/items/:id/seen`. ✅
+- Frontend: `ItemsPage` + `ItemCard` + `CaptureModal` con `why_saved` + type override. ✅
 
-### Sprint 2 (Semanas 3-4): Auto-tagging + Auto-summary
-- Módulo `internal/ai/` con interfaces + implementación OpenAI
-- Pipeline asíncrono de enriquecimiento
-- Config: `AI_PROVIDER`, `AI_OPT_IN_DEFAULT`
-- Frontend: indicador "analizando…" + UI de review de tags sugeridos
+### ⏳ Sprint 2 — Auto-tagging + Auto-summary (Fase 18 — PRÓXIMO)
+- Módulo `internal/ai/` con interfaces `Classifier` + `Summarizer` + `disabled.go` (noop)
+- `internal/ai/openai.go`: GPT-4o-mini
+- `internal/ai/ollama.go`: llama3.2 (Ollama local — default)
+- `internal/ai/pipeline.go`: worker pool + canal buffered; integración con `internal/jobs/`
+- Config: `AI_PROVIDER`, `OPENAI_API_KEY`, `OLLAMA_BASE_URL`, `AI_MAX_WORKERS`, `AI_OPT_IN_DEFAULT`
+- Endpoints: `POST /api/items/:id/ai-enrich`, `PATCH /api/items/:id/ai-tags`
+- Frontend: indicador "analizando…" en `ItemCard` + UI de review de tags sugeridos
 
-### Sprint 3 (Semanas 5-6): Búsqueda semántica
-- Migración `0006_embeddings.sql` + pgvector
+### 🔲 Sprint 3 — Búsqueda semántica (Fase 19)
+- `migrations/0006_embeddings.sql` + pgvector
 - Generación de embeddings en pipeline de IA
-- Búsqueda híbrida en endpoint `/api/search`
+- Búsqueda híbrida RRF en `/api/search`
 - Frontend: toggle "búsqueda semántica" en `GlobalSearchModal`
 
-### Sprint 4 (Semanas 7-8): Items relacionados + Ask DevDeck
+### 🔲 Sprint 4 — Items relacionados + Ask DevDeck (Fase 20)
 - Endpoint `/api/items/:id/related`
-- Sidebar "también te puede interesar" en detalle
-- Endpoint `/api/ask` con RAG básico
+- Sidebar "También te puede interesar" en detalle
+- Endpoint `POST /api/ask` con RAG básico
 - Frontend: panel "Ask DevDeck" en sidebar
 
-### Sprint 5 (Semanas 9-10): SQLite local + offline básico
-- Schema local SQLite
-- `SyncQueue` y `LocalDB` en cliente Electron
+### 🔲 Sprint 5 — SQLite local + offline básico (Fase 21)
+- Schema local SQLite (`userData/devdeck.db` en Electron, OPFS en web)
+- `SyncQueue` y `LocalDB` en cliente
 - Sync engine básico: push cola al conectar
 - Indicador de estado de sync en topbar
 
-### Sprint 6 (Semanas 11-12): Sync bidireccional + multi-device
-- Endpoint `/api/sync/batch` (idempotente)
-- Endpoint `/api/sync/delta`
-- Pull sync + resolución LWW
+### 🔲 Sprint 6 — Sync bidireccional + multi-device (Fase 22)
+- `POST /api/sync/batch` (idempotente con `operation_id`)
+- `GET /api/sync/delta?since=<timestamp>`
+- Pull sync + resolución LWW por campo
 - UI: lista de dispositivos en Settings
 
-### Sprint 7 (Semanas 13-14): Decks compartibles
-- Migración `0008_decks.sql`
-- CRUD endpoints de decks
-- Endpoints públicos (sin auth)
-- Frontend app: UI de crear/editar deck + copy link
-- Landing (devdeck.ai): página `/deck/:slug`
+### 🔲 Sprint 7 — Decks compartibles (Fase 23)
+- `migrations/0008_decks.sql`
+- CRUD endpoints de decks + endpoints públicos (sin auth)
+- Frontend: UI de crear/editar deck + copy link
+- Landing: página `/deck/:slug`
 
-### Sprint 8 (Semana 15): Multi-usuario + perfil público
+### 🔲 Sprint 8 — Multi-usuario + perfil público (Fase 24)
 - Ampliar allowlist a N usuarios
-- Endpoints de perfil público
-- Landing: página `/@username`
+- Endpoints de perfil público `/@username`
 - Rate limiting para IA por plan
 
 ---
