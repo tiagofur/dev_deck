@@ -1,6 +1,8 @@
 # DevDeck — Product Requirements Document
 
-> Versión: 0.4 · Owner: tfurt · Última actualización: 2026-04-08
+> Versión: 0.5 · Owner: tfurt · Última actualización: 2026-04-08
+>
+> **Cambio clave en 0.5:** el web client migró de Vue 3 a React 18 en un monorepo pnpm workspaces que comparte pages y componentes con el desktop. Ver [adr/0003-monorepo-pnpm-workspaces.md](adr/0003-monorepo-pnpm-workspaces.md).
 
 ---
 
@@ -13,7 +15,7 @@
 | Subdominio | Propósito |
 |------------|-----------|
 | `devdeck.ai` | Landing page + marketing + descargas |
-| `app.devdeck.ai` | Web app (Vue 3) |
+| `app.devdeck.ai` | Web app (React 18 — comparte pages con desktop via monorepo) |
 | `api.devdeck.ai` | Backend REST + sync engine |
 | `docs.devdeck.ai` | Documentación |
 | `download.devdeck.ai` | Descargas de la app desktop |
@@ -174,11 +176,11 @@ Ver [ROADMAP.md](../ROADMAP.md) para el detalle técnico completo de implementac
 #### Ola 4 — Web + Auth real ✅
 | Feature | Descripción |
 |---------|-------------|
-| Cliente web Vue 3 | Vue 3 + Vite + TypeScript + Pinia + Vue Router; mismo backend Go |
+| Cliente web React 18 | React 18 + Vite + TypeScript + React Router + TanStack Query. **Originalmente Vue 3, migrado a React en Wave 4.5 §16.13** para compartir pages y componentes con el desktop via monorepo pnpm workspaces. Ver `docs/adr/0003-monorepo-pnpm-workspaces.md`. |
 | GitHub OAuth | "Sign in with GitHub" → JWT de 30 días; allowlist de usernames |
 | JWT en Electron | OAuth via deeplink callback; safeStorage para tokens |
 | Refresh tokens | Refresh token de 90 días, rotación automática |
-| Paridad de features | Repos, commands, cheatsheets, discovery mode y mascota en Vue |
+| Paridad de features | Repos, commands, cheatsheets, discovery mode, items y mascota — 100% reuso de código con desktop via `@devdeck/features` |
 
 ---
 
@@ -431,7 +433,7 @@ US-38  Marcar un item como "solo local" para que no se sincronice.
 
 ## 9. Constraints técnicos y de producto
 
-- **Plataformas:** Electron (Mac, Win, Linux) + Web (Vue 3 / PWA). Mobile en roadmap futuro.
+- **Plataformas:** Electron (Mac, Win, Linux) + Web (React 18 / PWA). Ambas apps comparten 100% de pages y componentes via monorepo pnpm workspaces (`@devdeck/ui`, `@devdeck/api-client`, `@devdeck/features`). Mobile en roadmap futuro.
 - **Offline-first:** la app funciona sin red. Sync es eventual, no bloqueante.
 - **Idioma UI:** Español rioplatense (casual) — toggle inglés disponible en v2 desde settings.
 - **Performance:** lista con 1.000 items en < 200ms; búsqueda fuzzy < 100ms; búsqueda semántica < 500ms.
@@ -452,7 +454,7 @@ US-38  Marcar un item como "solo local" para que no se sincronice.
 6. **Quick capture es prioridad UX.** Guardar en < 3s; la IA completa después. La fricción mínima = más items guardados = app más valiosa.
 7. **La mascota NO es opcional en MVP.** Toggle disponible en settings. Snarkel es parte del diferencial de producto.
 8. **Discovery mode se expande** a todos los tipos de items en Ola 5 (no solo repos).
-9. **Vue para web (no React).** Decisión deliberada del owner — explora ecosistema Vue con el mismo backend Go.
+9. **React para web (originalmente Vue, migrado en Wave 4.5 §16.13).** La decisión original fue Vue para explorar el ecosistema con el mismo backend Go, pero la deriva entre el fork Vue y el desktop React se hizo insostenible al arrancar Ola 5. Migración motivada por: (a) cada feature de Ola 5 requería re-implementación manual; (b) `tokens.css` duplicado con riesgo de drift; (c) tests del design system solo vivían en desktop. Ver [adr/0003-monorepo-pnpm-workspaces.md](adr/0003-monorepo-pnpm-workspaces.md).
 10. **pgvector antes que servicio externo.** Misma Postgres, menor complejidad operacional. Evaluar Qdrant si escala lo requiere.
 11. **Embeddings opt-in.** Sin API key configurada, la búsqueda es fuzzy clásica (`pg_trgm`). Con API key, activa búsqueda semántica.
 12. **Decks compartibles son Ola 7**, no antes. Requieren multi-user y auth sólida primero.

@@ -292,10 +292,10 @@ Donde vos trabajás.
 ### Plataformas
 ```
 🖥️  Desktop                     🌐  Web
-Electron para macOS,            Vue 3 en cualquier browser.
+Electron para macOS,            React 18 en cualquier browser.
 Windows y Linux.                app.devdeck.ai
 Atajos globales de sistema.     GitHub OAuth. Mismos datos.
-Offline-first.
+Offline-first.                  Mismo UI que desktop — un solo codebase.
 ```
 
 ### Sync
@@ -407,15 +407,15 @@ Open-source · Self-hosteable · Offline-first · Hecho con ☕ por @tiagofur
 
 ### Stack recomendado para devdeck.ai landing
 - **Framework:** Astro (estático, fast, SEO) o Next.js (si quieren SSR)
-- **Estilos:** Mismo design system neo-brutalist — tokens CSS de `web/src/assets/tokens.css`
+- **Estilos:** Mismo design system neo-brutalist — tokens desde `packages/ui/styles/globals.css` + `packages/ui/tailwind-preset.cjs` del monorepo principal
 - **Deploy:** Vercel / Netlify / Cloudflare Pages — gratis para sitios estáticos
-- **Dominio:** `devdeck.ai` → landing, `app.devdeck.ai` → Vue web app, `api.devdeck.ai` → backend Go
+- **Dominio:** `devdeck.ai` → landing, `app.devdeck.ai` → React web app (`apps/web`), `api.devdeck.ai` → backend Go
 
 ### DNS setup recomendado
 ```
 devdeck.ai          A/CNAME → Vercel/Netlify (landing)
 www.devdeck.ai      CNAME   → devdeck.ai
-app.devdeck.ai      A       → VPS (Vue web app via Caddy)
+app.devdeck.ai      A       → VPS (React web app via Caddy)
 api.devdeck.ai      A       → VPS (Go API via Caddy)
 docs.devdeck.ai     CNAME   → docs hosting (GitBook/Starlight/Mintlify)
 ```

@@ -128,36 +128,70 @@ Contra el binario buildeado + backend dockerizado con seeds.
 
 ---
 
-## Frontend — Web (Vue)
+## Frontend — Monorepo (post Wave 4.5 §16.13)
+
+> **Cambio importante:** desde la migración a monorepo, los tests del frontend viven en los **packages compartidos**, no en las apps. Esto significa que los tests de `RepoCard`, `ItemCard`, `TagChip`, hooks de TanStack Query, fetch wrapper, etc. corren una sola vez y cubren tanto desktop como web.
+
+### Distribución actual de tests (67 total)
+
+| Package | Count | Tests |
+|---------|-------|-------|
+| `@devdeck/api-client` | 39 | `auth/auth.test.ts` (6), `format.test.ts` (3), `preferences.test.ts` (4), `features/capture/detect.test.ts` (26) |
+| `@devdeck/ui` | 5 | `TagChip.test.tsx` |
+| `@devdeck/features` | 18 | `RepoCard.test.tsx` (8), `ItemCard.test.tsx` (10) |
+| `apps/desktop` | 5 | `PasteInterceptor.test.tsx` (Electron-only component) |
+| **Total** | **67** | |
 
 ### Stack
-- **Unit/component:** Vitest + `@vue/test-utils`.
-- **E2E:** Playwright contra `pnpm dev` + backend dockerizado.
+- **Unit/component:** Vitest + `@testing-library/react` + `@testing-library/user-event`.
+- **E2E (desktop):** Playwright contra Electron build, backend dockerizado.
+- **E2E (web):** pendiente — TODO post-§16.13.
 
-### Unit
-- Components: `AddRepoModal.vue`, `CommandCard.vue`, `GlobalSearchModal.vue`, `ImportScriptsModal.vue`.
-- Stores Pinia: `auth`, `repos`, `cheatsheets`.
-- `lib/api.ts` con fetch mockeado (MSW).
+### Cómo correr tests
 
-Target: **50%** en `src/components/` y **70%** en `src/stores/` y `src/lib/`.
+```bash
+pnpm test                         # todos los packages (pnpm -r test)
+pnpm -F @devdeck/api-client test  # solo api-client
+pnpm -F @devdeck/ui test          # solo ui
+pnpm -F @devdeck/features test    # solo features
+pnpm -F @devdeck/desktop test     # solo desktop (PasteInterceptor)
+pnpm -F @devdeck/desktop test:e2e # Playwright flows
+```
 
-### E2E
-Los mismos 6 flujos que Electron, adaptados a browser.
+### Dónde escribir tests nuevos
+
+- **Hook TanStack Query / fetch wrapper / util puro / detector** → `packages/api-client/src/**/*.test.ts`
+- **Primitivo del design system (Button, TagChip, EmptyState, etc.)** → `packages/ui/src/**/*.test.tsx`
+- **Page o componente de dominio (RepoCard, ItemCard, CaptureModal, Topbar, Sidebar, Mascot, etc.)** → `packages/features/src/**/*.test.tsx`
+- **Componente Electron-only (PasteInterceptor)** → `apps/desktop/src/renderer/src/**/*.test.tsx`
+
+### Vitest setup
+
+Cada package con tests tiene su propio `vitest.config.ts` + `vitest.setup.ts` (donde aplique). El setup de `apps/desktop/vitest.setup.ts` llama a `configureApiClient()` + `setTokenStorage(localStorageAdapter)` antes de cada test para que los hooks que usan `getConfig()` tengan valores válidos (ver ADR 0003).
+
+### Target de cobertura
+
+- `packages/api-client` → **≥ 75%** (es la capa de dominio crítica)
+- `packages/features` → **≥ 60%** en componentes con lógica
+- `packages/ui` → smoke tests de cada primitive, no coverage quota
+- `apps/desktop` → 100% de los flows E2E + smoke de componentes Electron-only
 
 ---
 
 ## Matriz de tests E2E compartidos
 
-| Flow | Electron | Web Vue | Backend solo |
-|------|----------|---------|--------------|
-| Login OAuth | ✓ | ✓ | ✓ |
-| Add repo (URL) | ✓ | ✓ | ✓ |
-| Repo detail + notas | ✓ | ✓ | – |
-| Global search | ✓ | ✓ | ✓ |
-| Discovery swipe | ✓ | ✓ | – |
-| Commands CRUD + reorder | ✓ | ✓ | ✓ |
-| Cheatsheets | ✓ | ✓ | ✓ |
-| Batch import scripts | ✓ | ✓ | ✓ |
+| Flow | Electron (Playwright) | Web (TODO) | Backend solo |
+|------|-----------------------|------------|--------------|
+| Login OAuth | ✓ | — | ✓ |
+| Add repo (URL) | ✓ | — | ✓ |
+| Repo detail + notas | ✓ | — | – |
+| Global search | ✓ | — | ✓ |
+| Discovery swipe | ✓ | — | – |
+| Commands CRUD + reorder | ✓ | — | ✓ |
+| Cheatsheets | ✓ | — | ✓ |
+| Batch import scripts | ✓ | — | ✓ |
+
+Post-§16.13 los E2E de web son trivales de agregar (mismo Playwright apuntando a `:5173`) — TODO en próximo sprint.
 
 ---
 
@@ -177,32 +211,24 @@ jobs:
       - run: cd backend && go mod download
       - run: cd backend && go vet ./...
       - run: cd backend && go test -race -cover ./...
-  desktop:
+  monorepo:
+    # Desde §16.13 el repo es pnpm workspaces; todo el frontend se instala
+    # y testea desde la raíz con un solo install.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v3
-        with: { version: 9 }
+        with: { version: 10 }
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: pnpm, cache-dependency-path: desktop/pnpm-lock.yaml }
-      - run: cd desktop && pnpm install --frozen-lockfile
-      - run: cd desktop && pnpm typecheck
-      - run: cd desktop && pnpm test --run
-      - run: cd desktop && pnpm build
-  web:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-      - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: pnpm, cache-dependency-path: web/pnpm-lock.yaml }
-      - run: cd web && pnpm install --frozen-lockfile
-      - run: cd web && pnpm typecheck
-      - run: cd web && pnpm test --run
-      - run: cd web && pnpm build
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck              # pnpm -r typecheck (5 packages)
+      - run: pnpm test                   # pnpm -r test (67 tests en 4 packages)
+      - run: pnpm -F @devdeck/desktop build
+      - run: pnpm -F @devdeck/web build
   e2e:
     runs-on: ubuntu-latest
-    needs: [backend, web]
+    needs: [backend, monorepo]
     services:
       postgres:
         image: postgres:16-alpine
@@ -214,7 +240,7 @@ jobs:
 ```
 
 **Branch protection en `main`:**
-- Requerir status checks: `backend`, `desktop`, `web`, `e2e`.
+- Requerir status checks: `backend`, `monorepo`, `e2e`.
 - Requerir PR review de al menos 1 maintainer.
 - No permitir force push.
 - No permitir delete.

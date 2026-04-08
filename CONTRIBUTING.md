@@ -10,6 +10,13 @@ Gracias por querer ayudar. DevDeck es un proyecto indie con visión fuerte, así
 
 ## Setup local
 
+El repo es un **monorepo pnpm workspaces**. Una sola `pnpm install` en la raíz instala todo (`apps/desktop`, `apps/web`, `packages/ui`, `packages/api-client`, `packages/features`).
+
+```bash
+# Una sola vez, desde la raíz del repo
+pnpm install
+```
+
 ### Backend
 ```bash
 cd backend
@@ -19,19 +26,38 @@ docker compose -f ../deploy/docker-compose.dev.yml up -d db
 go run ./cmd/api
 ```
 
-### Desktop (Electron)
+### Desktop (Electron + React)
 ```bash
-cd desktop
-pnpm install
-pnpm dev
+pnpm dev:desktop                  # atajo desde la raíz
+# equivalente: pnpm -F @devdeck/desktop dev
 ```
 
-### Web (Vue)
+### Web (React)
 ```bash
-cd web
-pnpm install
-pnpm dev
+pnpm dev:web                      # atajo desde la raíz
+# equivalente: pnpm -F @devdeck/web dev
+# el dev server escucha en http://localhost:5173 y proxea /api → :8080
 ```
+
+### Tests y typecheck
+
+```bash
+pnpm typecheck                    # tsc --noEmit en los 5 packages
+pnpm test                         # vitest run en los 4 que tienen tests
+pnpm -F @devdeck/desktop test:e2e # Playwright flows del Electron
+```
+
+### Monorepo: cómo agregar código
+
+- **Componente primitivo de design-system** (sin fetch, sin hooks de dominio) → `packages/ui/src/`.
+- **Hook de TanStack Query, tipo de dominio, adapter de auth** → `packages/api-client/src/`.
+- **Página o componente con lógica de dominio reutilizable entre apps** → `packages/features/src/`.
+- **Código específico de Electron** (paste interceptor, OS shortcuts, safeStorage adapter) → `apps/desktop/src/renderer/src/`.
+- **Código específico de web** (LoginPage, AuthCallbackPage, NotFoundPage, AuthGuard) → `apps/web/src/`.
+
+Los packages se importan via alias `@devdeck/ui`, `@devdeck/api-client`, `@devdeck/features` — tanto en TS (`tsconfig.base.json` paths) como en Vite (aliases en cada app). No hay build step: los packages son TypeScript source consumido directo.
+
+Ver [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md) para la arquitectura completa.
 
 ## Estilo de código
 
@@ -44,13 +70,15 @@ pnpm dev
 
 ### TypeScript
 - ESLint + Prettier (configs en cada app). `pnpm lint` limpio.
-- `strict: true` en `tsconfig.json`.
+- `strict: true` en `tsconfig.base.json` (heredado por todos los packages).
 - Components funcionales, hooks. Nada de class components nuevos.
-- Imports absolutos via `@/` donde esté configurado.
+- Imports absolutos via `@devdeck/ui`, `@devdeck/api-client`, `@devdeck/features` cuando cruzan package; `@/` solo para paths internos del app (`apps/desktop/src/renderer/src/`).
 
-### Vue
-- Composition API + `<script setup>`. Nada de Options API nueva.
-- Pinia para state. Nada de Vuex.
+### React
+- Hooks only, nada de `React.Component`.
+- Estado server: TanStack Query v5 (hooks en `@devdeck/api-client/src/features/*/api.ts`).
+- Estado UI local: `useState`. Sin redux/zustand/jotai.
+- Routing: `react-router-dom` v6. Desktop usa `HashRouter`, web usa `BrowserRouter`.
 
 ### CSS / Tailwind
 - Tokens del design system (`tokens.css`) antes que classes custom.

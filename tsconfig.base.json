@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noUncheckedIndexedAccess": false,
+    "baseUrl": ".",
+    "paths": {
+      "@devdeck/ui": ["packages/ui/src/index.ts"],
+      "@devdeck/ui/*": ["packages/ui/*"],
+      "@devdeck/api-client": ["packages/api-client/src/index.ts"],
+      "@devdeck/api-client/*": ["packages/api-client/src/*"],
+      "@devdeck/features": ["packages/features/src/index.ts"],
+      "@devdeck/features/*": ["packages/features/src/*"]
+    }
+  }
+}
