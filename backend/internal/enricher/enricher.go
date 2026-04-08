@@ -31,12 +31,32 @@ type Service struct {
 	generic *OpenGraphEnricher
 }
 
+// defaultGitHubAPIBase is the public GitHub REST API root. Tests inject a
+// different base via newGitHubEnricher to point at an httptest.Server.
+const defaultGitHubAPIBase = "https://api.github.com"
+
 func New(githubToken string) *Service {
+	return NewWithGitHubBase(githubToken, defaultGitHubAPIBase)
+}
+
+// NewWithGitHubBase is a constructor that allows overriding the GitHub REST
+// API root URL. Tests use it to point at an httptest.Server. Production code
+// should use New, which defaults to the real api.github.com.
+func NewWithGitHubBase(githubToken, githubAPIBase string) *Service {
 	httpc := &http.Client{Timeout: 10 * time.Second}
 	return &Service{
-		github:  &GitHubEnricher{token: githubToken, httpc: httpc},
+		github:  newGitHubEnricher(githubToken, githubAPIBase, httpc),
 		generic: &OpenGraphEnricher{httpc: httpc},
 	}
+}
+
+// newGitHubEnricher constructs a GitHubEnricher with an explicit API base.
+// Exposed at package level so tests can stand up an httptest.Server.
+func newGitHubEnricher(token, apiBase string, httpc *http.Client) *GitHubEnricher {
+	if apiBase == "" {
+		apiBase = defaultGitHubAPIBase
+	}
+	return &GitHubEnricher{token: token, apiBase: apiBase, httpc: httpc}
 }
 
 // Enrich resolves metadata for the given URL. Returns ErrInvalidURL if the

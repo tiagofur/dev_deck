@@ -10,8 +10,9 @@ import (
 )
 
 type GitHubEnricher struct {
-	token string
-	httpc *http.Client
+	token   string
+	apiBase string // e.g. "https://api.github.com" — overridable for tests
+	httpc   *http.Client
 }
 
 // ghRepoResp is a partial schema of the GitHub /repos endpoint.
@@ -29,7 +30,7 @@ type ghRepoResp struct {
 }
 
 func (g *GitHubEnricher) Fetch(ctx context.Context, owner, repo string) (*repos.Metadata, error) {
-	apiURL := fmt.Sprintf("https://api.github.com/repos/%s/%s", owner, repo)
+	apiURL := fmt.Sprintf("%s/repos/%s/%s", g.apiBase, owner, repo)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
 	if err != nil {
 		return nil, err

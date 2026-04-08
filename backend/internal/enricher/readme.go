@@ -17,7 +17,7 @@ import (
 // The response embeds the README content base64-encoded; we decode and
 // return it as raw markdown.
 func (g *GitHubEnricher) FetchReadme(ctx context.Context, owner, repo string) (string, error) {
-	apiURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/readme", owner, repo)
+	apiURL := fmt.Sprintf("%s/repos/%s/%s/readme", g.apiBase, owner, repo)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
 	if err != nil {
 		return "", err
