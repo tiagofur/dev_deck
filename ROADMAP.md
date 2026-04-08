@@ -192,7 +192,101 @@
 
 ---
 
-## Stack
+## 🌊 Ola 5 — Items generales + IA real
+
+> **Objetivo:** convertir DevDeck de directorio de repos a knowledge OS para developers. Justificar el `.ai` con features de IA que resuelven fricción real, no decorativas.
+
+### Fase 17 — Modelo de items extendido
+
+- `migrations/0005_items.sql`: migrar tabla `repos` al modelo extendido `items` con campo `item_type` (`repo`, `cli`, `plugin`, `shortcut`, `snippet`, `agent`, `prompt`, `article`, `tool`, `workflow`, `note`)
+- `internal/domain/items/`: domain types extendidos, backwards-compatible con repos existentes
+- `internal/store/items.go`: CRUD extendido con soporte para todos los tipos
+- Nuevos campos: `why_saved` (string), `when_to_use` (string), `ai_summary` (text), `ai_tags` (array), `embedding` (vector)
+- Endpoint `POST /api/items` — acepta URL o texto libre; detecta tipo automáticamente
+- Endpoint `GET /api/items` — lista con filtro por `item_type`
+- Frontend (Electron + Vue): renombrar "repos" → "items" en UX; cards adaptadas por tipo; formulario "por qué lo guardé"
+
+### Fase 18 — Auto-tagging + Auto-summary (IA)
+
+- `internal/ai/`: módulo de IA con interfaz `Classifier` + `Summarizer`
+- `internal/ai/openai.go`: implementación con OpenAI (GPT-4o-mini para eficiencia)
+- `internal/ai/ollama.go`: implementación con Ollama para opción local
+- `internal/config/config.go`: `AI_PROVIDER` (`openai`|`ollama`|`disabled`), `AI_OPT_IN` por usuario
+- Pipeline de enriquecimiento: al guardar un item, encolar tarea de IA → auto-tags + summary en background (no bloquea el save)
+- Endpoint `POST /api/items/:id/ai-enrich` — dispara enriquecimiento manual on-demand
+- Endpoint `PATCH /api/items/:id/ai-tags` — el usuario acepta/edita/descarta tags sugeridos
+- Frontend: indicador "analizando…" mientras la IA trabaja; UI de review de tags sugeridos (aceptar/editar/descartar)
+
+### Fase 19 — Búsqueda semántica
+
+- `migrations/0006_embeddings.sql`: columna `embedding vector(1536)` en `items`; extensión `pgvector`
+- `internal/ai/embeddings.go`: generación de embeddings (OpenAI text-embedding-3-small o Ollama nomic-embed-text)
+- `internal/store/search.go`: búsqueda vectorial con `<=>` (cosine distance) + fallback a pg_trgm existente
+- Búsqueda híbrida: combina score vectorial + score textual; rank final ponderado
+- Endpoint `GET /api/search?q=...&mode=semantic|text|hybrid` — query param para elegir modo
+- Frontend: búsqueda semántica activada en `GlobalSearchModal` con toggle; resultados muestran score de relevancia
+
+### Fase 20 — Items relacionados + "Ask DevDeck"
+
+- `internal/ai/related.go`: dado un item, buscar los K más similares por embedding (K=5 por default)
+- Endpoint `GET /api/items/:id/related` — devuelve items relacionados con score
+- Frontend: sidebar "También te puede interesar" en `ItemDetailPage` con cards mini
+- `internal/ai/ask.go`: RAG simple — búsqueda semántica sobre vault del usuario + respuesta con contexto
+- Endpoint `POST /api/ask` — body `{question: string}` → `{answer: string, sources: Item[]}`
+- Frontend: panel "Ask DevDeck" en sidebar; contexto claro: "Basado en tu vault, encontré…"
+- Vistas por intención en `HomePage`: "AI Tools", "Terminal stuff", "Mac shortcuts", "Go setup", "Olvidados (sin abrir en 3 meses)"
+
+---
+
+## 🌊 Ola 6 — Offline-first + Sync + Multi-usuario
+
+> **Objetivo:** hacer que DevDeck funcione sin red y se sincronice entre devices; habilitar sharing y multi-usuario real.
+
+### Fase 21 — Offline-first con SQLite local
+
+- **Electron:** SQLite local via `better-sqlite3` o `sql.js`; DB en `userData/devdeck.db`
+- **Web (PWA):** `sql.js` con persistencia en Origin Private File System (OPFS)
+- `src/local-db/schema.sql`: schema local (subset del schema backend)
+- `src/local-db/migrations.ts`: migraciones locales versionadas
+- `src/sync/queue.ts`: cola de cambios locales con `operation` (`create`|`update`|`delete`), `entity`, `payload`, `created_at`, `synced_at`
+- Toda operación CRUD escribe local primero, luego encola para sync
+- `src/sync/engine.ts`: loop de sync — al conectar, drena la cola → POST `/api/sync/batch`; al reconectar, re-intenta fallidos
+- Backend: `POST /api/sync/batch` — acepta array de operaciones; procesa idempotentemente (con `client_id` + `operation_id`)
+- UI: indicador de estado en topbar: `🟢 Sincronizado` / `🟡 X cambios pendientes` / `🔴 Sin conexión`
+
+### Fase 22 — Multi-device + Resolución de conflictos
+
+- Schema: `items.updated_at` (timestamp), `items.version` (integer auto-increment en server)
+- Sync pull: `GET /api/sync/delta?since=<timestamp>` — devuelve cambios del servidor desde timestamp
+- Resolución de conflictos: last-write-wins por campo usando `updated_at`; en colisión real (mismo campo, mismo timestamp), notifica al usuario con UI de merge simple
+- `migrations/0007_sync.sql`: tabla `sync_log` para auditoría de operaciones sync
+- Multi-device: cada cliente tiene un `client_id` (UUID) generado al instalar; el backend trackea qué cliente generó cada operación
+- Backend: `GET /api/me/devices` — lista dispositivos activos del usuario
+- Frontend: Settings > Dispositivos — lista con "último sync", botón "desconectar dispositivo"
+
+### Fase 23 — Decks compartibles
+
+- `migrations/0008_decks.sql`: tabla `decks` (`id`, `user_id`, `slug`, `title`, `description`, `is_public`, `created_at`)
+- Tabla `deck_items` (`deck_id`, `item_id`, `position`, `added_at`)
+- CRUD endpoints: `GET|POST /api/decks`, `GET|PATCH|DELETE /api/decks/:id`
+- Endpoint `GET /api/decks/:slug/public` — público, sin auth; devuelve deck + items (metadata pública solamente)
+- Endpoint `POST /api/decks/:id/import` — importa items de un deck público al vault del usuario autenticado
+- Open Graph: `GET /deck/:slug` en landing (devdeck.ai) con meta tags `og:title`, `og:description`, `og:image` (preview del deck)
+- Frontend app: UI de "Crear deck", selector de items, toggle público/privado, copy link button
+- Frontend landing (devdeck.ai): página `devdeck.ai/deck/:slug` — preview del deck con lista de items + CTA "Importar a mi DevDeck"
+
+### Fase 24 — Perfil público + Multi-usuario completo
+
+- `GET /api/users/:username/public` — perfil público: nombre, bio, decks públicos
+- Landing: `devdeck.ai/@username` — página de perfil con decks públicos del usuario
+- Auth: ampliar allowlist de usuarios (pasar de 1 username a N usernames en `ALLOWED_GITHUB_LOGINS`)
+- Admin: `GET /api/admin/users` — listar usuarios (solo para el owner); gestión de permisos
+- Rate limiting por usuario para endpoints de IA (proteger contra abuso de costos)
+- Billing foundation: campo `plan` en `users` (`free`|`pro`); límites por plan (ej: items guardados, embeddings/mes)
+
+---
+
+## Stack actualizado
 
 | Capa | Tecnología |
 |------|-----------|
@@ -204,6 +298,10 @@
 | Markdown | react-markdown + remark-gfm + rehype-highlight |
 | Iconos | Lucide React |
 | Backend | Go + Chi + pgx v5 |
-| Base de datos | Postgres 16 + pg_trgm |
+| Base de datos | Postgres 16 + pg_trgm + pgvector |
+| IA | OpenAI API (GPT-4o-mini + text-embedding-3-small) o Ollama (local) |
+| Offline (desktop) | better-sqlite3 / sql.js + OPFS (web) |
+| Vector search | pgvector (Postgres) |
 | Deploy | Docker Compose + Caddy (TLS automático) |
 | Web (Ola 4) | Vue 3 + Vite + Pinia + Vue Router |
+| Landing | Astro o Next.js en Vercel/Cloudflare Pages |
