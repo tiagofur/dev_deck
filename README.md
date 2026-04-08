@@ -1,61 +1,29 @@
 # DevDeck.ai
 
-> 🌐 [devdeck.ai](https://devdeck.ai) — Tu memoria externa para desarrollo, asistida por IA.
+> **Tu memoria externa asistida por IA para el trabajo de desarrollo.**
 
-> **Tu knowledge OS para developers.** Guarda, organiza y redescubre herramientas, repos, comandos, cheatsheets, atajos, workflows y notas — con IA que te ayuda a recordar por qué las guardaste.
+Una app **offline-first, multi-usuario y multiplataforma** donde guardar, organizar y redescubrir todo lo útil que un dev encuentra: repos, CLIs, plugins, cheatsheets, shortcuts, snippets, agentes, prompts y workflows. Con IA que clasifica, resume y recupera por intención — no por tag exacto.
 
-Una app multiplataforma (Electron + Vue web) con backend Go + Postgres, en estilo **neo-brutalist colorido**, con búsqueda semántica, auto-tagging por IA, modo descubrimiento tipo Tinder, y una mascota animada que te juzga gentilmente.
-
----
-
-## ¿Qué problema resuelve?
-
-- **Descubrir** repos, CLIs, plugins, atajos y herramientas útiles para devs
-- **Volver a encontrarlos** cuando los necesitás (semanas o meses después)
-- **Recordar el contexto**: "¿para qué servía este repo / CLI / atajo?"
-- **Tener a mano** comandos, shortcuts y workflows por stack
-- **Curar conocimiento disperso**: repos, cheatsheets, snippets, notas, prompts, agentes
-
-> "Lo que guardás no se pierde. Lo que no recordabas que guardaste, DevDeck te lo recuerda."
+Dominio: **[devdeck.ai](https://devdeck.ai)**
 
 ---
 
-## Items que podés guardar
+## ¿Por qué DevDeck?
 
-| Tipo | Ejemplos |
-|------|---------|
-| **Repo** | GitHub repos de tools, libraries, boilerplates |
-| **CLI** | `gh`, `jq`, `fzf`, `ripgrep`, `lazygit` |
-| **Plugin / Extensión** | Plugins de VS Code, JetBrains, Neovim |
-| **Skill / Prompt / Agente** | Prompts de AI coding, agents, MCP skills |
-| **Cheatsheet** | Git, Docker, vim, tmux, kubectl… |
-| **Shortcut** | Atajos de macOS, VS Code, iTerm |
-| **Workflow** | Secuencias de comandos por stack o tarea |
-| **Nota** | "Por qué elegimos X", gotchas, decision logs |
-| **Snippet** | Scripts reutilizables, one-liners |
-| **Tool / App** | Apps de productividad, dev tools de escritorio |
+El problema real no es "guardar repos". Es no poder volver a encontrar lo que ya descubriste: una CLI útil que te pasaron en un chat, un plugin de IDE que no recordás cómo se llamaba, un atajo de macOS que tardaste horas en aprender, un repo que resolvía exactamente tu problema actual.
 
----
-
-## Features de IA (`devdeck.ai`)
-
-| Feature | Qué hace |
-|---------|---------|
-| **Auto-summary** | Genera automáticamente "qué es y para qué sirve" |
-| **Auto-tagging** | Propone tipo, stack, propósito y nivel automáticamente |
-| **Búsqueda semántica** | Encontrá items por intención, no solo por título exacto |
-| **Related items** | Sugiere repos, comandos y cheatsheets relacionados |
-| **Content → Knowledge** | Pegar URL/README → genera resumen, tags y comandos detectados |
-| **Ask DevDeck** | Preguntale a tu propia base de conocimiento |
+DevDeck es tu **colección curada de conocimiento dev** — con IA que hace que todo lo que guardás sea encontrable semanas después, aunque no recuerdes cómo lo llamaste.
 
 ---
 
 ## Stack
 
 - **Desktop:** Electron + React 18 + TypeScript + Tailwind + Framer Motion
-- **Web:** Vue 3 + Vite + Pinia + Vue Router + TanStack Query
-- **Backend:** Go + Chi + pgx + sqlc
-- **DB:** Postgres 16 (con `pg_trgm` para fuzzy search + pgvector para búsqueda semántica)
+- **Web:** Vue 3 + Vite + Pinia + Vue Router
+- **Backend:** Go + Chi + pgx + pgvector
+- **DB:** Postgres 16 (con `pg_trgm` + `pgvector` para búsqueda fuzzy y semántica)
+- **IA:** OpenAI API / Ollama (local)
+- **Offline:** SQLite local (Electron) + sql.js/OPFS (Web)
 - **Deploy:** VPS propio · Docker Compose · Caddy (TLS automático)
 - **Dominio:** [devdeck.ai](https://devdeck.ai) · `app.devdeck.ai` · `api.devdeck.ai`
 
@@ -65,9 +33,9 @@ Una app multiplataforma (Electron + Vue web) con backend Go + Postgres, en estil
 
 | Doc | Contenido |
 |-----|-----------|
-| [docs/PRD.md](docs/PRD.md) | Visión del producto, features, user stories, scope por olas |
-| [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) | Análisis competitivo vs Raindrop, Notion, Obsidian, Raycast, Dash/Zeal y más |
-| [docs/LANDING_COPY.md](docs/LANDING_COPY.md) | Copy de landing page para devdeck.ai (en español) |
+| [docs/PRD.md](docs/PRD.md) | Producto, features, user stories, scope por olas |
+| [docs/LANDING_COPY.md](docs/LANDING_COPY.md) | Copy y estructura de contenido para devdeck.ai |
+| [docs/TECHNICAL_ROADMAP_AI_OFFLINE.md](docs/TECHNICAL_ROADMAP_AI_OFFLINE.md) | Roadmap técnico detallado: offline-first, sync, multi-usuario, IA |
 | [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | Tokens, paleta, tipografía, componentes |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Diagrama, stack, decisiones, schema DB |
 | [docs/API.md](docs/API.md) | OpenAPI spec |
@@ -76,8 +44,6 @@ Una app multiplataforma (Electron + Vue web) con backend Go + Postgres, en estil
 
 ## Estado
 
-🚧 **Olas 1–4 completas.** Web client Vue + Auth GitHub OAuth operativo.
+🚧 **Olas 1–4 completas.** Próximo: Ola 5 (Items generales + IA) y Ola 6 (Offline-first + Sync + Multi-usuario).
 
-Próximo: **Ola 5** — tipos de items expandidos (CLI, Plugin, Shortcut, Workflow, Note, Prompt) + **Ola 6** — IA real (auto-summary, auto-tags, búsqueda semántica).
-
-Roadmap completo → [ROADMAP.md](ROADMAP.md)
+Roadmap completo en [ROADMAP.md](ROADMAP.md).
