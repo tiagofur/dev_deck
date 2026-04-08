@@ -23,6 +23,7 @@ Disponible como app de escritorio (Electron, Win/Mac/Linux) y web app en [`app.d
 | Doc | Contenido |
 |-----|-----------|
 | [docs/PRD.md](docs/PRD.md) | Visión del producto, features, user stories, scope por olas |
+| [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) | Análisis competitivo vs Raindrop, Notion, Obsidian, Raycast, Dash/Zeal y más |
 | [docs/LANDING_COPY.md](docs/LANDING_COPY.md) | Copy de landing page para devdeck.ai (en español) |
 | [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | Tokens, paleta, tipografía, componentes |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Diagrama, stack, decisiones, schema DB |
