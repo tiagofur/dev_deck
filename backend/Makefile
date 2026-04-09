@@ -7,7 +7,7 @@ run:
 	go run ./cmd/api
 
 migrate-up:
-	psql "$$DB_URL" -f migrations/0001_init.sql
+	for file in migrations/*.sql; do psql "$$DB_URL" -f "$$file"; done
 
 psql:
 	psql "$$DB_URL"

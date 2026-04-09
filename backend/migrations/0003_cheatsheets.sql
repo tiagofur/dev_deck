@@ -38,7 +38,3 @@ CREATE TABLE repo_cheatsheet_links (
   PRIMARY KEY (repo_id, cheatsheet_id)
 );
 
--- +goose Down
-DROP TABLE IF EXISTS repo_cheatsheet_links;
-DROP TABLE IF EXISTS cheatsheet_entries;
-DROP TABLE IF EXISTS cheatsheets;

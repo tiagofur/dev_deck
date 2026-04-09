@@ -27,8 +27,16 @@ CREATE TABLE IF NOT EXISTS repos (
   last_seen_at    TIMESTAMPTZ
 );
 
+-- Helper: array_to_string is STABLE, not IMMUTABLE, so PostgreSQL rejects
+-- it inside expression-based indexes. This thin IMMUTABLE wrapper makes
+-- it usable in GIN trigram indexes.
+CREATE OR REPLACE FUNCTION immutable_array_to_string(arr TEXT[], sep TEXT)
+RETURNS TEXT LANGUAGE sql IMMUTABLE PARALLEL SAFE AS $$
+  SELECT array_to_string(arr, sep);
+$$;
+
 CREATE INDEX IF NOT EXISTS idx_repos_search ON repos USING gin (
-  (name || ' ' || COALESCE(description,'') || ' ' || COALESCE(array_to_string(tags,' '),''))
+  (name || ' ' || COALESCE(description,'') || ' ' || COALESCE(immutable_array_to_string(tags,' '),''))
   gin_trgm_ops
 );
 CREATE INDEX IF NOT EXISTS idx_repos_lang     ON repos(language);

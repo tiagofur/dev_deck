@@ -8,7 +8,15 @@
 -- `/api/items/capture` writes to `items`. Dedupe works across both via
 -- the `url_normalized` column.
 
-CREATE TABLE items (
+-- Helper: array_to_string is STABLE, not IMMUTABLE, so PostgreSQL rejects
+-- it inside expression-based indexes. This thin IMMUTABLE wrapper makes
+-- it usable in GIN trigram indexes.
+CREATE OR REPLACE FUNCTION immutable_array_to_string(arr TEXT[], sep TEXT)
+RETURNS TEXT LANGUAGE sql IMMUTABLE PARALLEL SAFE AS $$
+  SELECT array_to_string(arr, sep);
+$$;
+
+CREATE TABLE IF NOT EXISTS items (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   item_type        TEXT NOT NULL CHECK (item_type IN (
     'repo','cli','plugin','shortcut','snippet','agent','prompt',
@@ -37,15 +45,15 @@ CREATE TABLE items (
 -- One row per normalized URL so the capture endpoint can dedupe in a single
 -- query. Nullable because type=note/shortcut/snippet/prompt items might not
 -- have a URL at all.
-CREATE UNIQUE INDEX idx_items_url_normalized
+CREATE UNIQUE INDEX IF NOT EXISTS idx_items_url_normalized
   ON items(url_normalized)
   WHERE url_normalized IS NOT NULL;
 
-CREATE INDEX idx_items_type ON items(item_type);
-CREATE INDEX idx_items_type_created ON items(item_type, created_at DESC);
-CREATE INDEX idx_items_tags ON items USING gin(tags);
-CREATE INDEX idx_items_search ON items USING gin (
-  (title || ' ' || COALESCE(description,'') || ' ' || COALESCE(array_to_string(tags,' '),''))
+CREATE INDEX IF NOT EXISTS idx_items_type ON items(item_type);
+CREATE INDEX IF NOT EXISTS idx_items_type_created ON items(item_type, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_items_tags ON items USING gin(tags);
+CREATE INDEX IF NOT EXISTS idx_items_search ON items USING gin (
+  (title || ' ' || COALESCE(description,'') || ' ' || COALESCE(immutable_array_to_string(tags,' '),''))
   gin_trgm_ops
 );
 
@@ -65,12 +73,3 @@ WHERE url_normalized IS NULL;
 
 CREATE INDEX IF NOT EXISTS idx_repos_url_normalized ON repos(url_normalized);
 
--- +goose Down
-DROP INDEX IF EXISTS idx_repos_url_normalized;
-ALTER TABLE repos DROP COLUMN IF EXISTS url_normalized;
-DROP INDEX IF EXISTS idx_items_search;
-DROP INDEX IF EXISTS idx_items_tags;
-DROP INDEX IF EXISTS idx_items_type_created;
-DROP INDEX IF EXISTS idx_items_type;
-DROP INDEX IF EXISTS idx_items_url_normalized;
-DROP TABLE IF EXISTS items;

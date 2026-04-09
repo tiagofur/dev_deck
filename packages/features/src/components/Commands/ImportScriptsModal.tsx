@@ -41,6 +41,14 @@ export function ImportScriptsModal({
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
 
+  // Sort scripts alphabetically for easier scanning.
+  // MUST be above the early return — React requires all hooks to run
+  // in the same order on every render (Rules of Hooks).
+  const sorted = useMemo(
+    () => [...scripts].sort((a, b) => a.name.localeCompare(b.name)),
+    [scripts],
+  )
+
   if (!open) return null
 
   function toggle(name: string) {
@@ -66,11 +74,7 @@ export function ImportScriptsModal({
     onImport(picked)
   }
 
-  // Sort scripts alphabetically for easier scanning.
-  const sorted = useMemo(
-    () => [...scripts].sort((a, b) => a.name.localeCompare(b.name)),
-    [scripts],
-  )
+  // guessCategory is a pure function — no hooks involved, safe here.
 
   // Try to guess a category from the script name.
   function guessCategory(name: string): string | undefined {
@@ -127,6 +131,22 @@ export function ImportScriptsModal({
               <div className="w-8 h-8 border-4 border-ink border-t-accent-yellow animate-spin" />
               <p className="font-mono text-sm text-ink-soft">
                 Descargando package.json de GitHub...
+              </p>
+            </div>
+          </div>
+        ) : scripts.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center py-16">
+            <div className="flex flex-col items-center gap-3 text-center px-6">
+              <div className="w-14 h-14 border-3 border-ink bg-bg-elevated flex items-center justify-center">
+                <Package size={28} strokeWidth={2.5} className="text-ink-soft" />
+              </div>
+              <p className="font-display font-bold text-lg uppercase">
+                Sin scripts
+              </p>
+              <p className="font-mono text-sm text-ink-soft max-w-sm">
+                {errorMessage
+                  ? errorMessage
+                  : 'Este repo no tiene un package.json o no contiene scripts.'}
               </p>
             </div>
           </div>
@@ -202,7 +222,7 @@ export function ImportScriptsModal({
           </>
         )}
 
-        {errorMessage && (
+        {errorMessage && scripts.length > 0 && (
           <div className="mt-4 p-3 bg-danger text-white border-3 border-ink font-bold text-sm shrink-0">
             {errorMessage}
           </div>
@@ -211,21 +231,25 @@ export function ImportScriptsModal({
         {/* Footer */}
         <div className="mt-5 flex items-center justify-between shrink-0 pt-4 border-t-3 border-ink">
           <p className="font-mono text-xs text-ink-soft">
-            Cada script se crea como un comando con categoría automática.
+            {scripts.length > 0
+              ? 'Cada script se crea como un comando con categoría automática.'
+              : ''}
           </p>
           <div className="flex gap-3">
             <Button type="button" variant="secondary" onClick={onClose}>
-              Cancelar
+              {scripts.length === 0 ? 'Cerrar' : 'Cancelar'}
             </Button>
-            <Button
-              type="button"
-              disabled={saving || selected.size === 0}
-              onClick={handleImport}
-            >
-              {saving
-                ? 'Importando...'
-                : `Importar ${selected.size} ${selected.size === 1 ? 'script' : 'scripts'}`}
-            </Button>
+            {scripts.length > 0 && (
+              <Button
+                type="button"
+                disabled={saving || selected.size === 0}
+                onClick={handleImport}
+              >
+                {saving
+                  ? 'Importando...'
+                  : `Importar ${selected.size} ${selected.size === 1 ? 'script' : 'scripts'}`}
+              </Button>
+            )}
           </div>
         </div>
       </div>

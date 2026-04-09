@@ -22,6 +22,3 @@ CREATE TABLE refresh_sessions (
 CREATE INDEX idx_refresh_sessions_user ON refresh_sessions(user_id);
 CREATE INDEX idx_refresh_sessions_token ON refresh_sessions(token_hash);
 
--- +goose Down
-DROP TABLE IF EXISTS refresh_sessions;
-DROP TABLE IF EXISTS users;
