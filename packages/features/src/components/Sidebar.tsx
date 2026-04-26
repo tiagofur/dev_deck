@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { useMemo } from 'react'
 import type { Repo } from '@devdeck/api-client'
 
 interface Props {
@@ -16,22 +17,28 @@ export function Sidebar({
   onSelectTag,
   onSelectLang,
 }: Props) {
-  const tagCounts = new Map<string, number>()
-  const langCounts = new Map<string, { count: number; color: string | null }>()
+  // ⚡ Bolt: Memoized expensive tag and language counting/sorting
+  // Prevents O(N * T) iteration and sorting on every render where N is repos and T is tags.
+  const { tags, langs } = useMemo(() => {
+    const tagCounts = new Map<string, number>()
+    const langCounts = new Map<string, { count: number; color: string | null }>()
 
-  for (const r of repos) {
-    for (const t of r.tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1)
-    if (r.language) {
-      const cur = langCounts.get(r.language)
-      langCounts.set(r.language, {
-        count: (cur?.count ?? 0) + 1,
-        color: r.language_color,
-      })
+    for (const r of repos) {
+      for (const t of r.tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1)
+      if (r.language) {
+        const cur = langCounts.get(r.language)
+        langCounts.set(r.language, {
+          count: (cur?.count ?? 0) + 1,
+          color: r.language_color,
+        })
+      }
     }
-  }
 
-  const tags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1])
-  const langs = [...langCounts.entries()].sort((a, b) => b[1].count - a[1].count)
+    return {
+      tags: [...tagCounts.entries()].sort((a, b) => b[1] - a[1]),
+      langs: [...langCounts.entries()].sort((a, b) => b[1].count - a[1].count),
+    }
+  }, [repos])
 
   return (
     <aside className="w-60 shrink-0 border-r-3 border-ink bg-bg-elevated p-5 overflow-y-auto">
