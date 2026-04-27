@@ -97,7 +97,7 @@ function createWindow(): void {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false, // required for preload to use ipcRenderer
+      sandbox: true,
       preload: preloadPath,
     },
   })
