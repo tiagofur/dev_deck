@@ -110,21 +110,25 @@ async function captureTab({ url, title, source, whySaved, tags }) {
   }
 }
 
-async function drainQueue() {
+export async function drainQueue() {
   const { apiUrl, token } = await getSettings()
   if (!token) return
   const q = await getQueue()
   if (q.length === 0) return
 
+  const results = await Promise.allSettled(
+    q.map((entry) => capture({ apiUrl, token, input: entry.input })),
+  )
+
   const remaining = []
-  for (const entry of q) {
-    try {
-      await capture({ apiUrl, token, input: entry.input })
-    } catch (err) {
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i]
+    if (result.status === 'rejected') {
+      const err = result.reason
       // Only transient errors stay in the queue. Permanent 4xx are
       // dropped so a malformed item doesn't block the whole queue.
       if (err.status === undefined || err.status >= 500) {
-        remaining.push(entry)
+        remaining.push(q[i])
       }
     }
   }
