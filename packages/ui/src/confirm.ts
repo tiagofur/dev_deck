@@ -1,16 +1,20 @@
-// Promise-based confirm dialog. Same singleton pattern as toast.ts.
-//
-// Usage:
-//   const ok = await confirm({
-//     title: 'Borrar repo',
-//     message: 'Esto no se puede deshacer.',
-//     confirmLabel: 'Borrar',
-//     variant: 'danger',
-//   })
-//   if (!ok) return
-//
-// Replaces window.confirm() so we can show a brutalist-styled dialog
-// instead of the native OS one.
+/**
+ * Promise-based confirm dialog. Same singleton pattern as toast.ts.
+ *
+ * @example
+ * ```typescript
+ * const ok = await confirm({
+ *   title: 'Borrar repo',
+ *   message: 'Esto no se puede deshacer.',
+ *   confirmLabel: 'Borrar',
+ *   variant: 'danger',
+ * })
+ * if (!ok) return
+ * ```
+ *
+ * Replaces window.confirm() so we can show a brutalist-styled dialog
+ * instead of the native OS one.
+ */
 
 export type ConfirmVariant = 'primary' | 'danger'
 
