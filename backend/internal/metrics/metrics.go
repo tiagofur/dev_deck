@@ -59,6 +59,15 @@ var CaptureItems = promauto.NewCounterVec(
 	[]string{"source", "item_type", "outcome"},
 )
 
+// MetadataExtractions counts metadata extraction attempts
+var MetadataExtractions = promauto.NewCounterVec(
+	prometheus.CounterOpts{
+		Name: "devdeck_metadata_extractions_total",
+		Help: "Metadata extraction attempts, labelled by outcome (success/error).",
+	},
+	[]string{"outcome"},
+)
+
 // Instrument wraps an http.Handler so every request observes the
 // latency histogram and (if 5xx) the error counter. Call from the
 // router right after chi is set up but before your routes — chi's

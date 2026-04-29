@@ -95,6 +95,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	cheatsH := handlers.NewCheatsheetsHandler(st)
 	captureH := handlers.NewCaptureHandler(st, deps.EnrichQueue)
 	itemsH := handlers.NewItemsHandler(st)
+	metadataH := handlers.NewMetadataHandler(en)
 
 	r.Route("/api", func(api chi.Router) {
 		api.Use(mw.TokenAuth(cfg, as))
@@ -113,6 +114,11 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				}),
 			))
 		}
+
+		// Ola 1.2 — metadata extraction (used by capture flow)
+		api.Route("/v1/metadata", func(mr chi.Router) {
+			mr.Post("/", metadataH.Extract)
+		})
 
 		api.Route("/repos", func(rr chi.Router) {
 			rr.Get("/", reposH.List)
