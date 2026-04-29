@@ -1,22 +1,122 @@
-# DevDeck.ai
+# DevDeck.ai — Tu cinturón de utilidades Batman para programar mejor 🦇
 
 > **Tu memoria externa asistida por IA para el trabajo de desarrollo.**
+>
+> Una app offline-first, multiplataforma donde guardar, organizar y redescubrir todo lo útil: repos, CLIs, plugins, tips, comandos, snippets, workflows, prompts. Con IA que clasifica automáticamente, resume, y te permite buscar por intención — no por nombre exacto que no recordás.
 
-Una app **offline-first, multi-usuario y multiplataforma** donde guardar, organizar y redescubrir todo lo útil que un dev encuentra: repos, CLIs, plugins, cheatsheets, shortcuts, snippets, agentes, prompts y workflows. Con IA que clasifica, resume y recupera por intención — no por tag exacto.
-
-Dominio: **[devdeck.ai](https://devdeck.ai)**
-
----
-
-## ¿Por qué DevDeck?
-
-El problema real no es "guardar repos". Es no poder volver a encontrar lo que ya descubriste: una CLI útil que te pasaron en un chat, un plugin de IDE que no recordás cómo se llamaba, un atajo de macOS que tardaste horas en aprender, un repo que resolvía exactamente tu problema actual.
-
-DevDeck es tu **colección curada de conocimiento dev** — con IA que hace que todo lo que guardás sea encontrable semanas después, aunque no recuerdes cómo lo llamaste.
+**Dominio**: [devdeck.ai](https://devdeck.ai)
 
 ---
 
-## Stack
+## 🎯 El problema real
+
+Todos los días encontrás herramientas útiles:
+- Un CLI que te pasó un colega en Slack
+- Un plugin de VS Code que te salvó la vida
+- Un atajo de macOS que nunca terminaste de aprender
+- Un repo que resolvía exactamente lo que estás haciendo ahora
+- Un prompt de AI que funcionó brillantemente
+
+**6 meses después**: Necesitás algo parecido. ¿Dónde estaba? ¿Cómo se llamaba? ¿En qué carpeta lo guardé? Googleás de cero algo que ya habías resuelto.
+
+### Eso es lo que mata la productividad.
+
+---
+
+## 🦇 Cómo DevDeck te ayuda
+
+### Captura en 2 segundos
+```
+cmd+K → Pegás la URL → DevDeck extrae metadata automáticamente
+→ Le asignás a un deck ("Go tools", "DevOps", etc)
+→ La IA agrega tags automáticamente
+→ Listo. Tu item quedó indexado y organizado.
+```
+
+### Búsqueda inteligente
+```
+No acordás el nombre exacto?
+"CLI para correr tasks en paralelo"
+↓
+DevDeck busca por INTENCIÓN, no por keywords
+↓
+Resulta: cobra, urfave/cli, goreleaser (los que realmente necesitás)
+```
+
+### Descubre lo que ya guardaste
+```
+Estás debuggeando goroutines
+↓
+DevDeck sugiere: "Tenés un tip sobre memory leaks aquí"
+↓
+Lo que olvidaste que guardaste aparece justo cuando lo necesitás
+```
+
+### Siempre disponible
+```
+Sin internet?
+→ Desktop funciona 100% offline con SQLite local
+→ Búsqueda local en < 100ms
+→ Cambios se sincronizan cuando vuelve internet
+```
+
+---
+
+## ✨ Que lo hace diferente
+
+| DevDeck | GitHub Stars | Notion | Raindrop | Raycast |
+|---------|--------------|--------|---------|---------|
+| Captura TODO tipo de asset dev | Solo repos | Todo (no optimizado) | Genérico | Launcher |
+| Auto-tagging con IA | ❌ | ❌ | ❌ | ❌ |
+| Búsqueda semántica | ✅ | ❌ | ❌ | ❌ |
+| Commands ejecutables | ✅ | ❌ | ❌ | ✅ |
+| Offline completo | ✅ | ❌ | ❌ | ✅ |
+| Tips por stack | ✅ | ❌ | ❌ | ❌ |
+| Compartición social | ✅ | ❌ | ❌ | ❌ |
+| Redescubrimiento activo | ✅ | ❌ | ❌ | ❌ |
+
+---
+
+## 🚀 Casos de uso reales
+
+### Dev full-stack que cambia de stack cada 3 meses
+```
+Guardás todo en DevDeck: Go tools, Node tools, Docker tips, AWS patterns
+→ Cuando pasás a un nuevo proyecto, tenés TODO listo en un deck
+→ Busca semántica: "patrón de testing para Node" → encuentra exactamente
+→ No pierdes tiempo googleando lo que ya sabés
+```
+
+### Developer de IA/LLMs que acumula prompts
+```
+Guardás tus mejores prompts, skills, agentes en DevDeck
+→ Cada uno con comandos: "cómo ejecutarlo", "qué parametrizar"
+→ Búsqueda inteligente: "dame un prompt para análisis de código"
+→ Descubrís tus propios prompts que olvidaste que guardaste
+→ Compartes decks con tu equipo de IA
+```
+
+### Platform engineer con stack complejo
+```
+Kubernetes, Docker, AWS, Terraform, Prometheus, etc
+→ Guardás tips, troubleshooting, runbooks por tecnología
+→ cmd+K mientras debuggeás Kubernetes → capture modal
+→ Capturás el comando que solucionó el problema
+→ La próxima vez que pase, está en tu deck
+```
+
+### Tech lead que cura conocimiento del equipo
+```
+Tenés decks públicos: "Onboarding Go", "Testing patterns", "DevOps essentials"
+→ Compartes con el equipo
+→ El equipo agrega comentarios, mejoras
+→ DevDeck es el single source of truth para tu equipo
+→ Trending sections muestran "lo que todos necesitamos saber"
+```
+
+---
+
+## 🏗️ Stack técnico
 
 - **Desktop:** Electron + React 18 + TypeScript + Tailwind + Framer Motion
 - **Web:** React 18 + Vite + React Router + TanStack Query (comparte 100% de pages y componentes con Desktop)
@@ -57,41 +157,51 @@ Ambas apps importan pages y componentes del package `@devdeck/features` — solo
 
 ## Documentación
 
-### Producto y visión
+### 🗺️ Roadmaps estratégicos (START HERE!)
+| Doc | Contenido |
+|-----|-----------|
+| [docs/STRATEGIC_ROADMAP.md](docs/STRATEGIC_ROADMAP.md) | 5 Olas (Foundation → AI Assistant), métricas de éxito |
+| [docs/ROADMAP_WEB.md](docs/ROADMAP_WEB.md) | Web (React): captura rápida → IA → compartición |
+| [docs/ROADMAP_DESKTOP.md](docs/ROADMAP_DESKTOP.md) | Desktop (Tauri): MVP → hotkeys/launcher → offline |
+| [docs/FEATURE_INVENTORY.md](docs/FEATURE_INVENTORY.md) | Catálogo de 50+ features planeadas por Ola |
+
+### 🎯 Estrategia y diseño
+| Doc | Contenido |
+|-----|-----------|
+| [docs/AI_STRATEGY.md](docs/AI_STRATEGY.md) | Cómo IA genera valor: auto-tagging, semantic search, discovery |
+| [docs/UX_PATTERNS.md](docs/UX_PATTERNS.md) | Diseño consistente: componentes, flujos, accessibility |
+| [docs/DATA_SCHEMA.md](docs/DATA_SCHEMA.md) | Schema completo: Item, Deck, Tag, Command, Tip, Relation |
+
+### 💡 Producto y visión
 | Doc | Contenido |
 |-----|-----------|
 | [docs/VISION.md](docs/VISION.md) | Visión, posicionamiento, diferenciadores |
-| [docs/PRD.md](docs/PRD.md) | Producto, features, user stories, scope por olas |
-| [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) | Análisis competitivo detallado |
-| [docs/LANDING.md](docs/LANDING.md) · [docs/LANDING_COPY.md](docs/LANDING_COPY.md) | Copy de landing (ES / EN) |
+| [docs/PRD.md](docs/PRD.md) | Producto, features, user stories |
+| [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) | Análisis competitivo |
 
-### Arquitectura y decisiones
+### 🏛️ Arquitectura y decisiones
 | Doc | Contenido |
 |-----|-----------|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Diagrama, stack, schema DB |
 | [docs/API.md](docs/API.md) | OpenAPI spec |
 | [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | Tokens, paleta, tipografía |
-| [docs/TECHNICAL_ROADMAP_AI_OFFLINE.md](docs/TECHNICAL_ROADMAP_AI_OFFLINE.md) | Roadmap técnico: offline, sync, IA |
-| [docs/adr/0001-items-polymorphism.md](docs/adr/0001-items-polymorphism.md) | ADR: modelo polimórfico de items |
-| [docs/adr/0002-sync-strategy.md](docs/adr/0002-sync-strategy.md) | ADR: estrategia de sync offline-first |
-| [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md) | ADR: monorepo pnpm workspaces + React en web |
+| [docs/adr/](docs/adr/) | Architecture Decision Records |
 
-### Operación y contribución
+### 🚀 Operación
 | Doc | Contenido |
 |-----|-----------|
-| [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md) | Guía paso a paso para self-host |
-| [docs/CAPTURE.md](docs/CAPTURE.md) | Spec de canales de captura (extensión, CLI, paste, share) |
+| [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md) | Guía self-host (Docker Compose) |
+| [docs/CAPTURE.md](docs/CAPTURE.md) | Canales de captura (CLI, extensión, paste) |
 | [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | Plan de tests y CI |
-| [docs/REVIEW_2026_04.md](docs/REVIEW_2026_04.md) | **Review técnico de abril 2026** — motiva Ola 4.5 |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Cómo contribuir |
 | [SECURITY.md](SECURITY.md) | Política de seguridad |
 
 ---
 
-## Estado
+### Roadmap
 
-🚧 **Olas 1–4 completas.** **Ola 4.5 (Hardening & Capture) en curso** — red de seguridad (tests + CI) y canales de captura (CLI + extensión + paste). Ver [docs/REVIEW_2026_04.md](docs/REVIEW_2026_04.md) para el análisis que la motiva.
-
-Próximo: Ola 5 (Items generales + IA) → Ola 6 (Offline-first + Sync + Multi-usuario).
-
-Roadmap completo en [ROADMAP.md](ROADMAP.md).
+Para entender a dónde vamos, ver:
+- [docs/STRATEGIC_ROADMAP.md](docs/STRATEGIC_ROADMAP.md) — 5 Olas de desarrollo (Foundation → Intelligence → Collaboration → Offline → AI Assistant)
+- [docs/ROADMAP_WEB.md](docs/ROADMAP_WEB.md) — Evolución del web client (React 18)
+- [docs/ROADMAP_DESKTOP.md](docs/ROADMAP_DESKTOP.md) — Evolución del desktop (Tauri)
+- [docs/FEATURE_INVENTORY.md](docs/FEATURE_INVENTORY.md) — Catálogo de 50+ features planeadas
