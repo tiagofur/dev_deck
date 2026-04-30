@@ -35,7 +35,7 @@ export default defineConfig({
   webServer: process.env.E2E_NO_WEBSERVER
     ? undefined
     : {
-        command: 'pnpm exec electron-vite --rendererOnly',
+        command: `pnpm exec electron-vite --rendererOnly${process.env.CI ? ' --noSandbox' : ''}`,
         port: 5174,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
