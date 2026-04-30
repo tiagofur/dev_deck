@@ -60,10 +60,8 @@ ALLOWED_GITHUB_LOGINS=tu-usuario,otro-usuario
 # Feature flags
 SEED_CHEATSHEETS=true
 
-# IA (opcional, Ola 6+)
-AI_PROVIDER=disabled        # disabled | openai | ollama
-OPENAI_API_KEY=
-OLLAMA_URL=http://ollama:11434
+# IA local (opcional, Fase 18 MVP actual)
+AI_PROVIDER=heuristic       # heuristic | local | disabled
 ```
 
 Generar `JWT_SECRET`:
@@ -215,13 +213,13 @@ Si querés features de IA sin mandar datos a OpenAI, agregar al `docker-compose.
     # docker compose exec ollama ollama pull nomic-embed-text
 ```
 
-En `.env`:
+En `.env` (futuro, todavía NO implementado en el repo actual):
 ```
 AI_PROVIDER=ollama
 OLLAMA_URL=http://ollama:11434
 ```
 
-Modelos recomendados:
+Modelos recomendados (para la siguiente iteración, no para el estado actual del repo):
 - **Summaries / tags:** `llama3.2:3b` (2 GB, rápido, calidad ok).
 - **Embeddings:** `nomic-embed-text` (270 MB, 768 dims).
 

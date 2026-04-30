@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"devdeck/internal/authservice"
+	"devdeck/internal/ai"
 	"devdeck/internal/config"
 	"devdeck/internal/cron"
 	"devdeck/internal/enricher"
@@ -65,6 +66,7 @@ func main() {
 
 	st := store.New(pool)
 	en := enricher.New(cfg.GithubToken)
+	aiSvc := ai.New(cfg.AIProvider)
 
 	// JWT auth service (Wave 4). Only active when AUTH_MODE=jwt.
 	var authService *authservice.Service
@@ -92,7 +94,7 @@ func main() {
 
 	// Background enrich queue (Wave 4.5 §16.9) — handlers that need
 	// async metadata fetches (capture + create repo) push jobs here.
-	enrichQueue := jobs.NewEnrichQueue(st, en, 128)
+	enrichQueue := jobs.NewEnrichQueue(st, en, aiSvc, 128)
 	enrichQueue.Start(ctx)
 
 	router := httpapi.NewRouterWithDeps(cfg, httpapi.Deps{
@@ -109,6 +111,7 @@ func main() {
 	logger.Info("enricher + refresher initialized",
 		"stale_after", staleAfter,
 		"github_token", cfg.GithubToken != "",
+		"ai_provider", cfg.AIProvider,
 	)
 
 	srv := &http.Server{

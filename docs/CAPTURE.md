@@ -69,8 +69,9 @@ Entrada polimórfica, detección de tipo automática en el servidor.
 - Encolar job en background worker.
 - Para `repo`: llamar GitHub API como ya hace `enricher/github.go`.
 - Para `tool`/`article`: scraping Open Graph (con SSRF guard, ver REVIEW §3.4).
-- Para todos: auto-tagging + summary con IA (si habilitada, ver Ola 6).
-- Al terminar, emitir evento a través de SSE/WebSocket: `item.enriched { id }` para que el cliente refresque.
+- Para todos: auto-tagging + summary local/heurístico si `AI_PROVIDER=heuristic` (o `local`).
+- Si `AI_PROVIDER=disabled`, solo corre el enrichment clásico de metadata cuando aplique.
+- Hoy NO hay SSE/WebSocket para refresco automático de items; el cliente ve el resultado al refetchear la lista/detalle.
 
 ---
 
