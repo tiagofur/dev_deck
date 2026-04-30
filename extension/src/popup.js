@@ -51,6 +51,7 @@ async function init() {
 
 async function onSave(tab) {
   if (!tab) return
+  showStatus(null)
   showError(null)
   const why = $('why').value.trim()
   const tagsRaw = $('tags').value.trim()
@@ -72,15 +73,40 @@ async function onSave(tab) {
       title: tab.title,
       whySaved: why || undefined,
       tags,
+      metaHints: {
+        capture_context: 'popup',
+        page_url: tab.url,
+        page_title: tab.title || '',
+      },
     },
   })
   if (resp?.ok) {
-    window.close()
+    showStatus('✓ Guardado en DevDeck.', 'ok')
+    window.setTimeout(() => window.close(), 500)
+    return
+  }
+  if (resp?.queued) {
+    showStatus('⚠ Guardado en cola. Se reintentará automáticamente.', 'queued')
+    $('save').disabled = false
+    $('save').textContent = 'Guardar'
     return
   }
   showError(resp?.error?.message || 'Error desconocido')
   $('save').disabled = false
   $('save').textContent = 'Guardar'
+}
+
+function showStatus(message, kind) {
+  const el = $('status')
+  if (!message) {
+    el.hidden = true
+    el.textContent = ''
+    el.className = 'status'
+    return
+  }
+  el.hidden = false
+  el.textContent = message
+  el.className = `status status-${kind || 'ok'}`
 }
 
 function showError(message) {
