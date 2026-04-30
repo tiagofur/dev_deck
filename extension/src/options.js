@@ -1,8 +1,8 @@
 // Options page — lets the user set the backend URL + token. We verify
-// the token by hitting /healthz before persisting when the user clicks
-// "Probar conexión" so a fat-fingered paste fails loudly.
+// both backend reachability and auth by hitting a protected endpoint
+// before persisting when the user clicks "Probar conexión".
 
-import { health } from './lib/api.js'
+import { verifyAuth } from './lib/api.js'
 import { getSettings, setSettings } from './lib/storage.js'
 
 const $ = (id) => document.getElementById(id)
@@ -19,13 +19,18 @@ async function init() {
 async function onVerify() {
   clearMessages()
   const apiUrl = $('api-url').value.trim()
+  const token = $('token').value.trim()
   if (!apiUrl) {
     showError('Falta la URL del backend.')
     return
   }
+  if (!token) {
+    showError('Falta el token/JWT.')
+    return
+  }
   try {
-    await health(apiUrl)
-    showSuccess('✓ Backend alcanzable.')
+    await verifyAuth(apiUrl, token)
+    showSuccess('✓ Backend y credenciales válidas.')
   } catch (err) {
     showError(`✗ ${err.message}`)
   }

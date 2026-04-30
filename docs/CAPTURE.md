@@ -87,9 +87,11 @@ Entrada polimórfica, detección de tipo automática en el servidor.
   - Textarea `why_saved` (autofocus).
   - Chips de tags sugeridos (vienen del vault del user via `/api/tags/suggest`).
   - Botón `Save` (Enter).
-- Autenticación: login inicial vía `/api/auth/github/login` con redirect al popup; token guardado en `chrome.storage.local` + sync.
+- Autenticación hoy: token/JWT manual configurado en Options y guardado en `chrome.storage.local`. Futuro: login vía `/api/auth/github/login` con redirect al popup.
 - Backend URL configurable (para self-hosters).
 - **Offline queue:** si el POST falla, guardar en `chrome.storage.local` y reintentar cada 60s o cuando vuelva la red.
+- Context menu: guardar link y guardar selección como snippet sin abrir el popup.
+- Los canales de extensión pueden adjuntar `meta_hints` con contexto de página (`page_url`, `page_title`, `capture_context`) para mejorar trazabilidad y enriquecimiento posterior.
 
 ### Estructura
 ```
@@ -110,7 +112,7 @@ extension/
 ```
 
 ### Primer milestone (P0)
-Solo Chrome, solo captura de tab activa, solo `repo`/`article`/`tool`, sin detección avanzada. Cuando funciona, expandir a selección, shortcuts, Firefox.
+Estado actual: Chrome/Chromium con captura de tab activa por shortcut o popup, cola offline, badge de pendientes, context menu para links/selección y configuración manual de backend + token/JWT. Cuando esto quede sólido, expandir a Firefox/OAuth/tags sugeridos.
 
 ---
 

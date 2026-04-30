@@ -5,7 +5,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import http from 'node:http'
 
-import { capture, health } from '../src/lib/api.js'
+import { capture, health, verifyAuth } from '../src/lib/api.js'
 
 // startStub spins up a one-off HTTP server that runs the provided
 // handler, then returns { url, close } so the test can tear it down.
@@ -126,6 +126,45 @@ test('health throws on non-2xx', async () => {
   })
   try {
     await assert.rejects(health(stub.url))
+  } finally {
+    await stub.close()
+  }
+})
+
+test('verifyAuth sends bearer token to protected endpoint', async () => {
+  let seen
+  const stub = await startStub((req, res) => {
+    seen = {
+      path: req.url,
+      auth: req.headers.authorization,
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({ total: 0, items: [] }))
+  })
+  try {
+    await verifyAuth(stub.url, 'jwt-or-token')
+    assert.equal(seen.path, '/api/repos?limit=1')
+    assert.equal(seen.auth, 'Bearer jwt-or-token')
+  } finally {
+    await stub.close()
+  }
+})
+
+test('verifyAuth surfaces structured auth errors', async () => {
+  const stub = await startStub((req, res) => {
+    res.writeHead(401, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({ error: { code: 'UNAUTHORIZED', message: 'missing or invalid bearer token' } }))
+  })
+  try {
+    await assert.rejects(
+      verifyAuth(stub.url, 'bad-token'),
+      (err) => {
+        assert.equal(err.status, 401)
+        assert.equal(err.code, 'UNAUTHORIZED')
+        assert.match(err.message, /invalid bearer token/)
+        return true
+      },
+    )
   } finally {
     await stub.close()
   }
