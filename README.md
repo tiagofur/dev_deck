@@ -79,6 +79,7 @@ Ambas apps importan pages y componentes del package `@devdeck/features` — solo
 ### Operación y contribución
 | Doc | Contenido |
 |-----|-----------|
+| [cli/README.md](cli/README.md) | Instalación y uso real del CLI `devdeck` (P0) |
 | [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md) | Guía paso a paso para self-host |
 | [docs/CAPTURE.md](docs/CAPTURE.md) | Spec de canales de captura (extensión, CLI, paste, share) |
 | [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | Plan de tests y CI |
