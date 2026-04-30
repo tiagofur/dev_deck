@@ -348,16 +348,20 @@
 - `GET /api/items`, `GET /api/items/:id`, `PATCH /api/items/:id`, `DELETE /api/items/:id`, `POST /api/items/:id/seen`. ✅
 - Frontend (`@devdeck/features`): `ItemsPage` con grid por tipo + filtros de tipo + search + empty state; `ItemCard` adaptada por tipo; `CaptureModal` con `why_saved` + type override. Funciona en desktop y web sin duplicación. ✅
 
-### Fase 18 — Auto-tagging + Auto-summary (IA)
+### Fase 18 — Auto-tagging + Auto-summary (IA) 🚧
 
-- `internal/ai/`: módulo de IA con interfaz `Classifier` + `Summarizer`
-- `internal/ai/openai.go`: implementación con OpenAI (GPT-4o-mini para eficiencia)
-- `internal/ai/ollama.go`: implementación con Ollama para opción local
-- `internal/config/config.go`: `AI_PROVIDER` (`openai`|`ollama`|`disabled`), `AI_OPT_IN` por usuario
-- Pipeline de enriquecimiento: al guardar un item, encolar tarea de IA → auto-tags + summary en background (no bloquea el save)
-- Endpoint `POST /api/items/:id/ai-enrich` — dispara enriquecimiento manual on-demand
-- Endpoint `PATCH /api/items/:id/ai-tags` — el usuario acepta/edita/descarta tags sugeridos
-- Frontend: indicador "analizando…" mientras la IA trabaja; UI de review de tags sugeridos (aceptar/editar/descartar)
+**Estado actual (MVP implementado):**
+- `internal/ai/`: módulo de IA con interfaces `Classifier` + `Summarizer` + providers `heuristic` y `disabled`. ✅
+- `internal/config/config.go`: `AI_PROVIDER` soporta `heuristic`/`local` y `disabled`. ✅
+- Pipeline de enriquecimiento: al guardar un item, la queue existente procesa metadata + auto-tags + summary en background sin bloquear capture/save. ✅
+- Persistencia: `ai_summary` + `ai_tags` ya se guardan en `items`; `GET /api/items` también los aprovecha en búsqueda textual. ✅
+- Frontend mínimo: `ItemCard` muestra estado `Analizando…`, prioriza `ai_summary` sobre `description` y usa `ai_tags` cuando no hay tags manuales. ✅
+
+**Pendiente para cerrar la fase como "IA real":**
+- `internal/ai/openai.go`: implementación con OpenAI (GPT-4o-mini). ⏳
+- `internal/ai/ollama.go`: implementación con Ollama local. ⏳
+- Endpoints `POST /api/items/:id/ai-enrich` y `PATCH /api/items/:id/ai-tags` para refresh/review manual. ⏳
+- UI de review de tags sugeridos (aceptar/editar/descartar) y surface de detalle para items no-repo. ⏳
 
 ### Fase 19 — Búsqueda semántica
 
@@ -437,6 +441,7 @@
 | Web | Vite + React 18 + TypeScript + react-router-dom (BrowserRouter) + AuthGuard (§16.13 — reemplaza el Vue 3 + Pinia original) |
 | Estilos | Tailwind CSS + CSS variables (neo-brutalist) — preset compartido en `@devdeck/ui/tailwind-preset.cjs` |
 | State/cache | TanStack Query v5 (hooks en `@devdeck/api-client`) |
+| IA actual | Heurística local async (`AI_PROVIDER=heuristic`) sobre la queue de enrichment existente |
 | Animaciones | framer-motion |
 | Drag & drop | @dnd-kit/core + @dnd-kit/sortable |
 | Markdown | react-markdown + remark-gfm + rehype-highlight + rehype-raw |

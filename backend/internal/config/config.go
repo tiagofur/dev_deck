@@ -40,6 +40,9 @@ type Config struct {
 	GitHubOAuthCallbackURL string `env:"GITHUB_OAUTH_CALLBACK_URL" envDefault:"http://localhost:8080/api/auth/github/callback"`
 	AppOAuthRedirectURL    string `env:"APP_OAUTH_REDIRECT_URL" envDefault:"http://localhost:5173/auth/callback"`
 	AllowedGitHubLogins    string `env:"ALLOWED_GITHUB_LOGINS"` // comma-separated, empty = allow all
+
+	// ─── Wave 5 Fase 18: local AI enrichment ───
+	AIProvider string `env:"AI_PROVIDER" envDefault:"heuristic"`
 }
 
 func (c Config) CORSOriginList() []string {
@@ -78,6 +81,11 @@ func Load() (Config, error) {
 	}
 	if c.AuthMode != "token" && c.AuthMode != "jwt" {
 		return c, errors.New("AUTH_MODE must be 'token' or 'jwt'")
+	}
+	switch strings.ToLower(strings.TrimSpace(c.AIProvider)) {
+	case "", "heuristic", "local", "disabled", "off", "none":
+	default:
+		return c, errors.New("AI_PROVIDER must be one of: heuristic, local, disabled")
 	}
 	return c, nil
 }
