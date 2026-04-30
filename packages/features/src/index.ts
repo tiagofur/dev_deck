@@ -7,6 +7,7 @@
 // Pages
 export { HomePage } from './pages/HomePage'
 export { ItemsPage } from './pages/ItemsPage'
+export { ItemDetailPage } from './pages/ItemDetailPage'
 export { RepoDetailPage } from './pages/RepoDetailPage'
 export { DiscoveryPage } from './pages/DiscoveryPage'
 export { SettingsPage } from './pages/SettingsPage'

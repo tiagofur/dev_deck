@@ -6,6 +6,7 @@ import {
   CheatsheetsListPage,
   DiscoveryPage,
   HomePage,
+  ItemDetailPage,
   ItemsPage,
   RepoDetailPage,
   SettingsPage,
@@ -41,6 +42,14 @@ function AnimatedRoutes() {
           element={
             <PageTransition>
               <ItemsPage />
+            </PageTransition>
+          }
+        />
+        <Route
+          path="/items/:id"
+          element={
+            <PageTransition>
+              <ItemDetailPage />
             </PageTransition>
           }
         />

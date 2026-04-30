@@ -13,6 +13,7 @@ import {
   CheatsheetsListPage,
   DiscoveryPage,
   HomePage,
+  ItemDetailPage,
   ItemsPage,
   RepoDetailPage,
   SettingsPage,
@@ -62,6 +63,10 @@ function AnimatedRoutes(): ReactElement {
         <Route
           path="/items"
           element={<AuthGuard>{withTransition(<ItemsPage />)}</AuthGuard>}
+        />
+        <Route
+          path="/items/:id"
+          element={<AuthGuard>{withTransition(<ItemDetailPage />)}</AuthGuard>}
         />
         <Route
           path="/repo/:id"

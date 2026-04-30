@@ -1,3 +1,5 @@
+//go:build !(darwin && arm64)
+
 // Package testutil provides shared test infrastructure.
 //
 // The Postgres helper boots a real Postgres container via testcontainers-go,
@@ -229,6 +231,7 @@ func migrationsDir() (string, error) {
 func truncateAll(ctx context.Context, pool *pgxpool.Pool) error {
 	_, err := pool.Exec(ctx, `
 		TRUNCATE TABLE
+			items,
 			refresh_sessions,
 			repo_cheatsheet_links,
 			cheatsheet_entries,

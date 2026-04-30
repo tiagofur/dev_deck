@@ -94,7 +94,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	commandsH := handlers.NewCommandsHandler(st)
 	cheatsH := handlers.NewCheatsheetsHandler(st)
 	captureH := handlers.NewCaptureHandler(st, deps.EnrichQueue)
-	itemsH := handlers.NewItemsHandler(st)
+	itemsH := handlers.NewItemsHandler(st, deps.EnrichQueue)
 
 	r.Route("/api", func(api chi.Router) {
 		api.Use(mw.TokenAuth(cfg, as))
@@ -168,6 +168,8 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			ir.Get("/{id}", itemsH.Get)
 			ir.Patch("/{id}", itemsH.Update)
 			ir.Delete("/{id}", itemsH.Delete)
+			ir.Post("/{id}/ai-enrich", itemsH.AIEnrich)
+			ir.Patch("/{id}/ai-tags", itemsH.ReviewAITags)
 			ir.Post("/{id}/seen", itemsH.MarkSeen)
 		})
 	})

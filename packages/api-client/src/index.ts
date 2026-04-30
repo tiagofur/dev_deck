@@ -55,17 +55,20 @@ export type {
 
 // Feature hooks — items
 export {
-  useItems,
-  useItem,
-  useUpdateItem,
-  useDeleteItem,
-  useMarkItemSeen,
-  ITEMS_KEY,
+	useItems,
+	useItem,
+	useUpdateItem,
+	useDeleteItem,
+	useAIEnrichItem,
+	useReviewItemAITags,
+	useMarkItemSeen,
+	ITEMS_KEY,
 } from './features/items/api'
 export type {
-  ListItemsParams,
-  ListItemsResult,
-  UpdateItemInput,
+	ListItemsParams,
+	ListItemsResult,
+	ReviewAITagsInput,
+	UpdateItemInput,
 } from './features/items/api'
 
 // Feature hooks — commands

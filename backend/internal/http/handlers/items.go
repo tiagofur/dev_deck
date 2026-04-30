@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"devdeck/internal/domain/items"
+	"devdeck/internal/jobs"
 	"devdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
@@ -24,10 +25,11 @@ import (
 
 type ItemsHandler struct {
 	store *store.Store
+	queue *jobs.EnrichQueue
 }
 
-func NewItemsHandler(s *store.Store) *ItemsHandler {
-	return &ItemsHandler{store: s}
+func NewItemsHandler(s *store.Store, q *jobs.EnrichQueue) *ItemsHandler {
+	return &ItemsHandler{store: s, queue: q}
 }
 
 // GET /api/items
@@ -154,6 +156,61 @@ func (h *ItemsHandler) MarkSeen(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// POST /api/items/{id}/ai-enrich — re-run async enrichment/AI manually.
+func (h *ItemsHandler) AIEnrich(w http.ResponseWriter, r *http.Request) {
+	id, ok := parseItemID(w, r)
+	if !ok {
+		return
+	}
+	it, err := h.store.GetItem(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "ITEM_NOT_FOUND", "item not found")
+			return
+		}
+		writeInternal(w, err)
+		return
+	}
+	job := jobs.EnrichJob{Kind: jobs.KindItem, ID: it.ID, Type: it.Type}
+	if it.URL != nil {
+		job.URL = *it.URL
+	}
+	if h.queue == nil || !h.queue.CanProcess(job) {
+		writeError(w, http.StatusConflict, "ENRICHMENT_UNAVAILABLE", "item cannot be enriched right now")
+		return
+	}
+	h.queue.Enqueue(job)
+	if err := h.store.UpdateItemEnrichmentStatus(r.Context(), it.ID, items.EnrichmentQueued); err != nil {
+		writeInternal(w, err)
+		return
+	}
+	it.EnrichmentStatus = items.EnrichmentQueued
+	writeJSON(w, http.StatusAccepted, it)
+}
+
+// PATCH /api/items/{id}/ai-tags — review/edit AI suggested tags.
+func (h *ItemsHandler) ReviewAITags(w http.ResponseWriter, r *http.Request) {
+	id, ok := parseItemID(w, r)
+	if !ok {
+		return
+	}
+	var in items.ReviewAITagsInput
+	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
+		return
+	}
+	it, err := h.store.ReviewItemAITags(r.Context(), id, in)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "ITEM_NOT_FOUND", "item not found")
+			return
+		}
+		writeInternal(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, it)
 }
 
 func parseItemID(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) {

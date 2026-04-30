@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"devdeck/internal/domain/items"
@@ -436,4 +437,74 @@ func (s *Store) UpdateItemAIFields(ctx context.Context, id uuid.UUID, summary st
 		return ErrNotFound
 	}
 	return nil
+}
+
+// ReviewItemAITags updates the editable AI suggestion set and optionally
+// merges the reviewed suggestions into the user's manual tags.
+func (s *Store) ReviewItemAITags(ctx context.Context, id uuid.UUID, in items.ReviewAITagsInput) (*items.Item, error) {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	row := tx.QueryRow(ctx,
+		`SELECT `+itemColumns+` FROM items WHERE id = $1 FOR UPDATE`, id)
+	it, err := scanItem(row)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+
+	aiTags := normalizeTags(in.AITags)
+	manualTags := it.Tags
+	if in.Apply {
+		manualTags = mergeTags(it.Tags, aiTags)
+	}
+
+	updatedRow := tx.QueryRow(ctx, `
+		UPDATE items
+		SET ai_tags = $1,
+		    tags = $2,
+		    updated_at = NOW()
+		WHERE id = $3
+		RETURNING `+itemColumns,
+		aiTags, manualTags, id,
+	)
+	updated, err := scanItem(updatedRow)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
+	}
+	return updated, nil
+}
+
+func normalizeTags(tags []string) []string {
+	if len(tags) == 0 {
+		return []string{}
+	}
+	seen := map[string]bool{}
+	out := make([]string, 0, len(tags))
+	for _, tag := range tags {
+		t := strings.ToLower(strings.TrimSpace(tag))
+		t = strings.ReplaceAll(t, " ", "-")
+		if t == "" || seen[t] {
+			continue
+		}
+		seen[t] = true
+		out = append(out, t)
+	}
+	sort.Strings(out)
+	return out
+}
+
+func mergeTags(existing, suggested []string) []string {
+	return normalizeTags(append(append([]string{}, existing...), suggested...))
 }
