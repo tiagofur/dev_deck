@@ -117,10 +117,10 @@ Solo Chrome, solo captura de tab activa, solo `repo`/`article`/`tool`, sin detec
 ## Canal 2 — CLI `devdeck`
 
 ### Spec
-Binario Go único, distribuido via Homebrew (`brew install devdeck`), Scoop (Windows), y `go install github.com/user/devdeck/cli@latest`.
+Binario Go único. El estado actual del repo soporta `go install`/`go build`; Homebrew y Scoop siguen como objetivo de release, no como distribución ya cerrada.
 
 ```bash
-devdeck login                              # OAuth flow, abre browser
+devdeck login --token <api-token>          # guarda token en OS keychain
 devdeck config set api-url https://api.devdeck.ai
 devdeck config set api-url http://localhost:8080   # self-hosters
 
@@ -129,25 +129,25 @@ devdeck add https://rg.dev --type=cli      # forzar tipo
 devdeck add "Cmd+Shift+P" --type=shortcut --tags=vscode,productivity
 echo 'rg --glob "*.go" "TODO"' | devdeck add --type=snippet --lang=bash
 
-devdeck search "debugging go"              # devuelve top 10, abrir con número
-devdeck open <id>                          # abre en browser / en la app
-devdeck run <alias>                        # ejecuta un comando guardado
-devdeck run deploy --env=staging           # con variables
+devdeck search "debugging go"              # devuelve top 10
+devdeck open <id>                           # abre la URL fuente del repo/item en el browser
+# devdeck run <alias>                      # futuro, no implementado
+# devdeck run deploy --env=staging         # futuro, no implementado
 
 devdeck list --type=cli
 devdeck import github-stars                # importa GitHub Stars del user
-devdeck import pocket ~/exports/pocket.html
+# devdeck import pocket ~/exports/pocket.html  # futuro, no implementado
 
-devdeck sync                               # fuerza sync manual (normalmente automático)
-devdeck status                             # qué tiene en cola, última sync
+# devdeck sync                             # futuro, no implementado
+devdeck status                             # config, token y health del backend
 ```
 
 ### Implementación
-- `cobra` para CLI, `charmbracelet/bubbletea` para TUI opcional (`devdeck ui`).
+- `cobra` para CLI. Bubbletea/TUI sigue como opción futura (`devdeck ui`), no implementada.
 - Token guardado en OS keychain via `zalando/go-keyring`.
 - Config en `~/.config/devdeck/config.toml`.
-- SQLite local en `~/.local/share/devdeck/devdeck.db` para queue offline y cache read.
-- Todas las operaciones locales primero, sync al servidor después.
+- Hoy no hay SQLite local ni cola offline en el CLI; eso queda para una etapa posterior si el canal terminal demuestra suficiente uso.
+- Hoy el CLI opera online contra la API: una request por comando, sin sync local.
 
 ### `devdeck run <alias>` — ejecutor de comandos
 - Busca el comando por alias/título en el vault.
@@ -181,7 +181,9 @@ cli/
 ```
 
 ### Primer milestone (P0)
-`login`, `add <url>`, `search`, `list`. El resto (import, run, TUI) viene después.
+Implementado hoy: `login`, `logout`, `config`, `add <url|text>`, `search`, `list`, `open <id>`, `status`, `import github-stars`.
+
+**Nota de alcance:** el `open <id>` actual abre la **URL fuente** del repo/item cuando existe. No intenta deducir rutas internas de la app (`app.devdeck...`) desde `api_url`; si el recurso no tiene `url`, falla con error claro.
 
 ---
 

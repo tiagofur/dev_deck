@@ -12,7 +12,7 @@
 - ✅ §16.7 Observability (slog + /metrics)
 - ✅ §16.8 SSRF guard + rate limiting
 - ✅ §16.9 `POST /api/items/capture` con detección, dedupe y enrich async
-- ⏳ §16.10 CLI `devdeck` (scaffold + P0 commands listos; falta release 0.1.0)
+- ⏳ §16.10 CLI `devdeck` (comandos P0 implementados; falta release 0.1.0)
 - ⏳ §16.11 Extensión Chrome/Firefox (P0 listo; falta publicar)
 - ✅ §16.12 Paste inteligente + CaptureModal en desktop
 - ✅ §16.13 Monorepo pnpm workspaces + Web Vue → React (ver ADR 0003)
@@ -45,7 +45,7 @@
 - Enricher: tests con `httptest.Server` mockeando GitHub + SSRF guard tests rechazando IPs privadas. ✅
 - Desktop: Vitest + `@testing-library/react` con 57 tests unitarios (format, preferences, auth, RepoCard, TagChip, PasteInterceptor, detector). Playwright config + skeleton con los 5 flows. ✅
 - Web Vue: intencionalmente sin tocar en Wave 4.5 inicial; **reemplazada por React 18 en §16.13** (ver abajo). Post-migración los 57 tests se redistribuyeron en los nuevos packages: 39 en `@devdeck/api-client`, 5 en `@devdeck/ui`, 18 en `@devdeck/features`, 5 en `apps/desktop` = **67 tests totales**. ✅
-- GitHub Actions: workflow `ci.yml` con jobs `backend`, `desktop`, `e2e` con concurrency cancel-in-progress. ✅ (TODO post-migración: agregar job `web` con `pnpm -F @devdeck/web typecheck && build`)
+- GitHub Actions: workflow `ci.yml` con jobs `backend`, `cli`, `monorepo`, `extension` y `e2e`; el job `monorepo` valida `pnpm typecheck`, `pnpm test`, `pnpm build:web` y `pnpm build:desktop`. ✅
 - Ver `docs/TESTING_STRATEGY.md` para el plan sprint-by-sprint.
 
 ### Fase 16.7 — Observability mínima ✅
@@ -70,11 +70,12 @@
 
 ### Fase 16.10 — CLI `devdeck` (P0) ⏳
 - Nuevo subproyecto `cli/` en el repo (Go, `cobra`, binario único).
-- Comandos P0: `login`, `config`, `add <url|text>`, `search <q>`, `list`, `open <id>`, `status`.
+- Implementado hoy: `login`, `logout`, `config`, `add <url|text>`, `search <q>`, `list`, `open <id>`, `status`, `import github-stars`.
+- `open <id>` en P0 abre la URL fuente del repo/item; no intenta deducir rutas internas del web app desde `api_url`.
 - Token en OS keychain via `zalando/go-keyring`.
 - Config en `~/.config/devdeck/config.toml`.
-- SQLite local en `~/.local/share/devdeck/` para queue offline y cache.
-- Distribución: `go install`, Homebrew tap, Scoop manifest.
+- SQLite local en `~/.local/share/devdeck/` para queue offline y cache. **Pendiente / no implementado todavía.**
+- Distribución: `go install`, Homebrew tap, Scoop manifest. **Pendiente como parte del release 0.1.0.**
 - Ver `docs/CAPTURE.md §Canal 2` para spec completa.
 
 ### Fase 16.11 — Extensión de browser (P0) ⏳
@@ -118,12 +119,12 @@
 - Commit: `698b432 feat(monorepo): pnpm workspaces + Vue→React web migration` en branch `claude/setup-react-web-app-LVWhi`.
 
 ### Criterio de salida de Ola 4.5
-- [x] CI verde en cada push, bloqueante para merge (GitHub Actions `ci.yml` con backend + desktop + e2e). Post-§16.13 falta agregar job `web`.
+- [x] CI verde en cada push, bloqueante para merge (GitHub Actions `ci.yml` con `backend`, `cli`, `monorepo`, `extension` y `e2e`).
 - [x] ≥ 60% cobertura en `backend/internal/http/handlers` y `backend/internal/store` (handler matrix + store tests con testcontainers).
 - [x] ≥ 5 flows E2E pasando en Electron (Playwright skeleton con los 5 flows).
 - [x] Endpoint `/api/items/capture` en producción con tests.
 - [x] Web client migrado a React y compartiendo código con desktop (§16.13).
-- [ ] CLI `devdeck` en release 0.1.0 con los comandos P0.
+- [ ] CLI `devdeck` en release 0.1.0 con distribución mínima (`go install` + docs claras; Homebrew/Scoop opcionales si no entran en el primer corte).
 - [ ] Extensión Chrome en Chrome Web Store (o sideload con instructions claras).
 - [ ] README con screenshots (no bloquea CI, agendado para antes del release público).
 - [x] `api.exe` fuera del repo.
