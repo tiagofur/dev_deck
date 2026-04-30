@@ -195,7 +195,7 @@ func (q *EnrichQueue) run(parent context.Context, job EnrichJob) {
 }
 
 func (q *EnrichQueue) canRunAI(job EnrichJob) bool {
-	return q != nil && job.Kind == KindItem && q.ai != nil && q.ai.Enabled()
+	return q != nil && job.Kind == KindItem && q.ai != nil && q.ai.Enabled() && canAutoEnrichItemType(job.Type)
 }
 
 func (q *EnrichQueue) canFetchMetadata(job EnrichJob) bool {
@@ -205,7 +205,11 @@ func (q *EnrichQueue) canFetchMetadata(job EnrichJob) bool {
 	if job.Kind == KindRepo {
 		return true
 	}
-	switch job.Type {
+	return canAutoEnrichItemType(job.Type)
+}
+
+func canAutoEnrichItemType(t items.Type) bool {
+	switch t {
 	case items.TypeRepo, items.TypePlugin, items.TypeArticle, items.TypeTool, items.TypeAgent, items.TypeWorkflow, items.TypeCLI:
 		return true
 	default:
