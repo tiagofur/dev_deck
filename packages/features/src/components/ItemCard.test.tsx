@@ -38,6 +38,19 @@ describe('<ItemCard>', () => {
     expect(screen.getByText('A powerful TUI framework')).toBeInTheDocument()
   })
 
+  it('prefers ai_summary over description when present', () => {
+    render(
+      <ItemCard
+        item={makeItem({
+          description: 'Raw upstream description',
+          ai_summary: 'Human-friendly summary from local AI',
+        })}
+      />,
+    )
+    expect(screen.getByText('Human-friendly summary from local AI')).toBeInTheDocument()
+    expect(screen.queryByText('Raw upstream description')).not.toBeInTheDocument()
+  })
+
   it('renders the type ribbon for repos', () => {
     render(<ItemCard item={makeItem({ item_type: 'repo' })} />)
     expect(screen.getByText('REPO')).toBeInTheDocument()
@@ -90,6 +103,17 @@ describe('<ItemCard>', () => {
     expect(screen.getByText('alpha')).toBeInTheDocument()
     expect(screen.getByText('beta')).toBeInTheDocument()
     expect(screen.getByText('gamma')).toBeInTheDocument()
+  })
+
+  it('falls back to ai_tags when manual tags are empty', () => {
+    render(<ItemCard item={makeItem({ tags: [], ai_tags: ['suggested', 'go'] })} />)
+    expect(screen.getByText('suggested')).toBeInTheDocument()
+    expect(screen.getByText('go')).toBeInTheDocument()
+  })
+
+  it('shows queued analysis status', () => {
+    render(<ItemCard item={makeItem({ enrichment_status: 'queued' })} />)
+    expect(screen.getByText(/analizando/i)).toBeInTheDocument()
   })
 
   it('fires onClick when clicked', async () => {

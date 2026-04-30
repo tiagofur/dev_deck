@@ -18,7 +18,7 @@
 
 ### Estado actual dentro de Ola 5
 - ✅ **Fase 17 completa:** tabla `items` polimórfica, CRUD completo backend + frontend, `ItemsPage` con filtros por tipo, `ItemCard`, `CaptureModal` integrado. Ver `ROADMAP.md §Fase 17`.
-- ⏳ **Fase 18 siguiente:** módulo `internal/ai/` con `Classifier` + `Summarizer`. Ver sección 1.2 abajo.
+- 🚧 **Fase 18 en curso:** ya existe un MVP local/heurístico en `internal/ai/` que genera `ai_summary` + `ai_tags` en background; restan providers LLM reales y endpoints/UI de review. Ver sección 1.2 abajo.
 
 ### Principios técnicos para las nuevas olas
 1. **Offline-first no es opcional.** La app debe ser 100% funcional sin red. La sync es eventual y no bloquea ninguna operación.
@@ -95,37 +95,27 @@ type Item struct {
 ```
 internal/
 └── ai/
-    ├── ai.go              # interfaces: Classifier, Summarizer, Embedder, RAG
-    ├── openai.go          # implementación OpenAI (GPT-4o-mini + text-embedding-3-small)
-    ├── ollama.go          # implementación Ollama (llama3.2 + nomic-embed-text)
-    ├── disabled.go        # implementación noop (cuando AI_PROVIDER=disabled)
-    ├── pipeline.go        # orquestación: enqueue → process → save
-    └── prompts/
-        ├── classify.txt   # prompt para auto-tagging y clasificación de tipo
-        └── summarize.txt  # prompt para auto-summary
+	    ├── service.go         # interfaces + orquestación básica
+	    ├── heuristic.go       # provider local/heurístico (MVP actual)
+	    ├── disabled.go        # implementación noop (cuando AI_PROVIDER=disabled)
+	    ├── openai.go          # futuro: implementación OpenAI
+	    ├── ollama.go          # futuro: implementación Ollama
+	    └── prompts/           # futuro: prompts cuando haya provider LLM
 ```
+
+**Nota de reconciliación (2026-04-30):** el repo NO tiene hoy `openai.go`, `ollama.go` ni prompts LLM. El estado real es `service.go` + `heuristic.go` + `disabled.go`, integrados a `internal/jobs/enrich.go`.
 
 #### Interfaces
 ```go
-// ai/ai.go
+// ai/service.go
 type Classifier interface {
-    // Dado un item, devuelve tipo sugerido, tags sugeridos y categorías
-    Classify(ctx context.Context, item ClassifyInput) (ClassifyResult, error)
+    SuggestTags(ctx context.Context, in Input) ([]string, error)
+    Enabled() bool
 }
 
 type Summarizer interface {
-    // Dado un item, devuelve un resumen corto (≤150 palabras)
-    Summarize(ctx context.Context, item SummarizeInput) (string, error)
-}
-
-type Embedder interface {
-    // Dado un texto, devuelve su vector de embeddings
-    Embed(ctx context.Context, text string) ([]float32, error)
-}
-
-type RAG interface {
-    // Dado una pregunta y contexto (items recuperados), genera respuesta
-    Answer(ctx context.Context, question string, context []Item) (string, error)
+    Summarize(ctx context.Context, in Input) (string, error)
+    Enabled() bool
 }
 ```
 
@@ -133,27 +123,19 @@ type RAG interface {
 ```
 [Save item] → [Write to DB] → [HTTP 201 response] → [Enqueue AI job]
                                                               ↓
-                                               [Worker: Classify + Summarize]
+                               [Worker: fetch metadata opcional + summarize + suggest tags]
                                                               ↓
-                                               [PATCH item: ai_tags + ai_summary]
-                                                              ↓
-                                               [WebSocket / SSE: notify client]
+                                               [UPDATE items.ai_tags + ai_summary]
 ```
 
-**Implementación:** worker pool simple con `goroutine` + canal buffered. No hace falta queue externa para el MVP de IA. Si escala, migrar a PgMQ o similar (ya tienen Postgres).
+**Implementación actual:** la queue existente en `internal/jobs/enrich.go` corre metadata enrichment + AI heurística en el mismo worker. No hay queue externa ni provider LLM todavía; eso vendrá después.
 
 #### Variables de configuración (`config.go`)
 ```go
-AI_PROVIDER        string  // "openai" | "ollama" | "disabled"
-OPENAI_API_KEY     string  // requerido si AI_PROVIDER=openai
-OPENAI_MODEL       string  // default: "gpt-4o-mini"
-OPENAI_EMBED_MODEL string  // default: "text-embedding-3-small"
-OLLAMA_BASE_URL    string  // default: "http://localhost:11434"
-OLLAMA_MODEL       string  // default: "llama3.2"
-OLLAMA_EMBED_MODEL string  // default: "nomic-embed-text"
-AI_MAX_WORKERS     int     // default: 3
-AI_OPT_IN_DEFAULT  bool    // default: false (usuarios deben activar explícitamente)
+AI_PROVIDER string // "heuristic" | "local" | "disabled" (actual)
 ```
+
+**Futuro (todavía no implementado):** `OPENAI_API_KEY`, `OLLAMA_BASE_URL`, modelos y workers configurables cuando entren providers externos.
 
 #### Prompt de clasificación (`prompts/classify.txt`)
 ```
@@ -689,14 +671,15 @@ func SanitizeForAI(item Item) ClassifyInput {
 - Endpoints: `GET /api/items`, `GET /api/items/:id`, `PATCH /api/items/:id`, `DELETE /api/items/:id`, `POST /api/items/:id/seen`. ✅
 - Frontend: `ItemsPage` + `ItemCard` + `CaptureModal` con `why_saved` + type override. ✅
 
-### ⏳ Sprint 2 — Auto-tagging + Auto-summary (Fase 18 — PRÓXIMO)
-- Módulo `internal/ai/` con interfaces `Classifier` + `Summarizer` + `disabled.go` (noop)
-- `internal/ai/openai.go`: GPT-4o-mini
-- `internal/ai/ollama.go`: llama3.2 (Ollama local — default)
-- `internal/ai/pipeline.go`: worker pool + canal buffered; integración con `internal/jobs/`
-- Config: `AI_PROVIDER`, `OPENAI_API_KEY`, `OLLAMA_BASE_URL`, `AI_MAX_WORKERS`, `AI_OPT_IN_DEFAULT`
-- Endpoints: `POST /api/items/:id/ai-enrich`, `PATCH /api/items/:id/ai-tags`
-- Frontend: indicador "analizando…" en `ItemCard` + UI de review de tags sugeridos
+### 🚧 Sprint 2 — Auto-tagging + Auto-summary (Fase 18 — EN CURSO)
+- `internal/ai/` ya existe con interfaces `Classifier` + `Summarizer`, provider `heuristic` y `disabled.go`. ✅
+- Integración con `internal/jobs/`: el worker actual genera `ai_summary` + `ai_tags` sin bloquear el save. ✅
+- Config actual: `AI_PROVIDER=heuristic|local|disabled`. ✅
+- Frontend actual: `ItemCard` muestra "analizando…", prioriza `ai_summary` y cae a `ai_tags` si no hay tags manuales. ✅
+- Pendiente: `internal/ai/openai.go` (GPT-4o-mini). ⏳
+- Pendiente: `internal/ai/ollama.go` (llama3.2 / local). ⏳
+- Pendiente: endpoints `POST /api/items/:id/ai-enrich` y `PATCH /api/items/:id/ai-tags`. ⏳
+- Pendiente: UI de review/aceptación de tags sugeridos. ⏳
 
 ### 🔲 Sprint 3 — Búsqueda semántica (Fase 19)
 - `migrations/0006_embeddings.sql` + pgvector

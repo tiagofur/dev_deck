@@ -210,7 +210,7 @@ func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListR
 	}
 	if p.Q != "" {
 		where = append(where, fmt.Sprintf(
-			"(title || ' ' || COALESCE(description,'') || ' ' || COALESCE(array_to_string(tags,' '),'')) %% $%d",
+			"(title || ' ' || COALESCE(description,'') || ' ' || COALESCE(ai_summary,'') || ' ' || COALESCE(array_to_string(tags,' '),'') || ' ' || COALESCE(array_to_string(ai_tags,' '),'')) %% $%d",
 			idx,
 		))
 		args = append(args, p.Q)
@@ -415,4 +415,25 @@ func (s *Store) UpdateItemFromMetadata(ctx context.Context, id uuid.UUID, md *re
 		return err
 	}
 	return tx.Commit(ctx)
+}
+
+// UpdateItemAIFields stores AI-generated summary and suggestion tags.
+func (s *Store) UpdateItemAIFields(ctx context.Context, id uuid.UUID, summary string, tags []string) error {
+	if tags == nil {
+		tags = []string{}
+	}
+	tag, err := s.pool.Exec(ctx, `
+		UPDATE items
+		SET ai_summary = $1,
+		    ai_tags = $2,
+		    updated_at = NOW()
+		WHERE id = $3
+	`, summary, tags, id)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
 }
