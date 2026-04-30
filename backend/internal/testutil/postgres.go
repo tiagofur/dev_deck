@@ -42,6 +42,8 @@ var (
 	sharedContainer *tcpostgres.PostgresContainer
 	sharedDSN       string
 	migrationsSQL   []string
+	migrationsOnce  sync.Once
+	migrationsErr   error
 )
 
 // SetupPostgres returns a pgxpool.Pool connected to a Postgres instance with
@@ -169,39 +171,45 @@ func waitReady(ctx context.Context, pool *pgxpool.Pool) error {
 // SQL files are loaded relative to this source file so callers don't need to
 // know the working directory.
 func applyMigrations(ctx context.Context, pool *pgxpool.Pool) error {
-	if len(migrationsSQL) == 0 {
-		dir, err := migrationsDir()
-		if err != nil {
-			return err
-		}
-		entries, err := os.ReadDir(dir)
-		if err != nil {
-			return err
-		}
-		var files []string
-		for _, e := range entries {
-			if !e.IsDir() && strings.HasSuffix(e.Name(), ".sql") {
-				files = append(files, filepath.Join(dir, e.Name()))
-			}
-		}
-		sort.Strings(files)
-		for _, f := range files {
-			data, err := os.ReadFile(f)
+	migrationsOnce.Do(func() {
+		if len(migrationsSQL) == 0 {
+			dir, err := migrationsDir()
 			if err != nil {
-				return err
+				migrationsErr = err
+				return
 			}
-			migrationsSQL = append(migrationsSQL, string(data))
+			entries, err := os.ReadDir(dir)
+			if err != nil {
+				migrationsErr = err
+				return
+			}
+			var files []string
+			for _, e := range entries {
+				if !e.IsDir() && strings.HasSuffix(e.Name(), ".sql") {
+					files = append(files, filepath.Join(dir, e.Name()))
+				}
+			}
+			sort.Strings(files)
+			for _, f := range files {
+				data, err := os.ReadFile(f)
+				if err != nil {
+					migrationsErr = err
+					return
+				}
+				migrationsSQL = append(migrationsSQL, string(data))
+			}
 		}
-	}
-	for _, sql := range migrationsSQL {
-		// goose markers (-- +goose Up / Down) are harmless to plain Postgres
-		// only when we strip the Down section. Keep just the Up half.
-		up := stripGooseDown(sql)
-		if _, err := pool.Exec(ctx, up); err != nil {
-			return err
+		for _, sql := range migrationsSQL {
+			// goose markers (-- +goose Up / Down) are harmless to plain Postgres
+			// only when we strip the Down section. Keep just the Up half.
+			up := stripGooseDown(sql)
+			if _, err := pool.Exec(ctx, up); err != nil {
+				migrationsErr = err
+				return
+			}
 		}
-	}
-	return nil
+	})
+	return migrationsErr
 }
 
 func stripGooseDown(sql string) string {
