@@ -144,8 +144,8 @@ Contra el binario buildeado + backend dockerizado con seeds.
 
 ### Stack
 - **Unit/component:** Vitest + `@testing-library/react` + `@testing-library/user-event`.
-- **E2E (desktop):** Playwright contra Electron build, backend dockerizado.
-- **E2E (web):** pendiente — TODO post-§16.13.
+- **E2E (desktop):** Playwright contra Electron build, backend live + Postgres efímero en CI.
+- **E2E (web):** todavía no existe una suite dedicada; hoy la cobertura del cliente web viene de `@devdeck/features`, `@devdeck/api-client`, `@devdeck/ui` y del build verificado en CI.
 
 ### Cómo correr tests
 
@@ -180,9 +180,9 @@ Cada package con tests tiene su propio `vitest.config.ts` + `vitest.setup.ts` (d
 
 ## Matriz de tests E2E compartidos
 
-| Flow | Electron (Playwright) | Web (TODO) | Backend solo |
-|------|-----------------------|------------|--------------|
-| Login OAuth | ✓ | — | ✓ |
+| Flow | Electron (Playwright) | Web dedicado | Backend solo |
+|------|-----------------------|--------------|--------------|
+| Login OAuth/token | ✓ | — | ✓ |
 | Add repo (URL) | ✓ | — | ✓ |
 | Repo detail + notas | ✓ | — | – |
 | Global search | ✓ | — | ✓ |
@@ -191,7 +191,7 @@ Cada package con tests tiene su propio `vitest.config.ts` + `vitest.setup.ts` (d
 | Cheatsheets | ✓ | — | ✓ |
 | Batch import scripts | ✓ | — | ✓ |
 
-Post-§16.13 los E2E de web son trivales de agregar (mismo Playwright apuntando a `:5173`) — TODO en próximo sprint.
+**Estado real hoy:** no hay suite E2E web separada. Antes de agregarla conviene cerrar el gap del CLI P0 y las próximas features de producto para evitar duplicar mantenimiento de flujos todavía inestables.
 
 ---
 
@@ -203,44 +203,23 @@ name: ci
 on: [push, pull_request]
 jobs:
   backend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with: { go-version: '1.23' }
-      - run: cd backend && go mod download
-      - run: cd backend && go vet ./...
-      - run: cd backend && go test -race -cover ./...
+    # backend/go vet/go test -race ./...
+  cli:
+    # cli/go test ./... + build ./cmd/devdeck + smoke --help
   monorepo:
-    # Desde §16.13 el repo es pnpm workspaces; todo el frontend se instala
-    # y testea desde la raíz con un solo install.
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with: { version: 10 }
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck              # pnpm -r typecheck (5 packages)
-      - run: pnpm test                   # pnpm -r test (67 tests en 4 packages)
-      - run: pnpm -F @devdeck/desktop build
-      - run: pnpm -F @devdeck/web build
+    # pnpm install --frozen-lockfile
+    # pnpm typecheck
+    # pnpm test
+    # pnpm build:web
+    # pnpm build:desktop
+  extension:
+    # manifest validation + node --check + npm test
   e2e:
-    runs-on: ubuntu-latest
-    needs: [backend, monorepo]
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env: { POSTGRES_PASSWORD: test, POSTGRES_DB: devdeck_test }
-        ports: ['5432:5432']
-    steps:
-      - uses: actions/checkout@v4
-      # boot backend, run playwright, teardown
+    # postgres service + backend live + Playwright contra apps/desktop
 ```
 
 **Branch protection en `main`:**
-- Requerir status checks: `backend`, `monorepo`, `e2e`.
+- Requerir status checks: `backend`, `cli`, `monorepo`, `extension`, `e2e`.
 - Requerir PR review de al menos 1 maintainer.
 - No permitir force push.
 - No permitir delete.
