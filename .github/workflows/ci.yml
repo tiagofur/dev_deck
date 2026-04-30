@@ -216,6 +216,9 @@ jobs:
       - name: Install desktop deps
         run: pnpm install --frozen-lockfile
 
+      - name: Build desktop app artifacts for renderer-only E2E
+        run: pnpm -F @devdeck/desktop build
+
       - name: Install Playwright browsers
         run: pnpm --dir apps/desktop exec playwright install --with-deps chromium
 

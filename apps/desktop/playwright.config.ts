@@ -2,8 +2,11 @@ import { defineConfig, devices } from '@playwright/test'
 
 // Playwright config for the renderer running in a real browser.
 //
-// We test against the renderer-only Vite dev server. Tests assume the backend
-// is reachable at http://localhost:8080 with
+// We test against the renderer-only Vite dev server. electron-vite requires
+// the main/preload outputs to exist first, so CI prebuilds the desktop app
+// before launching Playwright.
+//
+// Tests assume the backend is reachable at http://localhost:8080 with
 // VITE_AUTH_MODE=token + VITE_API_TOKEN=test-api-token. The CI job spins up
 // the Go API in a sidecar before running these.
 //
