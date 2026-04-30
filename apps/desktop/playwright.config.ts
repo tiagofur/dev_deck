@@ -2,14 +2,14 @@ import { defineConfig, devices } from '@playwright/test'
 
 // Playwright config for the renderer running in a real browser.
 //
-// We test against the Vite dev server (electron-vite preview --port=5174 also
-// works). Tests assume the backend is reachable at http://localhost:8080 with
+// We test against the renderer-only Vite dev server. Tests assume the backend
+// is reachable at http://localhost:8080 with
 // VITE_AUTH_MODE=token + VITE_API_TOKEN=test-api-token. The CI job spins up
 // the Go API in a sidecar before running these.
 //
 // To run locally:
-//   npm run test:e2e:install   # one-time browser install
-//   npm run test:e2e
+//   pnpm -F @devdeck/desktop test:e2e:install   # one-time browser install
+//   pnpm -F @devdeck/desktop test:e2e
 //
 // The five flows tracked here mirror the criteria in ROADMAP.md §16.6:
 //   1. Login (token-mode bypass)
@@ -32,7 +32,7 @@ export default defineConfig({
   webServer: process.env.E2E_NO_WEBSERVER
     ? undefined
     : {
-        command: 'npm run dev',
+        command: 'pnpm exec electron-vite --rendererOnly',
         port: 5174,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
