@@ -177,4 +177,35 @@ func TestLoad(t *testing.T) {
 			t.Errorf("got authmode %q, want jwt", cfg.AuthMode)
 		}
 	})
+
+	t.Run("OpenAI requires explicit opt-in and key", func(t *testing.T) {
+		setenv(t, "DB_URL", "postgres://localhost:5432/db")
+		setenv(t, "AUTH_MODE", "token")
+		setenv(t, "API_TOKEN", "test-token")
+		setenv(t, "AI_PROVIDER", "openai")
+		os.Unsetenv("AI_EXTERNAL_OPT_IN")
+		os.Unsetenv("OPENAI_API_KEY")
+
+		_, err := Load()
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+	})
+
+	t.Run("OpenAI loads when opted in", func(t *testing.T) {
+		setenv(t, "DB_URL", "postgres://localhost:5432/db")
+		setenv(t, "AUTH_MODE", "token")
+		setenv(t, "API_TOKEN", "test-token")
+		setenv(t, "AI_PROVIDER", "openai")
+		setenv(t, "AI_EXTERNAL_OPT_IN", "true")
+		setenv(t, "OPENAI_API_KEY", "sk-test")
+
+		cfg, err := Load()
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if cfg.AIProvider != "openai" {
+			t.Fatalf("provider = %q", cfg.AIProvider)
+		}
+	})
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 
+	"devdeck/internal/config"
 	"devdeck/internal/domain/items"
 )
 
@@ -45,10 +46,21 @@ func New(provider string) *Service {
 	switch strings.ToLower(strings.TrimSpace(provider)) {
 	case "", "heuristic", "local":
 		return NewHeuristic()
+	case "openai":
+		return NewDisabled()
 	case "disabled", "off", "none":
 		return NewDisabled()
 	default:
 		return NewDisabled()
+	}
+}
+
+func NewFromConfig(cfg config.Config) *Service {
+	switch strings.ToLower(strings.TrimSpace(cfg.AIProvider)) {
+	case "openai":
+		return NewOpenAI(cfg.OpenAIAPIKey, cfg.OpenAIModel)
+	default:
+		return New(cfg.AIProvider)
 	}
 }
 
@@ -82,13 +94,7 @@ func (s *Service) EnrichItem(ctx context.Context, item *items.Item) (Output, err
 		return Output{}, nil
 	}
 
-	in := Input{
-		Type:        item.Type,
-		Title:       strings.TrimSpace(item.Title),
-		Description: strings.TrimSpace(deref(item.Description)),
-		URL:         item.URL,
-		Meta:        item.Meta,
-	}
+	in := SanitizeForAI(item)
 
 	var out Output
 	var errs []error

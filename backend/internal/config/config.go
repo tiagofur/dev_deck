@@ -37,12 +37,16 @@ type Config struct {
 	JWTSecret              string `env:"JWT_SECRET"`
 	GitHubClientID         string `env:"GITHUB_CLIENT_ID"`
 	GitHubClientSecret     string `env:"GITHUB_CLIENT_SECRET"`
+	OAuthRedirectURL       string `env:"OAUTH_REDIRECT_URL" envDefault:"http://localhost:5173/auth/callback"`
 	GitHubOAuthCallbackURL string `env:"GITHUB_OAUTH_CALLBACK_URL" envDefault:"http://localhost:8080/api/auth/github/callback"`
 	AppOAuthRedirectURL    string `env:"APP_OAUTH_REDIRECT_URL" envDefault:"http://localhost:5173/auth/callback"`
 	AllowedGitHubLogins    string `env:"ALLOWED_GITHUB_LOGINS"` // comma-separated, empty = allow all
 
 	// ─── Wave 5 Fase 18: local AI enrichment ───
-	AIProvider string `env:"AI_PROVIDER" envDefault:"heuristic"`
+	AIProvider      string `env:"AI_PROVIDER" envDefault:"heuristic"`
+	OpenAIAPIKey    string `env:"OPENAI_API_KEY"`
+	OpenAIModel     string `env:"OPENAI_MODEL" envDefault:"gpt-4o-mini"`
+	AIExternalOptIn bool   `env:"AI_EXTERNAL_OPT_IN" envDefault:"false"`
 }
 
 func (c Config) CORSOriginList() []string {
@@ -83,9 +87,17 @@ func Load() (Config, error) {
 		return c, errors.New("AUTH_MODE must be 'token' or 'jwt'")
 	}
 	switch strings.ToLower(strings.TrimSpace(c.AIProvider)) {
-	case "", "heuristic", "local", "disabled", "off", "none":
+	case "", "heuristic", "local", "disabled", "off", "none", "openai":
 	default:
-		return c, errors.New("AI_PROVIDER must be one of: heuristic, local, disabled")
+		return c, errors.New("AI_PROVIDER must be one of: heuristic, local, disabled, openai")
+	}
+	if strings.EqualFold(strings.TrimSpace(c.AIProvider), "openai") {
+		if !c.AIExternalOptIn {
+			return c, errors.New("AI_EXTERNAL_OPT_IN=true is required when AI_PROVIDER=openai")
+		}
+		if strings.TrimSpace(c.OpenAIAPIKey) == "" {
+			return c, errors.New("OPENAI_API_KEY is required when AI_PROVIDER=openai")
+		}
 	}
 	return c, nil
 }

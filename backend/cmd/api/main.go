@@ -66,7 +66,7 @@ func main() {
 
 	st := store.New(pool)
 	en := enricher.New(cfg.GithubToken)
-	aiSvc := ai.New(cfg.AIProvider)
+	aiSvc := ai.NewFromConfig(cfg)
 
 	// JWT auth service (Wave 4). Only active when AUTH_MODE=jwt.
 	var authService *authservice.Service

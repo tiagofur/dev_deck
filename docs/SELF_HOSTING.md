@@ -60,8 +60,13 @@ ALLOWED_GITHUB_LOGINS=tu-usuario,otro-usuario
 # Feature flags
 SEED_CHEATSHEETS=true
 
-# IA local (opcional, Fase 18 MVP actual)
-AI_PROVIDER=heuristic       # heuristic | local | disabled
+# IA para enrichment (opcional)
+AI_PROVIDER=heuristic       # heuristic | local | disabled | openai
+
+# OpenAI (opcional, requiere opt-in explícito)
+# AI_EXTERNAL_OPT_IN=true
+# OPENAI_API_KEY=<tu-api-key>
+# OPENAI_MODEL=gpt-4o-mini
 ```
 
 Generar `JWT_SECRET`:
@@ -197,7 +202,25 @@ Migrations corren automáticamente al boot del `api` container. **Siempre hacer 
 
 ---
 
-## IA local con Ollama (opcional)
+## OpenAI (opcional, provider externo)
+
+Si querés usar un provider real en vez del heurístico local:
+
+```env
+AI_PROVIDER=openai
+AI_EXTERNAL_OPT_IN=true
+OPENAI_API_KEY=<tu-api-key>
+OPENAI_MODEL=gpt-4o-mini
+```
+
+### Importante sobre privacidad
+
+- `AI_EXTERNAL_OPT_IN=true` es obligatorio cuando `AI_PROVIDER=openai`.
+- El backend **NO** envía campos privados/free-form como `notes`, `why_saved` o `when_to_use` al provider externo.
+- Solo se manda un subset sanitizado del item (`title`, `description`, `url` y metadata pública permitida).
+- Si no querés mandar nada fuera de tu servidor, seguí con `AI_PROVIDER=heuristic`.
+
+## IA local con Ollama (opcional, futuro)
 
 Si querés features de IA sin mandar datos a OpenAI, agregar al `docker-compose.yml`:
 
