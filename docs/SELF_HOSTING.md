@@ -49,12 +49,12 @@ POSTGRES_PASSWORD=<password-largo-y-random>
 POSTGRES_DB=devdeck
 
 # Backend API
-DATABASE_URL=postgres://devdeck:<password>@db:5432/devdeck?sslmode=disable
 AUTH_MODE=jwt
 JWT_SECRET=<256-bit-random-hex>
 GITHUB_CLIENT_ID=<del paso 1>
 GITHUB_CLIENT_SECRET=<del paso 1>
-OAUTH_REDIRECT_URL=https://api.devdeck.tu-dominio.com/api/auth/github/callback
+GITHUB_OAUTH_CALLBACK_URL=https://api.devdeck.tu-dominio.com/api/auth/github/callback
+APP_OAUTH_REDIRECT_URL=https://app.devdeck.tu-dominio.com/auth/callback
 ALLOWED_GITHUB_LOGINS=tu-usuario,otro-usuario
 
 # Feature flags

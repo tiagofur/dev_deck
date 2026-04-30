@@ -1,15 +1,15 @@
 # DevDeck production stack — runs on the VPS.
 #
-# Three services:
-#   db     — Postgres 16, persistent volume
-#   api    — Go API, built from ../backend/Dockerfile
-#   caddy  — Reverse proxy with automatic Let's Encrypt TLS
+# Five services:
+#   db       — Postgres 16, persistent volume
+#   migrate  — one-shot SQL migrations runner
+#   api      — Go API, built from ../backend/Dockerfile
+#   web      — React SPA, built from ../apps/web/Dockerfile
+#   caddy    — Reverse proxy with automatic Let's Encrypt TLS
 #
 # Setup:
 #   1. cp .env.example .env  &&  edit values
 #   2. docker compose up -d
-#   3. (first time only) apply migration:
-#      docker compose exec -T db psql -U devdeck devdeck < ../backend/migrations/0001_init.sql
 
 services:
   db:
@@ -18,7 +18,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: devdeck
-      POSTGRES_PASSWORD: ${PG_PASS}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: devdeck
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -31,6 +31,30 @@ services:
     networks:
       - internal
 
+  migrate:
+    image: postgres:16-alpine
+    container_name: devdeck-migrate
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ../backend/migrations:/migrations:ro
+    command: >-
+      sh -c '
+        set -e
+        run() { awk "/-- [+]goose Down/{exit} {print}" "/migrations/$1" | psql -h db -U "$POSTGRES_USER" -d "$POSTGRES_DB"; }
+        for f in $(ls /migrations/*.sql | xargs -n1 basename | sort); do
+          echo "Applying $$f"
+          run "$$f"
+        done
+        echo "All migrations applied."
+      '
+    restart: "no"
+    networks:
+      - internal
+
   api:
     build:
       context: ../backend
@@ -39,21 +63,46 @@ services:
     container_name: devdeck-api
     restart: unless-stopped
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     environment:
       PORT: "8080"
-      DB_URL: postgres://devdeck:${PG_PASS}@db:5432/devdeck?sslmode=disable
-      AUTH_MODE: token
-      API_TOKEN: ${API_TOKEN}
+      DB_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable
+      AUTH_MODE: ${AUTH_MODE:-jwt}
+      API_TOKEN: ${API_TOKEN:-}
+      JWT_SECRET: ${JWT_SECRET}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      GITHUB_OAUTH_CALLBACK_URL: https://${API_DOMAIN}/api/auth/github/callback
+      APP_OAUTH_REDIRECT_URL: https://${APP_DOMAIN}/auth/callback
+      ALLOWED_GITHUB_LOGINS: ${ALLOWED_GITHUB_LOGINS:-}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
-      CORS_ORIGINS: ${CORS_ORIGINS:-app://.}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://${APP_DOMAIN},app://.}
       REFRESH_INTERVAL_HOURS: ${REFRESH_INTERVAL_HOURS:-168}
+      SEED_CHEATSHEETS: ${SEED_CHEATSHEETS:-true}
     expose:
       - "8080"
     networks:
       - internal
+      - web
+
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: https://${API_DOMAIN}
+        VITE_AUTH_MODE: jwt
+    image: devdeck-web:latest
+    container_name: devdeck-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    expose:
+      - "80"
+    networks:
       - web
 
   caddy:
@@ -66,6 +115,8 @@ services:
       - "443:443/udp" # HTTP/3
     environment:
       DOMAIN: ${DOMAIN}
+      API_DOMAIN: ${API_DOMAIN}
+      APP_DOMAIN: ${APP_DOMAIN}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

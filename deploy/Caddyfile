@@ -4,10 +4,9 @@
 # Caddy provisions a Let's Encrypt cert automatically the first time
 # the domain resolves to this server.
 
-{$DOMAIN} {
+{$API_DOMAIN} {
     encode gzip zstd
 
-    # Health check is public; everything else hits the API which enforces auth.
     handle /healthz {
         reverse_proxy api:8080
     }
@@ -16,7 +15,6 @@
         reverse_proxy api:8080
     }
 
-    # Anything else gets a 404 from Caddy (we don't serve a web client yet).
     handle {
         respond "DevDeck API" 200
     }
@@ -26,4 +24,19 @@
         format console
         level INFO
     }
+}
+
+{$APP_DOMAIN} {
+    encode gzip zstd
+    reverse_proxy web:80
+
+    log {
+        output stdout
+        format console
+        level INFO
+    }
+}
+
+{$DOMAIN} {
+    redir https://{$APP_DOMAIN}{uri} permanent
 }

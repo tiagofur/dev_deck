@@ -263,7 +263,7 @@
 - `internal/store/auth.go`: UpsertUser, GetUserByGitHubID, CreateRefreshSession, GetRefreshSession, DeleteAllRefreshSessions
 - `internal/http/handlers/auth.go`: GitHub OAuth login/callback/refresh/logout/me endpoints
 - `internal/http/middleware/auth.go`: Dual mode — static token (Wave 1) + JWT with context injection
-- `internal/config/config.go`: JWT_SECRET, GITHUB_CLIENT_ID/SECRET, OAUTH_REDIRECT_URL, ALLOWED_GITHUB_LOGINS
+- `internal/config/config.go`: JWT_SECRET, GITHUB_CLIENT_ID/SECRET, GITHUB_OAUTH_CALLBACK_URL, APP_OAUTH_REDIRECT_URL, ALLOWED_GITHUB_LOGINS
 - `internal/http/router.go`: Auth routes under /api/auth/*, public OAuth endpoints, JWT-protected /me
 - `cmd/api/main.go`: AuthService wiring, JWT mode initialization
 
@@ -292,7 +292,7 @@
 - Cheatsheet detail: entries con copy button + filtro por tag/search
 - Discovery mode: skip/keep flow
 - Mascota Snarkel — componente Vue con 5 moods, bubble con transición, click-to-interact
-- Deploy a `app.devdeck.tu-dominio.com` via Caddy (pendiente config)
+- Deploy web + api vía Caddy y Docker Compose (ver `deploy/README.md` y `docs/SELF_HOSTING.md`)
 
 ### Fase 16 — Pulido cross-platform ⏳
 - Verificación paridad Electron ↔ Web
@@ -306,7 +306,7 @@
 - OS-level global shortcuts: `Ctrl/Cmd+K` → search, `Ctrl/Cmd+N` → add (fire en background)
 - `auth.ts` detecta Electron y delega a `window.electronAPI`, fallback a localStorage
 - `electron.d.ts` con tipos para `window.electronAPI`
-- JWT mode no activado por defecto (`VITE_AUTH_MODE=token` → static)
+- Desktop mantiene fallback `VITE_AUTH_MODE=token` para dev/E2E; web usa `jwt` como modo productivo
 
 **Web Vue P1 — COMPLETADO:**
 - `GlobalSearchModal.vue` — Ctrl+K, búsqueda cross-entity, resultados agrupados

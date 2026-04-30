@@ -1,3 +1,5 @@
+//go:build !(darwin && arm64)
+
 // Package testutil provides shared test infrastructure.
 //
 // The Postgres helper boots a real Postgres container via testcontainers-go,

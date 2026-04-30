@@ -23,7 +23,8 @@ type AuthHandler struct {
 type AuthConfig struct {
 	GitHubClientID     string
 	GitHubClientSecret string
-	RedirectURL        string
+	GitHubCallbackURL  string
+	AppRedirectURL     string
 	AllowedLogins      map[string]bool // empty = allow all
 }
 
@@ -48,7 +49,7 @@ func (h *AuthHandler) GitHubLogin(w http.ResponseWriter, r *http.Request) {
 
 	url := fmt.Sprintf(
 		"https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&state=%s&scope=read:user",
-		h.config.GitHubClientID, h.config.RedirectURL, state,
+		h.config.GitHubClientID, h.config.GitHubCallbackURL, state,
 	)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
@@ -109,7 +110,7 @@ func (h *AuthHandler) GitHubCallback(w http.ResponseWriter, r *http.Request) {
 	// Redirect to the frontend with tokens in URL fragment.
 	// The frontend reads the fragment and stores the tokens.
 	redirectTo := fmt.Sprintf("%s#access_token=%s&refresh_token=%s&expires_in=%d",
-		h.config.RedirectURL, pair.AccessToken, pair.RefreshToken, pair.ExpiresIn)
+		h.config.AppRedirectURL, pair.AccessToken, pair.RefreshToken, pair.ExpiresIn)
 	http.Redirect(w, r, redirectTo, http.StatusTemporaryRedirect)
 }
 

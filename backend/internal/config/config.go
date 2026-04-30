@@ -34,11 +34,12 @@ type Config struct {
 	RateLimitDisabled  bool `env:"RATE_LIMIT_DISABLED" envDefault:"false"`
 
 	// ─── Wave 4: Auth ───
-	JWTSecret           string `env:"JWT_SECRET"`
-	GitHubClientID      string `env:"GITHUB_CLIENT_ID"`
-	GitHubClientSecret  string `env:"GITHUB_CLIENT_SECRET"`
-	OAuthRedirectURL    string `env:"OAUTH_REDIRECT_URL" envDefault:"http://localhost:5173/auth/callback"`
-	AllowedGitHubLogins string `env:"ALLOWED_GITHUB_LOGINS"` // comma-separated, empty = allow all
+	JWTSecret              string `env:"JWT_SECRET"`
+	GitHubClientID         string `env:"GITHUB_CLIENT_ID"`
+	GitHubClientSecret     string `env:"GITHUB_CLIENT_SECRET"`
+	GitHubOAuthCallbackURL string `env:"GITHUB_OAUTH_CALLBACK_URL" envDefault:"http://localhost:8080/api/auth/github/callback"`
+	AppOAuthRedirectURL    string `env:"APP_OAUTH_REDIRECT_URL" envDefault:"http://localhost:5173/auth/callback"`
+	AllowedGitHubLogins    string `env:"ALLOWED_GITHUB_LOGINS"` // comma-separated, empty = allow all
 }
 
 func (c Config) CORSOriginList() []string {

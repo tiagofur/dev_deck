@@ -505,21 +505,20 @@ CREATE INDEX idx_sessions_user ON sessions(user_id);
 |-----|-------------|---------|
 | `PORT` | Puerto del API | `8080` |
 | `DB_URL` | Conn string Postgres | required |
-| `AUTH_MODE` | `token` (Ola 1) o `jwt` (Ola 4) | `token` |
+| `AUTH_MODE` | `token` (legacy/dev) o `jwt` (modo productivo) | `token` |
 | `API_TOKEN` | Bearer token único (modo `token`) | required en modo token |
 | `GITHUB_TOKEN` | PAT para rate limit del enricher | optional |
 | `LOG_LEVEL` | debug/info/warn/error | `info` |
 | `CORS_ORIGINS` | CSV de origins permitidos | `app://.` |
 | `REFRESH_INTERVAL_HOURS` | Cron metadata refresh | `168` (7d) |
-| `OAUTH_GITHUB_CLIENT_ID` 🌊4 | OAuth App client ID | required en modo jwt |
-| `OAUTH_GITHUB_CLIENT_SECRET` 🌊4 | OAuth App secret | required en modo jwt |
-| `OAUTH_REDIRECT_URL` 🌊4 | Callback URL público | required en modo jwt |
+| `GITHUB_CLIENT_ID` 🌊4 | OAuth App client ID | required en modo jwt |
+| `GITHUB_CLIENT_SECRET` 🌊4 | OAuth App secret | required en modo jwt |
+| `GITHUB_OAUTH_CALLBACK_URL` 🌊4 | Callback GitHub → backend | required en modo jwt |
+| `APP_OAUTH_REDIRECT_URL` 🌊4 | Redirect backend → frontend | required en modo jwt |
 | `JWT_SECRET` 🌊4 | HMAC secret para firmar JWT | required en modo jwt |
-| `JWT_ACCESS_TTL` 🌊4 | TTL access token | `30d` |
-| `JWT_REFRESH_TTL` 🌊4 | TTL refresh token | `90d` |
 | `ALLOWED_GITHUB_LOGINS` 🌊4 | CSV de usernames permitidos | required en modo jwt |
 
-Cliente Electron lee `API_BASE_URL` y `API_TOKEN` de un config encriptado con `safeStorage`.
+Cliente Electron configura `baseUrl` y auth vía `configureApiClient()`; en desktop el storage de tokens usa `safeStorage` via IPC.
 
 ---
 
@@ -528,32 +527,11 @@ Cliente Electron lee `API_BASE_URL` y `API_TOKEN` de un config encriptado con `s
 `deploy/docker-compose.yml`:
 ```yaml
 services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_PASSWORD: ${PG_PASS}
-      POSTGRES_DB: devdeck
-    volumes: [pgdata:/var/lib/postgresql/data]
-    restart: unless-stopped
-
-  api:
-    image: ghcr.io/tfurt/devdeck-api:latest
-    environment:
-      DB_URL: postgres://postgres:${PG_PASS}@db:5432/devdeck?sslmode=disable
-      API_TOKEN: ${API_TOKEN}
-      GITHUB_TOKEN: ${GITHUB_TOKEN}
-    depends_on: [db]
-    restart: unless-stopped
-
-  caddy:
-    image: caddy:2-alpine
-    ports: ["80:80","443:443"]
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on: [api]
-    restart: unless-stopped
+  db: {}
+  migrate: {}
+  api: {}
+  web: {}
+  caddy: {}
 
 volumes:
   pgdata:
@@ -563,13 +541,18 @@ volumes:
 
 `deploy/Caddyfile`:
 ```
-api.devdeck.tu-dominio.com {
+{$API_DOMAIN} {
   reverse_proxy api:8080
-  encode gzip
+  encode gzip zstd
+}
+
+{$APP_DOMAIN} {
+  reverse_proxy web:80
+  encode gzip zstd
 }
 ```
 
-CI/CD: GitHub Action que en push a `main` → builda binario Go → push imagen a GHCR → SSH al VPS → `docker compose pull && docker compose up -d`.
+CI/CD: ver `.github/workflows/ci.yml` — backend, CLI, monorepo y E2E. El deploy self-hosted actual se documenta en `deploy/README.md` y `docs/SELF_HOSTING.md`.
 
 ---
 

@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: devdeck
-      POSTGRES_PASSWORD: ${PG_PASS}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devdeck}
       POSTGRES_DB: devdeck
     ports:
       - "5432:5432"
@@ -24,7 +24,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      PGPASSWORD: ${PG_PASS}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-devdeck}
     volumes:
       - ../backend/migrations:/migrations:ro
     # Extract only the +goose Up section (stop at +goose Down) before running.
@@ -52,13 +52,14 @@ services:
         condition: service_completed_successfully
     environment:
       PORT: "8080"
-      DB_URL: postgres://devdeck:${PG_PASS}@db:5432/devdeck?sslmode=disable
+      DB_URL: postgres://devdeck:${POSTGRES_PASSWORD:-devdeck}@db:5432/devdeck?sslmode=disable
       AUTH_MODE: ${AUTH_MODE:-token}
       API_TOKEN: ${API_TOKEN}
       JWT_SECRET: ${JWT_SECRET:-}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
-      OAUTH_REDIRECT_URL: ${OAUTH_REDIRECT_URL:-http://localhost:5173/auth/callback}
+      GITHUB_OAUTH_CALLBACK_URL: ${GITHUB_OAUTH_CALLBACK_URL:-http://localhost:8080/api/auth/github/callback}
+      APP_OAUTH_REDIRECT_URL: ${APP_OAUTH_REDIRECT_URL:-http://localhost:5173/auth/callback}
       ALLOWED_GITHUB_LOGINS: ${ALLOWED_GITHUB_LOGINS:-}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       LOG_LEVEL: ${LOG_LEVEL:-debug}

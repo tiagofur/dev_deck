@@ -88,33 +88,38 @@ jobs:
       - name: Smoke test (--help)
         run: /tmp/devdeck --help
 
-  desktop:
-    name: Desktop (Vitest + typecheck + build)
+  monorepo:
+    name: Monorepo (pnpm typecheck + tests)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: desktop
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
 
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: desktop/package-lock.json
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Typecheck
-        run: npm run typecheck
+        run: pnpm typecheck
 
-      - name: Vitest unit tests
-        run: npm test
+      - name: Unit tests
+        run: pnpm test
 
-      - name: Build (electron-vite)
-        run: npm run build
+      - name: Verify web build
+        run: pnpm build:web
+
+      - name: Verify desktop build
+        run: pnpm build:desktop
 
   extension:
     name: Extension (Manifest v3 + node:test)
@@ -147,7 +152,7 @@ jobs:
   e2e:
     name: E2E (Playwright + live backend)
     runs-on: ubuntu-latest
-    needs: [backend, desktop]
+    needs: [backend, monorepo]
     services:
       postgres:
         image: postgres:16-alpine
@@ -182,8 +187,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: desktop/package-lock.json
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
 
       - name: Apply DB migrations
         working-directory: backend
@@ -210,24 +220,23 @@ jobs:
           echo "API never became healthy" >&2
           exit 1
 
-      - name: Install desktop deps
-        working-directory: desktop
-        run: npm ci
+      - name: Install monorepo deps
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
-        working-directory: desktop
-        run: npx playwright install --with-deps chromium
+        working-directory: apps/desktop
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Run Playwright tests
-        working-directory: desktop
-        run: npm run test:e2e
+        working-directory: apps/desktop
+        run: pnpm test:e2e
 
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: desktop/playwright-report
+          path: apps/desktop/playwright-report
           retention-days: 7
 
       - name: Stop backend

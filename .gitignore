@@ -18,8 +18,10 @@ pnpm-debug.log*
 
 # Root/node workspaces
 node_modules/
+bin/
 
 # Go backend
+backend/devdeck
 backend/bin/
 backend/tmp/
 backend/*.exe
@@ -31,6 +33,8 @@ apps/*/dist/
 apps/*/out/
 apps/*/.vite/
 apps/*/coverage/
+apps/*/package-lock.json
+apps/*/pnpm-lock.yaml
 apps/desktop/build/icon.*
 packages/*/node_modules/
 packages/*/dist/

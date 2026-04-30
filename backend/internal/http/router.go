@@ -71,7 +71,8 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		authH = handlers.NewAuthHandler(st, as, handlers.AuthConfig{
 			GitHubClientID:     cfg.GitHubClientID,
 			GitHubClientSecret: cfg.GitHubClientSecret,
-			RedirectURL:        cfg.OAuthRedirectURL,
+			GitHubCallbackURL:  cfg.GitHubOAuthCallbackURL,
+			AppRedirectURL:     cfg.AppOAuthRedirectURL,
 			AllowedLogins:      cfg.AllowedLoginsMap(),
 		})
 		r.Route("/api/auth", func(ar chi.Router) {

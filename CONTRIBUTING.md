@@ -19,11 +19,7 @@ pnpm install
 
 ### Backend
 ```bash
-cd backend
-cp .env.example .env
-# editar DATABASE_URL, GITHUB_* si vas a testear auth
-docker compose -f ../deploy/docker-compose.dev.yml up -d db
-go run ./cmd/api
+docker compose -f deploy/docker-compose.local.yml up -d db migrate api
 ```
 
 ### Desktop (Electron + React)
