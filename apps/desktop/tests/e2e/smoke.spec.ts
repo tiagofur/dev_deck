@@ -30,13 +30,15 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     await expect(urlInput).toBeVisible()
     const url = `https://github.com/test-${Date.now()}/sample`
     await urlInput.fill(url)
+    const submitButton = page.locator('form').getByRole('button', { name: /^guardar$/i })
+    await expect(submitButton).toBeEnabled()
     const createRequestPromise = page.waitForRequest(
       (request) =>
         request.url().includes('/api/repos') &&
         request.method() === 'POST',
       { timeout: 5_000 },
     )
-    await urlInput.press('Enter')
+    await submitButton.click()
     const createRequest = await createRequestPromise
     const createResponse = await createRequest.response()
     expect(createResponse, 'repo create request never received a response').not.toBeNull()
