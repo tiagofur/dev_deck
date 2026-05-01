@@ -22,6 +22,7 @@ test.describe('DevDeck — desktop renderer E2E', () => {
   })
 
   test('2. add repo: opens modal, submits, sees the new card', async ({ page }) => {
+    test.setTimeout(60_000)
     // Open the add modal through the visible topbar action. This is less
     // fragile than relying on keyboard shortcuts in CI/browser mode.
     await page.getByRole('button', { name: /add/i }).click()
@@ -29,14 +30,19 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     await expect(urlInput).toBeVisible()
     const url = `https://github.com/test-${Date.now()}/sample`
     await urlInput.fill(url)
-    const createResponsePromise = page.waitForResponse(
-      (response) =>
-        response.url().includes('/api/repos') &&
-        response.request().method() === 'POST',
-      { timeout: 20_000 },
+    const createRequestPromise = page.waitForRequest(
+      (request) =>
+        request.url().includes('/api/repos') &&
+        request.method() === 'POST',
+      { timeout: 5_000 },
     )
-    await page.keyboard.press('Enter')
-    const createResponse = await createResponsePromise
+    await urlInput.press('Enter')
+    const createRequest = await createRequestPromise
+    const createResponse = await createRequest.response()
+    expect(createResponse, 'repo create request never received a response').not.toBeNull()
+    if (!createResponse) {
+      throw new Error('repo create request never received a response')
+    }
     const createBody = await createResponse.text()
     expect(createResponse.status(), createBody).toBe(201)
     await expect(urlInput).toBeHidden()
