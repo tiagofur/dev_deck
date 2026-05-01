@@ -29,15 +29,16 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     await expect(urlInput).toBeVisible()
     const url = `https://github.com/test-${Date.now()}/sample`
     await urlInput.fill(url)
-    await Promise.all([
-      page.waitForResponse(
-        (response) =>
-          response.url().includes('/api/repos') &&
-          response.request().method() === 'POST' &&
-          response.status() === 201,
-      ),
-      page.getByRole('button', { name: /guardar/i }).click(),
-    ])
+    const createResponsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/repos') &&
+        response.request().method() === 'POST',
+      { timeout: 20_000 },
+    )
+    await page.keyboard.press('Enter')
+    const createResponse = await createResponsePromise
+    const createBody = await createResponse.text()
+    expect(createResponse.status(), createBody).toBe(201)
     await expect(urlInput).toBeHidden()
     // CI proved the persistence works, but the reactive list refresh is a bit
     // flaky under browser-only mode. Reload to assert the new repo exists in
