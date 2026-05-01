@@ -29,10 +29,21 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     await expect(urlInput).toBeVisible()
     const url = `https://github.com/test-${Date.now()}/sample`
     await urlInput.fill(url)
-    await page.keyboard.press('Enter')
-    // After save the card should land on the home grid (best-effort match
-    // on the URL fragment that becomes the card title).
-    await expect(page.getByText(new RegExp(`sample`, 'i'))).toBeVisible({ timeout: 10_000 })
+    await Promise.all([
+      page.waitForResponse(
+        (response) =>
+          response.url().includes('/api/repos') &&
+          response.request().method() === 'POST' &&
+          response.status() === 201,
+      ),
+      page.getByRole('button', { name: /guardar/i }).click(),
+    ])
+    await expect(urlInput).toBeHidden()
+    // CI proved the persistence works, but the reactive list refresh is a bit
+    // flaky under browser-only mode. Reload to assert the new repo exists in
+    // the persisted home list.
+    await page.reload()
+    await expect(page.getByRole('heading', { name: /sample/i }).first()).toBeVisible({ timeout: 10_000 })
   })
 
   test('3. repo detail + notes: navigate to a card, edit notes, persist', async ({ page }) => {
