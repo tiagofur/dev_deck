@@ -34,7 +34,7 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     await expect(submitButton).toBeEnabled()
     const createRequestPromise = page.waitForRequest(
       (request) =>
-        request.url().includes('/api/repos') &&
+        (request.url().includes('/api/repos') || request.url().includes('/api/items/capture')) &&
         request.method() === 'POST',
       { timeout: 5_000 },
     )
