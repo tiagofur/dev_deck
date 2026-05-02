@@ -2,52 +2,57 @@
 
 ## Reporting a Vulnerability
 
-If you find a security vulnerability in DevDeck, **please do not open a public issue**. Instead, send an email to:
+If you find a security vulnerability in DevDeck, **please do not open a public issue**. Send an email to:
 
 **security@devdeck.ai**
 
-(If that channel is not yet available, please send to `tiagofur@gmail.com` with the subject `[DevDeck Security]`.)
+(If that channel is not yet available, please send it to `tiagofur@gmail.com` with the subject `[DevDeck Security]`.)
 
-[Leer en español](SECURITY.es.md)
+### What to include
 
-### What to Include
-- Description of the issue.
-- Affected component (backend API, desktop, web, extension, CLI).
-- Steps to reproduce (as clear as possible).
+- A clear description of the problem.
+- The affected component (Backend API, Desktop, Web, Extension, CLI).
+- Reproduction steps (as clear as possible).
 - Estimated impact (what an attacker could achieve).
-- Version / commit hash where the issue was found.
-- Your name / handle for credit (optional).
+- Version or commit hash where the vulnerability was found.
+- Your name/handle for credit (optional).
 
-### What to Expect
-- Acknowledgment within **48 business hours**.
-- Initial evaluation within **7 days**.
-- Coordinated fix and disclosure when ready. We aim for a **30-day** window for critical issues.
-- Public credit in the changelog / release notes (if desired).
+### What to expect
+
+- Acknowledgement of receipt within **48 business hours**.
+- Initial assessment within **7 days**.
+- A fix and coordinated disclosure once ready. We aim for a maximum of **30 days** for critical issues.
+- Public credit in the changelog/release notes (if desired).
+
+---
 
 ## Scope
 
-**In Scope:**
-- Backend API (`backend/`)
-- Official clients: desktop, web, extension, and CLI.
-- Official Dockerfiles and Caddyfile.
-- OAuth flow, JWT, refresh tokens.
-- SQL injection, XSS, CSRF, SSRF, path traversal, auth bypass.
+**In-scope:**
+- Backend API (`backend/`).
+- Official clients: Desktop, Web, future Extension, and CLI.
+- Official Dockerfiles and Caddyfile deployment configurations.
+- OAuth flow, JWT handling, and refresh token rotation.
+- SQL injection, XSS, CSRF, SSRF, path traversal, and auth bypass.
 - Dependency vulnerabilities affecting the runtime.
 
-**Out of Scope:**
+**Out-of-scope:**
 - Vulnerabilities requiring physical access to the device.
-- Resource DoS (e.g., sending 10k concurrent items). Rate limits and circuit breakers are on the roadmap.
+- Resource-based DoS (e.g., sending 10k concurrent items). Rate limits are in the roadmap.
 - Self-hosted deployments with insecure configurations.
-- Vulnerabilities in dependencies without an exploit vector in DevDeck.
-- Spam, phishing, social engineering.
+- Vulnerabilities in dependencies without a clear exploit vector in DevDeck.
+
+---
 
 ## Known Sensitive Areas
-To guide researchers, these are areas where we are actively hardening the attack surface:
 
-1. **SSRF in Open Graph Scraper** (`internal/enricher/generic.go`). There is a scheme whitelist, but IP range validation is in progress.
-2. **GitHub Login Allowlist.** Authentication via `ALLOWED_GITHUB_LOGINS`. Bypassing this list is a critical finding.
-3. **JWT Refresh Flow.** Revocation depends on database session deletion.
-4. **Markdown Rendering.** `react-markdown` + `rehype-highlight` in Electron. Finding XSS via crafted markdown is a critical finding.
+To guide researchers, these are the areas where we know there is an attack surface:
 
-## Thank You
-A secure product is built with the community's help. Thank you for taking the time to report issues responsibly.
+1.  **SSRF in Open Graph Scraper** (`internal/enricher/generic.go`): We have a scheme whitelist, but private IP range validation is still in the roadmap.
+2.  **GitHub Login Allowlist**: Authentication depends on the `ALLOWED_GITHUB_LOGINS` environment variable. Finding a way to bypass this list is considered critical.
+3.  **JWT Refresh Flow**: Revocation depends on DB session deletion. If a stolen refresh token can still generate access tokens after a logout, it's considered critical.
+4.  **Markdown Rendering**: We use `react-markdown` + `rehype-highlight` in Electron. Finding XSS via crafted markdown is considered critical.
+
+---
+
+*Thank you for helping us build a secure DevDeck.*

@@ -1,76 +1,102 @@
-# Contributing to DevDeck.ai
+# Contributing to DevDeck
 
-First of all, thank you for being here! **DevDeck.ai** is an open-source project born from the need to organize development knowledge in a way that actually works. If you want to help build the ultimate external memory for developers, you are in the right place.
+Thank you for your interest in contributing to DevDeck! This is an indie project with a strong vision, so please read this guide before opening a Pull Request.
 
 [Leer en español](CONTRIBUTING.es.md)
 
 ---
 
-## Our Mission
-To build a tool that makes everything you find (repos, CLIs, snippets, prompts) findable weeks later through AI-powered semantic search and high-quality organization.
+## Before You Start
 
-## Code of Conduct
-We follow the [Contributor Covenant](https://www.contributor-covenant.org/version/2/1/code_of_conduct/code_of_conduct.md). Be respectful, professional, and helpful.
-
-## Tech Stack
-We are a **pnpm workspaces monorepo**:
-- **Frontend:** React 18 + TypeScript + Tailwind CSS + TanStack Query + Framer Motion.
-- **Desktop:** Electron (wrapping the React app).
-- **Backend:** Go + Chi + pgx + pgvector.
-- **Database:** Postgres 16 (vector search).
+1.  **Read the vision**: Check `docs/VISION.md` and `docs/PRD.md`. If your proposal doesn't align with the project's direction, we might decline it. Save yourself some time!
+2.  **Discussion first**: For new features, please open a **Discussion Issue** first. Do not send large PRs without prior acknowledgment.
+3.  **Reporting bugs**: Open an issue with clear reproduction steps, version, OS, and stack traces if applicable.
 
 ---
 
-## How to Contribute
+## Local Setup
 
-### 1. Find or Open an Issue
-Before writing code, please check the [Issues](https://github.com/tiagofur/dev_deck/issues) to see if what you want to do is already being discussed. If not, open a new issue describing the problem or feature.
+DevDeck is a **pnpm workspaces monorepo**. A single `pnpm install` in the root installs all dependencies for all packages (`apps/desktop`, `apps/web`, `packages/ui`, `packages/api-client`, `packages/features`).
 
-### 2. Fork and Branch
-- Fork the repository.
-- Create a branch for your change: `git checkout -b feature/awesome-thing` or `bugfix/fix-that-bug`.
-
-### 3. Development Setup
-
-#### Prerequisites
-- **Node.js** v20+.
-- **pnpm** v9+.
-- **Go** 1.22+.
-- **Docker** & **Docker Compose** (for Postgres/pgvector).
-
-#### Initial Setup
 ```bash
-# Install dependencies
+# Run this once from the project root
 pnpm install
-
-# Start infrastructure (Postgres)
-pnpm run infra:up
-
-# Start Backend (in /backend)
-go run cmd/api/main.go
-
-# Start Frontend (Web)
-pnpm run web:dev
-
-# Start Desktop (Electron)
-pnpm run desktop:dev
 ```
 
-### 4. Style Guide
-- **Commits:** Use [Conventional Commits](https://www.conventionalcommits.org/) (e.g., `feat: add search filter`, `fix: handle null pointers`).
-- **TypeScript:** Strict mode is on. Prefer functional components and hooks.
-- **Go:** Follow standard `gofmt` and idiomatic Go patterns (Clean Architecture).
-- **Architecture:** We follow a domain-driven approach. Logic lives in `packages/features` to be shared between Web and Desktop.
+### Backend (Go)
+```bash
+cd backend
+cp .env.example .env
+# Edit DATABASE_URL and GITHUB_* credentials
+docker compose -f ../deploy/docker-compose.dev.yml up -d db
+go run ./cmd/api
+```
 
-### 5. Pull Requests
-- Keep PRs focused. One feature/fix per PR.
-- Ensure all tests pass.
-- Update documentation if necessary.
-- Wait for a maintainer review.
+### Desktop App (Electron + React)
+```bash
+pnpm dev:desktop
+# Equivalent to: pnpm -F @devdeck/desktop dev
+```
+
+### Web App (React)
+```bash
+pnpm dev:web
+# Equivalent to: pnpm -F @devdeck/web dev
+# The dev server listens on http://localhost:5173 and proxies /api to :8080
+```
+
+### Tests and Typechecking
+```bash
+pnpm typecheck                    # Runs tsc --noEmit across all packages
+pnpm test                         # Runs vitest in packages with unit tests
+pnpm -F @devdeck/desktop test:e2e # Runs Playwright flows for the desktop app
+```
 
 ---
 
-## Need Help?
-If you have questions about the architecture or how to get started, feel free to open a Discussion or ping us on the issue.
+## Monorepo Coding Patterns
 
-Let's build something amazing together!
+- **UI Primitives** (no fetch, no domain logic): `packages/ui/src/`.
+- **API logic, Domain types, Auth adapters**: `packages/api-client/src/`.
+- **Shared Pages & Domain Logic**: `packages/features/src/`.
+- **Desktop-only logic** (Electron main process, global shortcuts): `apps/desktop/src/`.
+- **Web-only logic** (Routing shell, Web-specific guards): `apps/web/src/`.
+
+We use internal aliases: `@devdeck/ui`, `@devdeck/api-client`, and `@devdeck/features`.
+
+---
+
+## Coding Style
+
+### Go
+- Use `gofmt` and `goimports`. The CI will fail if formatting is off.
+- Packages should be organized by **Domain**, not by layer.
+- Errors: Always wrap errors with context using `fmt.Errorf("context: %w", err)`.
+
+### TypeScript & React
+- Use **functional components and hooks** exclusively. No new class components.
+- Strict typechecking is enabled in `tsconfig.base.json`.
+- State management: Use **TanStack Query v5** for server state; `useState` for local UI state. Avoid Redux/Zustand unless discussed.
+
+### Commit Messages
+We follow **Conventional Commits**: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`, `ci:`.
+- Example: `feat(backend): add /api/items/capture endpoint`
+
+---
+
+## Pull Requests
+
+- Branch from `main` with a descriptive name: `feat/capture-endpoint`.
+- One PR = One concern.
+- Ensure the CI is green before requesting a review.
+- A minimum of one maintainer approval is required for merging.
+
+---
+
+## Code of Conduct
+
+Be respectful. If you have an issue with another contributor, please contact a maintainer privately. We keep the drama out of public discussions.
+
+---
+
+*Part of the DevDeck Open Source Guidelines*

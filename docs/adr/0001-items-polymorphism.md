@@ -1,45 +1,62 @@
 # ADR 0001: Polymorphic Items Model
 
-**Status:** DECIDED
-**Date:** April 2026
+**Status:** Accepted  
+**Date:** March 2026  
+**Context:** Wave 5 (General Items)
 
 [Leer en español](0001-items-polymorphism.es.md)
 
 ---
 
-## Context
-As we move to **Wave 5**, we need to support non-URL items such as CLIs, Snippets, IDE Plugins, and OS Shortcuts.
+## Context and Problem Statement
 
-Options considered:
-1. **Separate Tables:** One table per type (`repos`, `clis`, `snippets`).
-2. **Polymorphic Table:** A single `items` table with a `type` column and a JSONB `payload` for type-specific data.
+Initially, DevDeck was focused exclusively on **Repositories**. The data model was rigid, centered around the `repos` table. As we moved towards Wave 5, the need to support other developer assets (CLIs, Plugins, Snippets, Shortcuts, Prompts) became evident.
 
-## Decision
-We will use a **Single Polymorphic Table** (`items`).
+The challenge was: how do we store these diverse entities while maintaining a unified search experience (especially for AI semantic search) without creating a fragmented schema that is hard to maintain?
 
-### Rationale
-- **Unified Search:** Semantic search and global search are much simpler to implement against a single table.
-- **Shared Metadata:** All items share `title`, `description`, `created_at`, `user_id`, and `ai_summary`.
-- **Flexibility:** Adding a new type (e.g., "Agent") is just adding a new value to the `type` enum.
+## Considered Options
 
-## Implementation Details
+1.  **Separate Tables for Every Type**: Create `clis`, `plugins`, `snippets`, etc.
+    - **Pros**: Clean schema for type-specific fields.
+    - **Cons**: Extremely hard to perform global search, paging, and cross-entity filtering. AI embeddings would need to be handled separately.
+2.  **Single Monolithic Table**: One `items` table with many nullable columns.
+    - **Pros**: Simple global search and paging.
+    - **Cons**: "Sparse table" problem. The table grows wide and messy as new types are added.
+3.  **Polymorphic Base Table + JSONB Metadata (Selected)**: A central `items` table for common fields with a `metadata` JSONB column for type-specific data.
+
+## Decision Outcome
+
+We chose **Option 3**. All developer assets are stored in a single `items` table.
+
+### Data Structure
+
 ```sql
-CREATE TYPE item_type AS ENUM ('repo', 'cli', 'snippet', 'shortcut', 'plugin', 'note', 'prompt');
-
 CREATE TABLE items (
-  id           UUID PRIMARY KEY,
-  user_id      UUID REFERENCES users(id),
-  type         item_type NOT NULL,
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      UUID NOT NULL REFERENCES users(id),
+  item_type    TEXT NOT NULL, -- 'repo', 'cli', 'snippet', 'prompt', etc.
+  url          TEXT,          -- Optional for non-web items
   title        TEXT NOT NULL,
   description  TEXT,
-  url          TEXT, -- NULL for non-URL items
-  payload      JSONB, -- Type-specific data (e.g., keys, commands)
-  ai_summary   TEXT,
-  embedding    vector(1536),
-  created_at   TIMESTAMPTZ DEFAULT NOW()
+  tags         TEXT[] DEFAULT '{}',
+  content      TEXT,          -- Raw content for snippets/notes
+  metadata     JSONB,         -- Type-specific data (e.g., CLI install command)
+  embedding    vector(1536),  -- AI semantic representation
+  created_at   TIMESTAMPTZ DEFAULT NOW(),
+  updated_at   TIMESTAMPTZ DEFAULT NOW()
 );
 ```
 
-## Consequences
-- **Positive:** Simpler backend code, faster global search.
-- **Negative:** Type-specific validation must be handled in the application layer (Go/TypeScript) instead of DB constraints.
+### Consequences
+
+- **Pros**:
+    - **Unified Search**: Global search (fuzzy and semantic) works out of the box for all items.
+    - **Extensibility**: Adding a new type (e.g., "Agent") doesn't require a database migration.
+    - **Simplicity**: One set of CRUD endpoints and one TanStack Query cache.
+- **Cons**:
+    - **Validation**: Enforcing type-specific rules (e.g., a "Repo" must have a URL) moves from the DB layer to the application logic (Go).
+    - **SQL Complexity**: Querying deep into the JSONB metadata can be slightly slower (mitigated by GIN indexes if needed).
+
+---
+
+*Part of the DevDeck Architecture Decision Records*

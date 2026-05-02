@@ -14,7 +14,9 @@ import (
 )
 
 const cheatColumns = `id, user_id, slug, title, category, icon, color, description, visibility, parent_id, is_official, fork_count, stars_count, is_seed, created_at, updated_at`
+const cheatColumnsPrefixed = `c.id, c.user_id, c.slug, c.title, c.category, c.icon, c.color, c.description, c.visibility, c.parent_id, c.is_official, c.fork_count, c.stars_count, c.is_seed, c.created_at, c.updated_at`
 const entryColumns = `id, cheatsheet_id, label, command, description, tags, position`
+const entryColumnsPrefixed = `ce.id, ce.cheatsheet_id, ce.label, ce.command, ce.description, ce.tags, ce.position`
 
 func scanCheatsheet(row pgx.Row) (*cheatsheets.Cheatsheet, error) {
 	var c cheatsheets.Cheatsheet
@@ -339,7 +341,7 @@ func (s *Store) ListEntriesByCheatsheet(ctx context.Context, cheatsheetID uuid.U
 	scopeSQL, scopeArgs := ownerClause(ctx, "c.user_id", 2)
 	args := append([]any{cheatsheetID}, scopeArgs...)
 	rows, err := s.pool.Query(ctx, `
-		SELECT ce.`+entryColumns+` FROM cheatsheet_entries ce
+		SELECT `+entryColumnsPrefixed+` FROM cheatsheet_entries ce
 		JOIN cheatsheets c ON c.id = ce.cheatsheet_id
 		WHERE ce.cheatsheet_id = $1 AND `+scopeSQL+`
 		ORDER BY position ASC
@@ -391,7 +393,7 @@ func (s *Store) GetEntry(ctx context.Context, id uuid.UUID) (*cheatsheets.Entry,
 	scopeSQL, scopeArgs := ownerClause(ctx, "c.user_id", 2)
 	args := append([]any{id}, scopeArgs...)
 	row := s.pool.QueryRow(ctx, `
-		SELECT ce.`+entryColumns+`
+		SELECT `+entryColumnsPrefixed+`
 		FROM cheatsheet_entries ce
 		JOIN cheatsheets c ON c.id = ce.cheatsheet_id
 		WHERE ce.id = $1 AND `+scopeSQL, args...)
@@ -439,8 +441,8 @@ func (s *Store) UpdateEntry(ctx context.Context, id uuid.UUID, in cheatsheets.Up
 	args = append(args, id)
 	args = append(args, scopeArgs...)
 	q := fmt.Sprintf(
-		"UPDATE cheatsheet_entries ce SET %s FROM cheatsheets c WHERE ce.cheatsheet_id = c.id AND ce.id = $%d AND %s RETURNING ce.%s",
-		strings.Join(sets, ", "), idx, scopeSQL, entryColumns,
+		"UPDATE cheatsheet_entries ce SET %s FROM cheatsheets c WHERE ce.cheatsheet_id = c.id AND ce.id = $%d AND %s RETURNING %s",
+		strings.Join(sets, ", "), idx, scopeSQL, entryColumnsPrefixed,
 	)
 	row := s.pool.QueryRow(ctx, q, args...)
 	e, err := scanEntry(row)
@@ -514,7 +516,7 @@ func (s *Store) ListCheatsheetsByRepo(ctx context.Context, repoID uuid.UUID) ([]
 	scopeSQL, scopeArgs := ownerClause(ctx, "r.user_id", 2)
 	args := append([]any{repoID}, scopeArgs...)
 	rows, err := s.pool.Query(ctx, `
-		SELECT `+cheatColumns+` FROM cheatsheets c
+		SELECT `+cheatColumnsPrefixed+` FROM cheatsheets c
 		JOIN repo_cheatsheet_links rcl ON rcl.cheatsheet_id = c.id
 		JOIN repos r ON r.id = rcl.repo_id
 		WHERE rcl.repo_id = $1 AND `+scopeSQL+`
