@@ -199,9 +199,11 @@ jobs:
 
       - name: Start backend
         working-directory: backend
+        env:
+          LOG_LEVEL: debug
         run: |
           go build -o /tmp/devdeck-api ./cmd/api
-          /tmp/devdeck-api &
+          /tmp/devdeck-api 2>&1 &
           echo $! > /tmp/devdeck-api.pid
           # Wait for /healthz to come up.
           for i in 1 2 3 4 5 6 7 8 9 10; do
