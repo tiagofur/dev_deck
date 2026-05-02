@@ -23,7 +23,6 @@ const repoColumns = `id, url, source, owner, name, description, language, langua
 // INSERT … RETURNING with a trailing url_normalized we want to set but
 // don't want to return.
 
-
 func scanRepo(row pgx.Row) (*repos.Repo, error) {
 	var r repos.Repo
 	err := row.Scan(

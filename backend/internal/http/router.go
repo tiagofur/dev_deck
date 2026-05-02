@@ -6,8 +6,8 @@ import (
 
 	"devdeck/internal/authservice"
 	"devdeck/internal/config"
-	"devdeck/internal/enricher"
 	"devdeck/internal/email"
+	"devdeck/internal/enricher"
 	"devdeck/internal/http/handlers"
 	mw "devdeck/internal/http/middleware"
 	"devdeck/internal/jobs"

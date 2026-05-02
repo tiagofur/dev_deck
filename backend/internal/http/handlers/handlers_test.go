@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"devdeck/internal/config"
 	"devdeck/internal/ai"
+	"devdeck/internal/config"
 	"devdeck/internal/enricher"
 	httpapi "devdeck/internal/http"
 	"devdeck/internal/jobs"
@@ -502,8 +502,8 @@ func TestHandlers_Search_FindsAcrossEntities(t *testing.T) {
 		t.Fatalf("search: expected 200, got %d", rec.Code)
 	}
 	type searchResp struct {
-		Query   string                `json:"query"`
-		Results []store.SearchResult  `json:"results"`
+		Query   string               `json:"query"`
+		Results []store.SearchResult `json:"results"`
 	}
 	out := decodeJSON[searchResp](t, rec)
 	if len(out.Results) == 0 {

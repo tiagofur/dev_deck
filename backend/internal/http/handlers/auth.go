@@ -14,8 +14,6 @@ import (
 	"devdeck/internal/authservice"
 	"devdeck/internal/domain/auth"
 	"devdeck/internal/store"
-
-
 )
 
 type AuthHandler struct {

@@ -110,11 +110,11 @@ func TestHeuristicSuggestTags(t *testing.T) {
 func TestServiceEnrichItem(t *testing.T) {
 	svc := NewHeuristic()
 	item := &items.Item{
-		Type:  items.TypeRepo,
-		Title: "charmbracelet/bubbletea",
-		URL:   ptr("https://github.com/charmbracelet/bubbletea"),
+		Type:        items.TypeRepo,
+		Title:       "charmbracelet/bubbletea",
+		URL:         ptr("https://github.com/charmbracelet/bubbletea"),
 		Description: ptr("A powerful TUI framework for Go"),
-		Meta: map[string]any{"language": "Go", "topics": []any{"tui"}},
+		Meta:        map[string]any{"language": "Go", "topics": []any{"tui"}},
 	}
 
 	out, err := svc.EnrichItem(context.Background(), item)
@@ -139,7 +139,7 @@ func TestTruncate(t *testing.T) {
 		{"ascii_no_trunc", "hello", 10, "hello"},
 		{"ascii_trunc", "hello world", 5, "hell…"},
 		{"utf8_safe", "ABCDE ñ", 10, "ABCDE ñ"},
-		{"utf8_break", "ABCDE ñ extra", 8, "ABCDE ñ…"}, 
+		{"utf8_break", "ABCDE ñ extra", 8, "ABCDE ñ…"},
 		{"utf8_complex", "Estudio diseño 🎨 y mas", 16, "Estudio diseño…"},
 	}
 

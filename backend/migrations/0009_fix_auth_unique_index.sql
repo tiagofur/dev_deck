@@ -2,7 +2,8 @@
 -- Fix auth: restore full unique index and NOT NULL for github_id (back to GitHub-only).
 
 -- 1. Restore NOT NULL
-UPDATE users SET github_id = 0 WHERE github_id IS NULL; -- Should not happen in Wave 5 cleanup but safe
+UPDATE users SET github_id = 0 WHERE github_id IS NULL;
+UPDATE users SET login = 'unknown' WHERE login IS NULL;
 ALTER TABLE users ALTER COLUMN github_id SET NOT NULL;
 ALTER TABLE users ALTER COLUMN login SET NOT NULL;
 

@@ -192,9 +192,10 @@ jobs:
       - name: Apply DB migrations
         working-directory: backend
         run: |
+          set -e
           for f in migrations/*.sql; do
             echo "Applying $f"
-            PGPASSWORD=devdeck psql -h localhost -U devdeck -d devdeck -f "$f"
+            PGPASSWORD=devdeck psql -h localhost -U devdeck -d devdeck -v ON_ERROR_STOP=1 -f "$f"
           done
 
       - name: Start backend

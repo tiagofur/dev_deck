@@ -56,11 +56,11 @@ func seedCapture(t *testing.T, ts *testServer, body capturePayload) itemResp {
 func TestItems_List_FiltersByType(t *testing.T) {
 	ts := newTestServer(t)
 
-	seedCapture(t, ts, capturePayload{URL: "https://github.com/charmbracelet/glow"})       // repo
-	seedCapture(t, ts, capturePayload{Text: "brew install ripgrep"})                        // cli
-	seedCapture(t, ts, capturePayload{Text: "Cmd+Shift+P"})                                  // shortcut
-	seedCapture(t, ts, capturePayload{URL: "https://dev.to/foo/post"})                      // article
-	seedCapture(t, ts, capturePayload{Text: "remember to update deps"})                     // note
+	seedCapture(t, ts, capturePayload{URL: "https://github.com/charmbracelet/glow"}) // repo
+	seedCapture(t, ts, capturePayload{Text: "brew install ripgrep"})                 // cli
+	seedCapture(t, ts, capturePayload{Text: "Cmd+Shift+P"})                          // shortcut
+	seedCapture(t, ts, capturePayload{URL: "https://dev.to/foo/post"})               // article
+	seedCapture(t, ts, capturePayload{Text: "remember to update deps"})              // note
 
 	rec := ts.do(t, http.MethodGet, "/api/items", nil)
 	if rec.Code != http.StatusOK {

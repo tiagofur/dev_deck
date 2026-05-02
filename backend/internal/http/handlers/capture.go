@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"devdeck/internal/domain/items"
@@ -141,6 +142,7 @@ func (h *CaptureHandler) Capture(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+		slog.Error("capture: unexpected error", "err", err, "input_title", input.Title, "input_url", in.URL)
 		writeInternal(w, err)
 		return
 	}
@@ -148,10 +150,10 @@ func (h *CaptureHandler) Capture(w http.ResponseWriter, r *http.Request) {
 	// ─── Enqueue enrichment / AI analysis ───
 	enrichStatus := items.EnrichmentSkipped
 	job := jobs.EnrichJob{
-			Kind: jobs.KindItem,
-			ID:   item.ID,
-			Type: item.Type,
-		}
+		Kind: jobs.KindItem,
+		ID:   item.ID,
+		Type: item.Type,
+	}
 	if item.URL != nil {
 		job.URL = *item.URL
 	}
