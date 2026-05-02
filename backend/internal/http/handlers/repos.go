@@ -54,6 +54,8 @@ func (h *ReposHandler) Create(w http.ResponseWriter, r *http.Request) {
 				writeError(w, http.StatusUnprocessableEntity, "INVALID_URL", err.Error())
 				return
 			}
+			// DEBUG: Log more details for E2E failures
+			slog.Error("create: unexpected error", "err", err, "url", in.URL, "input_tags", in.Tags)
 			writeInternal(w, err)
 		}
 		return
