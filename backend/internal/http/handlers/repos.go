@@ -34,6 +34,7 @@ func NewReposHandler(s *store.Store, e *enricher.Service) *ReposHandler {
 // fails we still return the basic repo so the user never gets a 500 just
 // because GitHub is having a bad day.
 func (h *ReposHandler) Create(w http.ResponseWriter, r *http.Request) {
+	slog.Debug("create: received request", "url", r.URL.Path)
 	var in repos.CreateInput
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
