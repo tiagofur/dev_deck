@@ -13,6 +13,11 @@ declare global {
       }
       /** Register a listener for OS-level global shortcuts. Returns an unsubscribe fn. */
       onShortcut: (callback: (name: string) => void) => () => void
+      auth: {
+        openExternal: (url: string) => void
+        getPendingCallbackURL: () => string | null
+        onCallbackURL: (callback: (url: string) => void) => () => void
+      }
     }
   }
 }

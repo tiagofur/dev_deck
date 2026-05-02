@@ -1,33 +1,37 @@
 # DevDeck.ai
 
-> **Tu memoria externa asistida por IA para el trabajo de desarrollo.**
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/tiagofur)
 
-Una app **offline-first, multi-usuario y multiplataforma** donde guardar, organizar y redescubrir todo lo útil que un dev encuentra: repos, CLIs, plugins, cheatsheets, shortcuts, snippets, agentes, prompts y workflows. Con IA que clasifica, resume y recupera por intención — no por tag exacto.
+> **Your AI-assisted external memory for development work.**
 
-Dominio: **[devdeck.ai](https://devdeck.ai)**
+[Leer en español](README.es.md)
+
+An **offline-first, multi-user, and multi-platform** app to save, organize, and rediscover everything useful a developer finds: repos, CLIs, plugins, cheatsheets, shortcuts, snippets, agents, prompts, and workflows. Powered by AI that classifies, summarizes, and retrieves by intent — not just exact tags.
+
+Domain: **[devdeck.ai](https://devdeck.ai)**
 
 ---
 
-## ¿Por qué DevDeck?
+## Why DevDeck?
 
-El problema real no es "guardar repos". Es no poder volver a encontrar lo que ya descubriste: una CLI útil que te pasaron en un chat, un plugin de IDE que no recordás cómo se llamaba, un atajo de macOS que tardaste horas en aprender, un repo que resolvía exactamente tu problema actual.
+The real problem isn't "saving repos." It's being unable to find what you already discovered: a useful CLI shared in a chat, an IDE plugin whose name you forgot, a macOS shortcut that took hours to learn, or a repo that solved exactly your current problem.
 
-DevDeck es tu **colección curada de conocimiento dev** — con IA que hace que todo lo que guardás sea encontrable semanas después, aunque no recuerdes cómo lo llamaste.
+DevDeck is your **curated collection of dev knowledge** — with AI that makes everything you save findable weeks later, even if you don't remember what you called it.
 
 ---
 
 ## Stack
 
 - **Desktop:** Electron + React 18 + TypeScript + Tailwind + Framer Motion
-- **Web:** React 18 + Vite + React Router + TanStack Query (comparte 100% de pages y componentes con Desktop)
+- **Web:** React 18 + Vite + React Router + TanStack Query (shares 100% of pages and components with Desktop)
 - **Backend:** Go + Chi + pgx + pgvector
-- **DB:** Postgres 16 (con `pg_trgm` + `pgvector` para búsqueda fuzzy y semántica)
-- **IA:** OpenAI API / Ollama (local)
-- **Offline:** SQLite local (Electron) + sql.js/OPFS (Web)
-- **Deploy:** VPS propio · Docker Compose · Caddy (TLS automático)
-- **Dominio:** [devdeck.ai](https://devdeck.ai) · `app.devdeck.ai` · `api.devdeck.ai`
+- **DB:** Postgres 16 (with `pg_trgm` + `pgvector` for fuzzy and semantic search)
+- **AI:** OpenAI API / Ollama (local)
+- **Offline:** Local SQLite (Electron) + sql.js/OPFS (Web)
+- **Deploy:** Self-hosted VPS · Docker Compose · Caddy (Automatic TLS)
+- **Domain:** [devdeck.ai](https://devdeck.ai) · `app.devdeck.ai` · `api.devdeck.ai`
 
-### Layout del repo (monorepo pnpm workspaces)
+### Repo Layout (pnpm workspaces monorepo)
 
 ```
 dev_deck/
@@ -37,62 +41,62 @@ dev_deck/
 ├── packages/
 │   ├── ui/               # Design system: Button, TagChip, Toaster, tailwind-preset
 │   ├── api-client/       # Fetch wrapper + TanStack Query hooks + auth adapters
-│   └── features/         # Pages + componentes de dominio (compartidos entre apps)
+│   └── features/         # Pages + domain components (shared between apps)
 ├── backend/              # Go API
-├── cli/                  # CLI `devdeck` (Go)
+├── cli/                  # `devdeck` CLI (Go)
 ├── extension/            # Browser extension (Manifest v3)
 ├── deploy/               # Docker Compose + Caddy
-└── docs/                 # Documentación
+└── docs/                 # Documentation
 ```
 
-Ambas apps importan pages y componentes del package `@devdeck/features` — solo difieren en el shell (HashRouter + PasteInterceptor en desktop, BrowserRouter + AuthGuard en web). Ver [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md).
+Both apps import pages and components from the `@devdeck/features` package — they only differ in the shell (HashRouter + PasteInterceptor on desktop, BrowserRouter + AuthGuard on web). See [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md).
 
 ---
 
 ## Screenshots
 
-> 📸 _TODO: agregar GIFs/screenshots de Home, RepoDetail, Discovery y Cheatsheets. Parte de Fase 16.5._
+> 📸 _TODO: Add GIFs/screenshots of Home, RepoDetail, Discovery, and Cheatsheets. Part of Phase 16.5._
 
 ---
 
-## Documentación
+## Documentation
 
-### Producto y visión
-| Doc | Contenido |
+### Product & Vision
+| Doc | Content |
 |-----|-----------|
-| [docs/VISION.md](docs/VISION.md) | Visión, posicionamiento, diferenciadores |
-| [docs/PRD.md](docs/PRD.md) | Producto, features, user stories, scope por olas |
-| [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) | Análisis competitivo detallado |
-| [docs/LANDING.md](docs/LANDING.md) · [docs/LANDING_COPY.md](docs/LANDING_COPY.md) | Copy de landing (ES / EN) |
+| [docs/VISION.md](docs/VISION.md) | Vision, positioning, differentiators |
+| [docs/PRD.md](docs/PRD.md) | Product, features, user stories, scope by waves |
+| [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) | Detailed competitive analysis |
+| [docs/LANDING.md](docs/LANDING.md) · [docs/LANDING_COPY.md](docs/LANDING_COPY.md) | Landing copy (ES / EN) |
 
-### Arquitectura y decisiones
-| Doc | Contenido |
+### Architecture & Decisions
+| Doc | Content |
 |-----|-----------|
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Diagrama, stack, schema DB |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Diagram, stack, DB schema |
 | [docs/API.md](docs/API.md) | OpenAPI spec |
-| [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | Tokens, paleta, tipografía |
-| [docs/TECHNICAL_ROADMAP_AI_OFFLINE.md](docs/TECHNICAL_ROADMAP_AI_OFFLINE.md) | Roadmap técnico: offline, sync, IA |
-| [docs/adr/0001-items-polymorphism.md](docs/adr/0001-items-polymorphism.md) | ADR: modelo polimórfico de items |
-| [docs/adr/0002-sync-strategy.md](docs/adr/0002-sync-strategy.md) | ADR: estrategia de sync offline-first |
-| [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md) | ADR: monorepo pnpm workspaces + React en web |
+| [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | Tokens, palette, typography |
+| [docs/TECHNICAL_ROADMAP_AI_OFFLINE.md](docs/TECHNICAL_ROADMAP_AI_OFFLINE.md) | Technical roadmap: offline, sync, AI |
+| [docs/adr/0001-items-polymorphism.md](docs/adr/0001-items-polymorphism.md) | ADR: polymorphic items model |
+| [docs/adr/0002-sync-strategy.md](docs/adr/0002-sync-strategy.md) | ADR: offline-first sync strategy |
+| [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md) | ADR: pnpm workspaces monorepo + React on web |
 
-### Operación y contribución
-| Doc | Contenido |
+### Operation & Contribution
+| Doc | Content |
 |-----|-----------|
-| [cli/README.md](cli/README.md) | Instalación y uso real del CLI `devdeck` (P0) |
-| [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md) | Guía paso a paso para self-host |
-| [docs/CAPTURE.md](docs/CAPTURE.md) | Spec de canales de captura (extensión, CLI, paste, share) |
-| [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | Plan de tests y CI |
-| [docs/REVIEW_2026_04.md](docs/REVIEW_2026_04.md) | **Review técnico de abril 2026** — motiva Ola 4.5 |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Cómo contribuir |
-| [SECURITY.md](SECURITY.md) | Política de seguridad |
+| [cli/README.md](cli/README.md) | Real installation and usage of the `devdeck` CLI (P0) |
+| [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md) | Step-by-step self-hosting guide |
+| [docs/CAPTURE.md](docs/CAPTURE.md) | Capture channels spec (extension, CLI, paste, share) |
+| [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | Test plan and CI |
+| [docs/REVIEW_2026_04.md](docs/REVIEW_2026_04.md) | **April 2026 Technical Review** — motivates Wave 4.5 |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
+| [SECURITY.md](SECURITY.md) | Security policy |
 
 ---
 
-## Estado
+## Status
 
-🚧 **Olas 1–4 completas.** **Ola 4.5 (Hardening & Capture) en curso** — red de seguridad (tests + CI) y canales de captura (CLI + extensión + paste). Ver [docs/REVIEW_2026_04.md](docs/REVIEW_2026_04.md) para el análisis que la motiva.
+🚧 **Waves 1–4 complete.** **Wave 4.5 (Hardening & Capture) in progress** — safety net (tests + CI) and capture channels (CLI + extension + paste). See [docs/REVIEW_2026_04.md](docs/REVIEW_2026_04.md) for the analysis behind it.
 
-Próximo: Ola 5 (Items generales + IA) → Ola 6 (Offline-first + Sync + Multi-usuario).
+Next: Wave 5 (General Items + AI) → Wave 6 (Offline-first + Sync + Multi-user).
 
-Roadmap completo en [ROADMAP.md](ROADMAP.md).
+Full roadmap at [ROADMAP.md](ROADMAP.md).

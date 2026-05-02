@@ -2,7 +2,13 @@ import { ArrowLeft, Eye, EyeOff, Settings as SettingsIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@devdeck/ui'
-import { getConfig, setPreferences, usePreferences } from '@devdeck/api-client'
+import {
+  getAccessToken,
+  getConfig,
+  logoutCurrentSession,
+  setPreferences,
+  usePreferences,
+} from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
 
 const APP_VERSION = '0.1.0'
@@ -15,6 +21,7 @@ export function SettingsPage() {
   const cfg = getConfig()
   const apiUrl = cfg.baseUrl || 'same-origin'
   const apiToken = cfg.staticToken ?? ''
+  const sessionActive = cfg.authMode === 'jwt' ? Boolean(getAccessToken()) : Boolean(apiToken)
   const maskedToken = apiToken
     ? `${apiToken.slice(0, 4)}${'•'.repeat(Math.max(0, apiToken.length - 8))}${apiToken.slice(-4)}`
     : '— sin configurar —'
@@ -26,6 +33,12 @@ export function SettingsPage() {
     } catch {
       showToast('No se pudo copiar', 'error')
     }
+  }
+
+  async function logout() {
+    await logoutCurrentSession()
+    showToast('Sesión cerrada')
+    navigate('/login')
   }
 
   return (
@@ -66,34 +79,51 @@ export function SettingsPage() {
           <Field label="API URL">
             <code className="font-mono text-sm break-all">{apiUrl}</code>
           </Field>
-          <Field label="API Token">
-            <div className="flex items-center gap-2 flex-wrap">
-              <code className="font-mono text-sm">
-                {tokenVisible ? apiToken || '— sin configurar —' : maskedToken}
-              </code>
-              <button
-                type="button"
-                onClick={() => setTokenVisible((v) => !v)}
-                className="border-2 border-ink p-1 hover:bg-accent-yellow"
-                aria-label={tokenVisible ? 'Ocultar' : 'Mostrar'}
-              >
-                {tokenVisible ? (
-                  <EyeOff size={14} strokeWidth={3} />
-                ) : (
-                  <Eye size={14} strokeWidth={3} />
+          {cfg.authMode === 'jwt' ? (
+            <Field label="Sesión">
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="font-mono text-sm">
+                  {sessionActive ? 'OAuth activa' : 'Sin sesión'}
+                </span>
+                {sessionActive && (
+                  <Button size="sm" variant="secondary" onClick={logout}>
+                    Cerrar sesión
+                  </Button>
                 )}
-              </button>
-              {apiToken && (
-                <Button size="sm" variant="secondary" onClick={copyToken}>
-                  Copiar
-                </Button>
-              )}
-            </div>
-            <p className="text-xs text-ink-soft mt-2 font-mono">
-              Configurado vía <code>VITE_API_URL</code> y <code>VITE_API_TOKEN</code> en{' '}
-              <code>desktop/.env</code>
-            </p>
-          </Field>
+              </div>
+              <p className="text-xs text-ink-soft mt-2 font-mono">
+                Login real con proveedores OAuth y tokens JWT/refresh.
+              </p>
+            </Field>
+          ) : (
+            <Field label="API Token">
+              <div className="flex items-center gap-2 flex-wrap">
+                <code className="font-mono text-sm">
+                  {tokenVisible ? apiToken || '— sin configurar —' : maskedToken}
+                </code>
+                <button
+                  type="button"
+                  onClick={() => setTokenVisible((v) => !v)}
+                  className="border-2 border-ink p-1 hover:bg-accent-yellow"
+                  aria-label={tokenVisible ? 'Ocultar' : 'Mostrar'}
+                >
+                  {tokenVisible ? (
+                    <EyeOff size={14} strokeWidth={3} />
+                  ) : (
+                    <Eye size={14} strokeWidth={3} />
+                  )}
+                </button>
+                {apiToken && (
+                  <Button size="sm" variant="secondary" onClick={copyToken}>
+                    Copiar
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-ink-soft mt-2 font-mono">
+                Configurado vía <code>VITE_API_URL</code> y <code>VITE_API_TOKEN</code>.
+              </p>
+            </Field>
+          )}
         </Section>
 
         {/* About */}

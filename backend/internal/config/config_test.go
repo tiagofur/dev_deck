@@ -167,6 +167,8 @@ func TestLoad(t *testing.T) {
 		setenv(t, "DB_URL", "postgres://localhost:5432/db")
 		setenv(t, "AUTH_MODE", "jwt")
 		setenv(t, "JWT_SECRET", "secret")
+		setenv(t, "GITHUB_CLIENT_ID", "gh-client")
+		setenv(t, "GITHUB_CLIENT_SECRET", "gh-secret")
 		os.Unsetenv("API_TOKEN")
 
 		cfg, err := Load()
@@ -208,4 +210,24 @@ func TestLoad(t *testing.T) {
 			t.Fatalf("provider = %q", cfg.AIProvider)
 		}
 	})
+}
+
+func TestConfig_EnabledAuthProviders(t *testing.T) {
+	cfg := Config{
+		GitHubClientID:     "gh-id",
+		GitHubClientSecret: "gh-secret",
+		GoogleClientID:     "google-id",
+		GoogleClientSecret: "google-secret",
+	}
+
+	got := cfg.EnabledAuthProviders()
+	want := []string{"github", "google"}
+	if len(got) != len(want) {
+		t.Fatalf("got len %d, want %d", len(got), len(want))
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("provider[%d] = %q, want %q", i, got[i], want[i])
+		}
+	}
 }

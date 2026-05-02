@@ -14,7 +14,16 @@ export {
   isLoggedIn,
   parseTokensFromFragment,
   parseTokensFromQuery,
+  parseAuthErrorFromQuery,
+  fetchAuthProviders,
+  logoutCurrentSession,
+  registerUser,
+  loginLocal,
+  forgotPassword,
+  resetPassword,
+  changePassword,
 } from './auth/auth'
+export type { AuthProviderInfo } from './auth/auth'
 export {
   setTokenStorage,
   getTokenStorage,

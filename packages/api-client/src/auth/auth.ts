@@ -5,6 +5,8 @@
 // `getTokenStorage()` at call time, so swapping adapters in tests works.
 
 import { getTokenStorage } from './storage/types'
+import { getConfig } from '../config'
+import { api } from '../api-client'
 
 export function getAccessToken(): string | null {
   return getTokenStorage().getAccess()
@@ -51,4 +53,65 @@ export function parseTokensFromQuery(): { access: string; refresh: string } | nu
   if (!access || !refresh) return null
   setTokens(access, refresh)
   return { access, refresh }
+}
+
+export function parseAuthErrorFromQuery(): { code: string; message: string } | null {
+  if (typeof window === 'undefined') return null
+  const params = new URLSearchParams(window.location.search)
+  const code = params.get('error')
+  if (!code) return null
+  return {
+    code,
+    message: params.get('error_description') ?? code,
+  }
+}
+
+export interface AuthProviderInfo {
+  provider: 'github' | 'google' | 'apple'
+  label: string
+}
+
+export async function fetchAuthProviders(): Promise<AuthProviderInfo[]> {
+  const { baseUrl } = getConfig()
+  const res = await fetch(`${baseUrl}/api/auth/providers`)
+  if (!res.ok) {
+    throw new Error(`Failed to load auth providers (${res.status})`)
+  }
+  const body = (await res.json()) as { providers?: AuthProviderInfo[] }
+  return body.providers ?? []
+}
+
+export async function logoutCurrentSession(): Promise<void> {
+  const { baseUrl, authMode } = getConfig()
+  const refresh = getRefreshToken()
+  if (authMode === 'jwt' && refresh) {
+    await fetch(`${baseUrl}/api/auth/logout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refresh }),
+    }).catch(() => undefined)
+  }
+  clearTokens()
+}
+
+export async function registerUser(email: string, password: string): Promise<{ message: string }> {
+  return api.post<{ message: string }>('/api/auth/register', { email, password })
+}
+
+export async function loginLocal(email: string, password: string): Promise<{ access_token: string; refresh_token: string; expires_in: number }> {
+  const pair = await api.post<{ access_token: string; refresh_token: string; expires_in: number }>('/api/auth/login', { email, password })
+  setTokens(pair.access_token, pair.refresh_token)
+  return pair
+}
+
+export async function forgotPassword(email: string): Promise<{ message: string }> {
+  return api.post<{ message: string }>('/api/auth/forgot-password', { email })
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+  return api.post<{ message: string }>('/api/auth/reset-password', { token, new_password: newPassword })
+}
+
+export async function changePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
+  return api.post<{ message: string }>('/api/auth/change-password', { current_password: currentPassword, new_password: newPassword })
 }

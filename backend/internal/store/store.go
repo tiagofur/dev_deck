@@ -17,6 +17,10 @@ func New(pool *pgxpool.Pool) *Store {
 	return &Store{pool: pool}
 }
 
+func (s *Store) Pool() *pgxpool.Pool {
+	return s.pool
+}
+
 // Sentinel errors used by handlers to map to HTTP status codes.
 var (
 	ErrNotFound      = errors.New("not found")

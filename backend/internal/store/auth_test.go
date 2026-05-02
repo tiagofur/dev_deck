@@ -19,7 +19,7 @@ func TestStore_UpsertUser_CreatesAndUpdates(t *testing.T) {
 	if err != nil {
 		t.Fatalf("first upsert: %v", err)
 	}
-	if first.GitHubID != 12345 || first.Login != "ada" {
+	if first.Login != "ada" {
 		t.Errorf("unexpected user: %+v", first)
 	}
 
@@ -51,6 +51,42 @@ func TestStore_GetUserByGitHubID(t *testing.T) {
 	}
 	if got.ID != user.ID {
 		t.Errorf("expected matching id, got %s vs %s", got.ID, user.ID)
+	}
+}
+
+func TestStore_EnsureUserForIdentity_LinksVerifiedEmailAcrossProviders(t *testing.T) {
+	st, ctx := newStore(t)
+
+	email := "ada@example.com"
+	first, err := st.EnsureUserForIdentity(ctx, auth.ExternalIdentity{
+		Provider:       auth.ProviderGitHub,
+		ProviderUserID: "123",
+		Email:          &email,
+		EmailVerified:  true,
+		ProviderLogin:  "ada",
+		DisplayName:    "Ada Lovelace",
+		AvatarURL:      "https://avatars/ada",
+	})
+	if err != nil {
+		t.Fatalf("github identity: %v", err)
+	}
+
+	second, err := st.EnsureUserForIdentity(ctx, auth.ExternalIdentity{
+		Provider:       auth.ProviderGoogle,
+		ProviderUserID: "google-123",
+		Email:          &email,
+		EmailVerified:  true,
+		DisplayName:    "Ada L",
+	})
+	if err != nil {
+		t.Fatalf("google identity: %v", err)
+	}
+
+	if second.ID != first.ID {
+		t.Fatalf("expected provider linking to reuse same user, got %s vs %s", second.ID, first.ID)
+	}
+	if second.PrimaryEmail == nil || *second.PrimaryEmail != email {
+		t.Fatalf("expected primary email %q, got %+v", email, second.PrimaryEmail)
 	}
 }
 

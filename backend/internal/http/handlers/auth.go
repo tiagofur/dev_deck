@@ -5,13 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
+	"time"
 
+	"devdeck/internal/authctx"
 	"devdeck/internal/authservice"
 	"devdeck/internal/domain/auth"
 	"devdeck/internal/store"
 
-	"github.com/google/uuid"
+	"github.com/go-chi/chi/v5"
 )
 
 type AuthHandler struct {
@@ -21,95 +25,123 @@ type AuthHandler struct {
 }
 
 type AuthConfig struct {
-	GitHubClientID     string
-	GitHubClientSecret string
-	RedirectURL        string
-	AllowedLogins      map[string]bool // empty = allow all
+	GitHubClientID          string
+	GitHubClientSecret      string
+	GitHubOAuthCallbackURL  string
+	GoogleClientID          string
+	GoogleClientSecret      string
+	GoogleOAuthCallbackURL  string
+	AppleClientID           string
+	AppleTeamID             string
+	AppleKeyID              string
+	ApplePrivateKey         string
+	AppleOAuthCallbackURL   string
+	WebOAuthRedirectURL     string
+	DesktopOAuthRedirectURL string
 }
 
 func NewAuthHandler(s *store.Store, as *authservice.Service, cfg AuthConfig) *AuthHandler {
 	return &AuthHandler{store: s, authService: as, config: cfg}
 }
 
-// GET /api/auth/github/login
-// Redirects the user to GitHub's OAuth consent page.
-func (h *AuthHandler) GitHubLogin(w http.ResponseWriter, r *http.Request) {
-	// Generate a random state for CSRF protection.
-	state := uuid.New().String()
-	// In production, store state in a short-lived cookie.
-	http.SetCookie(w, &http.Cookie{
-		Name:     "oauth_state",
-		Value:    state,
-		Path:     "/",
-		MaxAge:   300, // 5 minutes
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
+// GET /api/auth/providers
+func (h *AuthHandler) Providers(w http.ResponseWriter, _ *http.Request) {
+	writeJSON(w, http.StatusOK, map[string]any{
+		"providers": h.enabledProviders(),
 	})
-
-	url := fmt.Sprintf(
-		"https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&state=%s&scope=read:user",
-		h.config.GitHubClientID, h.config.RedirectURL, state,
-	)
-	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
-// GET /api/auth/github/callback
-// Handles the OAuth callback from GitHub.
-func (h *AuthHandler) GitHubCallback(w http.ResponseWriter, r *http.Request) {
-	// Validate state.
-	state := r.URL.Query().Get("state")
-	cookie, err := r.Cookie("oauth_state")
-	if err != nil || cookie.Value != state {
-		writeError(w, http.StatusBadRequest, "INVALID_STATE", "oauth state mismatch")
-		return
-	}
-	// Clear the state cookie.
-	http.SetCookie(w, &http.Cookie{Name: "oauth_state", MaxAge: -1})
-
-	code := r.URL.Query().Get("code")
-	if code == "" {
-		writeError(w, http.StatusBadRequest, "MISSING_CODE", "missing authorization code")
+// GET /api/auth/{provider}/login
+func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	provider, ok := parseAuthProvider(chi.URLParam(r, "provider"))
+	if !ok || !h.providerEnabled(provider) {
+		writeError(w, http.StatusNotFound, "PROVIDER_NOT_FOUND", "provider not enabled")
 		return
 	}
 
-	// Exchange code for access token.
-	ghToken, err := h.exchangeGitHubCode(r, code)
-	if err != nil {
-		writeError(w, http.StatusBadGateway, "GITHUB_ERROR", "failed to exchange code: "+err.Error())
-		return
+	device := normalizeAuthDevice(r.URL.Query().Get("device"))
+	state := auth.OAuthState{
+		State:       randomState(),
+		Provider:    provider,
+		RedirectURI: h.redirectURIForDevice(device),
+		Device:      device,
+		ExpiresAt:   time.Now().Add(10 * time.Minute),
 	}
-
-	// Fetch GitHub user profile.
-	ghUser, err := h.fetchGitHubUser(r, ghToken)
-	if err != nil {
-		writeError(w, http.StatusBadGateway, "GITHUB_ERROR", "failed to fetch github user: "+err.Error())
-		return
-	}
-
-	// Check allowlist.
-	if len(h.config.AllowedLogins) > 0 && !h.config.AllowedLogins[ghUser.Login] {
-		writeError(w, http.StatusForbidden, "FORBIDDEN", "user not in allowlist")
-		return
-	}
-
-	// Upsert user in DB.
-	user, err := h.store.UpsertUser(r.Context(), *ghUser)
-	if err != nil {
+	if err := h.store.SaveOAuthState(r.Context(), state); err != nil {
 		writeInternal(w, err)
 		return
 	}
 
-	// Generate token pair.
+	authURL, err := h.buildAuthURL(provider, state)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+	http.Redirect(w, r, authURL, http.StatusTemporaryRedirect)
+}
+
+// GET|POST /api/auth/{provider}/callback
+func (h *AuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
+	provider, ok := parseAuthProvider(chi.URLParam(r, "provider"))
+	if !ok || !h.providerEnabled(provider) {
+		writeError(w, http.StatusNotFound, "PROVIDER_NOT_FOUND", "provider not enabled")
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_CALLBACK", "invalid callback payload")
+		return
+	}
+	if providerErr := r.FormValue("error"); providerErr != "" {
+		writeError(w, http.StatusBadGateway, "OAUTH_DENIED", providerErr)
+		return
+	}
+
+	stateValue := r.FormValue("state")
+	if stateValue == "" {
+		writeError(w, http.StatusBadRequest, "INVALID_STATE", "missing oauth state")
+		return
+	}
+	oauthState, err := h.store.ConsumeOAuthState(r.Context(), stateValue)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeError(w, http.StatusBadRequest, "INVALID_STATE", "oauth state mismatch or expired")
+			return
+		}
+		writeInternal(w, err)
+		return
+	}
+	if oauthState.Provider != provider {
+		h.redirectWithError(w, r, oauthState.RedirectURI, "INVALID_STATE", "oauth provider mismatch")
+		return
+	}
+
+	code := r.FormValue("code")
+	if code == "" {
+		h.redirectWithError(w, r, oauthState.RedirectURI, "MISSING_CODE", "missing authorization code")
+		return
+	}
+
+	identity, err := h.fetchExternalIdentity(r, provider, code)
+	if err != nil {
+		h.redirectWithError(w, r, oauthState.RedirectURI, "OAUTH_ERROR", err.Error())
+		return
+	}
+	user, err := h.store.EnsureUserForIdentity(r.Context(), *identity)
+	if err != nil {
+		h.redirectWithError(w, r, oauthState.RedirectURI, "AUTH_PERSIST_FAILED", err.Error())
+		return
+	}
 	pair, err := h.generateTokenPair(r, *user)
 	if err != nil {
-		writeInternal(w, err)
+		h.redirectWithError(w, r, oauthState.RedirectURI, "TOKEN_ISSUE_FAILED", err.Error())
 		return
 	}
 
-	// Redirect to the frontend with tokens in URL fragment.
-	// The frontend reads the fragment and stores the tokens.
-	redirectTo := fmt.Sprintf("%s#access_token=%s&refresh_token=%s&expires_in=%d",
-		h.config.RedirectURL, pair.AccessToken, pair.RefreshToken, pair.ExpiresIn)
+	redirectTo, err := appendTokenPair(oauthState.RedirectURI, pair)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
 	http.Redirect(w, r, redirectTo, http.StatusTemporaryRedirect)
 }
 
@@ -172,9 +204,8 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 // GET /api/auth/me
-// Returns the current user's profile (requires JWT auth).
 func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(userIDCtxKey).(uuid.UUID)
+	userID, ok := authctx.UserID(r.Context())
 	if !ok {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "not authenticated")
 		return
@@ -191,15 +222,104 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, user)
 }
 
-// ───── helpers ─────
+func (h *AuthHandler) enabledProviders() []auth.ProviderInfo {
+	out := make([]auth.ProviderInfo, 0, 3)
+	for _, provider := range []auth.Provider{auth.ProviderGitHub, auth.ProviderGoogle, auth.ProviderApple} {
+		if !h.providerEnabled(provider) {
+			continue
+		}
+		out = append(out, auth.ProviderInfo{
+			Provider: provider,
+			Label:    providerLabel(provider),
+		})
+	}
+	return out
+}
 
-type contextKey string
+func (h *AuthHandler) providerEnabled(provider auth.Provider) bool {
+	switch provider {
+	case auth.ProviderGitHub:
+		return strings.TrimSpace(h.config.GitHubClientID) != "" && strings.TrimSpace(h.config.GitHubClientSecret) != ""
+	case auth.ProviderGoogle:
+		return strings.TrimSpace(h.config.GoogleClientID) != "" && strings.TrimSpace(h.config.GoogleClientSecret) != ""
+	case auth.ProviderApple:
+		return strings.TrimSpace(h.config.AppleClientID) != "" &&
+			strings.TrimSpace(h.config.AppleTeamID) != "" &&
+			strings.TrimSpace(h.config.AppleKeyID) != "" &&
+			strings.TrimSpace(h.config.ApplePrivateKey) != ""
+	default:
+		return false
+	}
+}
 
-const userIDCtxKey contextKey = "user_id"
+func (h *AuthHandler) redirectURIForDevice(device string) string {
+	if device == "desktop" {
+		return h.config.DesktopOAuthRedirectURL
+	}
+	return h.config.WebOAuthRedirectURL
+}
 
-// UserIDCtxKey returns the context key used to store the authenticated user ID.
-func UserIDCtxKey() contextKey {
-	return userIDCtxKey
+func normalizeAuthDevice(device string) string {
+	if strings.EqualFold(strings.TrimSpace(device), "desktop") {
+		return "desktop"
+	}
+	return "web"
+}
+
+func parseAuthProvider(raw string) (auth.Provider, bool) {
+	switch strings.ToLower(strings.TrimSpace(raw)) {
+	case "github":
+		return auth.ProviderGitHub, true
+	case "google":
+		return auth.ProviderGoogle, true
+	case "apple":
+		return auth.ProviderApple, true
+	default:
+		return "", false
+	}
+}
+
+func providerLabel(provider auth.Provider) string {
+	switch provider {
+	case auth.ProviderGitHub:
+		return "GitHub"
+	case auth.ProviderGoogle:
+		return "Google"
+	case auth.ProviderApple:
+		return "Apple"
+	default:
+		return string(provider)
+	}
+}
+
+func randomState() string {
+	return fmt.Sprintf("%d-%s", time.Now().UnixNano(), strings.ReplaceAll(time.Now().UTC().Format(time.RFC3339Nano), ":", ""))
+}
+
+func appendTokenPair(redirectURI string, pair *auth.TokenPair) (string, error) {
+	parsed, err := url.Parse(redirectURI)
+	if err != nil {
+		return "", err
+	}
+	q := parsed.Query()
+	q.Set("token", pair.AccessToken)
+	q.Set("refresh_token", pair.RefreshToken)
+	q.Set("expires_in", strconv.FormatInt(pair.ExpiresIn, 10))
+	parsed.RawQuery = q.Encode()
+	return parsed.String(), nil
+}
+
+func (h *AuthHandler) redirectWithError(w http.ResponseWriter, r *http.Request, redirectURI, code, message string) {
+	parsed, err := url.Parse(redirectURI)
+	if err != nil {
+		writeError(w, http.StatusBadGateway, code, message)
+		return
+	}
+	q := parsed.Query()
+	q.Set("error", code)
+	q.Set("error_description", message)
+	parsed.RawQuery = q.Encode()
+	http.Redirect(w, r, parsed.String(), http.StatusTemporaryRedirect)
 }
 
 func (h *AuthHandler) generateTokenPair(r *http.Request, user auth.User) (*auth.TokenPair, error) {
@@ -223,59 +343,4 @@ func (h *AuthHandler) generateTokenPair(r *http.Request, user auth.User) (*auth.
 		RefreshToken: rawRefresh,
 		ExpiresIn:    expiresIn,
 	}, nil
-}
-
-func (h *AuthHandler) exchangeGitHubCode(r *http.Request, code string) (string, error) {
-	body := fmt.Sprintf(
-		`{"client_id":"%s","client_secret":"%s","code":"%s"}`,
-		h.config.GitHubClientID, h.config.GitHubClientSecret, code,
-	)
-	req, err := http.NewRequestWithContext(r.Context(), http.MethodPost,
-		"https://github.com/login/oauth/access_token", strings.NewReader(body))
-	if err != nil {
-		return "", err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	var result struct {
-		AccessToken string `json:"access_token"`
-		Error       string `json:"error"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return "", err
-	}
-	if result.Error != "" {
-		return "", fmt.Errorf("github oauth: %s", result.Error)
-	}
-	return result.AccessToken, nil
-}
-
-func (h *AuthHandler) fetchGitHubUser(r *http.Request, token string) (*auth.GitHubUser, error) {
-	req, err := http.NewRequestWithContext(r.Context(), http.MethodGet,
-		"https://api.github.com/user", nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Authorization", "Bearer "+token)
-	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("User-Agent", "DevDeck/0.1")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var ghUser auth.GitHubUser
-	if err := json.NewDecoder(resp.Body).Decode(&ghUser); err != nil {
-		return nil, err
-	}
-	return &ghUser, nil
 }

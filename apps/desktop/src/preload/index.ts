@@ -18,4 +18,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('global-shortcut', handler)
     return () => ipcRenderer.removeListener('global-shortcut', handler)
   },
+
+  auth: {
+    openExternal: (url: string): void => ipcRenderer.send('auth:open-external', url),
+    getPendingCallbackURL: (): string | null => ipcRenderer.sendSync('auth:get-pending-url'),
+    onCallbackURL: (callback: (url: string) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, url: string) => callback(url)
+      ipcRenderer.on('auth-callback-url', handler)
+      return () => ipcRenderer.removeListener('auth-callback-url', handler)
+    },
+  },
 })

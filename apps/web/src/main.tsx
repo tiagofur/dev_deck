@@ -1,7 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import {
+  clearTokens,
   configureApiClient,
+  getAccessToken,
+  getRefreshToken,
   localStorageAdapter,
   setTokenStorage,
 } from '@devdeck/api-client'
@@ -14,9 +17,22 @@ import '@devdeck/ui/styles/globals.css'
 // in production.
 setTokenStorage(localStorageAdapter)
 
+const authMode = import.meta.env.VITE_AUTH_MODE ?? 'jwt'
+
+// Token mode used to persist the same static token in both access/refresh slots.
+// If we later switch the web app back to JWT mode, that legacy pair would still
+// look "logged in" and bypass /login until the user manually cleared storage.
+if (authMode === 'jwt') {
+  const access = getAccessToken()
+  const refresh = getRefreshToken()
+  if (access && refresh && access === refresh) {
+    clearTokens()
+  }
+}
+
 configureApiClient({
   baseUrl: import.meta.env.VITE_API_URL ?? '',
-  authMode: import.meta.env.VITE_AUTH_MODE ?? 'jwt',
+  authMode,
   staticToken: import.meta.env.VITE_API_TOKEN,
 })
 

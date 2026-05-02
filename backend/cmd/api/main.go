@@ -17,6 +17,7 @@ import (
 	"devdeck/internal/ai"
 	"devdeck/internal/config"
 	"devdeck/internal/cron"
+	"devdeck/internal/email"
 	"devdeck/internal/enricher"
 	httpapi "devdeck/internal/http"
 	"devdeck/internal/jobs"
@@ -68,6 +69,13 @@ func main() {
 	en := enricher.New(cfg.GithubToken)
 	aiSvc := ai.NewFromConfig(cfg)
 
+	// Email sender (Local Auth)
+	var emailSender email.Sender = &email.NoopSender{}
+	if cfg.LocalAuthEnabled && cfg.ResendAPIKey != "" {
+		emailSender = email.NewResendSender(cfg.ResendAPIKey)
+		logger.Info("email sender (Resend) initialized")
+	}
+
 	// JWT auth service (Wave 4). Only active when AUTH_MODE=jwt.
 	var authService *authservice.Service
 	if cfg.AuthMode == "jwt" {
@@ -102,6 +110,7 @@ func main() {
 		Enricher:    en,
 		AuthService: authService,
 		EnrichQueue: enrichQueue,
+		EmailSender: emailSender,
 	})
 
 	// Background refresher: re-enriches stale repos so stars/desc don't drift.

@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"slices"
 	"strings"
 
 	"github.com/caarlos0/env/v11"
@@ -34,13 +35,26 @@ type Config struct {
 	RateLimitDisabled  bool `env:"RATE_LIMIT_DISABLED" envDefault:"false"`
 
 	// ─── Wave 4: Auth ───
-	JWTSecret              string `env:"JWT_SECRET"`
-	GitHubClientID         string `env:"GITHUB_CLIENT_ID"`
-	GitHubClientSecret     string `env:"GITHUB_CLIENT_SECRET"`
-	OAuthRedirectURL       string `env:"OAUTH_REDIRECT_URL" envDefault:"http://localhost:5173/auth/callback"`
-	GitHubOAuthCallbackURL string `env:"GITHUB_OAUTH_CALLBACK_URL" envDefault:"http://localhost:8080/api/auth/github/callback"`
-	AppOAuthRedirectURL    string `env:"APP_OAUTH_REDIRECT_URL" envDefault:"http://localhost:5173/auth/callback"`
-	AllowedGitHubLogins    string `env:"ALLOWED_GITHUB_LOGINS"` // comma-separated, empty = allow all
+	JWTSecret               string `env:"JWT_SECRET"`
+	GitHubClientID          string `env:"GITHUB_CLIENT_ID"`
+	GitHubClientSecret      string `env:"GITHUB_CLIENT_SECRET"`
+	GitHubOAuthCallbackURL  string `env:"GITHUB_OAUTH_CALLBACK_URL" envDefault:"http://localhost:8080/api/auth/github/callback"`
+	GoogleClientID          string `env:"GOOGLE_CLIENT_ID"`
+	GoogleClientSecret      string `env:"GOOGLE_CLIENT_SECRET"`
+	GoogleOAuthCallbackURL  string `env:"GOOGLE_OAUTH_CALLBACK_URL" envDefault:"http://localhost:8080/api/auth/google/callback"`
+	AppleClientID           string `env:"APPLE_CLIENT_ID"`
+	AppleTeamID             string `env:"APPLE_TEAM_ID"`
+	AppleKeyID              string `env:"APPLE_KEY_ID"`
+	ApplePrivateKey         string `env:"APPLE_PRIVATE_KEY"`
+	AppleOAuthCallbackURL   string `env:"APPLE_OAUTH_CALLBACK_URL" envDefault:"http://localhost:8080/api/auth/apple/callback"`
+	WebOAuthRedirectURL     string `env:"WEB_OAUTH_REDIRECT_URL" envDefault:"http://localhost:5173/auth/callback"`
+	DesktopOAuthRedirectURL string `env:"DESKTOP_OAUTH_REDIRECT_URL" envDefault:"devdeck://auth/callback"`
+	AllowedGitHubLogins     string `env:"ALLOWED_GITHUB_LOGINS"` // legacy single-user option
+
+	// ─── Wave 7: Local Auth & Email ───
+	LocalAuthEnabled bool   `env:"LOCAL_AUTH_ENABLED" envDefault:"false"`
+	ResendAPIKey     string `env:"RESEND_API_KEY"`
+	FrontendURL      string `env:"FRONTEND_URL" envDefault:"http://localhost:5173"`
 
 	// ─── Wave 5 Fase 18: local AI enrichment ───
 	AIProvider      string `env:"AI_PROVIDER" envDefault:"heuristic"`
@@ -75,6 +89,24 @@ func (c Config) AllowedLoginsMap() map[string]bool {
 	return m
 }
 
+func (c Config) EnabledAuthProviders() []string {
+	providers := []string{}
+	if strings.TrimSpace(c.GitHubClientID) != "" && strings.TrimSpace(c.GitHubClientSecret) != "" {
+		providers = append(providers, "github")
+	}
+	if strings.TrimSpace(c.GoogleClientID) != "" && strings.TrimSpace(c.GoogleClientSecret) != "" {
+		providers = append(providers, "google")
+	}
+	if strings.TrimSpace(c.AppleClientID) != "" &&
+		strings.TrimSpace(c.AppleTeamID) != "" &&
+		strings.TrimSpace(c.AppleKeyID) != "" &&
+		strings.TrimSpace(c.ApplePrivateKey) != "" {
+		providers = append(providers, "apple")
+	}
+	slices.Sort(providers)
+	return providers
+}
+
 func Load() (Config, error) {
 	var c Config
 	if err := env.Parse(&c); err != nil {
@@ -85,6 +117,14 @@ func Load() (Config, error) {
 	}
 	if c.AuthMode != "token" && c.AuthMode != "jwt" {
 		return c, errors.New("AUTH_MODE must be 'token' or 'jwt'")
+	}
+	if c.AuthMode == "jwt" {
+		if strings.TrimSpace(c.JWTSecret) == "" {
+			return c, errors.New("JWT_SECRET is required when AUTH_MODE=jwt")
+		}
+		if !c.LocalAuthEnabled && len(c.EnabledAuthProviders()) == 0 {
+			return c, errors.New("at least one auth method (local or OAuth) must be configured when AUTH_MODE=jwt")
+		}
 	}
 	switch strings.ToLower(strings.TrimSpace(c.AIProvider)) {
 	case "", "heuristic", "local", "disabled", "off", "none", "openai":

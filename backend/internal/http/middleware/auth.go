@@ -1,14 +1,13 @@
 package middleware
 
 import (
-	"context"
 	"crypto/subtle"
 	"net/http"
 	"strings"
 
+	"devdeck/internal/authctx"
 	"devdeck/internal/authservice"
 	"devdeck/internal/config"
-	"devdeck/internal/http/handlers"
 
 	"github.com/google/uuid"
 )
@@ -25,7 +24,7 @@ func TokenAuth(cfg config.Config, authService *authservice.Service) func(http.Ha
 				if !ok {
 					return
 				}
-				ctx := context.WithValue(r.Context(), handlers.UserIDCtxKey(), userID)
+				ctx := authctx.WithUserID(r.Context(), userID)
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
@@ -55,7 +54,7 @@ func JWTAuth(authService *authservice.Service) func(http.Handler) http.Handler {
 			if !ok {
 				return
 			}
-			ctx := context.WithValue(r.Context(), handlers.UserIDCtxKey(), userID)
+			ctx := authctx.WithUserID(r.Context(), userID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
