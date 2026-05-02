@@ -365,7 +365,7 @@ func (s *Store) CreateEntry(ctx context.Context, cheatsheetID uuid.UUID, in chea
 	if tags == nil {
 		tags = []string{}
 	}
-	scopeSQL, scopeArgs := ownerClause(ctx, "id", 6)
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 6)
 	args := []any{cheatsheetID, in.Label, in.Command, in.Description, tags}
 	args = append(args, scopeArgs...)
 	row := s.pool.QueryRow(ctx, `
