@@ -44,7 +44,10 @@ func TestStore_GetUserByGitHubID(t *testing.T) {
 		t.Errorf("expected ErrNotFound for missing github id, got %v", err)
 	}
 
-	user, _ := st.UpsertUser(ctx, auth.GitHubUser{ID: 1, Login: "x", Name: "X"})
+	user, err := st.UpsertUser(ctx, auth.GitHubUser{ID: 1, Login: "x", Name: "X"})
+	if err != nil {
+		t.Fatalf("upsert: %v", err)
+	}
 	got, err := st.GetUserByGitHubID(ctx, 1)
 	if err != nil {
 		t.Fatalf("get: %v", err)
@@ -93,7 +96,10 @@ func TestStore_EnsureUserForIdentity_LinksVerifiedEmailAcrossProviders(t *testin
 func TestStore_RefreshSession_LifecycleAndExpiry(t *testing.T) {
 	st, ctx := newStore(t)
 
-	user, _ := st.UpsertUser(ctx, auth.GitHubUser{ID: 1, Login: "x", Name: "X"})
+	user, err := st.UpsertUser(ctx, auth.GitHubUser{ID: 1, Login: "x", Name: "X"})
+	if err != nil {
+		t.Fatalf("upsert: %v", err)
+	}
 
 	const hash = "deadbeef"
 	if err := st.CreateRefreshSession(ctx, user.ID, hash, time.Now().Add(1*time.Hour)); err != nil {
@@ -118,7 +124,10 @@ func TestStore_RefreshSession_LifecycleAndExpiry(t *testing.T) {
 func TestStore_GetRefreshSession_RejectsExpired(t *testing.T) {
 	st, ctx := newStore(t)
 
-	user, _ := st.UpsertUser(ctx, auth.GitHubUser{ID: 2, Login: "y", Name: "Y"})
+	user, err := st.UpsertUser(ctx, auth.GitHubUser{ID: 2, Login: "y", Name: "Y"})
+	if err != nil {
+		t.Fatalf("upsert: %v", err)
+	}
 	const hash = "expired"
 	if err := st.CreateRefreshSession(ctx, user.ID, hash, time.Now().Add(-1*time.Minute)); err != nil {
 		t.Fatalf("create expired session: %v", err)
@@ -131,7 +140,10 @@ func TestStore_GetRefreshSession_RejectsExpired(t *testing.T) {
 func TestStore_DeleteAllRefreshSessions(t *testing.T) {
 	st, ctx := newStore(t)
 
-	user, _ := st.UpsertUser(ctx, auth.GitHubUser{ID: 3, Login: "z", Name: "Z"})
+	user, err := st.UpsertUser(ctx, auth.GitHubUser{ID: 3, Login: "z", Name: "Z"})
+	if err != nil {
+		t.Fatalf("upsert: %v", err)
+	}
 	for _, h := range []string{"a", "b", "c"} {
 		_ = st.CreateRefreshSession(ctx, user.ID, h, time.Now().Add(1*time.Hour))
 	}

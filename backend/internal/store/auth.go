@@ -14,6 +14,7 @@ import (
 )
 
 const userColumns = `id, primary_email, email_verified, password_hash, login, avatar_url, display_name, created_at, last_login_at`
+const userColumnsU = `u.id, u.primary_email, u.email_verified, u.password_hash, u.login, u.avatar_url, u.display_name, u.created_at, u.last_login_at`
 
 func scanUser(row pgx.Row) (*auth.User, error) {
 	var u auth.User
@@ -50,7 +51,7 @@ func scanUser(row pgx.Row) (*auth.User, error) {
 
 func (s *Store) GetUserByGitHubID(ctx context.Context, githubID int64) (*auth.User, error) {
 	row := s.pool.QueryRow(ctx, `
-		SELECT `+userColumns+`
+		SELECT `+userColumnsU+`
 		FROM users u
 		JOIN auth_identities ai ON ai.user_id = u.id
 		WHERE ai.provider = 'github' AND ai.provider_user_id = $1
@@ -130,7 +131,7 @@ func (s *Store) EnsureUserForIdentity(ctx context.Context, identity auth.Externa
 
 func getUserByIdentityTx(ctx context.Context, tx pgx.Tx, provider auth.Provider, providerUserID string) (*auth.User, error) {
 	row := tx.QueryRow(ctx, `
-		SELECT `+userColumns+`
+		SELECT `+userColumnsU+`
 		FROM users u
 		JOIN auth_identities ai ON ai.user_id = u.id
 		WHERE ai.provider = $1 AND ai.provider_user_id = $2
