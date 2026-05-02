@@ -38,7 +38,7 @@ func (h *MetadataHandler) Extract(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if in.URL == "" {
-		writeError(w, http.StatusBadRequest, "MISSING_URL", "url is required")
+		writeError(w, http.StatusUnprocessableEntity, "MISSING_URL", "url is required")
 		return
 	}
 
