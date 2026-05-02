@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log/slog"
 	"net/http"
 	"strconv"
+	"time"
 
 	"devdeck/internal/domain/cheatsheets"
 	"devdeck/internal/domain/repos"
@@ -57,15 +59,19 @@ func (h *ReposHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Best-effort enrichment
+	// Best-effort enrichment (asynchronous to prevent blocking the response)
 	if h.enricher != nil {
-		if md, err := h.enricher.Enrich(r.Context(), repo.URL); err != nil {
-			slog.Warn("create: enrich failed (continuing)", "err", err, "url", repo.URL)
-		} else if updated, err := h.store.UpdateMetadata(r.Context(), repo.ID, md); err != nil {
-			slog.Warn("create: update metadata failed", "err", err, "url", repo.URL)
-		} else {
-			repo = updated
-		}
+		go func(ctx context.Context, rID uuid.UUID, rURL string) {
+			// Create a fresh background context to outlive the request
+			bgCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+
+			if md, err := h.enricher.Enrich(bgCtx, rURL); err != nil {
+				slog.Warn("create: enrich failed", "err", err, "url", rURL)
+			} else if _, err := h.store.UpdateMetadata(bgCtx, rID, md); err != nil {
+				slog.Warn("create: update metadata failed", "err", err, "url", rURL)
+			}
+		}(context.Background(), repo.ID, repo.URL)
 	}
 
 	writeJSON(w, http.StatusCreated, repo)
