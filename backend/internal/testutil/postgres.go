@@ -237,7 +237,7 @@ func migrationsDir() (string, error) {
 // truncateAll wipes user data between tests. We use TRUNCATE … RESTART IDENTITY
 // CASCADE so refresh sessions, links, etc. all get cleared atomically.
 func truncateAll(ctx context.Context, pool *pgxpool.Pool) error {
-	_, err := pool.Exec(ctx, `
+	if _, err := pool.Exec(ctx, `
 		TRUNCATE TABLE
 			items,
 			refresh_sessions,
@@ -249,6 +249,15 @@ func truncateAll(ctx context.Context, pool *pgxpool.Pool) error {
 			users,
 			app_state
 		RESTART IDENTITY CASCADE
+	`); err != nil {
+		return err
+	}
+
+	// Re-seed the Test User used by handlers_test.go / middleware
+	_, err := pool.Exec(ctx, `
+		INSERT INTO users (id, github_id, login, display_name)
+		VALUES ('00000000-0000-0000-0000-000000000001', 0, 'devdeck-test', 'Test User')
+		ON CONFLICT DO NOTHING
 	`)
 	return err
 }
