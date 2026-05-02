@@ -609,3 +609,42 @@ func TestMetadataHandler_Extract(t *testing.T) {
 // Suppress "imported and not used" warnings if any helpers go unused.
 var _ context.Context = nil
 var _ = io.Discard
+func TestMetadataHandler_Extract(t *testing.T) {
+	    ts := newTestServer(t)
+
+	    t.Run("Success", func(t *testing.T) {
+			        rec := ts.do(t, http.MethodPost, "/api/v1/metadata", map[string]any{
+						            "url": "https://github.com/tiagofur/dev_deck",
+						        })
+			        if rec.Code != http.StatusOK {
+						            t.Fatalf("expected 200, got %d, body: %s", rec.Code, rec.Body.String())
+						        }
+			    })
+
+	    t.Run("MissingURL", func(t *testing.T) {
+			        rec := ts.do(t, http.MethodPost, "/api/v1/metadata", map[string]any{
+						            "url": "",
+						        })
+			        if rec.Code != http.StatusUnprocessableEntity {
+						            t.Errorf("expected 422, got %d", rec.Code)
+						        }
+			    })
+
+	    t.Run("InvalidURL", func(t *testing.T) {
+			        rec := ts.do(t, http.MethodPost, "/api/v1/metadata", map[string]any{
+						            "url": "not-a-url",
+						        })
+			        if rec.Code != http.StatusBadRequest {
+						            t.Errorf("expected 400, got %d", rec.Code)
+						        }
+			    })
+
+	    t.Run("NotFound", func(t *testing.T) {
+			        rec := ts.do(t, http.MethodPost, "/api/v1/metadata", map[string]any{
+						            "url": "https://github.com/tiagofur/notfound",
+						        })
+			        if rec.Code != http.StatusNotFound {
+						            t.Errorf("expected 404, got %d", rec.Code)
+						        }
+			    })
+}
