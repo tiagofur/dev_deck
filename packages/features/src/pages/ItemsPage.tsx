@@ -152,16 +152,7 @@ export function ItemsPage() {
                   key={it.id}
                   item={it}
                   onClick={() => {
-                    // Repos have an existing detail page. Other types
-                    // don't yet — open the URL when there is one, or
-                    // fall back to the home view for now.
-                    if (it.item_type === 'repo') {
-                      navigate(`/repo/${it.id}`)
-                      return
-                    }
-                    if (it.url) {
-                      window.open(it.url, '_blank', 'noopener')
-                    }
+					navigate(`/items/${it.id}`)
                   }}
                 />
               ))}

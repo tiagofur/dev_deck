@@ -34,11 +34,17 @@ Spec completa: [`docs/CAPTURE.md §Canal 1`](../docs/CAPTURE.md#canal-1--extensi
 - **Background** (`src/background.js`) — centraliza el fetch a `/api/items/capture`.
   Si el backend está caído (o no hay token), la captura va a una cola offline
   (`chrome.storage.local`) y se reintenta cada minuto via `chrome.alarms`. El
-  badge del toolbar muestra el número de items pendientes en rojo.
+  badge del toolbar muestra el número de items pendientes en rojo. También
+  registra context menus para guardar links o selección de texto.
 - **Options** (`src/options.html` + `options.js`) — editor de `apiUrl` + `token`
-  con un botón "Probar conexión" que hace un GET `/healthz`.
+  con un botón "Probar conexión" que valida reachability + auth contra un
+  endpoint protegido.
 - **Atajo** — declarado en `manifest.json` como `capture-tab` con
   `Cmd/Ctrl+Shift+D`. Capturá sin abrir el popup.
+- **Context menu** — click derecho sobre un link → "Guardar link en DevDeck";
+  click derecho sobre selección → "Guardar selección en DevDeck como snippet".
+  Ambos caminos adjuntan contexto de página (`page_url`, `page_title`, origen de captura)
+  en `meta_hints` para enriquecer mejor el item después.
 
 ## Permisos
 
@@ -47,13 +53,14 @@ Spec completa: [`docs/CAPTURE.md §Canal 1`](../docs/CAPTURE.md#canal-1--extensi
 | `activeTab` | Leer URL/título de la tab actual cuando el usuario invoca el popup o el shortcut. |
 | `storage` | Persistir `apiUrl`, `token` y la cola offline en `chrome.storage.local`. |
 | `alarms` | Reintentos del drain de cola cada minuto. |
+| `contextMenus` | Agregar acciones de click derecho para links y selección. |
 | `host_permissions: <all_urls>` | `fetch` al backend self-hosted (cualquier dominio). Cuando publiquemos al Chrome Web Store esto se restringe al dominio hosted. |
 
 ## Estado
 
 - ✅ P0 — capturar tab activa por shortcut o popup, token storage, offline queue.
+- ✅ Mejoras de captura — context menu para links y selección + verificación real de auth en opciones.
 - ⏳ Firefox — compatible manifest v3, pero falta validar shortcut y MV3 SW.
-- ⏳ Right-click en selección ("Guardar en DevDeck como snippet").
 - ⏳ OAuth flow con `/api/auth/github/login` en lugar de token manual (requiere JWT mode).
 - ⏳ Tags sugeridos vía `GET /api/tags/suggest` (endpoint a crear en Ola 5).
 - ⏳ Chrome Web Store / Firefox Add-ons.

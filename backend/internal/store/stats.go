@@ -19,6 +19,13 @@ type mascotState struct {
 	StreakLastDay string     `json:"streak_last_day"` // YYYY-MM-DD UTC
 }
 
+func mascotStateKey(ctx context.Context) string {
+	if userID, ok := currentUserID(ctx); ok {
+		return "mascot_state:" + userID.String()
+	}
+	return "mascot_state"
+}
+
 // Heartbeat updates last_open_at and the streak counter, returning:
 //   - the streak BEFORE the current visit was counted (for "fresh streak" UX),
 //   - the previous last_open_at (so the handler can detect "long absence").
@@ -31,8 +38,9 @@ func (s *Store) Heartbeat(ctx context.Context) (streak int, prevLastOpen *time.T
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
+	key := mascotStateKey(ctx)
 	var raw []byte
-	row := tx.QueryRow(ctx, `SELECT v FROM app_state WHERE k = 'mascot_state' FOR UPDATE`)
+	row := tx.QueryRow(ctx, `SELECT v FROM app_state WHERE k = $1 FOR UPDATE`, key)
 	if err := row.Scan(&raw); err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return 0, nil, err
 	}
@@ -64,9 +72,9 @@ func (s *Store) Heartbeat(ctx context.Context) (streak int, prevLastOpen *time.T
 		return 0, nil, err
 	}
 	if _, err := tx.Exec(ctx, `
-		INSERT INTO app_state (k, v) VALUES ('mascot_state', $1)
+		INSERT INTO app_state (k, v) VALUES ($1, $2)
 		ON CONFLICT (k) DO UPDATE SET v = EXCLUDED.v
-	`, newRaw); err != nil {
+	`, key, newRaw); err != nil {
 		return 0, nil, err
 	}
 	if err := tx.Commit(ctx); err != nil {
@@ -79,6 +87,7 @@ func (s *Store) Heartbeat(ctx context.Context) (streak int, prevLastOpen *time.T
 // non-archived repos.
 func (s *Store) GetRepoAggregates(ctx context.Context) (*stats.RepoAggregates, error) {
 	a := &stats.RepoAggregates{}
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 1)
 
 	// Total active + archived + last added
 	err := s.pool.QueryRow(ctx, `
@@ -87,7 +96,7 @@ func (s *Store) GetRepoAggregates(ctx context.Context) (*stats.RepoAggregates, e
 			COUNT(*) FILTER (WHERE archived = true),
 			MAX(added_at)
 		FROM repos
-	`).Scan(&a.Total, &a.Archived, &a.LastAddedAt)
+		WHERE `+scopeSQL, scopeArgs...).Scan(&a.Total, &a.Archived, &a.LastAddedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -95,13 +104,14 @@ func (s *Store) GetRepoAggregates(ctx context.Context) (*stats.RepoAggregates, e
 	// Top language (among non-archived)
 	var lang *string
 	var langCount int
+	langArgs := append([]any{}, scopeArgs...)
 	err = s.pool.QueryRow(ctx, `
 		SELECT language, COUNT(*) AS c FROM repos
-		WHERE archived = false AND language IS NOT NULL
+		WHERE archived = false AND language IS NOT NULL AND `+scopeSQL+`
 		GROUP BY language
 		ORDER BY c DESC
 		LIMIT 1
-	`).Scan(&lang, &langCount)
+	`, langArgs...).Scan(&lang, &langCount)
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return nil, err
 	}

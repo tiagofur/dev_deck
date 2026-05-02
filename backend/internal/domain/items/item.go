@@ -101,6 +101,14 @@ type UpdateInput struct {
 	ItemType *string `json:"item_type"`
 }
 
+// ReviewAITagsInput is the PATCH /api/items/:id/ai-tags body.
+// `ai_tags` is the edited suggestion set. If Apply is true, the edited
+// suggestions are also merged into the item's manual tags.
+type ReviewAITagsInput struct {
+	AITags []string `json:"ai_tags"`
+	Apply  bool     `json:"apply"`
+}
+
 // ListParams drives GET /api/items. All filters are additive.
 type ListParams struct {
 	// Type narrows to a single item_type. Empty = all types.

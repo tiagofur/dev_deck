@@ -50,3 +50,28 @@ export async function health(apiUrl) {
     throw new Error(`healthz ${res.status}`)
   }
 }
+
+/**
+ * verifyAuth hits a protected endpoint so the options page can confirm
+ * both reachability and that the provided token/JWT is actually usable.
+ */
+export async function verifyAuth(apiUrl, token) {
+  const res = await fetch(`${apiUrl.replace(/\/+$/, '')}/api/repos?limit=1`, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  if (!res.ok) {
+    let payload = {}
+    try {
+      payload = await res.json()
+    } catch {
+      /* empty */
+    }
+    const err = new Error(payload?.error?.message || res.statusText)
+    err.status = res.status
+    err.code = payload?.error?.code || 'UNKNOWN'
+    throw err
+  }
+}

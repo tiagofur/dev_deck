@@ -13,13 +13,17 @@ import (
 // only what the test needs so the fixture stays stable if we add
 // fields to the Item struct.
 type itemResp struct {
-	ID       uuid.UUID `json:"id"`
-	Type     string    `json:"item_type"`
-	Title    string    `json:"title"`
-	Tags     []string  `json:"tags"`
-	Notes    string    `json:"notes"`
-	Archived bool      `json:"archived"`
-	WhySaved string    `json:"why_saved"`
+	ID               uuid.UUID `json:"id"`
+	Type             string    `json:"item_type"`
+	Title            string    `json:"title"`
+	Tags             []string  `json:"tags"`
+	Notes            string    `json:"notes"`
+	Archived         bool      `json:"archived"`
+	WhySaved         string    `json:"why_saved"`
+	WhenToUse        string    `json:"when_to_use"`
+	AISummary        string    `json:"ai_summary"`
+	AITags           []string  `json:"ai_tags"`
+	EnrichmentStatus string    `json:"enrichment_status"`
 }
 
 type itemListResp struct {
@@ -257,5 +261,39 @@ func TestItems_MarkSeen(t *testing.T) {
 	rec := ts.do(t, http.MethodPost, "/api/items/"+seed.ID.String()+"/seen", nil)
 	if rec.Code != http.StatusNoContent {
 		t.Errorf("expected 204, got %d", rec.Code)
+	}
+}
+
+func TestItems_AIEnrich_QueuesItem(t *testing.T) {
+	ts := newTestServer(t)
+	seed := seedCapture(t, ts, capturePayload{Text: "brew install ripgrep"})
+
+	rec := ts.do(t, http.MethodPost, "/api/items/"+seed.ID.String()+"/ai-enrich", nil)
+	if rec.Code != http.StatusAccepted {
+		t.Fatalf("expected 202, got %d %s", rec.Code, rec.Body.String())
+	}
+	got := decodeJSON[itemResp](t, rec)
+	if got.EnrichmentStatus != "queued" {
+		t.Fatalf("expected queued, got %q", got.EnrichmentStatus)
+	}
+}
+
+func TestItems_ReviewAITags_AppliesSuggestions(t *testing.T) {
+	ts := newTestServer(t)
+	seed := seedCapture(t, ts, capturePayload{Text: "brew install ripgrep", Tags: []string{"manual"}})
+
+	rec := ts.do(t, http.MethodPatch, "/api/items/"+seed.ID.String()+"/ai-tags", items.ReviewAITagsInput{
+		AITags: []string{"CLI", "ripgrep", "manual"},
+		Apply:  true,
+	})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d %s", rec.Code, rec.Body.String())
+	}
+	got := decodeJSON[itemResp](t, rec)
+	if len(got.AITags) != 3 {
+		t.Fatalf("expected 3 ai tags, got %#v", got.AITags)
+	}
+	if len(got.Tags) != 3 {
+		t.Fatalf("expected merged manual tags, got %#v", got.Tags)
 	}
 }

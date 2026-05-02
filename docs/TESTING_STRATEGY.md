@@ -1,276 +1,62 @@
-# DevDeck — Estrategia de testing
+# Testing Strategy & CI
 
-> **Estado actual:** 0 tests. **Target Ola 4.5:** red de seguridad suficiente para refactorear con confianza.
->
-> Este doc define qué testear, cómo, y con qué herramientas. Es input para las tareas de Ola 4.5.
+This document outlines how we ensure the quality and stability of **DevDeck.ai**.
 
----
-
-## Filosofía
-
-- **No test coverage teatro.** No perseguimos 90% de cobertura. Perseguimos **confianza al refactorear**.
-- **Pocos tests, que cubran mucho.** Preferimos integration tests end-to-end de cada handler contra Postgres real a decenas de unit tests mockeados.
-- **Fast feedback loop.** El suite completo debe correr en < 60s local y < 3 min en CI.
-- **CI bloqueante.** Si los tests fallan, el merge está bloqueado. Sin excepciones.
+[Leer en español](TESTING_STRATEGY.es.md)
 
 ---
 
-## Pirámide (invertida levemente)
-
-```
-       ┌─────────────────┐
-       │   E2E (5-10)    │  Playwright, flows críticos cross-stack
-       ├─────────────────┤
-       │  Integration    │  httptest + testcontainers-go, todos los handlers
-       │   (30-50)       │
-       ├─────────────────┤
-       │   Unit (20-30)  │  lógica pura: enricher, authservice, parsers
-       └─────────────────┘
-```
+## 1. Core Principles
+- **Reliability:** The capture and search flows must never break.
+- **Speed:** Tests must run quickly in CI.
+- **Coverage:** Focus on high-value paths (Integration and E2E) rather than 100% unit coverage.
 
 ---
 
-## Backend — Go
+## 2. Backend (Go)
 
-### Stack
-- `testing` (stdlib)
-- `net/http/httptest` para server
-- `github.com/testcontainers/testcontainers-go` + `postgres` module para DB real
-- `github.com/stretchr/testify/require` para asserts
-- `github.com/jackc/pgx/v5` ya está en prod, se reusa
+### 2.1 Unit Tests
+- Location: `internal/**/*_test.go`.
+- Focus: Business logic, transformers, and validation.
+- Command: `go test -v ./internal/...`
 
-### Setup
-```go
-// internal/testutil/postgres.go
-func SetupPostgres(t *testing.T) (*pgxpool.Pool, func()) {
-    ctx := context.Background()
-    pgContainer, err := postgres.RunContainer(ctx,
-        testcontainers.WithImage("postgres:16-alpine"),
-        postgres.WithDatabase("devdeck_test"),
-        postgres.WithUsername("test"),
-        postgres.WithPassword("test"),
-        testcontainers.WithWaitStrategy(
-            wait.ForLog("database system is ready to accept connections").
-                WithOccurrence(2).WithStartupTimeout(30*time.Second)),
-    )
-    require.NoError(t, err)
-    // run migrations
-    // return pool + cleanup
-}
-```
-
-Se comparte un contenedor por package (via `TestMain`) con truncate de tablas entre tests para velocidad.
-
-### Qué testear (prioridad)
-
-**P0 — handlers críticos (hoy mismo)**
-- `repos`: Create, Get, List, Update, Delete, Refresh, MarkSeen, Readme.
-- `commands`: CRUD, BatchCreate, Reorder.
-- `cheatsheets`: CRUD de cheatsheets + entries + links.
-- `search`: global search cross-entity, fuzzy matching.
-- `auth`: GitHub OAuth callback (stub del token exchange), Refresh, Logout, Me.
-- `stats` y `discovery/next`: casos happy path.
-
-**P1 — store**
-- Transacciones de `Reorder` commands (position auto-calc).
-- Idempotencia de `BatchCreate`.
-- Search con `pg_trgm`.
-- Seed loader de cheatsheets (ejecutar dos veces, verificar no-duplicates).
-
-**P2 — enricher**
-- `github.go` con `httptest.Server` mockeando GitHub API.
-- `generic.go` con HTML de ejemplo para Open Graph.
-- `package_scripts.go` con package.json de ejemplo.
-- **Tests de SSRF:** verificar que URLs a IPs privadas son rechazadas.
-
-**P3 — authservice**
-- Generación y validación de JWT.
-- Expiración.
-- Refresh token hashing + verificación.
-
-### Target de cobertura
-- `internal/http/handlers/`: **75%**
-- `internal/store/`: **70%**
-- `internal/enricher/`: **60%** (los tests de red mock son frágiles)
-- `internal/authservice/`: **80%**
-
-### Convenciones
-- Archivo `*_test.go` al lado del código.
-- Tests de tabla (`table-driven`) cuando aplica.
-- `t.Parallel()` donde sea seguro.
-- Nombres descriptivos: `TestCreateRepo_DuplicateURL_Returns409`.
+### 2.2 Integration Tests
+- Tool: `testcontainers-go`.
+- Focus: Database queries (Postgres/pgvector) and external API interactions.
+- Command: `go test -tags=integration ./...`
 
 ---
 
-## Frontend — Electron (React)
+## 3. Frontend (React)
 
-### Stack
-- **Unit/component:** Vitest + `@testing-library/react`.
-- **E2E:** Playwright con `electron.launch()`.
+### 3.1 Component Tests
+- Tool: **Vitest** + **React Testing Library**.
+- Location: `packages/ui/**/*.test.tsx` and `packages/features/**/*.test.tsx`.
+- Command: `pnpm test:ui`
 
-### Unit
-- Components con estado: `AddRepoModal`, `CommandCard`, `NotesEditor`, `SwipeCard`.
-- Hooks custom: `useRepos`, `useReadme`, `usePackageScripts`.
-- Librerías internas: `api-client`, `toast`, `confirm`, `auth`.
-
-Target: **50%** en `src/renderer/src/components/` y **70%** en `src/renderer/src/lib/`.
-
-### E2E (Playwright)
-Contra el binario buildeado + backend dockerizado con seeds.
-
-**Flows críticos (P0):**
-1. Launch → login (mock OAuth) → home con repos.
-2. Cmd+N → agregar repo → aparece en grid.
-3. Click repo → detail → editar notas → guardar → refresh → persistió.
-4. Cmd+K → buscar "docker" → navegar al resultado.
-5. Home → `D` → Discovery → swipe left → archivado.
-6. Settings → toggle mascot → persistió.
+### 3.2 End-to-End (E2E)
+- Tool: **Playwright**.
+- Focus: Critical flows across the entire stack.
+    - Login via GitHub (Mocked).
+    - Capture URL -> Verify item appears in list.
+    - Search for item -> Verify correct result.
+- Command: `pnpm test:e2e`
 
 ---
 
-## Frontend — Monorepo (post Wave 4.5 §16.13)
+## 4. Continuous Integration (CI)
+We use **GitHub Actions** for every PR and push to `main`.
 
-> **Cambio importante:** desde la migración a monorepo, los tests del frontend viven en los **packages compartidos**, no en las apps. Esto significa que los tests de `RepoCard`, `ItemCard`, `TagChip`, hooks de TanStack Query, fetch wrapper, etc. corren una sola vez y cubren tanto desktop como web.
-
-### Distribución actual de tests (67 total)
-
-| Package | Count | Tests |
-|---------|-------|-------|
-| `@devdeck/api-client` | 39 | `auth/auth.test.ts` (6), `format.test.ts` (3), `preferences.test.ts` (4), `features/capture/detect.test.ts` (26) |
-| `@devdeck/ui` | 5 | `TagChip.test.tsx` |
-| `@devdeck/features` | 18 | `RepoCard.test.tsx` (8), `ItemCard.test.tsx` (10) |
-| `apps/desktop` | 5 | `PasteInterceptor.test.tsx` (Electron-only component) |
-| **Total** | **67** | |
-
-### Stack
-- **Unit/component:** Vitest + `@testing-library/react` + `@testing-library/user-event`.
-- **E2E (desktop):** Playwright contra Electron build, backend dockerizado.
-- **E2E (web):** pendiente — TODO post-§16.13.
-
-### Cómo correr tests
-
-```bash
-pnpm test                         # todos los packages (pnpm -r test)
-pnpm -F @devdeck/api-client test  # solo api-client
-pnpm -F @devdeck/ui test          # solo ui
-pnpm -F @devdeck/features test    # solo features
-pnpm -F @devdeck/desktop test     # solo desktop (PasteInterceptor)
-pnpm -F @devdeck/desktop test:e2e # Playwright flows
-```
-
-### Dónde escribir tests nuevos
-
-- **Hook TanStack Query / fetch wrapper / util puro / detector** → `packages/api-client/src/**/*.test.ts`
-- **Primitivo del design system (Button, TagChip, EmptyState, etc.)** → `packages/ui/src/**/*.test.tsx`
-- **Page o componente de dominio (RepoCard, ItemCard, CaptureModal, Topbar, Sidebar, Mascot, etc.)** → `packages/features/src/**/*.test.tsx`
-- **Componente Electron-only (PasteInterceptor)** → `apps/desktop/src/renderer/src/**/*.test.tsx`
-
-### Vitest setup
-
-Cada package con tests tiene su propio `vitest.config.ts` + `vitest.setup.ts` (donde aplique). El setup de `apps/desktop/vitest.setup.ts` llama a `configureApiClient()` + `setTokenStorage(localStorageAdapter)` antes de cada test para que los hooks que usan `getConfig()` tengan valores válidos (ver ADR 0003).
-
-### Target de cobertura
-
-- `packages/api-client` → **≥ 75%** (es la capa de dominio crítica)
-- `packages/features` → **≥ 60%** en componentes con lógica
-- `packages/ui` → smoke tests de cada primitive, no coverage quota
-- `apps/desktop` → 100% de los flows E2E + smoke de componentes Electron-only
+### Pipeline:
+1. **Linting:** `golangci-lint` for Go, `eslint` for TypeScript.
+2. **Type Check:** `tsc` for frontend.
+3. **Tests:** Run all unit and integration tests.
+4. **Build Check:** Ensure `pnpm build` completes for all packages.
 
 ---
 
-## Matriz de tests E2E compartidos
-
-| Flow | Electron (Playwright) | Web (TODO) | Backend solo |
-|------|-----------------------|------------|--------------|
-| Login OAuth | ✓ | — | ✓ |
-| Add repo (URL) | ✓ | — | ✓ |
-| Repo detail + notas | ✓ | — | – |
-| Global search | ✓ | — | ✓ |
-| Discovery swipe | ✓ | — | – |
-| Commands CRUD + reorder | ✓ | — | ✓ |
-| Cheatsheets | ✓ | — | ✓ |
-| Batch import scripts | ✓ | — | ✓ |
-
-Post-§16.13 los E2E de web son trivales de agregar (mismo Playwright apuntando a `:5173`) — TODO en próximo sprint.
-
----
-
-## CI — GitHub Actions
-
-```yaml
-# .github/workflows/ci.yml
-name: ci
-on: [push, pull_request]
-jobs:
-  backend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with: { go-version: '1.23' }
-      - run: cd backend && go mod download
-      - run: cd backend && go vet ./...
-      - run: cd backend && go test -race -cover ./...
-  monorepo:
-    # Desde §16.13 el repo es pnpm workspaces; todo el frontend se instala
-    # y testea desde la raíz con un solo install.
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with: { version: 10 }
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck              # pnpm -r typecheck (5 packages)
-      - run: pnpm test                   # pnpm -r test (67 tests en 4 packages)
-      - run: pnpm -F @devdeck/desktop build
-      - run: pnpm -F @devdeck/web build
-  e2e:
-    runs-on: ubuntu-latest
-    needs: [backend, monorepo]
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env: { POSTGRES_PASSWORD: test, POSTGRES_DB: devdeck_test }
-        ports: ['5432:5432']
-    steps:
-      - uses: actions/checkout@v4
-      # boot backend, run playwright, teardown
-```
-
-**Branch protection en `main`:**
-- Requerir status checks: `backend`, `monorepo`, `e2e`.
-- Requerir PR review de al menos 1 maintainer.
-- No permitir force push.
-- No permitir delete.
-
----
-
-## Plan de ataque — Sprint de testing (10 días hábiles)
-
-**Día 1–2:** Setup `testutil/postgres.go` + primer test de smoke en `handlers/repos_test.go` verde. Commit: "test: repos create/get/delete smoke".
-
-**Día 3–4:** Todos los handlers de `repos` + `commands`. Cobertura ~60% en handlers.
-
-**Día 5–6:** `cheatsheets` + `search` + `auth`. Cobertura 75% en handlers.
-
-**Día 7:** Tests de `store` que quedan huérfanos. `enricher` con mocks.
-
-**Día 8:** Setup Vitest en desktop y web. Primeros 10 component tests.
-
-**Día 9:** Setup Playwright. Primeros 3 flows E2E (login, add, search).
-
-**Día 10:** CI verde en GitHub Actions, branch protection aplicada, merge.
-
-Al terminar: red de seguridad suficiente para atacar Ola 5 sin miedo.
-
----
-
-## Qué NO testear
-
-- CSS/estilos (visual regression es otra bestia; si importa, se agrega Percy o Chromatic en Ola 6+).
-- Librerías de terceros.
-- Código de infra (Dockerfile, Caddyfile) — se testea con un deploy manual periódico.
-- Animations (framer-motion, transitions).
-- Mascota Snarkel — es decorativa, los tests son frágiles y poco valiosos.
+## 5. Manual Verification
+Before any major release:
+1. Deploy to **Staging** environment.
+2. Verify Desktop app build on macOS (native shell behavior).
+3. Smoke test capture via CLI and Extension.

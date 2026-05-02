@@ -16,11 +16,18 @@ import { capture } from './lib/api.js'
 import { enqueue, getQueue, getSettings, setQueue } from './lib/storage.js'
 
 const QUEUE_ALARM = 'devdeck-drain-queue'
+const MENU_CAPTURE_LINK = 'devdeck-capture-link'
+const MENU_CAPTURE_SELECTION = 'devdeck-capture-selection'
 
 // ─── Install hook: register the retry alarm ───
 
 chrome.runtime.onInstalled.addListener(async () => {
   await chrome.alarms.create(QUEUE_ALARM, { periodInMinutes: 1 })
+  await ensureContextMenus()
+})
+
+chrome.runtime.onStartup?.addListener(async () => {
+  await ensureContextMenus()
 })
 
 // ─── Keyboard command ───
@@ -33,7 +40,43 @@ chrome.commands.onCommand.addListener(async (command) => {
     url: tab.url,
     title: tab.title || '',
     source: 'browser-extension',
+    metaHints: {
+      capture_context: 'shortcut',
+      page_url: tab.url,
+      page_title: tab.title || '',
+    },
   })
+})
+
+// ─── Context menus ───
+
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  if (info.menuItemId === MENU_CAPTURE_LINK && info.linkUrl) {
+    await captureTab({
+      url: info.linkUrl,
+      source: 'browser-extension',
+      metaHints: {
+        capture_context: 'context-link',
+        page_url: info.pageUrl || tab?.url || '',
+        page_title: tab?.title || '',
+      },
+    })
+    return
+  }
+
+  if (info.menuItemId === MENU_CAPTURE_SELECTION && info.selectionText) {
+    await captureTab({
+      text: info.selectionText,
+      selection: info.selectionText,
+      typeHint: 'snippet',
+      source: 'browser-extension',
+      metaHints: {
+        capture_context: 'context-selection',
+        page_url: info.pageUrl || tab?.url || '',
+        page_title: tab?.title || '',
+      },
+    })
+  }
 })
 
 // ─── Popup ↔ background messaging ───
@@ -45,6 +88,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
       .catch((err) =>
         sendResponse({
           ok: false,
+          queued: Boolean(err.queued),
           error: { status: err.status, code: err.code, message: err.message },
         }),
       )
@@ -66,7 +110,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
 // ─── Internals ───
 
-async function captureTab({ url, title, source, whySaved, tags }) {
+async function captureTab({ url, text, selection, title, source, whySaved, tags, typeHint, metaHints }) {
   const { apiUrl, token } = await getSettings()
   if (!token) {
     // No token configured → queue the item so it can be flushed after
@@ -74,11 +118,17 @@ async function captureTab({ url, title, source, whySaved, tags }) {
     await enqueue({
       source: source || 'browser-extension',
       url,
+      text,
+      selection,
       title_hint: title,
+      type_hint: typeHint,
       why_saved: whySaved,
       tags,
+      meta_hints: metaHints,
     })
-    throw new Error('no token configured; item queued for later')
+    const err = new Error('No hay credenciales configuradas. La captura quedó en cola para reintentar después de configurar la extensión.')
+    err.queued = true
+    throw err
   }
   try {
     const res = await capture({
@@ -87,9 +137,13 @@ async function captureTab({ url, title, source, whySaved, tags }) {
       input: {
         source: source || 'browser-extension',
         url,
+        text,
+        selection,
         title_hint: title,
+        type_hint: typeHint,
         why_saved: whySaved,
         tags,
+        meta_hints: metaHints,
       },
     })
     await updateBadge()
@@ -100,11 +154,16 @@ async function captureTab({ url, title, source, whySaved, tags }) {
       await enqueue({
         source: source || 'browser-extension',
         url,
+        text,
+        selection,
         title_hint: title,
+        type_hint: typeHint,
         why_saved: whySaved,
         tags,
+        meta_hints: metaHints,
       })
       await updateBadge()
+      err.queued = true
     }
     throw err
   }
@@ -147,4 +206,18 @@ async function updateBadge() {
   } catch {
     /* setBadgeText may fail if the action isn't visible yet */
   }
+}
+
+async function ensureContextMenus() {
+  await chrome.contextMenus.removeAll()
+  chrome.contextMenus.create({
+    id: MENU_CAPTURE_LINK,
+    title: 'Guardar link en DevDeck',
+    contexts: ['link'],
+  })
+  chrome.contextMenus.create({
+    id: MENU_CAPTURE_SELECTION,
+    title: 'Guardar selección en DevDeck como snippet',
+    contexts: ['selection'],
+  })
 }

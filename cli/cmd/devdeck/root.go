@@ -37,6 +37,7 @@ func init() {
 		logoutCmd,
 		configCmd,
 		addCmd,
+		openCmd,
 		searchCmd,
 		listCmd,
 		statusCmd,

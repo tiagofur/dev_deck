@@ -53,10 +53,10 @@ func (s *Store) CreateRepo(ctx context.Context, in repos.CreateInput) (*repos.Re
 	norm := items.NormalizeURL(in.URL)
 
 	row := s.pool.QueryRow(ctx, `
-		INSERT INTO repos (url, source, owner, name, notes, tags, url_normalized)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO repos (user_id, url, source, owner, name, notes, tags, url_normalized)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING `+repoColumns,
-		in.URL, source, nilIfEmpty(owner), name, in.Notes, in.Tags, norm,
+		currentUserIDPtr(ctx), in.URL, source, nilIfEmpty(owner), name, in.Notes, in.Tags, norm,
 	)
 	r, err := scanRepo(row)
 	if err != nil {
@@ -69,7 +69,11 @@ func (s *Store) CreateRepo(ctx context.Context, in repos.CreateInput) (*repos.Re
 }
 
 func (s *Store) GetRepo(ctx context.Context, id uuid.UUID) (*repos.Repo, error) {
-	row := s.pool.QueryRow(ctx, `SELECT `+repoColumns+` FROM repos WHERE id = $1`, id)
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
+	args := append([]any{id}, scopeArgs...)
+	row := s.pool.QueryRow(ctx,
+		`SELECT `+repoColumns+` FROM repos WHERE id = $1 AND `+scopeSQL,
+		args...)
 	r, err := scanRepo(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -89,9 +93,10 @@ func (s *Store) ListRepos(ctx context.Context, p repos.ListParams) (*repos.ListR
 	}
 
 	// Build WHERE dynamically with positional args.
-	where := []string{"1=1"}
-	args := []any{}
-	idx := 1
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 1)
+	where := []string{scopeSQL}
+	args := append([]any{}, scopeArgs...)
+	idx := len(args) + 1
 
 	if p.Archived != nil {
 		where = append(where, fmt.Sprintf("archived = $%d", idx))
@@ -190,10 +195,12 @@ func (s *Store) UpdateRepo(ctx context.Context, id uuid.UUID, in repos.UpdateInp
 		return s.GetRepo(ctx, id)
 	}
 
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", idx+1)
 	args = append(args, id)
+	args = append(args, scopeArgs...)
 	q := fmt.Sprintf(
-		"UPDATE repos SET %s WHERE id = $%d RETURNING %s",
-		strings.Join(sets, ", "), idx, repoColumns,
+		"UPDATE repos SET %s WHERE id = $%d AND %s RETURNING %s",
+		strings.Join(sets, ", "), idx, scopeSQL, repoColumns,
 	)
 	row := s.pool.QueryRow(ctx, q, args...)
 	r, err := scanRepo(row)
@@ -207,7 +214,9 @@ func (s *Store) UpdateRepo(ctx context.Context, id uuid.UUID, in repos.UpdateInp
 }
 
 func (s *Store) DeleteRepo(ctx context.Context, id uuid.UUID) error {
-	tag, err := s.pool.Exec(ctx, `DELETE FROM repos WHERE id = $1`, id)
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
+	args := append([]any{id}, scopeArgs...)
+	tag, err := s.pool.Exec(ctx, `DELETE FROM repos WHERE id = $1 AND `+scopeSQL, args...)
 	if err != nil {
 		return err
 	}
@@ -259,12 +268,14 @@ func (s *Store) UpdateMetadata(ctx context.Context, id uuid.UUID, md *repos.Meta
 //
 // Returns ErrNotFound if there are no eligible repos.
 func (s *Store) GetDiscoveryNext(ctx context.Context) (*repos.Repo, error) {
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 1)
 	row := s.pool.QueryRow(ctx, `
 		SELECT `+repoColumns+` FROM repos
 		WHERE archived = false
+		  AND `+scopeSQL+`
 		ORDER BY last_seen_at NULLS FIRST, added_at ASC
 		LIMIT 1
-	`)
+	`, scopeArgs...)
 	r, err := scanRepo(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -278,7 +289,11 @@ func (s *Store) GetDiscoveryNext(ctx context.Context) (*repos.Repo, error) {
 // MarkSeen sets last_seen_at = NOW() for a repo. Used by discovery mode
 // to signal "the user looked at this card".
 func (s *Store) MarkSeen(ctx context.Context, id uuid.UUID) error {
-	tag, err := s.pool.Exec(ctx, `UPDATE repos SET last_seen_at = NOW() WHERE id = $1`, id)
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
+	args := append([]any{id}, scopeArgs...)
+	tag, err := s.pool.Exec(ctx,
+		`UPDATE repos SET last_seen_at = NOW() WHERE id = $1 AND `+scopeSQL,
+		args...)
 	if err != nil {
 		return err
 	}

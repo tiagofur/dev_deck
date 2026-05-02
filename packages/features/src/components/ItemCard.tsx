@@ -14,7 +14,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import type { Item, ItemType } from '@devdeck/api-client'
-import { formatCount } from '@devdeck/api-client'
+import { formatCount, EnrichmentStatus } from '@devdeck/api-client'
 import { TagChip, hashIndex } from '@devdeck/ui'
 
 // Ola 5 Fase 17 — card adaptado por tipo para el nuevo modelo de Items.
@@ -65,6 +65,13 @@ export function ItemCard({ item, onClick }: Props) {
   const language = typeof item.meta?.language === 'string' ? (item.meta.language as string) : null
   const languageColor =
     typeof item.meta?.language_color === 'string' ? (item.meta.language_color as string) : null
+  const heroText = item.ai_summary || item.description
+  const visibleTags = item.tags.length > 0 ? item.tags : item.ai_tags
+  const statusLabel = item.enrichment_status === EnrichmentStatus.Queued
+    ? 'Analizando…'
+    : item.enrichment_status === EnrichmentStatus.Error
+      ? 'Análisis pendiente'
+      : null
 
   return (
     <article
@@ -87,8 +94,14 @@ export function ItemCard({ item, onClick }: Props) {
           {item.title || '(sin título)'}
         </h3>
 
-        {item.description && (
-          <p className="text-sm text-ink-soft line-clamp-2 mb-3">{item.description}</p>
+        {heroText && (
+          <p className="text-sm text-ink-soft line-clamp-2 mb-3">{heroText}</p>
+        )}
+
+        {statusLabel && (
+          <p className="text-[11px] font-mono uppercase tracking-wide mb-3 text-ink-soft">
+            ✦ {statusLabel}
+          </p>
         )}
 
         {item.why_saved && (
@@ -122,9 +135,9 @@ export function ItemCard({ item, onClick }: Props) {
           </p>
         )}
 
-        {item.tags.length > 0 && (
+        {visibleTags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {item.tags.slice(0, 5).map((t) => (
+            {visibleTags.slice(0, 5).map((t) => (
               <TagChip key={t} label={t} colorIndex={hashIndex(t)} />
             ))}
           </div>

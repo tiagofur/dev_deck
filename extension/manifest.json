@@ -15,7 +15,7 @@
     "page": "src/options.html",
     "open_in_tab": true
   },
-  "permissions": ["activeTab", "storage", "alarms"],
+  "permissions": ["activeTab", "storage", "alarms", "contextMenus"],
   "host_permissions": ["<all_urls>"],
   "commands": {
     "capture-tab": {

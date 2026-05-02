@@ -31,3 +31,8 @@ func writeInternal(w http.ResponseWriter, err error) {
 	slog.Error("internal error", "err", err)
 	writeError(w, http.StatusInternalServerError, "INTERNAL", "internal server error")
 }
+
+func decodeJSON(r *http.Request, v any) error {
+	defer r.Body.Close()
+	return json.NewDecoder(r.Body).Decode(v)
+}

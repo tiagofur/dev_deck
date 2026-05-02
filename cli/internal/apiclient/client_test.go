@@ -173,6 +173,40 @@ func TestListRepos_BuildsFilters(t *testing.T) {
 	}
 }
 
+func TestGetRepo_FetchesByID(t *testing.T) {
+	fb := newFakeBackend(t, func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"id":"1","name":"foo","url":"https://github.com/u/foo","stars":42}`))
+	})
+	client := New(fb.server.URL, "t")
+	repo, err := client.GetRepo(context.Background(), "repo-123")
+	if err != nil {
+		t.Fatalf("GetRepo: %v", err)
+	}
+	if fb.lastReq.path != "/api/repos/repo-123" {
+		t.Errorf("path = %s", fb.lastReq.path)
+	}
+	if repo.URL != "https://github.com/u/foo" {
+		t.Errorf("url = %q", repo.URL)
+	}
+}
+
+func TestGetItem_FetchesByID(t *testing.T) {
+	fb := newFakeBackend(t, func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"id":"1","item_type":"article","title":"rg docs","url":"https://rg.dev"}`))
+	})
+	client := New(fb.server.URL, "t")
+	item, err := client.GetItem(context.Background(), "item-123")
+	if err != nil {
+		t.Fatalf("GetItem: %v", err)
+	}
+	if fb.lastReq.path != "/api/items/item-123" {
+		t.Errorf("path = %s", fb.lastReq.path)
+	}
+	if item.URL == nil || *item.URL != "https://rg.dev" {
+		t.Errorf("url = %+v", item.URL)
+	}
+}
+
 func TestHealth_OK(t *testing.T) {
 	fb := newFakeBackend(t, func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)

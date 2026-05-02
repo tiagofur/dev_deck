@@ -1,85 +1,68 @@
 # DevDeck Backend
 
-Go API. Wave 1: minimal CRUD for repos with static-token auth.
+Go API (Wave 5). Provides the core logic for capturing, organizing, and enriching development resources with AI.
 
-## Quick start
+## Quick Start
 
 ```bash
-# 1. Levantar Postgres (ejemplo con docker)
-docker run -d --name devdeck-pg \
-  -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=devdeck \
-  -p 5432:5432 \
-  postgres:16-alpine
+# 1. Start Postgres (via Docker Compose in the root)
+cd ..
+docker-compose up -d postgres
 
-# 2. Copiar env y editar API_TOKEN
+# 2. Copy env and configure GitHub OAuth
+cd backend
 cp .env.example .env
-# editá .env y poné un API_TOKEN largo random
+# Edit .env with your GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET
 
-# 3. Cargar env (bash)
-set -a && source .env && set +a
-
-# 4. Bajar deps
-make tidy
-
-# 5. Aplicar migración
+# 3. Apply migrations
 make migrate-up
 
-# 6. Correr el server
+# 4. Run the server
 make run
 ```
 
-## Smoke test
+## Auth Strategy (GitHub-only)
 
-```bash
-# add a repo
-make smoke-add
+DevDeck uses **GitHub OAuth** as the exclusive authentication provider.
+- **Access Tokens:** Short-lived JWTs sent via `Authorization: Bearer <token>`.
+- **Refresh Tokens:** Stored in secure `HttpOnly` cookies (Web) or secure storage (Desktop).
+- **OAuth State:** Handled via encrypted/secure cookies to maintain statelessness.
 
-# list repos
-make smoke-list
-
-# health
-curl http://localhost:8080/healthz
-```
-
-## Estructura
+## Directory Structure
 
 ```
-cmd/api/main.go              # entry point
+cmd/api/main.go              # Entry point
 internal/
-  config/                    # env loading
-  domain/repos/              # entidad Repo + inputs
+  authctx/                   # Context-based user ID helpers
+  authservice/               # JWT & Token logic
+  config/                    # Environment & configuration
+  domain/                    # Domain entities (auth, cheatsheets, repos, capture)
   http/
-    router.go                # chi setup
-    middleware/
-      auth.go                # bearer token (Wave 1)
-      logger.go              # request logging
-    handlers/
-      health.go
-      repos.go               # CRUD
-      response.go            # JSON helpers
-  store/
-    store.go                 # pgx pool wrapper
-    repos.go                 # SQL queries para repos
-migrations/
-  0001_init.sql              # schema base
+    handlers/                # HTTP route handlers (REST)
+    middleware/              # JWT, Logging, CORS, Metrics
+    router.go                # Chi router setup
+  jobs/                      # Background workers (Enrichment, AI)
+  store/                     # Database access layer (pgx)
+migrations/                  # SQL schema migrations
 ```
 
-## Endpoints (Wave 1)
+## Key API Endpoints (Wave 5)
 
-| Method | Path                | Descripción |
-|--------|---------------------|-------------|
-| GET    | `/healthz`          | Health (público) |
-| POST   | `/api/repos`        | Add repo by URL |
-| GET    | `/api/repos`        | List with q/lang/tag/sort/limit/offset |
-| GET    | `/api/repos/{id}`   | Get one |
-| PATCH  | `/api/repos/{id}`   | Update notes/tags/archived |
-| DELETE | `/api/repos/{id}`   | Delete |
+| Method | Path                        | Description |
+|--------|-----------------------------|-------------|
+| GET    | `/healthz`                  | Health check (Public) |
+| GET    | `/api/auth/github/login`    | Start GitHub OAuth flow |
+| GET    | `/api/auth/me`              | Get current authenticated user |
+| POST   | `/api/items/capture`        | Unified capture endpoint (Wave 5) |
+| GET    | `/api/cheatsheets`          | List/Search cheatsheets |
+| POST   | `/api/cheatsheets/{id}/fork`| Fork a community cheatsheet |
 
-Todos los `/api/*` requieren `Authorization: Bearer $API_TOKEN`.
+## Development
 
-## Notas
+- **Linting:** `make lint`
+- **Testing:** `go test ./...` (Note: DB tests require Docker)
+- **Migrations:** Use `make migrate-new name=...` to create a new migration.
 
-- **Sin enricher todavía.** El POST solo extrae `name`/`owner` de la URL. El enricher (GitHub API + Open Graph) llega en Wave 2 (Fase 2).
-- **Migraciones manuales por psql.** En Wave 2 evaluaremos goose embebido si crece el schema.
-- **`go mod tidy` no se corre automáticamente** — corrélo vos después del primer clone.
+---
+
+*Last updated: May 2026 (Wave 5)*

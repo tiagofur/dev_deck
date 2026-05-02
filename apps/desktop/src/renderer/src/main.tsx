@@ -1,8 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import {
+  clearTokens,
   configureApiClient,
   electronSafeStorageAdapter,
+  getAccessToken,
+  getRefreshToken,
   localStorageAdapter,
   setTokenStorage,
 } from '@devdeck/api-client'
@@ -17,9 +20,19 @@ const isElectron =
 
 setTokenStorage(isElectron ? electronSafeStorageAdapter : localStorageAdapter)
 
+const authMode = (import.meta.env.VITE_AUTH_MODE as 'jwt' | 'token' | undefined) ?? 'jwt'
+
+if (authMode === 'jwt') {
+  const access = getAccessToken()
+  const refresh = getRefreshToken()
+  if (access && refresh && access === refresh) {
+    clearTokens()
+  }
+}
+
 configureApiClient({
   baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:8080',
-  authMode: (import.meta.env.VITE_AUTH_MODE as 'jwt' | 'token') || 'token',
+  authMode,
   staticToken: import.meta.env.VITE_API_TOKEN || undefined,
 })
 

@@ -14,6 +14,9 @@ interface TokenData {
   refresh: string | null
 }
 
+let mainWindow: BrowserWindow | null = null
+let pendingAuthCallbackURL: string | null = null
+
 function readTokens(): TokenData {
   try {
     const file = TOKEN_FILE()
@@ -54,6 +57,15 @@ function registerIpcHandlers(): void {
 
   ipcMain.on('store:clear-tokens', () => {
     writeTokens({ access: null, refresh: null })
+  })
+
+  ipcMain.on('auth:open-external', (_event, url: string) => {
+    void shell.openExternal(url)
+  })
+
+  ipcMain.on('auth:get-pending-url', (event) => {
+    event.returnValue = pendingAuthCallbackURL
+    pendingAuthCallbackURL = null
   })
 }
 
@@ -101,10 +113,18 @@ function createWindow(): void {
       preload: preloadPath,
     },
   })
+  mainWindow = win
 
   win.once('ready-to-show', () => {
     win.show()
     registerGlobalShortcuts(win)
+  })
+
+  win.webContents.on('did-finish-load', () => {
+    if (pendingAuthCallbackURL) {
+      win.webContents.send('auth-callback-url', pendingAuthCallbackURL)
+      pendingAuthCallbackURL = null
+    }
   })
 
   // External links → system browser, never inside the app.
@@ -121,11 +141,44 @@ function createWindow(): void {
   }
 }
 
+function dispatchAuthCallback(url: string): void {
+  if (!url.startsWith('devdeck://')) return
+  pendingAuthCallbackURL = url
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.show()
+    mainWindow.focus()
+    mainWindow.webContents.send('auth-callback-url', url)
+    pendingAuthCallbackURL = null
+  }
+}
+
 // ---------------------------------------------------------------------------
 // App lifecycle
 // ---------------------------------------------------------------------------
 
+const singleInstance = app.requestSingleInstanceLock()
+
+if (!singleInstance) {
+  app.quit()
+}
+
+app.on('second-instance', (_event, argv) => {
+  const authURL = argv.find((arg) => arg.startsWith('devdeck://'))
+  if (authURL) {
+    dispatchAuthCallback(authURL)
+  } else if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.show()
+    mainWindow.focus()
+  }
+})
+
+app.on('open-url', (event, url) => {
+  event.preventDefault()
+  dispatchAuthCallback(url)
+})
+
 app.whenReady().then(() => {
+  app.setAsDefaultProtocolClient('devdeck')
   registerIpcHandlers()
   createWindow()
 

@@ -17,10 +17,12 @@ Creá `desktop/.env` (este archivo NO se commitea):
 
 ```env
 VITE_API_URL=http://localhost:8080
-VITE_API_TOKEN=el-mismo-API_TOKEN-del-backend
+VITE_AUTH_MODE=jwt
 ```
 
-> ⚠️ El `VITE_API_TOKEN` tiene que ser **idéntico** al `API_TOKEN` que usaste en `backend/.env`. Wave 4 cambia esto a OAuth + JWT, pero por ahora es token estático.
+Además el backend tiene que estar en `AUTH_MODE=jwt` y tener configurado al menos un proveedor OAuth (GitHub, Google o Apple). Desktop usa callback por protocolo `devdeck://auth/callback`, así que el login abre el browser del sistema y vuelve a la app cuando termina.
+
+> Si necesitás el modo viejo para tests/debug, todavía podés levantarlo con `VITE_AUTH_MODE=token` + `VITE_API_TOKEN=...`, pero ya no es el flujo principal.
 
 ### 3. Instalar dependencias
 

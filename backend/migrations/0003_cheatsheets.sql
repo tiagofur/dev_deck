@@ -27,7 +27,7 @@ CREATE TABLE cheatsheet_entries (
 );
 CREATE INDEX idx_entries_cheat ON cheatsheet_entries(cheatsheet_id, position);
 CREATE INDEX idx_entries_search ON cheatsheet_entries USING gin (
-  (label || ' ' || command || ' ' || COALESCE(description,'') || ' ' || COALESCE(array_to_string(tags,' '),''))
+  (label || ' ' || command || ' ' || COALESCE(description,'') || ' ' || COALESCE(immutable_array_to_string(tags,' '),''))
   gin_trgm_ops
 );
 
@@ -37,4 +37,3 @@ CREATE TABLE repo_cheatsheet_links (
   cheatsheet_id  UUID REFERENCES cheatsheets(id)  ON DELETE CASCADE,
   PRIMARY KEY (repo_id, cheatsheet_id)
 );
-
