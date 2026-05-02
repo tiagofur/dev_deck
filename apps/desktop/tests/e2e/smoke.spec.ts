@@ -32,19 +32,16 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     await urlInput.fill(url)
     const submitButton = page.locator('form').getByRole('button', { name: /^guardar$/i })
     await expect(submitButton).toBeEnabled()
-    const createRequestPromise = page.waitForRequest(
-      (request) =>
-        (request.url().includes('/api/repos') || request.url().includes('/api/items/capture')) &&
-        request.method() === 'POST',
-      { timeout: 5_000 },
+    const createResponsePromise = page.waitForResponse(
+      (response) =>
+        (response.url().includes('/api/repos') || response.url().includes('/api/items/capture')) &&
+        response.request().method() === 'POST',
+      { timeout: 15_000 },
     )
     await submitButton.click()
-    const createRequest = await createRequestPromise
-    const createResponse = await createRequest.response()
+    const createResponse = await createResponsePromise
+    
     expect(createResponse, 'repo create request never received a response').not.toBeNull()
-    if (!createResponse) {
-      throw new Error('repo create request never received a response')
-    }
     const createBody = await createResponse.text()
     expect(createResponse.status(), createBody).toBe(201)
     await expect(urlInput).toBeHidden()
