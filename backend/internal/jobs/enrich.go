@@ -180,12 +180,7 @@ func (q *EnrichQueue) run(parent context.Context, job EnrichJob) {
 		}
 	}
 
-	status := "skipped"
-	if processed {
-		status = "ok"
-	} else if hadError {
-		status = "error"
-	}
+	status := resolveStatus(processed, hadError)
 	if job.Kind == KindItem {
 		if err := q.store.UpdateItemEnrichmentStatus(ctx, job.ID, items.EnrichmentStatus(status)); err != nil {
 			slog.Warn("enrich: update item status failed", "err", err, "id", job.ID, "status", status)
@@ -215,4 +210,14 @@ func canAutoEnrichItemType(t items.Type) bool {
 	default:
 		return false
 	}
+}
+
+func resolveStatus(processed, hadError bool) string {
+	if hadError {
+		return "error"
+	}
+	if processed {
+		return "ok"
+	}
+	return "skipped"
 }

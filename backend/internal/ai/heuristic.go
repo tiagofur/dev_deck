@@ -136,13 +136,14 @@ func cleanSentence(s string) string {
 }
 
 func truncate(s string, n int) string {
-	if len(s) <= n {
+	runes := []rune(s)
+	if len(runes) <= n {
 		return s
 	}
 	if n <= 1 {
-		return s[:n]
+		return string(runes[:n])
 	}
-	return strings.TrimSpace(s[:n-1]) + "…"
+	return strings.TrimSpace(string(runes[:n-1])) + "…"
 }
 
 func hostTag(raw *string) string {

@@ -14,7 +14,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import type { Item, ItemType } from '@devdeck/api-client'
-import { formatCount } from '@devdeck/api-client'
+import { formatCount, EnrichmentStatus } from '@devdeck/api-client'
 import { TagChip, hashIndex } from '@devdeck/ui'
 
 // Ola 5 Fase 17 — card adaptado por tipo para el nuevo modelo de Items.
@@ -67,9 +67,9 @@ export function ItemCard({ item, onClick }: Props) {
     typeof item.meta?.language_color === 'string' ? (item.meta.language_color as string) : null
   const heroText = item.ai_summary || item.description
   const visibleTags = item.tags.length > 0 ? item.tags : item.ai_tags
-  const statusLabel = item.enrichment_status === 'queued'
+  const statusLabel = item.enrichment_status === EnrichmentStatus.Queued
     ? 'Analizando…'
-    : item.enrichment_status === 'error'
+    : item.enrichment_status === EnrichmentStatus.Error
       ? 'Análisis pendiente'
       : null
 

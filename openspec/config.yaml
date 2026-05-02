@@ -1,0 +1,45 @@
+schema: spec-driven
+
+context: |
+  Tech stack: Go 1.23 (Chi, pgx, JWT), TS (React, Vitest), pnpm monorepo.
+  Architecture: Hexagonal-lite, feature-based frontend.
+  Testing: go test (backend), vitest (frontend).
+  Style: golangci-lint, eslint, prettier.
+
+strict_tdd: true
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Identify affected modules/packages
+  specs:
+    - Use Given/When/Then format for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+  tasks:
+    - Group tasks by phase (infrastructure, implementation, testing)
+    - Use hierarchical numbering (1.1, 1.2, etc.)
+    - Keep tasks small enough to complete in one session
+  apply:
+    - Follow existing code patterns and conventions
+    - Load relevant coding skills for the project stack
+  verify:
+    - Run tests if test infrastructure exists
+    - Compare implementation against every spec scenario
+  archive:
+    - Warn before merging destructive deltas (large removals)
+
+testing:
+  strict_tdd: true
+  detected: 2026-05-01
+  test_runner:
+    backend: "go test ./..."
+    frontend: "pnpm test"
+  layers:
+    - { layer: "Unit", available: true, tool: "go test / vitest" }
+    - { layer: "Integration", available: true, tool: "testcontainers-go" }
+  quality:
+    - { tool: "Linter", available: true, command: "golangci-lint run / pnpm lint" }
+    - { tool: "Type checker", available: true, command: "pnpm typecheck" }

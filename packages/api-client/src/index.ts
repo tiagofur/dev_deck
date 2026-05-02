@@ -139,9 +139,8 @@ export type { DetectionResult } from './features/capture/detect'
 export type {
   Item,
   ItemType,
-  EnrichmentStatus,
   CaptureInput,
   CaptureResponse,
   CaptureSource,
 } from './features/capture/types'
-export { ALL_ITEM_TYPES } from './features/capture/types'
+export { ALL_ITEM_TYPES, EnrichmentStatus } from './features/capture/types'

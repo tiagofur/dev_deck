@@ -129,4 +129,28 @@ func TestServiceEnrichItem(t *testing.T) {
 	}
 }
 
+func TestTruncate(t *testing.T) {
+	tests := []struct {
+		name string
+		s    string
+		n    int
+		want string
+	}{
+		{"ascii_no_trunc", "hello", 10, "hello"},
+		{"ascii_trunc", "hello world", 5, "hell…"},
+		{"utf8_safe", "ABCDE ñ", 10, "ABCDE ñ"},
+		{"utf8_break", "ABCDE ñ extra", 8, "ABCDE ñ…"}, 
+		{"utf8_complex", "Estudio diseño 🎨 y mas", 16, "Estudio diseño…"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := truncate(tt.s, tt.n)
+			if got != tt.want {
+				t.Errorf("truncate() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func ptr[T any](v T) *T { return &v }
