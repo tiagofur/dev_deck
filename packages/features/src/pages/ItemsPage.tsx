@@ -16,6 +16,8 @@ import { ALL_ITEM_TYPES, type ItemType } from '@devdeck/api-client'
 
 type TypeFilter = 'all' | ItemType
 
+const STACKS = ["go", "node", "python", "rust", "typescript", "react", "vue", "ai", "cli", "db"]
+
 const TYPE_FILTERS: Array<{ key: TypeFilter; label: string }> = [
   { key: 'all', label: 'All' },
   ...ALL_ITEM_TYPES.map((t) => ({ key: t as TypeFilter, label: t })),
@@ -23,7 +25,8 @@ const TYPE_FILTERS: Array<{ key: TypeFilter; label: string }> = [
 
 export function ItemsPage() {
   const navigate = useNavigate()
-  const [type, setType] = useState<TypeFilter>('all')
+  const [type, setType] = useState<TypeFilter>("all")
+  const [stack, setStack] = useState<string[]>([])
   const [query, setQuery] = useState('')
   const [captureOpen, setCaptureOpen] = useState(false)
 
