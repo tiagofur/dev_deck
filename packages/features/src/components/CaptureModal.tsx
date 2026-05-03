@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@devdeck/ui'
-import { useCapture } from '@devdeck/api-client'
+import { useCapture, usePreview, type PreviewResponse } from '@devdeck/api-client'
 import { detectType } from '@devdeck/api-client'
 import { ALL_ITEM_TYPES, type CaptureInput, type ItemType } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
@@ -30,7 +30,10 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
   const [typeHint, setTypeHint] = useState<ItemType | ''>('')
   const [whySaved, setWhySaved] = useState('')
   const [tagsRaw, setTagsRaw] = useState('')
+  const [preview, setPreview] = useState<PreviewResponse | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
   const capture = useCapture()
+  const previewFetch = usePreview()
 
   // Reset + seed from prefill each time the modal opens.
   useEffect(() => {
@@ -53,12 +56,42 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
       }
     }
     function onKey(e: KeyboardEvent) {
+      // Don't trap Enter in inputs - native form submission handles it
       if (e.key === 'Escape') onClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, prefill])
+
+  // Fetch preview when URL changes (debounced)
+  const [lastPreviewUrl, setLastPreviewUrl] = useState('')
+  useEffect(() => {
+    const urlTrimmed = url.trim()
+    if (!urlTrimmed || !looksLikeURL(urlTrimmed)) {
+      setPreview(null)
+      setLastPreviewUrl('')
+      return
+    }
+    // Debounce: only fetch if URL changed significantly
+    if (urlTrimmed === lastPreviewUrl) return
+    setLastPreviewUrl(urlTrimmed)
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await previewFetch.mutateAsync({
+          url: urlTrimmed,
+          type_hint: typeHint || undefined,
+        })
+        setPreview(res)
+      } catch {
+        // Best-effort: failure to fetch shouldn't block capture
+        setPreview(null)
+      }
+    }, 300) // 300ms debounce
+
+    return () => clearTimeout(timer)
+  }, [url, typeHint])
 
   const detected = useMemo(() => {
     if (!url.trim() && !text.trim()) return null
@@ -109,8 +142,8 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
       <form
         onSubmit={onSubmit}
         onClick={(e) => e.stopPropagation()}
-        className="bg-bg-card border-5 border-ink shadow-hard-xl p-8 w-full max-w-2xl
-                   max-h-[90vh] overflow-y-auto"
+        className="bg-bg-card border-5 border-ink shadow-hard-xl p-5 w-full max-w-lg
+                   max-h-[85vh] overflow-y-auto"
       >
         <header className="flex items-center justify-between mb-5">
           <h2 className="font-display font-black text-3xl uppercase">
@@ -126,7 +159,22 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
           </button>
         </header>
 
-        <label className="block mb-3">
+        <label
+          className={`block mb-3 ${isDragging ? 'bg-accent-yellow/30' : ''}`}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setIsDragging(true)
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault()
+            setIsDragging(false)
+            const text = e.dataTransfer.getData('text/plain')
+            if (text && looksLikeURL(text)) {
+              setUrl(text)
+            }
+          }}
+        >
           <span className="block text-xs font-mono font-bold uppercase mb-1">URL</span>
           <input
             autoFocus={!text}
@@ -162,6 +210,29 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
                 <span className="opacity-60"> · </span>
                 <span>{detected.title}</span>
               </>
+            )}
+          </div>
+        )}
+
+        {preview && (
+          <div className="mb-4 p-3 bg-accent-cyan/20 border-3 border-ink">
+            {preview.image && (
+              <img
+                src={preview.image}
+                alt=""
+                className="w-full h-32 object-cover mb-2 border-2 border-ink"
+              />
+            )}
+            {preview.title && (
+              <div className="font-bold text-sm truncate">{preview.title}</div>
+            )}
+            {preview.description && (
+              <div className="text-xs opacity-70 truncate mt-1">
+                {preview.description}
+              </div>
+            )}
+            {previewFetch.isPending && (
+              <div className="text-xs opacity-50 mt-1">Cargando preview…</div>
             )}
           </div>
         )}
