@@ -24,13 +24,18 @@ export interface ListItemsResult {
 }
 
 export interface UpdateItemInput {
-  title?: string
-  notes?: string
-  tags?: string[]
+	title?: string
+	notes?: string
+	tags?: string[]
   why_saved?: string
   when_to_use?: string
   archived?: boolean
-  item_type?: ItemType
+	item_type?: ItemType
+}
+
+export interface ReviewAITagsInput {
+	ai_tags: string[]
+	apply?: boolean
 }
 
 function buildQuery(p: ListItemsParams): string {
@@ -91,5 +96,30 @@ export function useMarkItemSeen() {
   return useMutation({
     mutationFn: (id: string) => api.post<void>(`/api/items/${id}/seen`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ITEMS_KEY }),
-  })
+	})
+}
+
+/** POST /api/items/:id/ai-enrich — trigger async AI refresh. */
+export function useAIEnrichItem() {
+	const qc = useQueryClient()
+	return useMutation({
+		mutationFn: (id: string) => api.post<Item>(`/api/items/${id}/ai-enrich`),
+		onSuccess: (item) => {
+			qc.invalidateQueries({ queryKey: ITEMS_KEY })
+			qc.setQueryData([...ITEMS_KEY, 'detail', item.id], item)
+		},
+	})
+}
+
+/** PATCH /api/items/:id/ai-tags — review/edit AI suggestions. */
+export function useReviewItemAITags() {
+	const qc = useQueryClient()
+	return useMutation({
+		mutationFn: ({ id, input }: { id: string; input: ReviewAITagsInput }) =>
+			api.patch<Item>(`/api/items/${id}/ai-tags`, input),
+		onSuccess: (item) => {
+			qc.invalidateQueries({ queryKey: ITEMS_KEY })
+			qc.setQueryData([...ITEMS_KEY, 'detail', item.id], item)
+		},
+	})
 }

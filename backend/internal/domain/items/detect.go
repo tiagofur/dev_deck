@@ -133,15 +133,15 @@ func isPluginHost(host string) bool {
 // articleHosts covers the top dev-blog platforms. Users can always
 // override with type_hint if the classifier picks wrong.
 var articleHosts = map[string]bool{
-	"dev.to":            true,
-	"medium.com":        true,
-	"hashnode.com":      true,
-	"hashnode.dev":      true,
-	"substack.com":      true,
-	"blog.logrocket.com": true,
-	"css-tricks.com":    true,
+	"dev.to":               true,
+	"medium.com":           true,
+	"hashnode.com":         true,
+	"hashnode.dev":         true,
+	"substack.com":         true,
+	"blog.logrocket.com":   true,
+	"css-tricks.com":       true,
 	"smashingmagazine.com": true,
-	"freecodecamp.org":  true,
+	"freecodecamp.org":     true,
 }
 
 func isArticleHost(host string) bool {

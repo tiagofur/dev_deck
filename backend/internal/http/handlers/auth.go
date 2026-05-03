@@ -5,13 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
+	"time"
 
+	"devdeck/internal/authctx"
 	"devdeck/internal/authservice"
 	"devdeck/internal/domain/auth"
 	"devdeck/internal/store"
-
-	"github.com/google/uuid"
 )
 
 type AuthHandler struct {
@@ -21,100 +23,158 @@ type AuthHandler struct {
 }
 
 type AuthConfig struct {
-	GitHubClientID     string
-	GitHubClientSecret string
-	RedirectURL        string
-	AllowedLogins      map[string]bool // empty = allow all
+	GitHubClientID          string
+	GitHubClientSecret      string
+	GitHubOAuthCallbackURL  string
+	WebOAuthRedirectURL     string
+	DesktopOAuthRedirectURL string
 }
 
 func NewAuthHandler(s *store.Store, as *authservice.Service, cfg AuthConfig) *AuthHandler {
 	return &AuthHandler{store: s, authService: as, config: cfg}
 }
 
+// GET /api/auth/providers
+func (h *AuthHandler) Providers(w http.ResponseWriter, _ *http.Request) {
+	writeJSON(w, http.StatusOK, map[string]any{
+		"providers": []map[string]string{
+			{"provider": "github", "label": "GitHub"},
+		},
+	})
+}
+
 // GET /api/auth/github/login
-// Redirects the user to GitHub's OAuth consent page.
-func (h *AuthHandler) GitHubLogin(w http.ResponseWriter, r *http.Request) {
-	// Generate a random state for CSRF protection.
-	state := uuid.New().String()
-	// In production, store state in a short-lived cookie.
+func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	device := normalizeAuthDevice(r.URL.Query().Get("device"))
+	state := randomState()
+
+	// Store state and device in a secure cookie
 	http.SetCookie(w, &http.Cookie{
 		Name:     "oauth_state",
-		Value:    state,
+		Value:    state + "|" + device,
 		Path:     "/",
-		MaxAge:   300, // 5 minutes
+		MaxAge:   600,
 		HttpOnly: true,
+		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	url := fmt.Sprintf(
-		"https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&state=%s&scope=read:user",
-		h.config.GitHubClientID, h.config.RedirectURL, state,
+	authURL := fmt.Sprintf(
+		"https://github.com/login/oauth/authorize?client_id=%s&redirect_uri=%s&state=%s&scope=user:email",
+		h.config.GitHubClientID,
+		url.QueryEscape(h.config.GitHubOAuthCallbackURL),
+		state,
 	)
-	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+
+	http.Redirect(w, r, authURL, http.StatusTemporaryRedirect)
 }
 
 // GET /api/auth/github/callback
-// Handles the OAuth callback from GitHub.
-func (h *AuthHandler) GitHubCallback(w http.ResponseWriter, r *http.Request) {
-	// Validate state.
-	state := r.URL.Query().Get("state")
+func (h *AuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("oauth_state")
-	if err != nil || cookie.Value != state {
-		writeError(w, http.StatusBadRequest, "INVALID_STATE", "oauth state mismatch")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_STATE", "missing oauth cookie")
 		return
 	}
-	// Clear the state cookie.
-	http.SetCookie(w, &http.Cookie{Name: "oauth_state", MaxAge: -1})
 
-	code := r.URL.Query().Get("code")
+	parts := strings.Split(cookie.Value, "|")
+	if len(parts) != 2 {
+		writeError(w, http.StatusBadRequest, "INVALID_STATE", "malformed oauth cookie")
+		return
+	}
+	storedState, device := parts[0], parts[1]
+
+	if r.FormValue("state") != storedState {
+		writeError(w, http.StatusBadRequest, "INVALID_STATE", "state mismatch")
+		return
+	}
+
+	// Clear the cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:   "oauth_state",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+
+	code := r.FormValue("code")
 	if code == "" {
-		writeError(w, http.StatusBadRequest, "MISSING_CODE", "missing authorization code")
+		writeError(w, http.StatusBadRequest, "MISSING_CODE", "missing code")
 		return
 	}
 
-	// Exchange code for access token.
-	ghToken, err := h.exchangeGitHubCode(r, code)
+	ghUser, err := h.fetchGitHubUser(code)
 	if err != nil {
-		writeError(w, http.StatusBadGateway, "GITHUB_ERROR", "failed to exchange code: "+err.Error())
+		writeError(w, http.StatusBadGateway, "OAUTH_ERROR", err.Error())
 		return
 	}
 
-	// Fetch GitHub user profile.
-	ghUser, err := h.fetchGitHubUser(r, ghToken)
-	if err != nil {
-		writeError(w, http.StatusBadGateway, "GITHUB_ERROR", "failed to fetch github user: "+err.Error())
-		return
-	}
-
-	// Check allowlist.
-	if len(h.config.AllowedLogins) > 0 && !h.config.AllowedLogins[ghUser.Login] {
-		writeError(w, http.StatusForbidden, "FORBIDDEN", "user not in allowlist")
-		return
-	}
-
-	// Upsert user in DB.
 	user, err := h.store.UpsertUser(r.Context(), *ghUser)
 	if err != nil {
 		writeInternal(w, err)
 		return
 	}
 
-	// Generate token pair.
 	pair, err := h.generateTokenPair(r, *user)
 	if err != nil {
 		writeInternal(w, err)
 		return
 	}
 
-	// Redirect to the frontend with tokens in URL fragment.
-	// The frontend reads the fragment and stores the tokens.
-	redirectTo := fmt.Sprintf("%s#access_token=%s&refresh_token=%s&expires_in=%d",
-		h.config.RedirectURL, pair.AccessToken, pair.RefreshToken, pair.ExpiresIn)
+	redirectBase := h.config.WebOAuthRedirectURL
+	if device == "desktop" {
+		redirectBase = h.config.DesktopOAuthRedirectURL
+	}
+
+	redirectTo, _ := appendTokenPair(redirectBase, pair)
 	http.Redirect(w, r, redirectTo, http.StatusTemporaryRedirect)
 }
 
+func (h *AuthHandler) fetchGitHubUser(code string) (*auth.GitHubUser, error) {
+	// 1. Exchange code for token
+	data := url.Values{}
+	data.Set("client_id", h.config.GitHubClientID)
+	data.Set("client_secret", h.config.GitHubClientSecret)
+	data.Set("code", code)
+
+	req, _ := http.NewRequest("POST", "https://github.com/login/oauth/access_token", strings.NewReader(data.Encode()))
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var tokenResp struct {
+		AccessToken string `json:"access_token"`
+		Error       string `json:"error"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
+		return nil, err
+	}
+	if tokenResp.Error != "" {
+		return nil, errors.New(tokenResp.Error)
+	}
+
+	// 2. Fetch user profile
+	req, _ = http.NewRequest("GET", "https://api.github.com/user", nil)
+	req.Header.Set("Authorization", "Bearer "+tokenResp.AccessToken)
+
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var ghUser auth.GitHubUser
+	if err := json.NewDecoder(resp.Body).Decode(&ghUser); err != nil {
+		return nil, err
+	}
+	return &ghUser, nil
+}
+
 // POST /api/auth/refresh
-// Body: { "refresh_token": "..." }
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		RefreshToken string `json:"refresh_token"`
@@ -123,19 +183,11 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
 		return
 	}
-	if body.RefreshToken == "" {
-		writeError(w, http.StatusBadRequest, "MISSING_TOKEN", "refresh_token is required")
-		return
-	}
 
 	tokenHash := h.authService.HashRefreshToken(body.RefreshToken)
 	userID, err := h.store.GetRefreshSession(r.Context(), tokenHash)
 	if err != nil {
-		if errors.Is(err, store.ErrNotFound) {
-			writeError(w, http.StatusUnauthorized, "INVALID_TOKEN", "refresh token not found or expired")
-			return
-		}
-		writeInternal(w, err)
+		writeError(w, http.StatusUnauthorized, "INVALID_TOKEN", "expired or invalid session")
 		return
 	}
 
@@ -154,52 +206,31 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 }
 
 // POST /api/auth/logout
-// Body: { "refresh_token": "..." }
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		RefreshToken string `json:"refresh_token"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
-		return
-	}
+	_ = json.NewDecoder(r.Body).Decode(&body)
 	if body.RefreshToken != "" {
 		tokenHash := h.authService.HashRefreshToken(body.RefreshToken)
-		_, err := h.store.GetRefreshSession(r.Context(), tokenHash) // deletes via RETURNING
-		_ = err
+		_, _ = h.store.GetRefreshSession(r.Context(), tokenHash)
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
 
 // GET /api/auth/me
-// Returns the current user's profile (requires JWT auth).
 func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(userIDCtxKey).(uuid.UUID)
+	userID, ok := authctx.UserID(r.Context())
 	if !ok {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "not authenticated")
 		return
 	}
 	user, err := h.store.GetUserByID(r.Context(), userID)
 	if err != nil {
-		if errors.Is(err, store.ErrNotFound) {
-			writeError(w, http.StatusNotFound, "USER_NOT_FOUND", "user not found")
-			return
-		}
-		writeInternal(w, err)
+		writeError(w, http.StatusNotFound, "USER_NOT_FOUND", "user not found")
 		return
 	}
 	writeJSON(w, http.StatusOK, user)
-}
-
-// ───── helpers ─────
-
-type contextKey string
-
-const userIDCtxKey contextKey = "user_id"
-
-// UserIDCtxKey returns the context key used to store the authenticated user ID.
-func UserIDCtxKey() contextKey {
-	return userIDCtxKey
 }
 
 func (h *AuthHandler) generateTokenPair(r *http.Request, user auth.User) (*auth.TokenPair, error) {
@@ -207,17 +238,13 @@ func (h *AuthHandler) generateTokenPair(r *http.Request, user auth.User) (*auth.
 	if err != nil {
 		return nil, err
 	}
-
 	rawRefresh, hashedRefresh, err := h.authService.GenerateRefreshToken()
 	if err != nil {
 		return nil, err
 	}
-
-	expiresAt := h.authService.RefreshExpiry()
-	if err := h.store.CreateRefreshSession(r.Context(), user.ID, hashedRefresh, expiresAt); err != nil {
+	if err := h.store.CreateRefreshSession(r.Context(), user.ID, hashedRefresh, h.authService.RefreshExpiry()); err != nil {
 		return nil, err
 	}
-
 	return &auth.TokenPair{
 		AccessToken:  accessToken,
 		RefreshToken: rawRefresh,
@@ -225,57 +252,23 @@ func (h *AuthHandler) generateTokenPair(r *http.Request, user auth.User) (*auth.
 	}, nil
 }
 
-func (h *AuthHandler) exchangeGitHubCode(r *http.Request, code string) (string, error) {
-	body := fmt.Sprintf(
-		`{"client_id":"%s","client_secret":"%s","code":"%s"}`,
-		h.config.GitHubClientID, h.config.GitHubClientSecret, code,
-	)
-	req, err := http.NewRequestWithContext(r.Context(), http.MethodPost,
-		"https://github.com/login/oauth/access_token", strings.NewReader(body))
-	if err != nil {
-		return "", err
+func normalizeAuthDevice(device string) string {
+	if strings.ToLower(device) == "desktop" {
+		return "desktop"
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	var result struct {
-		AccessToken string `json:"access_token"`
-		Error       string `json:"error"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return "", err
-	}
-	if result.Error != "" {
-		return "", fmt.Errorf("github oauth: %s", result.Error)
-	}
-	return result.AccessToken, nil
+	return "web"
 }
 
-func (h *AuthHandler) fetchGitHubUser(r *http.Request, token string) (*auth.GitHubUser, error) {
-	req, err := http.NewRequestWithContext(r.Context(), http.MethodGet,
-		"https://api.github.com/user", nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Authorization", "Bearer "+token)
-	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("User-Agent", "DevDeck/0.1")
+func randomState() string {
+	return strconv.FormatInt(time.Now().UnixNano(), 36)
+}
 
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var ghUser auth.GitHubUser
-	if err := json.NewDecoder(resp.Body).Decode(&ghUser); err != nil {
-		return nil, err
-	}
-	return &ghUser, nil
+func appendTokenPair(redirectURI string, pair *auth.TokenPair) (string, error) {
+	parsed, _ := url.Parse(redirectURI)
+	q := parsed.Query()
+	q.Set("token", pair.AccessToken)
+	q.Set("refresh_token", pair.RefreshToken)
+	q.Set("expires_in", strconv.FormatInt(pair.ExpiresIn, 10))
+	parsed.RawQuery = q.Encode()
+	return parsed.String(), nil
 }

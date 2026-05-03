@@ -1,150 +1,102 @@
-# Contribuir a DevDeck
+# Contributing to DevDeck
 
-Gracias por querer ayudar. DevDeck es un proyecto indie con visión fuerte, así que te pido que leas esto antes de abrir un PR.
+Thank you for your interest in contributing to DevDeck! This is an indie project with a strong vision, so please read this guide before opening a Pull Request.
 
-## Antes de empezar
+[Leer en español](CONTRIBUTING.es.md)
 
-1. Leé `docs/VISION.md` y `docs/PRD.md`. Si tu propuesta no encaja, probablemente te digamos que no. Mejor ahorrarte el tiempo.
-2. Para features nuevas: abrí un **issue de discusión** primero. No envíes PRs grandes sin ack previo.
-3. Para bugs: abrí un issue con repro pasos, versión, OS, stack trace si aplica.
+---
 
-## Setup local
+## Before You Start
 
-El repo es un **monorepo pnpm workspaces**. Una sola `pnpm install` en la raíz instala todo (`apps/desktop`, `apps/web`, `packages/ui`, `packages/api-client`, `packages/features`).
+1.  **Read the vision**: Check `docs/VISION.md` and `docs/PRD.md`. If your proposal doesn't align with the project's direction, we might decline it. Save yourself some time!
+2.  **Discussion first**: For new features, please open a **Discussion Issue** first. Do not send large PRs without prior acknowledgment.
+3.  **Reporting bugs**: Open an issue with clear reproduction steps, version, OS, and stack traces if applicable.
+
+---
+
+## Local Setup
+
+DevDeck is a **pnpm workspaces monorepo**. A single `pnpm install` in the root installs all dependencies for all packages (`apps/desktop`, `apps/web`, `packages/ui`, `packages/api-client`, `packages/features`).
 
 ```bash
-# Una sola vez, desde la raíz del repo
+# Run this once from the project root
 pnpm install
 ```
 
-### Backend
+### Backend (Go)
 ```bash
 cd backend
 cp .env.example .env
-# editar DATABASE_URL, GITHUB_* si vas a testear auth
+# Edit DATABASE_URL and GITHUB_* credentials
 docker compose -f ../deploy/docker-compose.dev.yml up -d db
 go run ./cmd/api
 ```
 
-### Desktop (Electron + React)
+### Desktop App (Electron + React)
 ```bash
-pnpm dev:desktop                  # atajo desde la raíz
-# equivalente: pnpm -F @devdeck/desktop dev
+pnpm dev:desktop
+# Equivalent to: pnpm -F @devdeck/desktop dev
 ```
 
-### Web (React)
+### Web App (React)
 ```bash
-pnpm dev:web                      # atajo desde la raíz
-# equivalente: pnpm -F @devdeck/web dev
-# el dev server escucha en http://localhost:5173 y proxea /api → :8080
+pnpm dev:web
+# Equivalent to: pnpm -F @devdeck/web dev
+# The dev server listens on http://localhost:5173 and proxies /api to :8080
 ```
 
-### Tests y typecheck
-
+### Tests and Typechecking
 ```bash
-pnpm typecheck                    # tsc --noEmit en los 5 packages
-pnpm test                         # vitest run en los 4 que tienen tests
-pnpm -F @devdeck/desktop test:e2e # Playwright flows del Electron
+pnpm typecheck                    # Runs tsc --noEmit across all packages
+pnpm test                         # Runs vitest in packages with unit tests
+pnpm -F @devdeck/desktop test:e2e # Runs Playwright flows for the desktop app
 ```
 
-### Monorepo: cómo agregar código
+---
 
-- **Componente primitivo de design-system** (sin fetch, sin hooks de dominio) → `packages/ui/src/`.
-- **Hook de TanStack Query, tipo de dominio, adapter de auth** → `packages/api-client/src/`.
-- **Página o componente con lógica de dominio reutilizable entre apps** → `packages/features/src/`.
-- **Código específico de Electron** (paste interceptor, OS shortcuts, safeStorage adapter) → `apps/desktop/src/renderer/src/`.
-- **Código específico de web** (LoginPage, AuthCallbackPage, NotFoundPage, AuthGuard) → `apps/web/src/`.
+## Monorepo Coding Patterns
 
-Los packages se importan via alias `@devdeck/ui`, `@devdeck/api-client`, `@devdeck/features` — tanto en TS (`tsconfig.base.json` paths) como en Vite (aliases en cada app). No hay build step: los packages son TypeScript source consumido directo.
+- **UI Primitives** (no fetch, no domain logic): `packages/ui/src/`.
+- **API logic, Domain types, Auth adapters**: `packages/api-client/src/`.
+- **Shared Pages & Domain Logic**: `packages/features/src/`.
+- **Desktop-only logic** (Electron main process, global shortcuts): `apps/desktop/src/`.
+- **Web-only logic** (Routing shell, Web-specific guards): `apps/web/src/`.
 
-Ver [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md) para la arquitectura completa.
+We use internal aliases: `@devdeck/ui`, `@devdeck/api-client`, and `@devdeck/features`.
 
-## Estilo de código
+---
+
+## Coding Style
 
 ### Go
-- `gofmt` + `goimports`. El CI falla si el diff no está formateado.
-- `go vet ./...` limpio.
-- Packages por dominio, no por capa. Ya está así, seguí el patrón.
-- Errors: `fmt.Errorf("contexto: %w", err)`. Nada de `errors.New` sin wrap cuando hay un error previo.
-- Tests al lado del código (`foo_test.go`).
+- Use `gofmt` and `goimports`. The CI will fail if formatting is off.
+- Packages should be organized by **Domain**, not by layer.
+- Errors: Always wrap errors with context using `fmt.Errorf("context: %w", err)`.
 
-### TypeScript
-- ESLint + Prettier (configs en cada app). `pnpm lint` limpio.
-- `strict: true` en `tsconfig.base.json` (heredado por todos los packages).
-- Components funcionales, hooks. Nada de class components nuevos.
-- Imports absolutos via `@devdeck/ui`, `@devdeck/api-client`, `@devdeck/features` cuando cruzan package; `@/` solo para paths internos del app (`apps/desktop/src/renderer/src/`).
+### TypeScript & React
+- Use **functional components and hooks** exclusively. No new class components.
+- Strict typechecking is enabled in `tsconfig.base.json`.
+- State management: Use **TanStack Query v5** for server state; `useState` for local UI state. Avoid Redux/Zustand unless discussed.
 
-### React
-- Hooks only, nada de `React.Component`.
-- Estado server: TanStack Query v5 (hooks en `@devdeck/api-client/src/features/*/api.ts`).
-- Estado UI local: `useState`. Sin redux/zustand/jotai.
-- Routing: `react-router-dom` v6. Desktop usa `HashRouter`, web usa `BrowserRouter`.
+### Commit Messages
+We follow **Conventional Commits**: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`, `ci:`.
+- Example: `feat(backend): add /api/items/capture endpoint`
 
-### CSS / Tailwind
-- Tokens del design system (`tokens.css`) antes que classes custom.
-- No agregues nuevos colores sin discutir en `docs/DESIGN_SYSTEM.md`.
-
-## Tests
-
-**Ningún PR se mergea sin tests cuando aplica.** Ver `docs/TESTING_STRATEGY.md`.
-
-- Bug fix → test que reproduce el bug antes de arreglarlo.
-- Feature nueva → tests de happy path + 1 edge case mínimo.
-- Refactor → si los tests existentes siguen verdes, es suficiente. Si no hay tests, escribilos antes del refactor.
-
-## Commits
-
-- **Conventional commits:** `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`, `ci:`.
-- Scope opcional: `feat(backend): agregar endpoint /api/items/capture`.
-- Imperativo, presente: "agregar X", no "agregado X".
-- Primera línea ≤ 72 chars. Body si hace falta explicar el "por qué".
-
-Ejemplo:
-```
-feat(backend): detectar duplicados en POST /api/items/capture
-
-Normaliza la URL entrante (lowercase scheme+host, sin trailing slash,
-sin fragmentos) y busca match en items del user. Si existe, devuelve
-200 con `duplicate_of` en lugar de crear uno nuevo.
-
-Closes #123
-```
+---
 
 ## Pull Requests
 
-- Branch desde `main`, nombre descriptivo: `feat/capture-endpoint`, `fix/reorder-race`.
-- Un PR = una cosa. Si estás tocando backend + frontend para una misma feature, ok, pero no mezcles features distintas.
-- Descripción del PR debe tener:
-  - **Qué** cambia.
-  - **Por qué** (link al issue).
-  - **Cómo probarlo** (pasos manuales si aplica).
-  - Screenshots si hay UI.
-- CI verde antes de pedir review.
-- Un approval de maintainer mínimo para mergear.
-- Squash merge por default.
+- Branch from `main` with a descriptive name: `feat/capture-endpoint`.
+- One PR = One concern.
+- Ensure the CI is green before requesting a review.
+- A minimum of one maintainer approval is required for merging.
 
-## Reviews
+---
 
-Si revisás un PR ajeno:
-- Sé directo pero amable. Criticá el código, no a la persona.
-- Sugerí alternativas concretas, no "esto está mal".
-- Usá `nit:` para cosas menores.
-- Un `LGTM` sin comentarios está ok si no ves nada que arreglar.
+## Code of Conduct
 
-## Preguntas que nadie hace pero importan
+Be respectful. If you have an issue with another contributor, please contact a maintainer privately. We keep the drama out of public discussions.
 
-**¿Puedo agregar una dependencia nueva?**
-Sí, pero justificala en el PR. "Para hacer X necesitamos Y; evaluamos Z y W; elegimos Y porque...". Nada de `npm install algo-random` sin contexto.
+---
 
-**¿Puedo cambiar el design system?**
-No sin discusión previa en un issue. El look & feel es parte de la identidad del producto.
-
-**¿Puedo traducir la app a otro idioma?**
-Aún no hay i18n setup. Si querés agregarla, es una feature grande — abrí issue primero.
-
-**¿Puedo vender/fork-ear/usar comercialmente?**
-Ver `LICENSE` (cuando exista). Hasta entonces, asumí que es "all rights reserved" y preguntá.
-
-## Código de conducta
-
-Sé respetuoso. Si tenés un problema con otro contributor, hablá con un maintainer en privado. No hacemos drama en public.
+*Part of the DevDeck Open Source Guidelines*

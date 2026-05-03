@@ -18,6 +18,8 @@ import (
 	"log/slog"
 	"time"
 
+	"devdeck/internal/ai"
+	"devdeck/internal/domain/items"
 	"devdeck/internal/enricher"
 	"devdeck/internal/metrics"
 	"devdeck/internal/store"
@@ -41,6 +43,7 @@ type EnrichJob struct {
 	Kind EnrichKind
 	ID   uuid.UUID
 	URL  string
+	Type items.Type
 }
 
 // EnrichQueue is the producer-facing handle. Handlers call Enqueue;
@@ -48,6 +51,7 @@ type EnrichJob struct {
 type EnrichQueue struct {
 	ch       chan EnrichJob
 	store    *store.Store
+	ai       *ai.Service
 	enricher *enricher.Service
 	timeout  time.Duration
 }
@@ -55,16 +59,26 @@ type EnrichQueue struct {
 // NewEnrichQueue allocates a queue with the given buffer size. A buffer
 // of 64 is plenty for a single-node deployment; enqueues beyond that
 // drop the oldest waiting job instead of blocking the handler.
-func NewEnrichQueue(st *store.Store, en *enricher.Service, buffer int) *EnrichQueue {
+func NewEnrichQueue(st *store.Store, en *enricher.Service, aiSvc *ai.Service, buffer int) *EnrichQueue {
 	if buffer <= 0 {
 		buffer = 64
 	}
 	return &EnrichQueue{
 		ch:       make(chan EnrichJob, buffer),
 		store:    st,
+		ai:       aiSvc,
 		enricher: en,
 		timeout:  15 * time.Second,
 	}
+}
+
+// CanProcess returns true when the queue has at least one stage that can do
+// useful work for the given job.
+func (q *EnrichQueue) CanProcess(job EnrichJob) bool {
+	if q == nil {
+		return false
+	}
+	return q.canFetchMetadata(job) || q.canRunAI(job)
 }
 
 // Enqueue pushes a job onto the queue without blocking. If the buffer
@@ -105,40 +119,105 @@ func (q *EnrichQueue) run(parent context.Context, job EnrichJob) {
 	ctx, cancel := context.WithTimeout(parent, q.timeout)
 	defer cancel()
 
-	if q.enricher == nil {
+	if !q.CanProcess(job) {
 		metrics.EnrichJobs.WithLabelValues(string(job.Kind), "skipped").Inc()
 		return
 	}
-	md, err := q.enricher.Enrich(ctx, job.URL)
-	if err != nil {
-		level := slog.LevelWarn
-		if errors.Is(err, enricher.ErrNotFound) {
-			level = slog.LevelInfo
+
+	processed := false
+	hadError := false
+
+	if q.canFetchMetadata(job) {
+		md, err := q.enricher.Enrich(ctx, job.URL)
+		if err != nil {
+			level := slog.LevelWarn
+			if errors.Is(err, enricher.ErrNotFound) {
+				level = slog.LevelInfo
+			}
+			slog.Log(ctx, level, "enrich: fetch failed",
+				"err", err, "kind", job.Kind, "id", job.ID, "url", job.URL)
+			hadError = true
+		} else {
+			switch job.Kind {
+			case KindRepo:
+				if _, err := q.store.UpdateMetadata(ctx, job.ID, md); err != nil {
+					slog.Warn("enrich: update repo metadata failed", "err", err, "id", job.ID)
+					hadError = true
+				} else {
+					processed = true
+				}
+			case KindItem:
+				if err := q.store.UpdateItemFromMetadata(ctx, job.ID, md); err != nil {
+					slog.Warn("enrich: update item metadata failed", "err", err, "id", job.ID)
+					hadError = true
+				} else {
+					processed = true
+				}
+			default:
+				slog.Warn("enrich: unknown job kind", "kind", job.Kind)
+				hadError = true
+			}
 		}
-		slog.Log(ctx, level, "enrich: fetch failed",
-			"err", err, "kind", job.Kind, "id", job.ID, "url", job.URL)
-		metrics.EnrichJobs.WithLabelValues(string(job.Kind), "error").Inc()
-		return
 	}
 
-	switch job.Kind {
-	case KindRepo:
-		if _, err := q.store.UpdateMetadata(ctx, job.ID, md); err != nil {
-			slog.Warn("enrich: update repo metadata failed", "err", err, "id", job.ID)
-			metrics.EnrichJobs.WithLabelValues(string(job.Kind), "error").Inc()
-			return
+	if job.Kind == KindItem && q.canRunAI(job) {
+		it, err := q.store.GetItem(ctx, job.ID)
+		if err != nil {
+			slog.Warn("enrich: load item for ai failed", "err", err, "id", job.ID)
+			hadError = true
+		} else {
+			out, err := q.ai.EnrichItem(ctx, it)
+			if err != nil {
+				slog.Warn("enrich: ai enrich failed", "err", err, "id", job.ID)
+				hadError = true
+			}
+			if err := q.store.UpdateItemAIFields(ctx, job.ID, out.Summary, out.Tags); err != nil {
+				slog.Warn("enrich: update item ai fields failed", "err", err, "id", job.ID)
+				hadError = true
+			} else {
+				processed = true
+			}
 		}
-	case KindItem:
-		if err := q.store.UpdateItemFromMetadata(ctx, job.ID, md); err != nil {
-			slog.Warn("enrich: update item metadata failed", "err", err, "id", job.ID)
-			metrics.EnrichJobs.WithLabelValues(string(job.Kind), "error").Inc()
-			return
+	}
+
+	status := resolveStatus(processed, hadError)
+	if job.Kind == KindItem {
+		if err := q.store.UpdateItemEnrichmentStatus(ctx, job.ID, items.EnrichmentStatus(status)); err != nil {
+			slog.Warn("enrich: update item status failed", "err", err, "id", job.ID, "status", status)
 		}
+	}
+	metrics.EnrichJobs.WithLabelValues(string(job.Kind), status).Inc()
+}
+
+func (q *EnrichQueue) canRunAI(job EnrichJob) bool {
+	return q != nil && job.Kind == KindItem && q.ai != nil && q.ai.Enabled() && canAutoEnrichItemType(job.Type)
+}
+
+func (q *EnrichQueue) canFetchMetadata(job EnrichJob) bool {
+	if q == nil || q.enricher == nil || job.URL == "" {
+		return false
+	}
+	if job.Kind == KindRepo {
+		return true
+	}
+	return canAutoEnrichItemType(job.Type)
+}
+
+func canAutoEnrichItemType(t items.Type) bool {
+	switch t {
+	case items.TypeRepo, items.TypePlugin, items.TypeArticle, items.TypeTool, items.TypeAgent, items.TypeWorkflow, items.TypeCLI:
+		return true
 	default:
-		slog.Warn("enrich: unknown job kind", "kind", job.Kind)
-		metrics.EnrichJobs.WithLabelValues(string(job.Kind), "error").Inc()
-		return
+		return false
 	}
+}
 
-	metrics.EnrichJobs.WithLabelValues(string(job.Kind), "ok").Inc()
+func resolveStatus(processed, hadError bool) string {
+	if hadError {
+		return "error"
+	}
+	if processed {
+		return "ok"
+	}
+	return "skipped"
 }

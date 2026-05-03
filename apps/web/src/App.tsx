@@ -13,6 +13,7 @@ import {
   CheatsheetsListPage,
   DiscoveryPage,
   HomePage,
+  ItemDetailPage,
   ItemsPage,
   RepoDetailPage,
   SettingsPage,
@@ -20,6 +21,9 @@ import {
 import { ConfirmHost, PageTransition, Toaster } from '@devdeck/ui'
 import { isLoggedIn } from '@devdeck/api-client'
 import { LoginPage } from './pages/LoginPage'
+import { RegisterPage } from './pages/RegisterPage'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
@@ -52,6 +56,9 @@ function AnimatedRoutes(): ReactElement {
       <Routes location={location} key={location.pathname}>
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
         {/* Protected routes */}
@@ -62,6 +69,10 @@ function AnimatedRoutes(): ReactElement {
         <Route
           path="/items"
           element={<AuthGuard>{withTransition(<ItemsPage />)}</AuthGuard>}
+        />
+        <Route
+          path="/items/:id"
+          element={<AuthGuard>{withTransition(<ItemDetailPage />)}</AuthGuard>}
         />
         <Route
           path="/repo/:id"

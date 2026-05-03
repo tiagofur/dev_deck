@@ -30,3 +30,19 @@ type GitHubUser struct {
 	AvatarURL string `json:"avatar_url"`
 	Name      string `json:"name"`
 }
+
+type Provider string
+
+const (
+	ProviderGitHub Provider = "github"
+)
+
+type OAuthState struct {
+	State        string
+	Provider     Provider
+	RedirectURI  string
+	CodeVerifier string
+	Nonce        string
+	Device       string
+	ExpiresAt    time.Time
+}

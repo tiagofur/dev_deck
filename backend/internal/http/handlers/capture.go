@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"devdeck/internal/domain/items"
@@ -141,20 +142,23 @@ func (h *CaptureHandler) Capture(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+		slog.Error("capture: unexpected error", "err", err, "input_title", input.Title, "input_url", in.URL)
 		writeInternal(w, err)
 		return
 	}
 
-	// ─── Enqueue enrichment ───
-	// Only for item types where enrichment makes sense — a keyboard
-	// shortcut or a plain note has nothing to fetch.
+	// ─── Enqueue enrichment / AI analysis ───
 	enrichStatus := items.EnrichmentSkipped
-	if shouldEnrich(item.Type) && item.URL != nil && h.queue != nil {
-		h.queue.Enqueue(jobs.EnrichJob{
-			Kind: jobs.KindItem,
-			ID:   item.ID,
-			URL:  *item.URL,
-		})
+	job := jobs.EnrichJob{
+		Kind: jobs.KindItem,
+		ID:   item.ID,
+		Type: item.Type,
+	}
+	if item.URL != nil {
+		job.URL = *item.URL
+	}
+	if h.queue != nil && h.queue.CanProcess(job) {
+		h.queue.Enqueue(job)
 		enrichStatus = items.EnrichmentQueued
 		if err := h.store.UpdateItemEnrichmentStatus(r.Context(), item.ID, enrichStatus); err != nil {
 			// Non-fatal: we already created the item, just note the drift.
@@ -173,17 +177,6 @@ func (h *CaptureHandler) Capture(w http.ResponseWriter, r *http.Request) {
 		EnrichmentStatus: enrichStatus,
 		DuplicateOf:      nil,
 	})
-}
-
-// shouldEnrich returns true if the type has data worth fetching from
-// upstream (GitHub API, Open Graph scraping, etc.). Shortcut/snippet/
-// note/prompt are local-only and skip enrichment.
-func shouldEnrich(t items.Type) bool {
-	switch t {
-	case items.TypeRepo, items.TypePlugin, items.TypeArticle, items.TypeTool, items.TypeAgent, items.TypeWorkflow, items.TypeCLI:
-		return true
-	}
-	return false
 }
 
 // sourceLabel caps the cardinality of the source label on the metrics.

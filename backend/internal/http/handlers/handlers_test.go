@@ -10,9 +10,11 @@ import (
 	"strings"
 	"testing"
 
+	"devdeck/internal/ai"
 	"devdeck/internal/config"
 	"devdeck/internal/enricher"
 	httpapi "devdeck/internal/http"
+	"devdeck/internal/jobs"
 	"devdeck/internal/store"
 	"devdeck/internal/testutil"
 
@@ -65,6 +67,11 @@ func newTestServer(t *testing.T) *testServer {
 	// NewForTest bypasses the SSRF guard so handler tests can point the
 	// generic enricher at 127.0.0.1 httptest.Server URLs.
 	en := enricher.NewForTest(gh.URL)
+	aiSvc := ai.NewHeuristic()
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	q := jobs.NewEnrichQueue(st, en, aiSvc, 32)
+	q.Start(ctx)
 
 	cfg := config.Config{
 		Port:              "0",
@@ -72,7 +79,7 @@ func newTestServer(t *testing.T) *testServer {
 		APIToken:          testToken,
 		RateLimitDisabled: true, // so burst tests don't hit 429 on the shared IP
 	}
-	router := httpapi.NewRouter(cfg, st, en, nil)
+	router := httpapi.NewRouterWithDeps(cfg, httpapi.Deps{Store: st, Enricher: en, EnrichQueue: q})
 	return &testServer{
 		router:      router,
 		store:       st,
@@ -495,8 +502,8 @@ func TestHandlers_Search_FindsAcrossEntities(t *testing.T) {
 		t.Fatalf("search: expected 200, got %d", rec.Code)
 	}
 	type searchResp struct {
-		Query   string                `json:"query"`
-		Results []store.SearchResult  `json:"results"`
+		Query   string               `json:"query"`
+		Results []store.SearchResult `json:"results"`
 	}
 	out := decodeJSON[searchResp](t, rec)
 	if len(out.Results) == 0 {

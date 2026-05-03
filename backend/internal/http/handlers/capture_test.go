@@ -217,6 +217,10 @@ func TestCapture_ThreadsSourceAndWhySavedAndTags(t *testing.T) {
 		URL:      "https://dev.to/foo/some-post",
 		Tags:     []string{"go", "productivity"},
 		WhySaved: "for the terminal section",
+		MetaHints: map[string]any{
+			"capture_context": "popup",
+			"page_url":        "https://dev.to/foo/some-post",
+		},
 	})
 	if resp.Item == nil {
 		t.Fatal("nil item")
@@ -229,5 +233,11 @@ func TestCapture_ThreadsSourceAndWhySavedAndTags(t *testing.T) {
 	}
 	if len(resp.Item.Tags) != 2 {
 		t.Errorf("expected 2 tags, got %d", len(resp.Item.Tags))
+	}
+	if got := resp.Item.Meta["capture_context"]; got != "popup" {
+		t.Errorf("capture_context not threaded: %#v", got)
+	}
+	if got := resp.Item.Meta["page_url"]; got != "https://dev.to/foo/some-post" {
+		t.Errorf("page_url not threaded: %#v", got)
 	}
 }

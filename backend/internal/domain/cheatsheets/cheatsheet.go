@@ -26,18 +26,32 @@ const (
 	CatOther          Category = "other"
 )
 
+// Visibility defines if a cheatsheet is private or public.
+type Visibility string
+
+const (
+	VisibilityPrivate Visibility = "private"
+	VisibilityPublic  Visibility = "public"
+)
+
 // Cheatsheet is the top-level entity.
 type Cheatsheet struct {
-	ID          uuid.UUID `json:"id"`
-	Slug        string    `json:"slug"`
-	Title       string    `json:"title"`
-	Category    string    `json:"category"`
-	Icon        *string   `json:"icon"`
-	Color       *string   `json:"color"`
-	Description string    `json:"description"`
-	IsSeed      bool      `json:"is_seed"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID          uuid.UUID  `json:"id"`
+	UserID      *uuid.UUID `json:"user_id"` // Optional: NULL for official/global seeds
+	Slug        string     `json:"slug"`
+	Title       string     `json:"title"`
+	Category    string     `json:"category"`
+	Icon        *string    `json:"icon"`
+	Color       *string    `json:"color"`
+	Description string     `json:"description"`
+	Visibility  Visibility `json:"visibility"`
+	ParentID    *uuid.UUID `json:"parent_id"` // Reference to the original if forked
+	IsOfficial  bool       `json:"is_official"`
+	ForkCount   int        `json:"fork_count"`
+	StarsCount  int        `json:"stars_count"`
+	IsSeed      bool       `json:"is_seed"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
 }
 
 // CheatsheetDetail is a cheatsheet with its entries loaded.
@@ -59,12 +73,13 @@ type Entry struct {
 
 // CreateCheatsheetInput is the body of POST /api/cheatsheets.
 type CreateCheatsheetInput struct {
-	Slug        string  `json:"slug"`
-	Title       string  `json:"title"`
-	Category    string  `json:"category"`
-	Icon        *string `json:"icon"`
-	Color       *string `json:"color"`
-	Description string  `json:"description"`
+	Slug        string     `json:"slug"`
+	Title       string     `json:"title"`
+	Category    string     `json:"category"`
+	Icon        *string    `json:"icon"`
+	Color       *string    `json:"color"`
+	Description string     `json:"description"`
+	Visibility  Visibility `json:"visibility"`
 }
 
 // UpdateCheatsheetInput is the body of PATCH /api/cheatsheets/:id.

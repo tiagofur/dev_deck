@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"devdeck/internal/domain/items"
@@ -90,12 +91,12 @@ func (s *Store) CreateItem(ctx context.Context, in CreateItemInput) (*items.Item
 
 	row := s.pool.QueryRow(ctx, `
 		INSERT INTO items (
-			item_type, title, url, url_normalized, description, notes, tags,
+			user_id, item_type, title, url, url_normalized, description, notes, tags,
 			why_saved, source_channel, meta, enrichment_status
 		)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
 		RETURNING `+itemColumns,
-		string(in.Type), in.Title, in.URL, in.URLNormalized, in.Description,
+		currentUserIDPtr(ctx), string(in.Type), in.Title, in.URL, in.URLNormalized, in.Description,
 		in.Notes, in.Tags, in.WhySaved, in.SourceChannel, metaJSON,
 		string(in.EnrichmentStatus),
 	)
@@ -111,7 +112,9 @@ func (s *Store) CreateItem(ctx context.Context, in CreateItemInput) (*items.Item
 
 // GetItem returns a single item by id.
 func (s *Store) GetItem(ctx context.Context, id uuid.UUID) (*items.Item, error) {
-	row := s.pool.QueryRow(ctx, `SELECT `+itemColumns+` FROM items WHERE id = $1`, id)
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
+	args := append([]any{id}, scopeArgs...)
+	row := s.pool.QueryRow(ctx, `SELECT `+itemColumns+` FROM items WHERE id = $1 AND `+scopeSQL, args...)
 	it, err := scanItem(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -125,8 +128,10 @@ func (s *Store) GetItem(ctx context.Context, id uuid.UUID) (*items.Item, error) 
 // FindItemByNormalizedURL returns the existing item that matches the given
 // normalized URL, or ErrNotFound if none exists.
 func (s *Store) FindItemByNormalizedURL(ctx context.Context, norm string) (*items.Item, error) {
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
+	args := append([]any{norm}, scopeArgs...)
 	row := s.pool.QueryRow(ctx,
-		`SELECT `+itemColumns+` FROM items WHERE url_normalized = $1 LIMIT 1`, norm)
+		`SELECT `+itemColumns+` FROM items WHERE url_normalized = $1 AND `+scopeSQL+` LIMIT 1`, args...)
 	it, err := scanItem(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -142,8 +147,10 @@ func (s *Store) FindItemByNormalizedURL(ctx context.Context, norm string) (*item
 // github URL that was originally added via /api/repos still dedupes.
 func (s *Store) FindRepoIDByNormalizedURL(ctx context.Context, norm string) (uuid.UUID, error) {
 	var id uuid.UUID
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
+	args := append([]any{norm}, scopeArgs...)
 	err := s.pool.QueryRow(ctx,
-		`SELECT id FROM repos WHERE url_normalized = $1 LIMIT 1`, norm).Scan(&id)
+		`SELECT id FROM repos WHERE url_normalized = $1 AND `+scopeSQL+` LIMIT 1`, args...).Scan(&id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return uuid.Nil, ErrNotFound
@@ -187,9 +194,10 @@ func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListR
 		p.Offset = 0
 	}
 
-	where := []string{"1=1"}
-	args := []any{}
-	idx := 1
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 1)
+	where := []string{scopeSQL}
+	args := append([]any{}, scopeArgs...)
+	idx := len(args) + 1
 
 	if p.Archived != nil {
 		where = append(where, fmt.Sprintf("archived = $%d", idx))
@@ -210,7 +218,7 @@ func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListR
 	}
 	if p.Q != "" {
 		where = append(where, fmt.Sprintf(
-			"(title || ' ' || COALESCE(description,'') || ' ' || COALESCE(array_to_string(tags,' '),'')) %% $%d",
+			"(title || ' ' || COALESCE(description,'') || ' ' || COALESCE(ai_summary,'') || ' ' || COALESCE(array_to_string(tags,' '),'') || ' ' || COALESCE(array_to_string(ai_tags,' '),'')) %% $%d",
 			idx,
 		))
 		args = append(args, p.Q)
@@ -311,9 +319,11 @@ func (s *Store) UpdateItem(ctx context.Context, id uuid.UUID, in items.UpdateInp
 	sets = append(sets, "updated_at = NOW()")
 
 	args = append(args, id)
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", idx+1)
+	args = append(args, scopeArgs...)
 	q := fmt.Sprintf(
-		"UPDATE items SET %s WHERE id = $%d RETURNING %s",
-		strings.Join(sets, ", "), idx, itemColumns,
+		"UPDATE items SET %s WHERE id = $%d AND %s RETURNING %s",
+		strings.Join(sets, ", "), idx, scopeSQL, itemColumns,
 	)
 	row := s.pool.QueryRow(ctx, q, args...)
 	it, err := scanItem(row)
@@ -328,7 +338,9 @@ func (s *Store) UpdateItem(ctx context.Context, id uuid.UUID, in items.UpdateInp
 
 // DeleteItem removes a row. ErrNotFound if the id didn't exist.
 func (s *Store) DeleteItem(ctx context.Context, id uuid.UUID) error {
-	tag, err := s.pool.Exec(ctx, `DELETE FROM items WHERE id = $1`, id)
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
+	args := append([]any{id}, scopeArgs...)
+	tag, err := s.pool.Exec(ctx, `DELETE FROM items WHERE id = $1 AND `+scopeSQL, args...)
 	if err != nil {
 		return err
 	}
@@ -341,8 +353,10 @@ func (s *Store) DeleteItem(ctx context.Context, id uuid.UUID) error {
 // MarkItemSeen bumps last_seen_at so discovery-mode rotation works on
 // items the same way it does on repos.
 func (s *Store) MarkItemSeen(ctx context.Context, id uuid.UUID) error {
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
+	args := append([]any{id}, scopeArgs...)
 	tag, err := s.pool.Exec(ctx,
-		`UPDATE items SET last_seen_at = NOW() WHERE id = $1`, id)
+		`UPDATE items SET last_seen_at = NOW() WHERE id = $1 AND `+scopeSQL, args...)
 	if err != nil {
 		return err
 	}
@@ -415,4 +429,100 @@ func (s *Store) UpdateItemFromMetadata(ctx context.Context, id uuid.UUID, md *re
 		return err
 	}
 	return tx.Commit(ctx)
+}
+
+// UpdateItemAIFields stores AI-generated summary and suggestion tags.
+func (s *Store) UpdateItemAIFields(ctx context.Context, id uuid.UUID, summary string, tags []string) error {
+	if tags == nil {
+		tags = []string{}
+	}
+	tag, err := s.pool.Exec(ctx, `
+		UPDATE items
+		SET ai_summary = $1,
+		    ai_tags = $2,
+		    updated_at = NOW()
+		WHERE id = $3
+	`, summary, tags, id)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+// ReviewItemAITags updates the editable AI suggestion set and optionally
+// merges the reviewed suggestions into the user's manual tags.
+func (s *Store) ReviewItemAITags(ctx context.Context, id uuid.UUID, in items.ReviewAITagsInput) (*items.Item, error) {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	selectScopeSQL, selectScopeArgs := ownerClause(ctx, "user_id", 2)
+	selectArgs := append([]any{id}, selectScopeArgs...)
+	row := tx.QueryRow(ctx,
+		`SELECT `+itemColumns+` FROM items WHERE id = $1 AND `+selectScopeSQL+` FOR UPDATE`,
+		selectArgs...)
+	it, err := scanItem(row)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+
+	aiTags := normalizeTags(in.AITags)
+	manualTags := it.Tags
+	if in.Apply {
+		manualTags = mergeTags(it.Tags, aiTags)
+	}
+
+	updateScopeSQL, updateScopeArgs := ownerClause(ctx, "user_id", 4)
+	updateArgs := append([]any{aiTags, manualTags, id}, updateScopeArgs...)
+	updatedRow := tx.QueryRow(ctx, `
+		UPDATE items
+		SET ai_tags = $1,
+		    tags = $2,
+		    updated_at = NOW()
+		WHERE id = $3 AND `+updateScopeSQL+`
+		RETURNING `+itemColumns,
+		updateArgs...,
+	)
+	updated, err := scanItem(updatedRow)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return nil, err
+	}
+	return updated, nil
+}
+
+func normalizeTags(tags []string) []string {
+	if len(tags) == 0 {
+		return []string{}
+	}
+	seen := map[string]bool{}
+	out := make([]string, 0, len(tags))
+	for _, tag := range tags {
+		t := strings.ToLower(strings.TrimSpace(tag))
+		t = strings.ReplaceAll(t, " ", "-")
+		if t == "" || seen[t] {
+			continue
+		}
+		seen[t] = true
+		out = append(out, t)
+	}
+	sort.Strings(out)
+	return out
+}
+
+func mergeTags(existing, suggested []string) []string {
+	return normalizeTags(append(append([]string{}, existing...), suggested...))
 }

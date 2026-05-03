@@ -28,7 +28,16 @@ export const ALL_ITEM_TYPES: readonly ItemType[] = [
   'note',
 ]
 
-export type EnrichmentStatus = 'pending' | 'queued' | 'ok' | 'error' | 'skipped'
+export const EnrichmentStatus = {
+  Pending: 'pending',
+  Queued: 'queued',
+  Ok: 'ok',
+  Error: 'error',
+  Skipped: 'skipped',
+} as const
+
+export type EnrichmentStatus = (typeof EnrichmentStatus)[keyof typeof EnrichmentStatus]
+
 
 export interface Item {
   id: string

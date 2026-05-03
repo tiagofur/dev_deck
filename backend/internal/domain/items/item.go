@@ -64,41 +64,49 @@ const (
 // upcoming /api/items list endpoint in Ola 5. JSON tags drive the API
 // contract and mirror what the desktop/web clients deserialize.
 type Item struct {
-	ID               uuid.UUID              `json:"id"`
-	Type             Type                   `json:"item_type"`
-	Title            string                 `json:"title"`
-	URL              *string                `json:"url"`
-	URLNormalized    *string                `json:"url_normalized"`
-	Description      *string                `json:"description"`
-	Notes            string                 `json:"notes"`
-	Tags             []string               `json:"tags"`
-	WhySaved         string                 `json:"why_saved"`
-	WhenToUse        string                 `json:"when_to_use"`
-	SourceChannel    string                 `json:"source_channel"`
-	Meta             map[string]any         `json:"meta"`
-	AISummary        string                 `json:"ai_summary"`
-	AITags           []string               `json:"ai_tags"`
-	EnrichmentStatus EnrichmentStatus       `json:"enrichment_status"`
-	Archived         bool                   `json:"archived"`
-	CreatedAt        time.Time              `json:"created_at"`
-	UpdatedAt        time.Time              `json:"updated_at"`
-	LastSeenAt       *time.Time             `json:"last_seen_at"`
+	ID               uuid.UUID        `json:"id"`
+	Type             Type             `json:"item_type"`
+	Title            string           `json:"title"`
+	URL              *string          `json:"url"`
+	URLNormalized    *string          `json:"url_normalized"`
+	Description      *string          `json:"description"`
+	Notes            string           `json:"notes"`
+	Tags             []string         `json:"tags"`
+	WhySaved         string           `json:"why_saved"`
+	WhenToUse        string           `json:"when_to_use"`
+	SourceChannel    string           `json:"source_channel"`
+	Meta             map[string]any   `json:"meta"`
+	AISummary        string           `json:"ai_summary"`
+	AITags           []string         `json:"ai_tags"`
+	EnrichmentStatus EnrichmentStatus `json:"enrichment_status"`
+	Archived         bool             `json:"archived"`
+	CreatedAt        time.Time        `json:"created_at"`
+	UpdatedAt        time.Time        `json:"updated_at"`
+	LastSeenAt       *time.Time       `json:"last_seen_at"`
 }
 
 // UpdateInput is the PATCH /api/items/:id body. All fields are
 // optional; nil / unset = unchanged. Mirrors the "edit the item you
 // just saved" flow in the desktop detail view.
 type UpdateInput struct {
-	Title       *string  `json:"title"`
-	Notes       *string  `json:"notes"`
-	Tags        []string `json:"tags"`
-	WhySaved    *string  `json:"why_saved"`
-	WhenToUse   *string  `json:"when_to_use"`
-	Archived    *bool    `json:"archived"`
+	Title     *string  `json:"title"`
+	Notes     *string  `json:"notes"`
+	Tags      []string `json:"tags"`
+	WhySaved  *string  `json:"why_saved"`
+	WhenToUse *string  `json:"when_to_use"`
+	Archived  *bool    `json:"archived"`
 	// ItemType lets the user reclassify an item (e.g. a snippet that
 	// was mis-detected as a note). It's optional and validated against
 	// IsValid before hitting the store.
 	ItemType *string `json:"item_type"`
+}
+
+// ReviewAITagsInput is the PATCH /api/items/:id/ai-tags body.
+// `ai_tags` is the edited suggestion set. If Apply is true, the edited
+// suggestions are also merged into the item's manual tags.
+type ReviewAITagsInput struct {
+	AITags []string `json:"ai_tags"`
+	Apply  bool     `json:"apply"`
 }
 
 // ListParams drives GET /api/items. All filters are additive.

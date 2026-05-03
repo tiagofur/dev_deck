@@ -138,6 +138,15 @@ type Repo struct {
 	Tags        []string `json:"tags"`
 }
 
+// GetRepo returns one repo by ID from /api/repos/{id}.
+func (c *Client) GetRepo(ctx context.Context, id string) (*Repo, error) {
+	var body Repo
+	if err := c.do(ctx, http.MethodGet, "/api/repos/"+url.PathEscape(id), nil, &body); err != nil {
+		return nil, err
+	}
+	return &body, nil
+}
+
 type listReposResponse struct {
 	Total int    `json:"total"`
 	Items []Repo `json:"items"`
@@ -167,6 +176,25 @@ func (c *Client) ListRepos(ctx context.Context, p ListReposParams) ([]Repo, int,
 		return nil, 0, err
 	}
 	return body.Items, body.Total, nil
+}
+
+// ─── Items ───
+
+// ItemDetail is the subset the CLI needs from GET /api/items/{id}.
+type ItemDetail struct {
+	ID    string  `json:"id"`
+	Type  string  `json:"item_type"`
+	Title string  `json:"title"`
+	URL   *string `json:"url"`
+}
+
+// GetItem returns one polymorphic item by ID from /api/items/{id}.
+func (c *Client) GetItem(ctx context.Context, id string) (*ItemDetail, error) {
+	var body ItemDetail
+	if err := c.do(ctx, http.MethodGet, "/api/items/"+url.PathEscape(id), nil, &body); err != nil {
+		return nil, err
+	}
+	return &body, nil
 }
 
 // ─── Health ───

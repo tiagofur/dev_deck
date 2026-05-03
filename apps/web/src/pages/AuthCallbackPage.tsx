@@ -1,6 +1,10 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { parseTokensFromQuery, parseTokensFromFragment } from '@devdeck/api-client'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import {
+  parseAuthErrorFromQuery,
+  parseTokensFromFragment,
+  parseTokensFromQuery,
+} from '@devdeck/api-client'
 
 // OAuth redirect landing page.
 //
@@ -12,8 +16,14 @@ import { parseTokensFromQuery, parseTokensFromFragment } from '@devdeck/api-clie
 // home. On failure, bounce to /login.
 export function AuthCallbackPage() {
   const navigate = useNavigate()
+  const [authError, setAuthError] = useState<string | null>(null)
 
   useEffect(() => {
+    const authError = parseAuthErrorFromQuery()
+    if (authError) {
+      setAuthError(authError.message)
+      return
+    }
     const fromQuery = parseTokensFromQuery()
     const fromFragment = fromQuery ?? parseTokensFromFragment()
     if (fromFragment) {
@@ -29,7 +39,19 @@ export function AuthCallbackPage() {
         <div className="w-12 h-12 border-3 border-ink bg-accent-lime mx-auto mb-4 flex items-center justify-center text-xl">
           🦎
         </div>
-        <p className="font-mono text-sm">Autenticando…</p>
+        {authError ? (
+          <div className="space-y-4">
+            <p className="font-mono text-sm">{authError}</p>
+            <Link
+              to="/login"
+              className="inline-flex border-3 border-ink bg-ink px-4 py-2 font-display font-bold uppercase text-white shadow-hard"
+            >
+              Volver al login
+            </Link>
+          </div>
+        ) : (
+          <p className="font-mono text-sm">Autenticando…</p>
+        )}
       </div>
     </div>
   )

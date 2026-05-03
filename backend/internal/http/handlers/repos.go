@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log/slog"
 	"net/http"
 	"strconv"
+	"time"
 
 	"devdeck/internal/domain/cheatsheets"
 	"devdeck/internal/domain/repos"
@@ -32,6 +34,7 @@ func NewReposHandler(s *store.Store, e *enricher.Service) *ReposHandler {
 // fails we still return the basic repo so the user never gets a 500 just
 // because GitHub is having a bad day.
 func (h *ReposHandler) Create(w http.ResponseWriter, r *http.Request) {
+	slog.Debug("create: received request", "url", r.URL.Path)
 	var in repos.CreateInput
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
@@ -52,14 +55,19 @@ func (h *ReposHandler) Create(w http.ResponseWriter, r *http.Request) {
 				writeError(w, http.StatusUnprocessableEntity, "INVALID_URL", err.Error())
 				return
 			}
+			// DEBUG: Log more details for E2E failures
+			slog.Error("create: unexpected error", "err", err, "url", in.URL, "input_tags", in.Tags)
 			writeInternal(w, err)
 		}
 		return
 	}
 
-	// Best-effort enrichment
+	// Best-effort enrichment (synchronous but with a strict timeout)
 	if h.enricher != nil {
-		if md, err := h.enricher.Enrich(r.Context(), repo.URL); err != nil {
+		enrichCtx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+		defer cancel()
+
+		if md, err := h.enricher.Enrich(enrichCtx, repo.URL); err != nil {
 			slog.Warn("create: enrich failed (continuing)", "err", err, "url", repo.URL)
 		} else if updated, err := h.store.UpdateMetadata(r.Context(), repo.ID, md); err != nil {
 			slog.Warn("create: update metadata failed", "err", err, "url", repo.URL)

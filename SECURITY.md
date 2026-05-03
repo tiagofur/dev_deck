@@ -1,60 +1,58 @@
-# Política de seguridad
+# Security Policy
 
-## Reportar una vulnerabilidad
+## Reporting a Vulnerability
 
-Si encontrás una vulnerabilidad de seguridad en DevDeck, **por favor no abras un issue público**. Mandá un email a:
+If you find a security vulnerability in DevDeck, **please do not open a public issue**. Send an email to:
 
 **security@devdeck.ai**
 
-(Si no tenés ese canal todavía, mandá a `tiagofur@gmail.com` con subject `[DevDeck Security]`.)
+(If that channel is not yet available, please send it to `tiagofur@gmail.com` with the subject `[DevDeck Security]`.)
 
-### Qué incluir
+### What to include
 
-- Descripción del problema.
-- Componente afectado (backend API, desktop, web, extension, CLI).
-- Pasos de reproducción (lo más claros posible).
-- Impacto estimado (qué puede hacer un atacante).
-- Versión / commit hash donde lo encontraste.
-- Tu nombre / handle para el crédito (opcional).
+- A clear description of the problem.
+- The affected component (Backend API, Desktop, Web, Extension, CLI).
+- Reproduction steps (as clear as possible).
+- Estimated impact (what an attacker could achieve).
+- Version or commit hash where the vulnerability was found.
+- Your name/handle for credit (optional).
 
-### Qué esperar
+### What to expect
 
-- Acuso de recibo en **48 horas hábiles**.
-- Primera evaluación en **7 días**.
-- Fix y disclosure coordinado cuando esté listo. Intentamos no pasar de **30 días** para críticas.
-- Crédito público en el changelog / release notes (si lo querés).
+- Acknowledgement of receipt within **48 business hours**.
+- Initial assessment within **7 days**.
+- A fix and coordinated disclosure once ready. We aim for a maximum of **30 days** for critical issues.
+- Public credit in the changelog/release notes (if desired).
+
+---
 
 ## Scope
 
-**Dentro de scope:**
-- Backend API (`backend/`)
-- Clientes oficiales: desktop, web, futura extensión y CLI.
-- Dockerfiles y Caddyfile de deploy oficial.
-- OAuth flow, JWT, refresh tokens.
-- SQL injection, XSS, CSRF, SSRF, path traversal, auth bypass.
-- Dependency vulnerabilities que afectan el runtime.
+**In-scope:**
+- Backend API (`backend/`).
+- Official clients: Desktop, Web, future Extension, and CLI.
+- Official Dockerfiles and Caddyfile deployment configurations.
+- OAuth flow, JWT handling, and refresh token rotation.
+- SQL injection, XSS, CSRF, SSRF, path traversal, and auth bypass.
+- Dependency vulnerabilities affecting the runtime.
 
-**Fuera de scope:**
-- Vulnerabilidades que requieren acceso físico al device.
-- DoS por recursos (ej: mandar 10k items concurrentes). Tenemos rate limits y circuit breakers en roadmap.
-- Deployments self-hosted con config insegura (responsabilidad del operador).
-- Vulnerabilidades en dependencias sin vector de explotación en DevDeck.
-- Spam, phishing, social engineering.
+**Out-of-scope:**
+- Vulnerabilities requiring physical access to the device.
+- Resource-based DoS (e.g., sending 10k concurrent items). Rate limits are in the roadmap.
+- Self-hosted deployments with insecure configurations.
+- Vulnerabilities in dependencies without a clear exploit vector in DevDeck.
 
-## Áreas sensibles conocidas
+---
 
-Para orientar a researchers: estas son áreas donde sabemos que hay superficie de ataque y estamos trabajando:
+## Known Sensitive Areas
 
-1. **SSRF en scraper de Open Graph** (`internal/enricher/generic.go`). Hay whitelist de esquemas, pero la validación de rangos IP privados está en roadmap. Si encontrás un bypass, reportalo.
+To guide researchers, these are the areas where we know there is an attack surface:
 
-2. **Allowlist de GitHub logins.** Autenticación vía `ALLOWED_GITHUB_LOGINS`. Si encontrás forma de pasarlo sin estar en la lista, es crítico.
+1.  **SSRF in Open Graph Scraper** (`internal/enricher/generic.go`): We have a scheme whitelist, but private IP range validation is still in the roadmap.
+2.  **GitHub Login Allowlist**: Authentication depends on the `ALLOWED_GITHUB_LOGINS` environment variable. Finding a way to bypass this list is considered critical.
+3.  **JWT Refresh Flow**: Revocation depends on DB session deletion. If a stolen refresh token can still generate access tokens after a logout, it's considered critical.
+4.  **Markdown Rendering**: We use `react-markdown` + `rehype-highlight` in Electron. Finding XSS via crafted markdown is considered critical.
 
-3. **JWT refresh flow.** Revocación post-logout depende de borrar la sesión en DB. Si un refresh token robado puede seguir generando access tokens después de logout, es crítico.
+---
 
-4. **Markdown rendering.** `react-markdown` + `rehype-highlight` en Electron. Si encontrás XSS vía markdown crafted, es crítico.
-
-5. **Runbooks ejecutables** (Ola 5+, aún no implementado). Cuando exista, el modelo de confianza va a ser: solo ejecuta local, con confirm por paso, nunca ejecuta comandos recibidos del server. Romper eso es crítico.
-
-## Gracias
-
-Un producto seguro se construye con ayuda de la comunidad. Gracias por tomarte el tiempo de reportar responsablemente.
+*Thank you for helping us build a secure DevDeck.*

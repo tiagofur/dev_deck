@@ -120,6 +120,59 @@ func (h *CheatsheetsHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// ───── Discovery & Social ─────
+
+// GET /api/cheatsheets/explore
+func (h *CheatsheetsHandler) Explore(w http.ResponseWriter, r *http.Request) {
+	category := r.URL.Query().Get("category")
+	officialOnly := r.URL.Query().Get("official") == "true"
+
+	out, err := h.store.ExploreCheatsheets(r.Context(), category, officialOnly)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+	if out == nil {
+		out = []*cheatsheets.Cheatsheet{}
+	}
+	writeJSON(w, http.StatusOK, out)
+}
+
+// POST /api/cheatsheets/{id}/fork
+func (h *CheatsheetsHandler) Fork(w http.ResponseWriter, r *http.Request) {
+	id, ok := parseCheatsheetID(w, r)
+	if !ok {
+		return
+	}
+	forked, err := h.store.ForkCheatsheet(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "CHEATSHEET_NOT_FOUND", "cheatsheet not found")
+			return
+		}
+		writeInternal(w, err)
+		return
+	}
+	writeJSON(w, http.StatusCreated, forked)
+}
+
+// POST /api/cheatsheets/{id}/star
+func (h *CheatsheetsHandler) Star(w http.ResponseWriter, r *http.Request) {
+	id, ok := parseCheatsheetID(w, r)
+	if !ok {
+		return
+	}
+	if err := h.store.StarCheatsheet(r.Context(), id); err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "CHEATSHEET_NOT_FOUND", "cheatsheet not found")
+			return
+		}
+		writeInternal(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 // ───── Entries ─────
 
 // GET /api/cheatsheets/{id}/entries

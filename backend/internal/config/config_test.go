@@ -167,6 +167,8 @@ func TestLoad(t *testing.T) {
 		setenv(t, "DB_URL", "postgres://localhost:5432/db")
 		setenv(t, "AUTH_MODE", "jwt")
 		setenv(t, "JWT_SECRET", "secret")
+		setenv(t, "GITHUB_CLIENT_ID", "gh-client")
+		setenv(t, "GITHUB_CLIENT_SECRET", "gh-secret")
 		os.Unsetenv("API_TOKEN")
 
 		cfg, err := Load()
@@ -177,4 +179,55 @@ func TestLoad(t *testing.T) {
 			t.Errorf("got authmode %q, want jwt", cfg.AuthMode)
 		}
 	})
+
+	t.Run("OpenAI requires explicit opt-in and key", func(t *testing.T) {
+		setenv(t, "DB_URL", "postgres://localhost:5432/db")
+		setenv(t, "AUTH_MODE", "token")
+		setenv(t, "API_TOKEN", "test-token")
+		setenv(t, "AI_PROVIDER", "openai")
+		os.Unsetenv("AI_EXTERNAL_OPT_IN")
+		os.Unsetenv("OPENAI_API_KEY")
+
+		_, err := Load()
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+	})
+
+	t.Run("OpenAI loads when opted in", func(t *testing.T) {
+		setenv(t, "DB_URL", "postgres://localhost:5432/db")
+		setenv(t, "AUTH_MODE", "token")
+		setenv(t, "API_TOKEN", "test-token")
+		setenv(t, "AI_PROVIDER", "openai")
+		setenv(t, "AI_EXTERNAL_OPT_IN", "true")
+		setenv(t, "OPENAI_API_KEY", "sk-test")
+
+		cfg, err := Load()
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if cfg.AIProvider != "openai" {
+			t.Fatalf("provider = %q", cfg.AIProvider)
+		}
+	})
+}
+
+func TestConfig_EnabledAuthProviders(t *testing.T) {
+	cfg := Config{
+		GitHubClientID:     "gh-id",
+		GitHubClientSecret: "gh-secret",
+		GoogleClientID:     "google-id",
+		GoogleClientSecret: "google-secret",
+	}
+
+	got := cfg.EnabledAuthProviders()
+	want := []string{"github", "google"}
+	if len(got) != len(want) {
+		t.Fatalf("got len %d, want %d", len(got), len(want))
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("provider[%d] = %q, want %q", i, got[i], want[i])
+		}
+	}
 }
