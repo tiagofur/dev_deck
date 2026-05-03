@@ -130,6 +130,8 @@ export type { Stats, MascotMood } from './features/stats/types'
 
 // Feature hooks — capture
 export { useCapture } from './features/capture/api'
+export { usePreview } from './features/capture/preview'
+export type { PreviewInput, PreviewResponse } from './features/capture/preview'
 export {
   detectType,
   quickDetectFromClipboard,
