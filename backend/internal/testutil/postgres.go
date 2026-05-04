@@ -15,7 +15,6 @@ import (
 	"net"
 	"os"
 	"path/filepath"
-	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -203,35 +202,15 @@ func applyMigrations(ctx context.Context, pool *pgxpool.Pool) error {
 			// goose markers (-- +goose Up / Down) are harmless to plain Postgres
 			// only when we strip the Down section. Keep just the Up half.
 			up := stripGooseDown(sql)
-			if _, err := pool.Exec(ctx, up); err != nil {
-				migrationsErr = err
-				return
+			for _, stmt := range splitSQLStatements(up) {
+				if _, err := pool.Exec(ctx, stmt); err != nil {
+					migrationsErr = err
+					return
+				}
 			}
 		}
 	})
 	return migrationsErr
-}
-
-func stripGooseDown(sql string) string {
-	idx := strings.Index(sql, "-- +goose Down")
-	if idx == -1 {
-		return sql
-	}
-	return sql[:idx]
-}
-
-func migrationsDir() (string, error) {
-	_, file, _, ok := runtime.Caller(0)
-	if !ok {
-		return "", errors.New("runtime.Caller failed")
-	}
-	// internal/testutil/postgres.go → backend/migrations
-	dir := filepath.Join(filepath.Dir(file), "..", "..", "migrations")
-	abs, err := filepath.Abs(dir)
-	if err != nil {
-		return "", err
-	}
-	return abs, nil
 }
 
 // truncateAll wipes user data between tests. We use TRUNCATE … RESTART IDENTITY
