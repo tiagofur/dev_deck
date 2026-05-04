@@ -148,3 +148,28 @@ export type {
 } from './features/capture/types'
 export { ALL_ITEM_TYPES, EnrichmentStatus } from './features/capture/types'
 
+// Feature hooks — decks
+export {
+  useDecks,
+  useCreateDeck,
+  useUpdateDeck,
+  useDeleteDeck,
+  useDeckDetail,
+  useAddDeckItems,
+  useRemoveDeckItem,
+  usePublicDeck,
+  useImportDeck,
+  useStarDeck,
+  addRecentDeck,
+  getRecentDeckIds,
+  setLastUsedDeck,
+  getLastUsedDeck,
+} from './features/decks/api'
+export type {
+  Deck,
+  CreateDeckInput,
+  UpdateDeckInput,
+  AddItemsInput,
+  DeckItem,
+} from './features/decks/api'
+

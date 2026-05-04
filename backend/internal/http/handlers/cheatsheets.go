@@ -269,7 +269,7 @@ func (h *CheatsheetsHandler) DeleteEntry(w http.ResponseWriter, r *http.Request)
 
 // ───── Search ─────
 
-// GET /api/search?q=...&limit=...&mode=text|semantic|hybrid
+// GET /api/search?q=...&limit=...
 func (h *CheatsheetsHandler) Search(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	if q == "" {
@@ -283,50 +283,21 @@ func (h *CheatsheetsHandler) Search(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	mode := store.SearchModeText
-	if v := r.URL.Query().Get("mode"); v != "" {
-		switch v {
-		case "semantic", "vector":
-			mode = store.SearchModeVector
-		case "hybrid":
-			mode = store.SearchModeHybrid
-		}
-	}
-
-	// Get user from context (requires auth)
-	userID, ok := authctx.UserID(r.Context())
-	if !ok {
+	if _, ok := authctx.UserID(r.Context()); !ok {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
 		return
 	}
 
-	// For semantic/hybrid, we need to generate embedding
-	var queryEmbedding []float32
-	if mode == store.SearchModeVector || mode == store.SearchModeHybrid {
-		if h.embeddings == nil || !h.embeddings.Enabled() {
-			// Fallback to text mode if no embeddings service
-			mode = store.SearchModeText
-		} else {
-			emb, err := h.embeddings.EmbedSearch(r.Context(), q)
-			if err != nil {
-				mode = store.SearchModeText
-			} else {
-				queryEmbedding = emb
-			}
-		}
-	}
-
-	results, err := h.store.SearchItems(r.Context(), userID, mode, q, queryEmbedding, limit)
+	results, err := h.store.Search(r.Context(), q, limit)
 	if err != nil {
 		writeInternal(w, err)
 		return
 	}
 	if results == nil {
-		results = []store.SearchItemsResult{}
+		results = []store.SearchResult{}
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
 		"query":   q,
-		"mode":   mode,
 		"results": results,
 	})
 }

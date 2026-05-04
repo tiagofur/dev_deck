@@ -80,7 +80,7 @@ type Item struct {
 	AITags           []string         `json:"ai_tags"`
 	EnrichmentStatus EnrichmentStatus `json:"enrichment_status"`
 	Archived         bool             `json:"archived"`
-	IsFavorite      bool             `json:"is_favorite"`
+	IsFavorite       bool             `json:"is_favorite"`
 	CreatedAt        time.Time        `json:"created_at"`
 	UpdatedAt        time.Time        `json:"updated_at"`
 	LastSeenAt       *time.Time       `json:"last_seen_at"`
@@ -146,6 +146,7 @@ type CaptureInput struct {
 	Source      string         `json:"source"`
 	ClientID    string         `json:"client_id"`
 	OperationID string         `json:"operation_id"`
+	DeckID      *uuid.UUID     `json:"deck_id,omitempty"`
 	URL         string         `json:"url"`
 	Text        string         `json:"text"`
 	Selection   string         `json:"selection"`

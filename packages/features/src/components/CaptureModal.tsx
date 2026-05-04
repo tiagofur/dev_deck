@@ -5,6 +5,7 @@ import { useCapture, usePreview, type PreviewResponse } from '@devdeck/api-clien
 import { detectType } from '@devdeck/api-client'
 import { ALL_ITEM_TYPES, type CaptureInput, type ItemType } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
+import { DeckSelect } from './Deck/DeckSelect'
 
 interface Props {
   open: boolean
@@ -30,6 +31,7 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
   const [typeHint, setTypeHint] = useState<ItemType | ''>('')
   const [whySaved, setWhySaved] = useState('')
   const [tagsRaw, setTagsRaw] = useState('')
+  const [deckId, setDeckId] = useState<string | null>(null)
   const [preview, setPreview] = useState<PreviewResponse | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const capture = useCapture()
@@ -43,6 +45,7 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
       setTypeHint('')
       setWhySaved('')
       setTagsRaw('')
+      setDeckId(null)
       capture.reset()
       return
     }
@@ -114,6 +117,7 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
     try {
       const res = await capture.mutateAsync({
         source,
+        deck_id: deckId || undefined,
         url: url.trim() || undefined,
         text: text.trim() || undefined,
         type_hint: typeHint || undefined,
@@ -285,6 +289,13 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
                        focus:outline-none focus:bg-accent-yellow/20"
           />
         </label>
+
+        <div className="mb-5">
+          <span className="block text-xs font-mono font-bold uppercase mb-1">
+            Deck (opcional)
+          </span>
+          <DeckSelect value={deckId} onChange={setDeckId} />
+        </div>
 
         {capture.error && (
           <div className="mb-4 p-3 bg-danger text-white border-3 border-ink font-bold text-sm">

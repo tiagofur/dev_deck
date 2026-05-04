@@ -78,6 +78,7 @@ export interface CaptureInput {
   source?: CaptureSource
   client_id?: string
   operation_id?: string
+  deck_id?: string
   url?: string
   text?: string
   selection?: string

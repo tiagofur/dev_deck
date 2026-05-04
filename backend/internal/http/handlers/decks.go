@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"devdeck/internal/authctx"
+	"devdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -13,12 +16,12 @@ import (
 // Profile represents a public user profile.
 type Profile struct {
 	ID              uuid.UUID `json:"id"`
-	Username        string   `json:"username"`
-	Bio             string   `json:"bio,omitempty"`
-	AvatarURL       string   `json:"avatar_url,omitempty"`
-	PublicDeckCount int      `json:"public_deck_count"`
-	TotalItems     int      `json:"total_items"`
-	CreatedAt      string   `json:"created_at"`
+	Username        string    `json:"username"`
+	Bio             string    `json:"bio,omitempty"`
+	AvatarURL       string    `json:"avatar_url,omitempty"`
+	PublicDeckCount int       `json:"public_deck_count"`
+	TotalItems      int       `json:"total_items"`
+	CreatedAt       string    `json:"created_at"`
 }
 
 // ProfileHandler handles public profile operations.
@@ -59,33 +62,33 @@ func (h *ProfileHandler) GetPublicDecks(w http.ResponseWriter, r *http.Request) 
 // Deck represents a shared deck.
 type Deck struct {
 	ID          uuid.UUID `json:"id"`
-	Slug        string   `json:"slug"`
-	Title       string   `json:"title"`
-	Description string   `json:"description,omitempty"`
-	IsPublic    bool     `json:"is_public"`
-	ItemCount   int      `json:"item_count,omitempty"`
-	CreatedAt   string   `json:"created_at"`
-	UpdatedAt  string   `json:"updated_at"`
+	Slug        string    `json:"slug"`
+	Title       string    `json:"title"`
+	Description *string   `json:"description,omitempty"`
+	IsPublic    bool      `json:"is_public"`
+	ItemCount   int       `json:"item_count,omitempty"`
+	CreatedAt   string    `json:"created_at"`
+	UpdatedAt   string    `json:"updated_at"`
 }
 
 // DeckItem represents an item in a deck.
 type DeckItem struct {
 	ItemID   uuid.UUID `json:"item_id"`
-	Position int      `json:"position"`
+	Position int       `json:"position"`
 }
 
 // DeckCreateRequest is the request to create a deck.
 type DeckCreateRequest struct {
-	Title       string `json:"title"`
-	Description string `json:"description,omitempty"`
-	IsPublic    bool   `json:"is_public"`
+	Title       string  `json:"title"`
+	Description *string `json:"description,omitempty"`
+	IsPublic    bool    `json:"is_public"`
 }
 
 // DeckUpdateRequest is the request to update a deck.
 type DeckUpdateRequest struct {
-	Title       string `json:"title,omitempty"`
-	Description string `json:"description,omitempty"`
-	IsPublic    *bool  `json:"is_public,omitempty"`
+	Title       *string `json:"title,omitempty"`
+	Description *string `json:"description,omitempty"`
+	IsPublic    *bool   `json:"is_public,omitempty"`
 }
 
 // AddItemsRequest is the request to add items to a deck.
@@ -94,39 +97,63 @@ type AddItemsRequest struct {
 }
 
 // DeckHandler handles deck CRUD operations.
-type DeckHandler struct{}
+type DeckHandler struct {
+	store *store.Store
+}
 
-func NewDeckHandler() *DeckHandler {
-	return &DeckHandler{}
+func NewDeckHandler(s *store.Store) *DeckHandler {
+	return &DeckHandler{store: s}
 }
 
 // GET /api/decks — list user's decks
 func (h *DeckHandler) List(w http.ResponseWriter, r *http.Request) {
-	userID, ok := authctx.UserID(r.Context())
-	if !ok {
-		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
-		return
-	}
-
-	_ = userID // TODO: Query from DB
-	writeJSON(w, http.StatusOK, map[string]any{
-		"decks": []Deck{},
-	})
-}
-
-// POST /api/decks — create a new deck
-func (h *DeckHandler) Create(w http.ResponseWriter, r *http.Request) {
 	_, ok := authctx.UserID(r.Context())
 	if !ok {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
 		return
 	}
 
-	var req DeckCreateRequest
-	_ = req // TODO: Parse and create
+	decks, err := h.store.ListDecks(r.Context())
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
 
 	writeJSON(w, http.StatusOK, map[string]any{
-		"deck": Deck{},
+		"decks": decks,
+	})
+}
+
+// POST /api/decks — create a new deck
+func (h *DeckHandler) Create(w http.ResponseWriter, r *http.Request) {
+	userID, ok := authctx.UserID(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+		return
+	}
+
+	var req DeckCreateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
+		return
+	}
+	if req.Title == "" {
+		writeError(w, http.StatusBadRequest, "INVALID_TITLE", "title is required")
+		return
+	}
+
+	d, err := h.store.CreateDeck(r.Context(), userID, store.CreateDeckInput{
+		Title:       req.Title,
+		Description: req.Description,
+		IsPublic:    req.IsPublic,
+	})
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusCreated, map[string]any{
+		"deck": d,
 	})
 }
 
@@ -144,10 +171,21 @@ func (h *DeckHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = id // TODO: Query from DB
+	deck, err := h.store.GetDeck(r.Context(), id)
+	if errors.Is(err, store.ErrDeckNotFound) {
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "deck not found")
+		return
+	}
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	itemIDs, _ := h.store.GetDeckItems(r.Context(), id)
+
 	writeJSON(w, http.StatusOK, map[string]any{
-		"deck": Deck{},
-		"items": []DeckItem{},
+		"deck":  deck,
+		"items": itemIDs,
 	})
 }
 
@@ -166,11 +204,27 @@ func (h *DeckHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req DeckUpdateRequest
-	_ = req // TODO: Parse and update
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
+		return
+	}
 
-	_ = id
+	d, err := h.store.UpdateDeck(r.Context(), id, store.UpdateDeckInput{
+		Title:       req.Title,
+		Description: req.Description,
+		IsPublic:    req.IsPublic,
+	})
+	if errors.Is(err, store.ErrDeckNotFound) {
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "deck not found")
+		return
+	}
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
 	writeJSON(w, http.StatusOK, map[string]any{
-		"deck": Deck{},
+		"deck": d,
 	})
 }
 
@@ -188,7 +242,16 @@ func (h *DeckHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = id // TODO: Delete from DB
+	err = h.store.DeleteDeck(r.Context(), id)
+	if errors.Is(err, store.ErrDeckNotFound) {
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "deck not found")
+		return
+	}
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
 	writeJSON(w, http.StatusOK, map[string]any{
 		"deleted": true,
 	})
@@ -209,11 +272,27 @@ func (h *DeckHandler) AddItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req AddItemsRequest
-	_ = req // TODO: Parse and add items
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
+		return
+	}
+	if len(req.ItemIDs) == 0 {
+		writeError(w, http.StatusBadRequest, "INVALID_ITEMS", "item_ids required")
+		return
+	}
 
-	_ = id
+	err = h.store.AddItemsToDeck(r.Context(), id, req.ItemIDs)
+	if errors.Is(err, store.ErrDeckNotFound) {
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "deck not found")
+		return
+	}
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
 	writeJSON(w, http.StatusOK, map[string]any{
-		"added": 0,
+		"added": len(req.ItemIDs),
 	})
 }
 
@@ -237,8 +316,15 @@ func (h *DeckHandler) RemoveItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = deckID
-	_ = itemID // TODO: Remove from DB
+	err = h.store.RemoveItemFromDeck(r.Context(), deckID, itemID)
+	if errors.Is(err, store.ErrDeckItemNotFound) {
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "item not in deck")
+		return
+	}
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
 
 	writeJSON(w, http.StatusOK, map[string]any{
 		"removed": true,
@@ -264,7 +350,7 @@ func (h *PublicDeckHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: Query public deck from DB
 	writeJSON(w, http.StatusOK, map[string]any{
-		"deck": Deck{},
+		"deck":  Deck{},
 		"items": []DeckItem{},
 	})
 }
@@ -360,11 +446,11 @@ func (h *AdminHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 // UserInfo is user info for admin.
 type UserInfo struct {
 	ID        uuid.UUID `json:"id"`
-	Username  string `json:"username"`
-	Email    string `json:"email,omitempty"`
-	Plan     string `json:"plan"`
-	ItemCount int  `json:"item_count"`
-	CreatedAt string `json:"created_at"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email,omitempty"`
+	Plan      string    `json:"plan"`
+	ItemCount int       `json:"item_count"`
+	CreatedAt string    `json:"created_at"`
 }
 
 // Helper to parse limit query param.

@@ -1,33 +1,6 @@
 -- 0013_offline_sync.sql
 -- Fase 21: Offline-first with sync support
 
--- SyncLog: audit trail for all sync operations
-CREATE TABLE IF NOT EXISTS sync_log (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES users(id),
-    client_id UUID NOT NULL,
-    operation_id UUID NOT NULL,
-    operation operation_type NOT NULL,
-    entity_type entity_type NOT NULL,
-    entity_id UUID NOT NULL,
-    payload JSONB,
-    server_version INTEGER DEFAULT 0,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    synced_at TIMESTAMPTZ,
-    FOREIGN KEY (user_id, client_id) REFERENCES users(id)
-);
-
--- Index for efficient delta queries
-CREATE INDEX IF NOT EXISTS sync_log_user_synced 
-ON sync_log (user_id, client_id, synced_at NULLS FIRST, created_at);
-
-CREATE INDEX IF NOT EXISTS sync_log_entity 
-ON sync_log (entity_type, entity_id);
-
--- Unique constraint to prevent duplicate operation processing
-ALTER TABLE sync_log 
-ADD CONSTRAINT sync_log_unique UNIQUE (user_id, client_id, operation_id);
-
 -- Enum types
 DO $$ BEGIN
     CREATE TYPE operation_type AS ENUM ('create', 'update', 'delete');
@@ -40,6 +13,32 @@ DO $$ BEGIN
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
+
+-- SyncLog: audit trail for all sync operations
+CREATE TABLE IF NOT EXISTS sync_log (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id),
+    client_id UUID NOT NULL,
+    operation_id UUID NOT NULL,
+    operation operation_type NOT NULL,
+    entity_type entity_type NOT NULL,
+    entity_id UUID NOT NULL,
+    payload JSONB,
+    server_version INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    synced_at TIMESTAMPTZ
+);
+
+-- Index for efficient delta queries
+CREATE INDEX IF NOT EXISTS sync_log_user_synced 
+ON sync_log (user_id, client_id, synced_at NULLS FIRST, created_at);
+
+CREATE INDEX IF NOT EXISTS sync_log_entity 
+ON sync_log (entity_type, entity_id);
+
+-- Unique constraint to prevent duplicate operation processing
+ALTER TABLE sync_log 
+ADD CONSTRAINT sync_log_unique UNIQUE (user_id, client_id, operation_id);
 
 -- Function to get delta changes since timestamp
 CREATE OR REPLACE FUNCTION get_sync_delta(
