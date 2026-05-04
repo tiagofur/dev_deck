@@ -9,9 +9,12 @@
     "build:web": "pnpm -F @devdeck/web build",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "lint": "pnpm -r lint"
+    "lint": "pnpm -r lint",
+    "release": "bumpp --files CHANGELOG.md package.json",
+    "changelog": "git-changelog"
   },
   "devDependencies": {
+    "bumpp": "^9.4.0",
     "typescript": "^5.6.2"
   },
   "packageManager": "pnpm@10.33.0",
