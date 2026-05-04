@@ -96,6 +96,9 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	relatedH := handlers.NewItemRelatedHandler(st)
 	syncH := handlers.NewSyncHandler()
 	devicesH := handlers.NewDevicesHandler()
+	deckH := handlers.NewDeckHandler()
+	publicDeckH := handlers.NewPublicDeckHandler()
+	importH := handlers.NewImportHandler()
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/suggestions/commands", suggestionsH.Commands)
@@ -193,7 +196,24 @@ r.Route("/items", func(ir chi.Router) {
 			r.Get("/me/devices", devicesH.List)
 			r.Post("/me/devices/register", devicesH.Register)
 			r.Delete("/me/devices/{clientId}", devicesH.Delete)
+
+			// Decks (auth required)
+			r.Get("/decks", deckH.List)
+			r.Post("/decks", deckH.Create)
+			r.Get("/decks/{id}", deckH.Get)
+			r.Patch("/decks/{id}", deckH.Update)
+			r.Delete("/decks/{id}", deckH.Delete)
+			r.Post("/decks/{id}/items", deckH.AddItems)
+			r.Delete("/decks/{id}/items/{itemId}", deckH.RemoveItem)
+			r.Post("/decks/{id}/star", importH.Star)
+			r.Delete("/decks/{id}/star", importH.Unstar)
+
+			// Deck import (auth required)
+			r.Post("/decks/{id}/import", importH.Import)
 		})
+
+		// Public deck (no auth)
+		r.Get("/decks/{slug}/public", publicDeckH.Get)
 	})
 
 	return r
