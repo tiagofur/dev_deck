@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"devdeck/internal/authctx"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
@@ -159,4 +161,93 @@ const (
 // NewSyncStatus returns initial sync status.
 func NewSyncStatus() SyncStatus {
 	return SyncStatusSynced
+}
+
+// ───── Device Management ─────
+
+// Device represents a user's registered device.
+type Device struct {
+	ID         uuid.UUID `json:"id"`
+	ClientID   uuid.UUID `json:"client_id"`
+	Name      string   `json:"name,omitempty"`
+	DeviceType string   `json:"device_type"`
+	LastSync  string   `json:"last_sync_at,omitempty"`
+	LastSeen  string   `json:"last_seen_at"`
+	CreatedAt string   `json:"created_at"`
+	IsActive  bool     `json:"is_active"`
+}
+
+// DevicesHandler manages user devices.
+type DevicesHandler struct{}
+
+func NewDevicesHandler() *DevicesHandler {
+	return &DevicesHandler{}
+}
+
+// GET /api/me/devices
+func (h *DevicesHandler) List(w http.ResponseWriter, r *http.Request) {
+	_, ok := authctx.UserID(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+		return
+	}
+
+	// TODO: Query devices from DB based on userID
+	// For now, return stub response
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"devices": []Device{},
+	})
+}
+
+// DELETE /api/me/devices/:clientId
+func (h *DevicesHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	_, ok := authctx.UserID(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+		return
+	}
+
+	clientID, err := uuid.Parse(chi.URLParam(r, "clientId"))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_CLIENT", "client_id must be a valid UUID")
+		return
+	}
+
+	_ = clientID // TODO: Delete device from DB
+	// For now, return success
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"deleted": true,
+	})
+}
+
+// POST /api/me/devices/register
+// Body: {"client_id": "uuid", "name": "My Laptop", "device_type": "desktop"}
+func (h *DevicesHandler) Register(w http.ResponseWriter, r *http.Request) {
+	_, ok := authctx.UserID(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+		return
+	}
+
+	var req struct {
+		ClientID   uuid.UUID `json:"client_id"`
+		Name      string   `json:"name,omitempty"`
+		DeviceType string   `json:"device_type,omitempty"`
+	}
+
+	_ = req // TODO: Parse from body and register device in DB
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"registered": true,
+	})
+}
+
+// FormatTime formats a time for JSON response.
+func formatTime(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	return t.Format(time.RFC3339)
 }

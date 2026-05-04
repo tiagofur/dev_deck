@@ -95,6 +95,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	askH := handlers.NewAskHandler(st, embSvc)
 	relatedH := handlers.NewItemRelatedHandler(st)
 	syncH := handlers.NewSyncHandler()
+	devicesH := handlers.NewDevicesHandler()
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/suggestions/commands", suggestionsH.Commands)
@@ -188,6 +189,10 @@ r.Route("/items", func(ir chi.Router) {
 
 			r.Post("/sync/batch", syncH.BatchSync)
 			r.Get("/sync/delta", syncH.Delta)
+
+			r.Get("/me/devices", devicesH.List)
+			r.Post("/me/devices/register", devicesH.Register)
+			r.Delete("/me/devices/{clientId}", devicesH.Delete)
 		})
 	})
 
