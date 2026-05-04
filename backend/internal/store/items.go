@@ -764,3 +764,132 @@ func normalizeSim(sim float64) float64 {
 	}
 	return sim
 }
+
+// GetRelatedItems returns K items most similar to the given item by embedding.
+func (s *Store) GetRelatedItems(ctx context.Context, itemID uuid.UUID, limit int) ([]SearchItemsResult, error) {
+	if limit <= 0 || limit > 20 {
+		limit = 5
+	}
+	// Get the source item's embedding
+	var srcEmbedding []float32
+	err := s.pool.QueryRow(ctx, `
+		SELECT embedding FROM items WHERE id = $1 AND embedding IS NOT NULL
+	`, itemID).Scan(&srcEmbedding)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	if srcEmbedding == nil {
+		return nil, errors.New("item has no embedding")
+	}
+
+	// Find similar items by cosine distance
+	const q = `
+		SELECT id, item_type, title, why_saved, url,
+		       1 - (embedding <=> $1) as sim
+		FROM items
+		WHERE id != $2
+		  AND user_id = (SELECT user_id FROM items WHERE id = $2)
+		  AND archived = false
+		  AND embedding IS NOT NULL
+		ORDER BY embedding <=> $1
+		LIMIT $3
+	`
+	rows, err := s.pool.Query(ctx, q, srcEmbedding, itemID, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []SearchItemsResult
+	for rows.Next() {
+		var r SearchItemsResult
+		var sim float64
+		if err := rows.Scan(&r.ID, &r.Type, &r.Title, &r.WhySaved, &r.URL, &sim); err != nil {
+			return nil, err
+		}
+		r.Similarity = sim
+		results = append(results, r)
+	}
+	if results == nil {
+		results = []SearchItemsResult{}
+	}
+	return results, rows.Err()
+}
+
+// AskResult is the response for /api/ask
+type AskResult struct {
+	Answer  string            `json:"answer"`
+	Sources []SearchItemsResult `json:"sources"`
+}
+
+// AskDevDeck searches the user's vault and returns an answer with sources (RAG).
+func (s *Store) AskDevDeck(ctx context.Context, userID uuid.UUID, question string, embedding []float32, limit int) (*AskResult, error) {
+	if limit <= 0 || limit > 10 {
+		limit = 5
+	}
+
+	if len(embedding) == 0 {
+		// Fallback to text search if no embedding
+		textResults, err := s.searchItemsText(ctx, userID, question, limit)
+		if err != nil {
+			return nil, err
+		}
+		return &AskResult{
+			Answer:  formatTextAnswer(question, textResults),
+			Sources: textResults,
+		}, nil
+	}
+
+	// Search by embedding
+	results, err := s.searchItemsHybrid(ctx, userID, question, embedding, limit, false)
+	if err != nil {
+		return nil, err
+	}
+
+	return &AskResult{
+		Answer:  formatRAGAnswer(question, results),
+		Sources: results,
+	}, nil
+}
+
+func formatTextAnswer(q string, results []SearchItemsResult) string {
+	if len(results) == 0 {
+		return "No encontré información relevante en tu vault."
+	}
+	return "Basado en tu vault, encontré " + formatCount(len(results)) + " elementos relacionados con \"" + q + "\":\n\n" +
+		formatSources(results)
+}
+
+func formatRAGAnswer(q string, results []SearchItemsResult) string {
+	if len(results) == 0 {
+		return "No encontré información relevante en tu vault para responder esa pregunta."
+	}
+	return "Basado en tu vault, encontré " + formatCount(len(results)) + " elementos relevantes:\n\n" +
+		formatSources(results)
+}
+
+func formatCount(n int) string {
+	switch n {
+	case 1:
+		return "1"
+	case 2:
+		return "2"
+	default:
+		return fmt.Sprintf("%d", n)
+	}
+}
+
+func formatSources(results []SearchItemsResult) string {
+	var out string
+	for i, r := range results {
+		out += fmt.Sprintf("%d. %s", i+1, r.Title)
+		if r.URL != "" {
+			out += " (" + r.URL + ")"
+		}
+		out += "\n"
+	}
+	return out
+}

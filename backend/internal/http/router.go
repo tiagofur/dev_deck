@@ -92,6 +92,8 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	captureH := handlers.NewCaptureHandler(st, deps.EnrichQueue)
 	itemsH := handlers.NewItemsHandler(st, deps.EnrichQueue)
 	previewH := handlers.NewPreviewHandler(deps.Enricher)
+	askH := handlers.NewAskHandler(st, embSvc)
+	relatedH := handlers.NewItemRelatedHandler(st)
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/suggestions/commands", suggestionsH.Commands)
@@ -178,7 +180,10 @@ r.Route("/items", func(ir chi.Router) {
 			ir.Post("/{id}/ai-enrich", itemsH.AIEnrich)
 			ir.Patch("/{id}/ai-tags", itemsH.ReviewAITags)
 			ir.Post("/{id}/seen", itemsH.MarkSeen)
+			ir.Get("/{id}/related", relatedH.Related)
 		})
+
+			r.Post("/ask", askH.Ask)
 		})
 	})
 
