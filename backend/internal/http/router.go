@@ -94,6 +94,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	previewH := handlers.NewPreviewHandler(deps.Enricher)
 	askH := handlers.NewAskHandler(st, embSvc)
 	relatedH := handlers.NewItemRelatedHandler(st)
+	syncH := handlers.NewSyncHandler()
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/suggestions/commands", suggestionsH.Commands)
@@ -184,6 +185,9 @@ r.Route("/items", func(ir chi.Router) {
 		})
 
 			r.Post("/ask", askH.Ask)
+
+			r.Post("/sync/batch", syncH.BatchSync)
+			r.Get("/sync/delta", syncH.Delta)
 		})
 	})
 
