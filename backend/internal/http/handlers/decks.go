@@ -10,6 +10,52 @@ import (
 	"github.com/google/uuid"
 )
 
+// Profile represents a public user profile.
+type Profile struct {
+	ID              uuid.UUID `json:"id"`
+	Username        string   `json:"username"`
+	Bio             string   `json:"bio,omitempty"`
+	AvatarURL       string   `json:"avatar_url,omitempty"`
+	PublicDeckCount int      `json:"public_deck_count"`
+	TotalItems     int      `json:"total_items"`
+	CreatedAt      string   `json:"created_at"`
+}
+
+// ProfileHandler handles public profile operations.
+type ProfileHandler struct{}
+
+func NewProfileHandler() *ProfileHandler {
+	return &ProfileHandler{}
+}
+
+// GET /api/users/:username/public — public profile (no auth)
+func (h *ProfileHandler) GetPublic(w http.ResponseWriter, r *http.Request) {
+	username := chi.URLParam(r, "username")
+	if username == "" {
+		writeError(w, http.StatusBadRequest, "MISSING_USERNAME", "username is required")
+		return
+	}
+
+	// TODO: Query profile from DB using get_user_by_username()
+	writeJSON(w, http.StatusOK, map[string]any{
+		"profile": Profile{},
+	})
+}
+
+// GET /api/users/:username/public/decks — user's public decks (no auth)
+func (h *ProfileHandler) GetPublicDecks(w http.ResponseWriter, r *http.Request) {
+	username := chi.URLParam(r, "username")
+	if username == "" {
+		writeError(w, http.StatusBadRequest, "MISSING_USERNAME", "username is required")
+		return
+	}
+
+	// TODO: Query public decks from DB
+	writeJSON(w, http.StatusOK, map[string]any{
+		"decks": []Deck{},
+	})
+}
+
 // Deck represents a shared deck.
 type Deck struct {
 	ID          uuid.UUID `json:"id"`
@@ -292,6 +338,33 @@ func (h *ImportHandler) Unstar(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{
 		"unstarred": true,
 	})
+}
+
+// ───── Admin Users ─────
+
+// AdminHandler handles admin user management.
+type AdminHandler struct{}
+
+func NewAdminHandler() *AdminHandler {
+	return &AdminHandler{}
+}
+
+// GET /api/admin/users — list all users (admin only)
+func (h *AdminHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
+	// TODO: Check admin role/permission
+	writeJSON(w, http.StatusOK, map[string]any{
+		"users": []UserInfo{},
+	})
+}
+
+// UserInfo is user info for admin.
+type UserInfo struct {
+	ID        uuid.UUID `json:"id"`
+	Username  string `json:"username"`
+	Email    string `json:"email,omitempty"`
+	Plan     string `json:"plan"`
+	ItemCount int  `json:"item_count"`
+	CreatedAt string `json:"created_at"`
 }
 
 // Helper to parse limit query param.
