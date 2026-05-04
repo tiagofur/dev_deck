@@ -8,6 +8,12 @@ EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
 
+DO $$ BEGIN
+    CREATE TYPE entity_type AS ENUM ('item', 'repo', 'cheatsheet', 'cheatsheet_entry', 'command', 'deck', 'deck_item');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
 -- SyncLog: audit trail for all sync operations
 CREATE TABLE IF NOT EXISTS sync_log (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -33,12 +39,6 @@ ON sync_log (entity_type, entity_id);
 -- Unique constraint to prevent duplicate operation processing
 ALTER TABLE sync_log 
 ADD CONSTRAINT sync_log_unique UNIQUE (user_id, client_id, operation_id);
-
-DO $$ BEGIN
-    CREATE TYPE entity_type AS ENUM ('item', 'repo', 'cheatsheet', 'cheatsheet_entry', 'command', 'deck', 'deck_item');
-EXCEPTION
-    WHEN duplicate_object THEN null;
-END $$;
 
 -- Function to get delta changes since timestamp
 CREATE OR REPLACE FUNCTION get_sync_delta(
