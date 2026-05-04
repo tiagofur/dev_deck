@@ -24,6 +24,7 @@ function makeItem(patch: Partial<Item> = {}): Item {
     ai_tags: [],
     enrichment_status: 'ok',
     archived: false,
+    is_favorite: false,
     created_at: '2026-04-08T00:00:00Z',
     updated_at: '2026-04-08T00:00:00Z',
     last_seen_at: null,

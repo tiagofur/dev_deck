@@ -47,10 +47,11 @@ func NewItemsHandler(s *store.Store, q *jobs.EnrichQueue) *ItemsHandler {
 func (h *ItemsHandler) List(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	p := items.ListParams{
-		Type: q.Get("type"),
-		Tag:  q.Get("tag"),
-		Q:    q.Get("q"),
-		Sort: q.Get("sort"),
+		Type:       q.Get("type"),
+		Tag:        q.Get("tag"),
+		Q:          q.Get("q"),
+		Sort:       q.Get("sort"),
+		Favorites:  q.Get("favorites") == "true",
 	}
 	if v := q.Get("archived"); v != "" {
 		if b, err := strconv.ParseBool(v); err == nil {
