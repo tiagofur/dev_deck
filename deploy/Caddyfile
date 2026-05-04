@@ -7,18 +7,19 @@
 {$DOMAIN} {
     encode gzip zstd
 
-    # Health check is public; everything else hits the API which enforces auth.
+    # Health check is public
     handle /healthz {
         reverse_proxy api:8080
     }
 
+    # API proxy
     handle /api/* {
         reverse_proxy api:8080
     }
 
-    # Anything else gets a 404 from Caddy (we don't serve a web client yet).
-    handle {
-        respond "DevDeck API" 200
+    # SPA — serve React app for all other routes (including root)
+    handle /* {
+        reverse_proxy web:3000
     }
 
     log {
