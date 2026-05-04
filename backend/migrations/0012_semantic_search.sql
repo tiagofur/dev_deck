@@ -39,7 +39,7 @@ CREATE OR REPLACE FUNCTION hybrid_search(
 )
 RETURNS TABLE (
     id uuid,
-    item_type item_type,
+    item_type text,
     title text,
     why_saved text,
     url text,
@@ -59,15 +59,15 @@ BEGIN
             COUNT(*) OVER() as text_count
         FROM (
             SELECT id, item_type, title, why_saved, url,
-                   similarity(i.title, p_query) as similarity
+                   similarity(title, p_query) as similarity
             FROM items
             WHERE user_id = p_user_id 
               AND archived = false
-              AND (i.title ILIKE '%' || p_query || '%' 
-                   OR i.why_saved ILIKE '%' || p_query || '%'
+              AND (title ILIKE '%' || p_query || '%' 
+                   OR why_saved ILIKE '%' || p_query || '%'
                    OR EXISTS (
-                       SELECT 1 FROM unnest(ai_tags) t 
-                       WHERE t ILIKE '%' || p_query || '%'
+                        SELECT 1 FROM unnest(ai_tags) t 
+                        WHERE t ILIKE '%' || p_query || '%'
                    ))
         ) i
     ),

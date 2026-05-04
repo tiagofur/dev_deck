@@ -239,6 +239,9 @@ func migrationsDir() (string, error) {
 func truncateAll(ctx context.Context, pool *pgxpool.Pool) error {
 	if _, err := pool.Exec(ctx, `
 		TRUNCATE TABLE
+			deck_stars,
+			deck_items,
+			decks,
 			items,
 			refresh_sessions,
 			repo_cheatsheet_links,
