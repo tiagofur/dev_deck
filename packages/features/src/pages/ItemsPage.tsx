@@ -16,7 +16,9 @@ import { ALL_ITEM_TYPES, type ItemType } from '@devdeck/api-client'
 
 type TypeFilter = 'all' | ItemType
 
-const STACKS = ["go", "node", "python", "rust", "typescript", "react", "vue", "ai", "cli", "db"]
+const STACKS = ['go', 'node', 'python', 'rust', 'typescript', 'react', 'vue', 'ai', 'cli', 'db'] as const
+
+type StackFilter = typeof STACKS[number]
 
 const TYPE_FILTERS: Array<{ key: TypeFilter; label: string }> = [
   { key: 'all', label: 'All' },
@@ -25,19 +27,37 @@ const TYPE_FILTERS: Array<{ key: TypeFilter; label: string }> = [
 
 export function ItemsPage() {
   const navigate = useNavigate()
-  const [type, setType] = useState<TypeFilter>("all")
-  const [stack, setStack] = useState<string[]>([])
+  const [type, setType] = useState<TypeFilter>('all')
+  const [stack, setStack] = useState<StackFilter[]>([])
   const [query, setQuery] = useState('')
   const [captureOpen, setCaptureOpen] = useState(false)
 
+  // Build stack query param — comma-separated for OR logic
+  const stackParam = stack.length > 0 ? stack.join(',') : undefined
+
   const { data, isLoading, error } = useItems({
     type: type === 'all' ? undefined : type,
+    stack: stackParam,
     q: query || undefined,
     limit: 200,
     sort: 'added_desc',
   })
 
   const items = data?.items ?? []
+
+  // Handler: toggle a stack in the filter
+  function toggleStack(s: StackFilter) {
+    setStack((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]))
+  }
+
+  // Handler: clear all filters
+  function clearFilters() {
+    setType('all')
+    setStack([])
+    setQuery('')
+  }
+
+  const hasFilters = type !== 'all' || stack.length > 0 || query.length > 0
 
   // Count by type for the chip badges. The UI doesn't paginate between
   // types so this is a single pass over the current page, not a
@@ -130,6 +150,43 @@ export function ItemsPage() {
             )
           })}
         </div>
+
+        {/* Stack filters — inline pills */}
+        <div className="flex gap-2 mt-3 pt-3 border-t border-ink/30">
+          <span className="text-xs font-mono text-ink-soft uppercase tracking-wide py-1">
+            Stack:
+          </span>
+          {STACKS.map((s) => {
+            const active = stack.includes(s as StackFilter)
+            return (
+              <button
+                key={s}
+                type="button"
+                onClick={() => toggleStack(s as StackFilter)}
+                className={`border-3 border-ink px-2 py-0.5 text-xs font-mono
+                            lowercase transition-colors whitespace-nowrap
+                            ${
+                              active
+                                ? 'bg-accent-orange text-white shadow-hard-sm'
+                                : 'bg-bg-card hover:bg-accent-yellow/40'
+                            }`}
+              >
+                {s}
+              </button>
+            )
+          })}
+
+          {hasFilters && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="ml-2 px-2 py-0.5 text-xs font-mono text-ink-soft
+                         hover:text-danger transition-colors"
+            >
+              [clear]
+            </button>
+          )}
+        </div>
       </nav>
 
       <main className="flex-1 overflow-y-auto p-6">
@@ -166,6 +223,7 @@ export function ItemsPage() {
             <p className="font-mono text-xs text-ink-soft mb-4">
               {data?.total} items
               {type !== 'all' && ` · tipo: ${type}`}
+              {stack.length > 0 && ` · stack: ${stack.join(', ')}`}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {items.map((it) => (
@@ -173,7 +231,7 @@ export function ItemsPage() {
                   key={it.id}
                   item={it}
                   onClick={() => {
-					navigate(`/items/${it.id}`)
+                    navigate(`/items/${it.id}`)
                   }}
                 />
               ))}

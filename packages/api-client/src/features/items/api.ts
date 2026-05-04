@@ -11,6 +11,7 @@ export const ITEMS_KEY = ['items'] as const
 export interface ListItemsParams {
   type?: ItemType
   tag?: string
+  stack?: string    // Filter by tech stack (single or comma-separated)
   q?: string
   archived?: boolean
   sort?: 'added_desc' | 'added_asc' | 'updated_desc' | 'title_asc'
@@ -42,6 +43,7 @@ function buildQuery(p: ListItemsParams): string {
   const qs = new URLSearchParams()
   if (p.type) qs.set('type', p.type)
   if (p.tag) qs.set('tag', p.tag)
+  if (p.stack) qs.set('stack', p.stack)
   if (p.q) qs.set('q', p.q)
   if (p.sort) qs.set('sort', p.sort)
   if (p.archived !== undefined) qs.set('archived', String(p.archived))
