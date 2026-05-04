@@ -13,12 +13,13 @@ interface Shortcut {
 }
 
 const shortcuts: Shortcut[] = [
-  { keys: ['Ctrl', 'N'], description: 'Agregar repo' },
-  { keys: ['/'], description: 'Buscar' },
-  { keys: ['D'], description: 'Modo descubrimiento' },
-  { keys: ['?'], description: 'Mostrar este panel' },
+  { keys: ['Cmd', 'K'], description: 'Abrir captura / Buscar' },
+  { keys: ['Cmd', 'N'], description: 'Nuevo item' },
+  { keys: ['Cmd', 'L'], description: 'Ir a items (buscar)' },
+  { keys: ['Cmd', '/'], description: 'Mostrar atajos' },
+  { keys: ['Cmd', 'D'], description: 'Toggle favorito (detail)' },
   { keys: ['Esc'], description: 'Cerrar modales' },
-  { keys: ['Enter'], description: 'Confirmar diálogo' },
+  { keys: ['Enter'], description: 'Confirmar' },
 ]
 
 export function ShortcutsModal({ open, onClose }: Props) {

@@ -1,13 +1,14 @@
 # DevDeck production stack — runs on the VPS.
 #
-# Three services:
+# Five services:
 #   db     — Postgres 16, persistent volume
 #   api    — Go API, built from ../backend/Dockerfile
+#   web    — React web app, built from ../apps/web/Dockerfile
 #   caddy  — Reverse proxy with automatic Let's Encrypt TLS
 #
 # Setup:
 #   1. cp .env.example .env  &&  edit values
-#   2. docker compose up -d
+#   2. docker compose up -d --build
 #   3. (first time only) apply migration:
 #      docker compose exec -T db psql -U devdeck devdeck < ../backend/migrations/0001_init.sql
 
@@ -72,6 +73,19 @@ services:
       - caddy_config:/config
     depends_on:
       - api
+      - web
+    networks:
+      - web
+
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    image: devdeck-web:latest
+    container_name: devdeck-web
+    restart: unless-stopped
+    expose:
+      - "3000"
     networks:
       - web
 

@@ -12,6 +12,7 @@ export interface ListItemsParams {
   type?: ItemType
   tag?: string
   stack?: string    // Filter by tech stack (single or comma-separated)
+  favorites?: boolean  // Filter to favorites only
   q?: string
   archived?: boolean
   sort?: 'added_desc' | 'added_asc' | 'updated_desc' | 'title_asc'
@@ -25,13 +26,14 @@ export interface ListItemsResult {
 }
 
 export interface UpdateItemInput {
-	title?: string
-	notes?: string
-	tags?: string[]
+  title?: string
+  notes?: string
+  tags?: string[]
   why_saved?: string
   when_to_use?: string
   archived?: boolean
-	item_type?: ItemType
+  is_favorite?: boolean
+  item_type?: ItemType
 }
 
 export interface ReviewAITagsInput {
@@ -44,6 +46,7 @@ function buildQuery(p: ListItemsParams): string {
   if (p.type) qs.set('type', p.type)
   if (p.tag) qs.set('tag', p.tag)
   if (p.stack) qs.set('stack', p.stack)
+  if (p.favorites) qs.set('favorites', 'true')
   if (p.q) qs.set('q', p.q)
   if (p.sort) qs.set('sort', p.sort)
   if (p.archived !== undefined) qs.set('archived', String(p.archived))
@@ -123,5 +126,13 @@ export function useReviewItemAITags() {
 			qc.invalidateQueries({ queryKey: ITEMS_KEY })
 			qc.setQueryData([...ITEMS_KEY, 'detail', item.id], item)
 		},
+	})
+}
+
+/** GET /api/items/tags — all unique tags for the authenticated user. */
+export function useUserTags() {
+	return useQuery({
+		queryKey: [...ITEMS_KEY, 'tags'],
+		queryFn: () => api.get<string[]>(`/api/items/tags`),
 	})
 }

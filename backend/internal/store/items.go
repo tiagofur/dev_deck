@@ -17,7 +17,7 @@ import (
 
 const itemColumns = `id, item_type, title, url, url_normalized, description,
 	notes, tags, why_saved, when_to_use, source_channel, meta, ai_summary,
-	ai_tags, enrichment_status, archived, created_at, updated_at, last_seen_at`
+	ai_tags, enrichment_status, archived, is_favorite, created_at, updated_at, last_seen_at`
 
 func scanItem(row pgx.Row) (*items.Item, error) {
 	var it items.Item
@@ -27,7 +27,7 @@ func scanItem(row pgx.Row) (*items.Item, error) {
 		&it.ID, &itemType, &it.Title, &it.URL, &it.URLNormalized,
 		&it.Description, &it.Notes, &it.Tags, &it.WhySaved, &it.WhenToUse,
 		&it.SourceChannel, &rawMeta, &it.AISummary, &it.AITags,
-		&enrichStatus, &it.Archived, &it.CreatedAt, &it.UpdatedAt, &it.LastSeenAt,
+		&enrichStatus, &it.Archived, &it.IsFavorite, &it.CreatedAt, &it.UpdatedAt, &it.LastSeenAt,
 	)
 	if err != nil {
 		return nil, err
@@ -216,6 +216,11 @@ func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListR
 		args = append(args, p.Tag)
 		idx++
 	}
+	if p.Favorites {
+		where = append(where, fmt.Sprintf("is_favorite = $%d", idx))
+		args = append(args, true)
+		idx++
+	}
 	if p.Q != "" {
 		where = append(where, fmt.Sprintf(
 			"(title || ' ' || COALESCE(description,'') || ' ' || COALESCE(ai_summary,'') || ' ' || COALESCE(array_to_string(tags,' '),'') || ' ' || COALESCE(array_to_string(ai_tags,' '),'')) %% $%d",
@@ -308,6 +313,11 @@ func (s *Store) UpdateItem(ctx context.Context, id uuid.UUID, in items.UpdateInp
 	if in.ItemType != nil {
 		sets = append(sets, fmt.Sprintf("item_type = $%d", idx))
 		args = append(args, *in.ItemType)
+		idx++
+	}
+	if in.IsFavorite != nil {
+		sets = append(sets, fmt.Sprintf("is_favorite = $%d", idx))
+		args = append(args, *in.IsFavorite)
 		idx++
 	}
 
@@ -525,4 +535,35 @@ func normalizeTags(tags []string) []string {
 
 func mergeTags(existing, suggested []string) []string {
 	return normalizeTags(append(append([]string{}, existing...), suggested...))
+}
+
+// GetUserTags returns all unique tags (manual + AI) for a user's items, sorted by usage count.
+func (s *Store) GetUserTags(ctx context.Context, userID uuid.UUID) ([]string, error) {
+	const q = `
+		SELECT tag, COUNT(*) as cnt
+		FROM (
+			SELECT unnest(tags) as tag FROM items WHERE user_id = $1 AND array_length(tags, 1) > 0
+			UNION ALL
+			SELECT unnest(ai_tags) as tag FROM items WHERE user_id = $1 AND array_length(ai_tags, 1) > 0
+		) t(tag)
+		GROUP BY tag
+		ORDER BY cnt DESC, tag ASC
+		LIMIT 50
+	`
+	rows, err := s.pool.Query(ctx, q, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tags []string
+	for rows.Next() {
+		var tag string
+		var cnt int
+		if err := rows.Scan(&tag, &cnt); err != nil {
+			return nil, err
+		}
+		tags = append(tags, tag)
+	}
+	return tags, rows.Err()
 }

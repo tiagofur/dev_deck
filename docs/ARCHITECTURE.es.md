@@ -322,7 +322,7 @@ User pega URL en AddRepoModal
 | **Postgres + sqlc** (no ORM) | Type-safety sin magia, queries explícitas, fácil de optimizar | Más boilerplate inicial vs Gorm |
 | **Chi** sobre Gin/Echo | Idiomático, ligero, middleware claro estilo `net/http` | Menos batteries-included |
 | **VPS propio + Caddy** | Control, costo fijo bajo, TLS automático | Yo opero la infra; aceptable |
-| **Electron** sobre Tauri | Familiaridad React; ecosistema maduro | Bundle pesado (~80MB); aceptable porque es app personal |
+| **Electron** (no Tauri) | Familiaridad React; ecosistema maduro; bundle ~80MB aceptable para app personal | Bundle pesado (~80MB); aceptable porque es app personal |
 | **GitHub API + OG scraping** (no headless browser) | Rápido, liviano, suficiente para 95% de casos | Sitios JS-only dan preview pobre; permitir editar manual |
 | **pg_trgm** para search (no Elastic/Meili) | Una sola DB, suficiente para miles de repos | No ranking sofisticado; basta para volumen personal |
 | **Mascota Lottie/Rive** | Animaciones complejas con poco código | Asset extra; vale la pena por personalidad |

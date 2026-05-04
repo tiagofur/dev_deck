@@ -56,6 +56,7 @@ export interface Item {
   ai_tags: string[]
   enrichment_status: EnrichmentStatus
   archived: boolean
+  is_favorite: boolean
   created_at: string
   updated_at: string
   last_seen_at: string | null

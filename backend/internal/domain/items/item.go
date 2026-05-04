@@ -80,6 +80,7 @@ type Item struct {
 	AITags           []string         `json:"ai_tags"`
 	EnrichmentStatus EnrichmentStatus `json:"enrichment_status"`
 	Archived         bool             `json:"archived"`
+	IsFavorite      bool             `json:"is_favorite"`
 	CreatedAt        time.Time        `json:"created_at"`
 	UpdatedAt        time.Time        `json:"updated_at"`
 	LastSeenAt       *time.Time       `json:"last_seen_at"`
@@ -89,12 +90,13 @@ type Item struct {
 // optional; nil / unset = unchanged. Mirrors the "edit the item you
 // just saved" flow in the desktop detail view.
 type UpdateInput struct {
-	Title     *string  `json:"title"`
-	Notes     *string  `json:"notes"`
-	Tags      []string `json:"tags"`
-	WhySaved  *string  `json:"why_saved"`
-	WhenToUse *string  `json:"when_to_use"`
-	Archived  *bool    `json:"archived"`
+	Title      *string  `json:"title"`
+	Notes      *string  `json:"notes"`
+	Tags       []string `json:"tags"`
+	WhySaved   *string  `json:"why_saved"`
+	WhenToUse  *string  `json:"when_to_use"`
+	Archived   *bool    `json:"archived"`
+	IsFavorite *bool    `json:"is_favorite"`
 	// ItemType lets the user reclassify an item (e.g. a snippet that
 	// was mis-detected as a note). It's optional and validated against
 	// IsValid before hitting the store.
@@ -115,6 +117,8 @@ type ListParams struct {
 	Type string
 	// Tag narrows to items that contain the given tag.
 	Tag string
+	// Favorites filters to only favorite items.
+	Favorites bool
 	// Q is a fuzzy text filter over title + description + tags.
 	Q string
 	// Archived: nil = hide archived (default), true = archived only,

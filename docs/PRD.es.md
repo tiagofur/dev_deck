@@ -1,8 +1,10 @@
 # DevDeck — Product Requirements Document
 
-> Versión: 0.6 · Owner: tfurt · Última actualización: 2026-04-08
+> Versión: 0.7 · Owner: tfurt · Última actualización: 2026-05-03
 >
-> **Cambio clave en 0.5:** el web client migró de Vue 3 a React 18 en un monorepo pnpm workspaces que comparte pages y componentes con el desktop. Ver [adr/0003-monorepo-pnpm-workspaces.md](adr/0003-monorepo-pnpm-workspaces.md).
+> **Estado:** Ola 5 en progreso (AI features), Ola 6 pendiente
+>
+> **Cambios en 0.7:** Desktop MVP con Electron (no Tauri). Filtro por stack, smart tags, keyboard shortcuts, favorites, mobile responsive.
 
 ---
 
@@ -174,13 +176,20 @@ Ver [ROADMAP.md](../ROADMAP.md) para el detalle técnico completo de implementac
 | CRUD propio | El usuario puede agregar y editar sus propios cheatsheets |
 
 #### Ola 4 — Web + Auth real ✅
-| Feature | Descripción |
-|---------|-------------|
-| Cliente web React 18 | React 18 + Vite + TypeScript + React Router + TanStack Query. **Originalmente Vue 3, migrado a React en Wave 4.5 §16.13** para compartir pages y componentes con el desktop via monorepo pnpm workspaces. Ver `docs/adr/0003-monorepo-pnpm-workspaces.md`. |
-| GitHub OAuth | "Sign in with GitHub" → JWT de 30 días; allowlist de usernames |
-| JWT en Electron | OAuth via deeplink callback; safeStorage para tokens |
-| Refresh tokens | Refresh token de 90 días, rotación automática |
-| Paridad de features | Repos, commands, cheatsheets, discovery mode, items y mascota — 100% reuso de código con desktop via `@devdeck/features` |
+| Feature | Descripción | Estado |
+|---------|-------------|--------|
+| Cliente web React 18 | React 18 + Vite + TypeScript + React Router + TanStack Query. **Originalmente Vue 3, migrado a React en Wave 4.5 §16.13** para compartir pages y componentes con el desktop via monorepo pnpm workspaces. | ✅ |
+| GitHub OAuth | "Sign in with GitHub" → JWT de 30 días; allowlist de usernames | ✅ |
+| JWT en Electron | OAuth via deeplink callback; safeStorage para tokens | ✅ |
+| Refresh tokens | Refresh token de 90 días, rotación automática | ✅ |
+| Paridad de features | Repos, commands, cheatsheets, discovery mode, items y mascota — 100% reuso de código con desktop via `@devdeck/features` | ✅ |
+| Desktop MVP | App Electron con login, register, páginas compartidas desde monorepo | ✅ |
+| Filtro por stack | Filtrado por campo stack (Go, Node, Python, etc.) en ItemsPage | ✅ |
+| Smart tags | Autocomplete dropdown + AI tags badges | ✅ |
+| Keyboard shortcuts | Cmd+K (búsqueda), Cmd+N (nuevo), Cmd+L (login), Cmd+/ (ayuda) | ✅ |
+| Favoritos | Star toggle en cards, campo `is_favorite`,快捷 `Cmd+D` en detalle | ✅ |
+| Mobile responsive | Sidebar drawer, search bar full-width en móvil | ✅ |
+| Production readiness | Dockerfile, health checks, Caddy config, logging, métricas | ✅ |
 
 ---
 

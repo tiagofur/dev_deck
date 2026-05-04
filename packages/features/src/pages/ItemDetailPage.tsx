@@ -71,6 +71,29 @@ export function ItemDetailPage() {
 		}
 	}
 
+	async function toggleFavorite() {
+		try {
+			await updateItem.mutateAsync({ id: currentItem.id, input: { is_favorite: !currentItem.is_favorite } })
+			showToast(currentItem.is_favorite ? 'Eliminado de favoritos' : 'Agregado a favoritos')
+		} catch (e) {
+			showToast((e as Error).message, 'error')
+		}
+	}
+
+	// Cmd+D: Toggle favorite
+	useEffect(() => {
+		function onKey(e: KeyboardEvent) {
+			const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
+			const modKey = isMac ? e.metaKey : e.ctrlKey
+			if (modKey && e.key.toLowerCase() === 'd') {
+				e.preventDefault()
+				toggleFavorite()
+			}
+		}
+		window.addEventListener('keydown', onKey)
+		return () => window.removeEventListener('keydown', onKey)
+	}, [currentItem.id, currentItem.is_favorite])
+
 	async function saveAITags(next: string[]) {
 		try {
 			await reviewAITags.mutateAsync({ id: currentItem.id, input: { ai_tags: next, apply: false } })

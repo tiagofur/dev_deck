@@ -9,30 +9,17 @@ import {
   Puzzle,
   Sparkles,
   StickyNote,
+  Star,
   Terminal,
   Wrench,
   type LucideIcon,
 } from 'lucide-react'
 import type { Item, ItemType } from '@devdeck/api-client'
-import { formatCount, EnrichmentStatus } from '@devdeck/api-client'
+import { formatCount, EnrichmentStatus, useUpdateItem } from '@devdeck/api-client'
 import { TagChip, hashIndex } from '@devdeck/ui'
 
-// Ola 5 Fase 17 — card adaptado por tipo para el nuevo modelo de Items.
-// Keeps the neo-brutalist personality of <RepoCard> but swaps the
-// accent color, icon, and hero line based on item_type so the grid is
-// scannable when the user has 400 mixed items.
-
-interface Props {
-  item: Item
-  onClick?: () => void
-}
-
-// ─── Per-type styling ───
-//
-// The `hue` drives the top ribbon. It's one of the existing Tailwind
-// tokens so we don't grow the design system palette.
 interface TypeStyle {
-  hue: string // background class for the top ribbon
+  hue: string
   icon: LucideIcon
   label: string
 }
@@ -55,16 +42,27 @@ function styleFor(type: ItemType): TypeStyle {
   return typeStyles[type] ?? { hue: 'bg-bg-elevated', icon: Box, label: String(type).toUpperCase() }
 }
 
+interface Props {
+  item: Item
+  onClick?: () => void
+}
+
 export function ItemCard({ item, onClick }: Props) {
+  const updateItem = useUpdateItem()
   const { hue, icon: Icon, label } = styleFor(item.item_type)
 
-  // Tiny deterministic rotation for personality (-1°, 0°, +1°).
-  const rotation = (item.id.charCodeAt(0) % 3) - 1
+  async function toggleFavorite(e: React.MouseEvent) {
+    e.stopPropagation()
+    await updateItem.mutateAsync({
+      id: item.id,
+      input: { is_favorite: !item.is_favorite },
+    })
+  }
 
+  const rotation = (item.id.charCodeAt(0) % 3) - 1
   const stars = typeof item.meta?.stars === 'number' ? (item.meta.stars as number) : 0
   const language = typeof item.meta?.language === 'string' ? (item.meta.language as string) : null
-  const languageColor =
-    typeof item.meta?.language_color === 'string' ? (item.meta.language_color as string) : null
+  const languageColor = typeof item.meta?.language_color === 'string' ? (item.meta.language_color as string) : null
   const heroText = item.ai_summary || item.description
   const visibleTags = item.tags.length > 0 ? item.tags : item.ai_tags
   const statusLabel = item.enrichment_status === EnrichmentStatus.Queued
@@ -83,10 +81,23 @@ export function ItemCard({ item, onClick }: Props) {
                  overflow-hidden"
       style={{ transform: `rotate(${rotation}deg)` }}
     >
-      {/* Type ribbon */}
-      <header className={`${hue} border-b-3 border-ink px-3 py-1.5 flex items-center gap-2`}>
-        <Icon size={14} strokeWidth={3} />
-        <span className="text-[10px] font-display font-black tracking-wider">{label}</span>
+      <header className={`${hue} border-b-3 border-ink px-3 py-1.5 flex items-center justify-between`}>
+        <div className="flex items-center gap-2">
+          <Icon size={14} strokeWidth={3} />
+          <span className="text-[10px] font-display font-black tracking-wider">{label}</span>
+        </div>
+        <button
+          type="button"
+          onClick={toggleFavorite}
+          className="opacity-0 group-hover:opacity-100 transition-opacity"
+          aria-label={item.is_favorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+        >
+          <Star
+            size={14}
+            strokeWidth={3}
+            className={item.is_favorite ? 'fill-accent-yellow text-accent-yellow' : 'text-ink'}
+          />
+        </button>
       </header>
 
       <div className="p-4">
@@ -110,21 +121,15 @@ export function ItemCard({ item, onClick }: Props) {
           </p>
         )}
 
-        {/* Type-specific metadata row */}
         {item.item_type === 'repo' && (language || stars > 0) && (
           <div className="flex items-center gap-3 text-xs font-mono mb-3">
             {language && (
               <span className="flex items-center gap-1.5">
-                <span
-                  className="w-3 h-3 border border-ink"
-                  style={{ backgroundColor: languageColor || '#888' }}
-                />
+                <span className="w-3 h-3 border border-ink" style={{ backgroundColor: languageColor || '#888' }} />
                 {language}
               </span>
             )}
-            {stars > 0 && (
-              <span>★ {formatCount(stars)}</span>
-            )}
+            {stars > 0 && <span>★ {formatCount(stars)}</span>}
           </div>
         )}
 

@@ -1,5 +1,6 @@
 import clsx from 'clsx'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { Menu, X } from 'lucide-react'
 import type { Repo } from '@devdeck/api-client'
 
 interface Props {
@@ -17,6 +18,8 @@ export function Sidebar({
   onSelectTag,
   onSelectLang,
 }: Props) {
+  const [isOpen, setIsOpen] = useState(false)
+
   // ⚡ Bolt: Memoized expensive tag and language counting/sorting
   // Prevents O(N * T) iteration and sorting on every render where N is repos and T is tags.
   const { tags, langs } = useMemo(() => {
@@ -40,8 +43,20 @@ export function Sidebar({
     }
   }, [repos])
 
-  return (
-    <aside className="w-60 shrink-0 border-r-3 border-ink bg-bg-elevated p-5 overflow-y-auto">
+  // Mobile: toggle button
+  const MobileToggle = (
+    <button
+      type="button"
+      onClick={() => setIsOpen(!isOpen)}
+      className="fixed top-4 left-4 z-50 p-2 bg-bg-card border-3 border-ink shadow-hard lg:hidden"
+      aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
+    >
+      {isOpen ? <X size={20} strokeWidth={3} /> : <Menu size={20} strokeWidth={3} />}
+    </button>
+  )
+
+  const sidebarContent = (
+    <>
       <Section title="Tags">
         {tags.length === 0 ? (
           <Empty />
@@ -62,73 +77,100 @@ export function Sidebar({
         {langs.length === 0 ? (
           <Empty />
         ) : (
-          langs.map(([lang, info]) => (
+          langs.map(([lang, { count, color }]) => (
             <FilterRow
               key={lang}
               label={lang}
-              count={info.count}
-              color={info.color}
+              count={count}
+              color={color}
               active={selectedLang === lang}
               onClick={() => onSelectLang(selectedLang === lang ? null : lang)}
             />
           ))
         )}
       </Section>
-    </aside>
+    </>
   )
-}
 
-function Section({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
+  // Desktop: always visible
+  if (!isOpen) {
+    return (
+      <>
+        {MobileToggle}
+        <aside className="w-60 shrink-0 border-r-3 border-ink bg-bg-elevated p-5 overflow-y-auto hidden lg:block">
+          {sidebarContent}
+        </aside>
+      </>
+    )
+  }
+
+  // Mobile: slide-over drawer
   return (
-    <section className="mb-6">
-      <h3 className="font-display font-black text-xs uppercase tracking-widest mb-3 text-ink">
-        {title}
-      </h3>
-      <div className="space-y-1">{children}</div>
-    </section>
+    <>
+      {MobileToggle}
+      {/* Backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+      <aside
+        className={clsx(
+          'fixed lg:hidden inset-y-0 left-0 w-72 z-40 bg-bg-elevated border-r-3 border-ink p-5 overflow-y-auto transition-transform duration-200',
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        {sidebarContent}
+      </aside>
+    </>
   )
 }
 
-interface FilterRowProps {
+function FilterRow({
+  label,
+  count,
+  color,
+  active,
+  onClick,
+}: {
   label: string
   count: number
   color?: string | null
   active: boolean
   onClick: () => void
-}
-
-function FilterRow({ label, count, color, active, onClick }: FilterRowProps) {
+}) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={clsx(
-        'w-full flex items-center justify-between gap-2 px-2 py-1 text-sm font-mono text-left',
-        'border-2 transition-colors',
-        active
-          ? 'bg-accent-yellow border-ink shadow-hard-sm'
-          : 'border-transparent hover:border-ink',
+        'w-full flex items-center justify-between px-2 py-1.5 text-sm font-mono transition-colors',
+        active ? 'bg-accent-lime shadow-hard-sm' : 'hover:bg-accent-yellow/40'
       )}
     >
-      <span className="flex items-center gap-2 truncate">
+      <span className="flex items-center gap-2">
         {color && (
-          <span
-            className="w-2.5 h-2.5 border border-ink shrink-0"
-            style={{ backgroundColor: color }}
-          />
+          <span className="w-3 h-3 border border-ink" style={{ backgroundColor: color }} />
         )}
-        <span className="truncate">{label}</span>
+        {label}
       </span>
-      <span className="text-ink-soft text-xs shrink-0">{count}</span>
+      <span className="text-xs opacity-60">({count})</span>
     </button>
   )
 }
 
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="mb-5">
+      <h3 className="font-display font-black text-xs uppercase tracking-widest text-ink-soft mb-2">
+        {title}
+      </h3>
+      {children}
+    </div>
+  )
+}
+
 function Empty() {
-  return <p className="text-xs font-mono text-ink-soft italic">— vacío —</p>
+  return <p className="text-sm font-mono text-ink-soft italic">— vacío —</p>
 }

@@ -80,6 +80,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	suggestionsH := handlers.NewSuggestionsHandler(st)
 	captureH := handlers.NewCaptureHandler(st, deps.EnrichQueue)
 	itemsH := handlers.NewItemsHandler(st, deps.EnrichQueue)
+	previewH := handlers.NewPreviewHandler(deps.Enricher)
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/suggestions/commands", suggestionsH.Commands)
@@ -155,16 +156,18 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Get("/stats", statsH.Get)
 			r.Get("/discovery/next", discoveryH.Next)
 
-			r.Route("/items", func(ir chi.Router) {
-				ir.Post("/capture", captureH.Capture)
-				ir.Get("/", itemsH.List)
-				ir.Get("/{id}", itemsH.Get)
-				ir.Patch("/{id}", itemsH.Update)
-				ir.Delete("/{id}", itemsH.Delete)
-				ir.Post("/{id}/ai-enrich", itemsH.AIEnrich)
-				ir.Patch("/{id}/ai-tags", itemsH.ReviewAITags)
-				ir.Post("/{id}/seen", itemsH.MarkSeen)
-			})
+r.Route("/items", func(ir chi.Router) {
+			ir.Post("/capture", captureH.Capture)
+			ir.Post("/preview", previewH.Preview)
+			ir.Get("/", itemsH.List)
+			ir.Get("/tags", itemsH.ListTags)
+			ir.Get("/{id}", itemsH.Get)
+			ir.Patch("/{id}", itemsH.Update)
+			ir.Delete("/{id}", itemsH.Delete)
+			ir.Post("/{id}/ai-enrich", itemsH.AIEnrich)
+			ir.Patch("/{id}/ai-tags", itemsH.ReviewAITags)
+			ir.Post("/{id}/seen", itemsH.MarkSeen)
+		})
 		})
 	})
 
