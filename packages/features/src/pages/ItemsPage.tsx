@@ -109,7 +109,7 @@ export function ItemsPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="border-3 border-ink px-3 py-2 font-mono text-sm
-                     focus:outline-none focus:bg-accent-yellow/20 w-64"
+                     focus:outline-none focus:bg-accent-yellow/20 w-full md:w-64"
         />
 
         <button
