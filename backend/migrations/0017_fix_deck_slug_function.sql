@@ -1,7 +1,7 @@
 -- 0017_fix_deck_slug_function.sql
 -- Fix deck slug generation parameter scoping and volatility
 
-CREATE OR REPLACE FUNCTION generate_deck_slug(title_text TEXT, p_user_id UUID)
+CREATE OR REPLACE FUNCTION generate_deck_slug(title_text TEXT, user_id UUID)
 RETURNS TEXT AS $$
 DECLARE
     base_slug TEXT;
@@ -25,7 +25,7 @@ BEGIN
             SELECT 1
             FROM decks d
             WHERE d.slug = new_slug
-              AND d.user_id = p_user_id
+              AND d.user_id = $2
         ) THEN
             RETURN new_slug;
         END IF;
