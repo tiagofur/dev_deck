@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	defaultPGImage = "postgres:16-alpine"
+	defaultPGImage = "pgvector/pgvector:pg16"
 	defaultPGUser  = "devdeck_test"
 	defaultPGPass  = "devdeck_test"
 	defaultPGDB    = "devdeck_test"
