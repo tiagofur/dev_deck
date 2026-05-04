@@ -125,3 +125,11 @@ export function useReviewItemAITags() {
 		},
 	})
 }
+
+/** GET /api/items/tags — all unique tags for the authenticated user. */
+export function useUserTags() {
+	return useQuery({
+		queryKey: [...ITEMS_KEY, 'tags'],
+		queryFn: () => api.get<string[]>(`/api/items/tags`),
+	})
+}

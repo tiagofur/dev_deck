@@ -526,3 +526,34 @@ func normalizeTags(tags []string) []string {
 func mergeTags(existing, suggested []string) []string {
 	return normalizeTags(append(append([]string{}, existing...), suggested...))
 }
+
+// GetUserTags returns all unique tags (manual + AI) for a user's items, sorted by usage count.
+func (s *Store) GetUserTags(ctx context.Context, userID uuid.UUID) ([]string, error) {
+	const q = `
+		SELECT tag, COUNT(*) as cnt
+		FROM (
+			SELECT unnest(tags) as tag FROM items WHERE user_id = $1 AND array_length(tags, 1) > 0
+			UNION ALL
+			SELECT unnest(ai_tags) as tag FROM items WHERE user_id = $1 AND array_length(ai_tags, 1) > 0
+		) t(tag)
+		GROUP BY tag
+		ORDER BY cnt DESC, tag ASC
+		LIMIT 50
+	`
+	rows, err := s.pool.Query(ctx, q, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tags []string
+	for rows.Next() {
+		var tag string
+		var cnt int
+		if err := rows.Scan(&tag, &cnt); err != nil {
+			return nil, err
+		}
+		tags = append(tags, tag)
+	}
+	return tags, rows.Err()
+}

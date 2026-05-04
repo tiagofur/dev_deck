@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"devdeck/internal/authctx"
 	"devdeck/internal/domain/items"
 	"devdeck/internal/jobs"
 	"devdeck/internal/store"
@@ -211,6 +212,21 @@ func (h *ItemsHandler) ReviewAITags(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, it)
+}
+
+// GET /api/items/tags — all unique tags for the authenticated user.
+func (h *ItemsHandler) ListTags(w http.ResponseWriter, r *http.Request) {
+	userID, ok := authctx.UserID(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "must be authenticated")
+		return
+	}
+	tags, err := h.store.GetUserTags(r.Context(), userID)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, tags)
 }
 
 func parseItemID(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) {

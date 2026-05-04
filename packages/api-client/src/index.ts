@@ -71,6 +71,7 @@ export {
 	useAIEnrichItem,
 	useReviewItemAITags,
 	useMarkItemSeen,
+	useUserTags,
 	ITEMS_KEY,
 } from './features/items/api'
 export type {
