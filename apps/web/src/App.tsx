@@ -8,6 +8,7 @@ import {
   useLocation,
 } from 'react-router-dom'
 import type { ReactElement } from 'react'
+import { useState } from 'react'
 import {
   CheatsheetDetailPage,
   CheatsheetsListPage,
@@ -17,7 +18,9 @@ import {
   ItemsPage,
   RepoDetailPage,
   SettingsPage,
+  useGlobalShortcuts,
 } from '@devdeck/features'
+import { CaptureModal, ShortcutsModal } from '@devdeck/features'
 import { ConfirmHost, PageTransition, Toaster } from '@devdeck/ui'
 import { isLoggedIn } from '@devdeck/api-client'
 import { LoginPage } from './pages/LoginPage'
@@ -51,6 +54,15 @@ function withTransition(element: ReactElement): ReactElement {
 
 function AnimatedRoutes(): ReactElement {
   const location = useLocation()
+  const [captureOpen, setCaptureOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
+
+  // Global keyboard shortcuts
+  useGlobalShortcuts({
+    onCapture: () => setCaptureOpen(true),
+    onShortcuts: () => setShortcutsOpen(true),
+  })
+
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
@@ -102,6 +114,10 @@ function AnimatedRoutes(): ReactElement {
         {/* 404 */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+
+      {/* Global modals */}
+      <CaptureModal open={captureOpen} onClose={() => setCaptureOpen(false)} source="manual" />
+      <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
     </AnimatePresence>
   )
 }

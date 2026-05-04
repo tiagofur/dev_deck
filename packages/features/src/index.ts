@@ -4,6 +4,9 @@
 // own App shell (HashRouter vs BrowserRouter). App shells own routing and
 // global providers.
 
+// Hooks
+export { useGlobalShortcuts } from './hooks/useGlobalShortcuts'
+
 // Pages
 export { HomePage } from './pages/HomePage'
 export { ItemsPage } from './pages/ItemsPage'
