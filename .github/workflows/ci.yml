@@ -88,6 +88,37 @@ jobs:
       - name: Smoke test (--help)
         run: /tmp/devdeck --help
 
+  workspace:
+    name: Workspace (pnpm typecheck)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install workspace
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck api-client
+        run: pnpm -F @devdeck/api-client typecheck
+
+      - name: Typecheck features
+        run: pnpm -F @devdeck/features typecheck
+
+      - name: Typecheck ui
+        run: pnpm -F @devdeck/ui typecheck
+
+      - name: Typecheck web
+        run: pnpm -F @devdeck/web typecheck
+
   desktop:
     name: Desktop (Vitest + typecheck + build)
     runs-on: ubuntu-latest
@@ -147,7 +178,7 @@ jobs:
   e2e:
     name: E2E (Playwright + live backend)
     runs-on: ubuntu-latest
-    needs: [backend, desktop]
+    needs: [backend, workspace]
     services:
       postgres:
         image: postgres:16-alpine
