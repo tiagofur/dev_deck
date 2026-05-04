@@ -14,6 +14,7 @@ import (
 // the fields they actually care about.
 type capturePayload struct {
 	Source    string         `json:"source,omitempty"`
+	DeckID    *uuid.UUID     `json:"deck_id,omitempty"`
 	URL       string         `json:"url,omitempty"`
 	Text      string         `json:"text,omitempty"`
 	TypeHint  string         `json:"type_hint,omitempty"`

@@ -74,6 +74,12 @@ func (h *CaptureHandler) Capture(w http.ResponseWriter, r *http.Request) {
 	if normPtr != nil {
 		existing, err := h.store.FindItemByNormalizedURL(r.Context(), *normPtr)
 		if err == nil {
+			if in.DeckID != nil {
+				if derr := h.store.AddItemsToDeck(r.Context(), *in.DeckID, []uuid.UUID{existing.ID}); derr != nil {
+					writeInternal(w, derr)
+					return
+				}
+			}
 			metrics.CaptureItems.WithLabelValues(sourceLabel(in.Source), string(existing.Type), "duplicate").Inc()
 			dupID := existing.ID
 			writeJSON(w, http.StatusOK, items.CaptureResponse{
@@ -145,6 +151,13 @@ func (h *CaptureHandler) Capture(w http.ResponseWriter, r *http.Request) {
 		slog.Error("capture: unexpected error", "err", err, "input_title", input.Title, "input_url", in.URL)
 		writeInternal(w, err)
 		return
+	}
+
+	if in.DeckID != nil {
+		if err := h.store.AddItemsToDeck(r.Context(), *in.DeckID, []uuid.UUID{item.ID}); err != nil {
+			writeInternal(w, err)
+			return
+		}
 	}
 
 	// ─── Enqueue enrichment / AI analysis ───

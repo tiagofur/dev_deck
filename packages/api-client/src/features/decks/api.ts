@@ -85,7 +85,10 @@ export function getLastUsedDeck(): string | null {
 export function useDecks() {
   return useQuery({
     queryKey: DECKS_KEY,
-    queryFn: () => api.get<Deck[]>('/api/decks'),
+    queryFn: async () => {
+      const res = await api.get<{ decks: Deck[] }>('/api/decks')
+      return res.decks
+    },
   })
 }
 
@@ -99,7 +102,10 @@ export function useDeckDetail(id: string) {
 
 export function useCreateDeck() {
   return useMutation({
-    mutationFn: (input: CreateDeckInput) => api.post<Deck>('/api/decks', input),
+    mutationFn: async (input: CreateDeckInput) => {
+      const res = await api.post<{ deck: Deck }>('/api/decks', input)
+      return res.deck
+    },
     onSuccess: (deck) => {
       addRecentDeck(deck.id)
       setLastUsedDeck(deck.id)
@@ -109,8 +115,10 @@ export function useCreateDeck() {
 
 export function useUpdateDeck() {
   return useMutation({
-    mutationFn: ({ id, input }: { id: string; input: UpdateDeckInput }) =>
-      api.patch<Deck>(`/api/decks/${id}`, input),
+    mutationFn: async ({ id, input }: { id: string; input: UpdateDeckInput }) => {
+      const res = await api.patch<{ deck: Deck }>(`/api/decks/${id}`, input)
+      return res.deck
+    },
   })
 }
 
