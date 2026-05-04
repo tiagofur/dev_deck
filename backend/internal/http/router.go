@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"devdeck/internal/ai"
 	"devdeck/internal/authservice"
 	"devdeck/internal/config"
 	"devdeck/internal/email"
@@ -27,6 +28,7 @@ type Deps struct {
 	AuthService *authservice.Service
 	EnrichQueue *jobs.EnrichQueue
 	EmailSender email.Sender
+	AI          *ai.Service
 }
 
 func NewRouter(cfg config.Config, st *store.Store, en *enricher.Service, as *authservice.Service) http.Handler {
@@ -61,6 +63,15 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	en := deps.Enricher
 	as := deps.AuthService
 
+	// Initialize AI embeddings service if AI is enabled
+	var embSvc *ai.EmbeddingsService
+	if deps.AI != nil && deps.AI.Enabled() {
+		// Create appropriate embedder based on config
+		// This would use same provider as AI summary/tags
+		// For now, we'll create based on config defaults
+		embSvc = ai.NewEmbeddingsService(nil) // placeholder until config integration
+	}
+
 	var authH *handlers.AuthHandler
 	if cfg.AuthMode == "jwt" && as != nil {
 		authH = handlers.NewAuthHandler(st, as, handlers.AuthConfig{
@@ -76,7 +87,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	statsH := handlers.NewStatsHandler(st)
 	discoveryH := handlers.NewDiscoveryHandler(st)
 	commandsH := handlers.NewCommandsHandler(st)
-	cheatsH := handlers.NewCheatsheetsHandler(st)
+	cheatsH := handlers.NewCheatsheetsHandler(st, embSvc)
 	suggestionsH := handlers.NewSuggestionsHandler(st)
 	captureH := handlers.NewCaptureHandler(st, deps.EnrichQueue)
 	itemsH := handlers.NewItemsHandler(st, deps.EnrichQueue)

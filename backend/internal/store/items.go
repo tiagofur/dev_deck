@@ -567,3 +567,200 @@ func (s *Store) GetUserTags(ctx context.Context, userID uuid.UUID) ([]string, er
 	}
 	return tags, rows.Err()
 }
+
+// ─── Embeddings ───
+
+// SearchMode specifies how to perform the search.
+type SearchMode string
+
+const (
+	SearchModeText    SearchMode = "text"    // pg_trgm only
+	SearchModeVector SearchMode = "semantic" // embeddings only
+	SearchModeHybrid SearchMode = "hybrid"  // both combined
+)
+
+// SearchItemsResult is a single search result with score.
+type SearchItemsResult struct {
+	ID         uuid.UUID    `json:"id"`
+	Type       items.Type `json:"type"`
+	Title      string    `json:"title"`
+	WhySaved   string    `json:"why_saved,omitempty"`
+	URL        string    `json:"url,omitempty"`
+	Similarity float64  `json:"similarity"`
+}
+
+// EmbedItem inserts or updates the embedding for an item.
+func (s *Store) EmbedItem(ctx context.Context, id uuid.UUID, embedding []float32) error {
+	if embedding == nil {
+		return nil // no-op
+	}
+	_, err := s.pool.Exec(ctx, `
+		UPDATE items
+		SET embedding = $1, updated_at = NOW()
+		WHERE id = $2
+	`, embedding, id)
+	return err
+}
+
+// SearchItems performs search across a user's items.
+// For vector mode, queryEmbedding must be provided. For hybrid, both text query and embedding are used.
+func (s *Store) SearchItems(ctx context.Context, userID uuid.UUID, mode SearchMode, query string, queryEmbedding []float32, limit int) ([]SearchItemsResult, error) {
+	if limit <= 0 || limit > 50 {
+		limit = 20
+	}
+
+	switch mode {
+	case SearchModeVector, SearchModeHybrid:
+		if len(queryEmbedding) == 0 {
+			return nil, errors.New("embedding required for semantic search")
+		}
+		return s.searchItemsHybrid(ctx, userID, query, queryEmbedding, limit, mode == SearchModeHybrid)
+	default:
+		return s.searchItemsText(ctx, userID, query, limit)
+	}
+}
+
+func (s *Store) searchItemsText(ctx context.Context, userID uuid.UUID, query string, limit int) ([]SearchItemsResult, error) {
+	const q = `
+		SELECT id, item_type, title, why_saved, url,
+		       similarity(title, $3) + similarity(COALESCE(why_saved, ''), $3) as sim
+		FROM items
+		WHERE user_id = $1
+		  AND archived = false
+		  AND (title ILIKE '%' || $3 || '%'
+		       OR why_saved ILIKE '%' || $3 || '%'
+		       OR EXISTS (
+		           SELECT 1 FROM unnest(ai_tags) t WHERE t ILIKE '%' || $3 || '%'
+		       ))
+		ORDER BY sim DESC
+		LIMIT $2
+	`
+	rows, err := s.pool.Query(ctx, q, userID, limit, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []SearchItemsResult
+	for rows.Next() {
+		var r SearchItemsResult
+		var sim float64
+		if err := rows.Scan(&r.ID, &r.Type, &r.Title, &r.WhySaved, &r.URL, &sim); err != nil {
+			return nil, err
+		}
+		r.Similarity = normalizeSim(sim)
+		results = append(results, r)
+	}
+	if results == nil {
+		results = []SearchItemsResult{}
+	}
+	return results, rows.Err()
+}
+
+func (s *Store) searchItemsHybrid(ctx context.Context, userID uuid.UUID, query string, embedding []float32, limit int, useText bool) ([]SearchItemsResult, error) {
+	// Get vector results
+	vecQ := `
+		SELECT id, item_type, title, why_saved, url,
+		       1 - (embedding <=> $3) as sim
+		FROM items
+		WHERE user_id = $1
+		  AND archived = false
+		  AND embedding IS NOT NULL
+		ORDER BY embedding <=> $3
+		LIMIT $2
+	`
+	rows, err := s.pool.Query(ctx, vecQ, userID, limit, embedding)
+	if err != nil {
+		return nil, err
+	}
+
+	var vecResults []SearchItemsResult
+	for rows.Next() {
+		var r SearchItemsResult
+		var sim float64
+		if err := rows.Scan(&r.ID, &r.Type, &r.Title, &r.WhySaved, &r.URL, &sim); err != nil {
+			return nil, err
+		}
+		r.Similarity = sim // 1 - cosine_distance = similarity
+		vecResults = append(vecResults, r)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	rows.Close()
+
+	if !useText || query == "" {
+		if vecResults == nil {
+			vecResults = []SearchItemsResult{}
+		}
+		return vecResults, nil
+	}
+
+	// Get text results and merge
+	textResults, err := s.searchItemsText(ctx, userID, query, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	// RRF (Reciprocal Rank Fusion) merge
+	return mergeRRF(vecResults, textResults, limit), nil
+}
+
+func mergeRRF(vec, text []SearchItemsResult, limit int) []SearchItemsResult {
+	const k = 60.0 // RRF constant
+
+	scores := map[uuid.UUID]float64{}
+	rank := map[uuid.UUID]SearchItemsResult{}
+
+	for i, r := range vec {
+		scores[r.ID] += k / float64(i+1)
+		rank[r.ID] = r
+	}
+	for i, r := range text {
+		scores[r.ID] += k / float64(i+1)
+		if _, ok := rank[r.ID]; !ok {
+			rank[r.ID] = r
+		}
+	}
+
+	// Sort by combined score
+	type scored struct {
+		id    uuid.UUID
+		score float64
+	}
+	var sorted []scored
+	for id, score := range scores {
+		sorted = append(sorted, scored{id, score})
+	}
+	for i := 0; i < len(sorted)-1; i++ {
+		for j := i + 1; j < len(sorted); j++ {
+			if sorted[j].score > sorted[i].score {
+				sorted[i], sorted[j] = sorted[j], sorted[i]
+			}
+		}
+	}
+
+	var result []SearchItemsResult
+	for i, s := range sorted {
+		if i >= limit {
+			break
+		}
+		if r, ok := rank[s.id]; ok {
+			result = append(result, r)
+		}
+	}
+	if result == nil {
+		result = []SearchItemsResult{}
+	}
+	return result
+}
+
+func normalizeSim(sim float64) float64 {
+	if sim > 1 {
+		return 1
+	}
+	if sim < 0 {
+		return 0
+	}
+	return sim
+}

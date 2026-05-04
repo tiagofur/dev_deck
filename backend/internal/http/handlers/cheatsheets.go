@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"devdeck/internal/ai"
+	"devdeck/internal/authctx"
 	"devdeck/internal/domain/cheatsheets"
 	"devdeck/internal/store"
 
@@ -14,11 +16,12 @@ import (
 )
 
 type CheatsheetsHandler struct {
-	store *store.Store
+	store      *store.Store
+	embeddings *ai.EmbeddingsService
 }
 
-func NewCheatsheetsHandler(s *store.Store) *CheatsheetsHandler {
-	return &CheatsheetsHandler{store: s}
+func NewCheatsheetsHandler(s *store.Store, emb *ai.EmbeddingsService) *CheatsheetsHandler {
+	return &CheatsheetsHandler{store: s, embeddings: emb}
 }
 
 // GET /api/cheatsheets
@@ -266,7 +269,7 @@ func (h *CheatsheetsHandler) DeleteEntry(w http.ResponseWriter, r *http.Request)
 
 // ───── Search ─────
 
-// GET /api/search?q=...&limit=...
+// GET /api/search?q=...&limit=...&mode=text|semantic|hybrid
 func (h *CheatsheetsHandler) Search(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	if q == "" {
@@ -279,16 +282,51 @@ func (h *CheatsheetsHandler) Search(w http.ResponseWriter, r *http.Request) {
 			limit = n
 		}
 	}
-	results, err := h.store.Search(r.Context(), q, limit)
+
+	mode := store.SearchModeText
+	if v := r.URL.Query().Get("mode"); v != "" {
+		switch v {
+		case "semantic", "vector":
+			mode = store.SearchModeVector
+		case "hybrid":
+			mode = store.SearchModeHybrid
+		}
+	}
+
+	// Get user from context (requires auth)
+	userID, ok := authctx.UserID(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+		return
+	}
+
+	// For semantic/hybrid, we need to generate embedding
+	var queryEmbedding []float32
+	if mode == store.SearchModeVector || mode == store.SearchModeHybrid {
+		if h.embeddings == nil || !h.embeddings.Enabled() {
+			// Fallback to text mode if no embeddings service
+			mode = store.SearchModeText
+		} else {
+			emb, err := h.embeddings.EmbedSearch(r.Context(), q)
+			if err != nil {
+				mode = store.SearchModeText
+			} else {
+				queryEmbedding = emb
+			}
+		}
+	}
+
+	results, err := h.store.SearchItems(r.Context(), userID, mode, q, queryEmbedding, limit)
 	if err != nil {
 		writeInternal(w, err)
 		return
 	}
 	if results == nil {
-		results = []store.SearchResult{}
+		results = []store.SearchItemsResult{}
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
 		"query":   q,
+		"mode":   mode,
 		"results": results,
 	})
 }
