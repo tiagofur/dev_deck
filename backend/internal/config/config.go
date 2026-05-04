@@ -57,10 +57,14 @@ type Config struct {
 	FrontendURL      string `env:"FRONTEND_URL" envDefault:"http://localhost:5173"`
 
 	// ─── Wave 5 Fase 18: local AI enrichment ───
-	AIProvider      string `env:"AI_PROVIDER" envDefault:"heuristic"`
+	AIProvider       string `env:"AI_PROVIDER" envDefault:"heuristic"`
 	OpenAIAPIKey    string `env:"OPENAI_API_KEY"`
-	OpenAIModel     string `env:"OPENAI_MODEL" envDefault:"gpt-4o-mini"`
-	AIExternalOptIn bool   `env:"AI_EXTERNAL_OPT_IN" envDefault:"false"`
+	OpenAIModel    string `env:"OPENAI_MODEL" envDefault:"gpt-4o-mini"`
+	QwenAPIKey     string `env:"QWEN_API_KEY"`     // Alibaba DashScope
+	QwenModel      string `env:"QWEN_MODEL" envDefault:"qwen-turbo"`
+	DeepSeekAPIKey string `env:"DEEPSEEK_API_KEY"`
+	DeepSeekModel  string `env:"DEEPSEEK_MODEL" envDefault:"deepseek-chat"`
+	AIExternalOptIn bool  `env:"AI_EXTERNAL_OPT_IN" envDefault:"false"`
 }
 
 func (c Config) CORSOriginList() []string {
@@ -127,9 +131,9 @@ func Load() (Config, error) {
 		}
 	}
 	switch strings.ToLower(strings.TrimSpace(c.AIProvider)) {
-	case "", "heuristic", "local", "disabled", "off", "none", "openai":
+	case "", "heuristic", "local", "disabled", "off", "none", "openai", "qwen", "deepseek":
 	default:
-		return c, errors.New("AI_PROVIDER must be one of: heuristic, local, disabled, openai")
+		return c, errors.New("AI_PROVIDER must be one of: heuristic, local, disabled, openai, qwen, deepseek")
 	}
 	if strings.EqualFold(strings.TrimSpace(c.AIProvider), "openai") {
 		if !c.AIExternalOptIn {
@@ -137,6 +141,22 @@ func Load() (Config, error) {
 		}
 		if strings.TrimSpace(c.OpenAIAPIKey) == "" {
 			return c, errors.New("OPENAI_API_KEY is required when AI_PROVIDER=openai")
+		}
+	}
+	if strings.EqualFold(strings.TrimSpace(c.AIProvider), "qwen") {
+		if !c.AIExternalOptIn {
+			return c, errors.New("AI_EXTERNAL_OPT_IN=true is required when AI_PROVIDER=qwen")
+		}
+		if strings.TrimSpace(c.QwenAPIKey) == "" {
+			return c, errors.New("QWEN_API_KEY is required when AI_PROVIDER=qwen")
+		}
+	}
+	if strings.EqualFold(strings.TrimSpace(c.AIProvider), "deepseek") {
+		if !c.AIExternalOptIn {
+			return c, errors.New("AI_EXTERNAL_OPT_IN=true is required when AI_PROVIDER=deepseek")
+		}
+		if strings.TrimSpace(c.DeepSeekAPIKey) == "" {
+			return c, errors.New("DEEPSEEK_API_KEY is required when AI_PROVIDER=deepseek")
 		}
 	}
 	return c, nil

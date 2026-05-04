@@ -47,7 +47,11 @@ func New(provider string) *Service {
 	case "", "heuristic", "local":
 		return NewHeuristic()
 	case "openai":
-		return NewDisabled()
+		return &Service{} // caller must call NewOpenAI() with API key
+	case "qwen":
+		return &Service{} // caller must call NewQwen() with API key
+	case "deepseek":
+		return &Service{} // caller must call NewDeepSeek() with API key
 	case "disabled", "off", "none":
 		return NewDisabled()
 	default:
@@ -59,6 +63,10 @@ func NewFromConfig(cfg config.Config) *Service {
 	switch strings.ToLower(strings.TrimSpace(cfg.AIProvider)) {
 	case "openai":
 		return NewOpenAI(cfg.OpenAIAPIKey, cfg.OpenAIModel)
+	case "qwen":
+		return NewQwen(cfg.QwenAPIKey, cfg.QwenModel)
+	case "deepseek":
+		return NewDeepSeek(cfg.DeepSeekAPIKey, cfg.DeepSeekModel)
 	default:
 		return New(cfg.AIProvider)
 	}
