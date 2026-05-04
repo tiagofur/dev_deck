@@ -54,10 +54,9 @@ jobs:
             --message "release: %s" \
             --yes
 
-      - name: Generate changelog
-        if: 'false'
+      - name: Generate full changelog
         run: |
-          npx git-changelog > /tmp/changelog.md || echo "No generate"
+          pnpm changelog:all
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
