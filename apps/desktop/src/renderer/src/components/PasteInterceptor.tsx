@@ -1,7 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ClipboardPaste, X } from 'lucide-react'
-import { useCapture, quickDetectFromClipboard, type ItemType } from '@devdeck/api-client'
+import { ClipboardPaste, ExternalLink, X } from 'lucide-react'
+import {
+  getLastUsedDeck,
+  looksLikeURL,
+  normalizeURLInput,
+  suggestCaptureTags,
+  useCapture,
+  quickDetectFromClipboard,
+  type CaptureInput,
+  type ItemType,
+} from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
 import { CaptureModal } from '@devdeck/features'
 
@@ -26,18 +35,34 @@ interface PendingPaste {
   title: string
 }
 
-export function PasteInterceptor() {
+interface SavedPaste {
+  id: string
+  title: string
+  duplicate: boolean
+  type: ItemType
+}
+
+interface PasteInterceptorProps {
+  onOpenItem?: (id: string) => void
+}
+
+export function PasteInterceptor({ onOpenItem }: PasteInterceptorProps = {}) {
   const [pending, setPending] = useState<PendingPaste | null>(null)
+  const [saved, setSaved] = useState<SavedPaste | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalPrefill, setModalPrefill] = useState<string | undefined>(undefined)
   const capture = useCapture()
 
-  const dismiss = useCallback(() => setPending(null), [])
+  const dismiss = useCallback(() => {
+    setPending(null)
+    setSaved(null)
+  }, [])
 
   const openExpanded = useCallback((prefill: string) => {
     setModalPrefill(prefill)
     setModalOpen(true)
     setPending(null)
+    setSaved(null)
   }, [])
 
   // Global paste listener.
@@ -55,6 +80,7 @@ export function PasteInterceptor() {
 
       const det = quickDetectFromClipboard(raw)
       setPending({ id: Date.now(), raw, type: det.type, title: det.title })
+      setSaved(null)
     }
     window.addEventListener('paste', onPaste)
     return () => window.removeEventListener('paste', onPaste)
@@ -85,38 +111,48 @@ export function PasteInterceptor() {
 
   // Auto-dismiss the floating card after AUTO_DISMISS_MS.
   useEffect(() => {
-    if (!pending) return
-    const t = setTimeout(() => setPending(null), AUTO_DISMISS_MS)
+    if (!pending && !saved) return
+    const t = setTimeout(dismiss, AUTO_DISMISS_MS)
     return () => clearTimeout(t)
-  }, [pending])
+  }, [dismiss, pending, saved])
 
-  // ESC dismisses the pending card.
+  // ESC dismisses the floating card.
   useEffect(() => {
-    if (!pending) return
+    if (!pending && !saved) return
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setPending(null)
+      if (e.key === 'Escape') dismiss()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [pending])
+  }, [dismiss, pending, saved])
 
   const onQuickSave = useCallback(
     async (p: PendingPaste) => {
-      const input = looksLikeURL(p.raw)
-        ? { url: p.raw, source: 'web-paste' as const }
-        : { text: p.raw, source: 'web-paste' as const }
+      const input = buildQuickCaptureInput(p)
       try {
         const res = await capture.mutateAsync(input)
+        const id = res.item?.id || res.duplicate_of
         if (res.duplicate_of) {
           showToast('Ya lo tenías ✓', 'info')
         } else {
           showToast(`Guardado como ${p.type}`, 'success')
+        }
+        if (id) {
+          setSaved({
+            id,
+            title: res.item?.title || p.title || previewLine(p.raw),
+            duplicate: Boolean(res.duplicate_of),
+            type: p.type,
+          })
+        } else {
+          setSaved(null)
         }
       } catch (err) {
         showToast(
           err instanceof Error ? err.message : 'Error al guardar',
           'error',
         )
+        setSaved(null)
       } finally {
         setPending(null)
       }
@@ -127,9 +163,9 @@ export function PasteInterceptor() {
   return (
     <>
       <AnimatePresence>
-        {pending && (
+        {(pending || saved) && (
           <motion.div
-            key={pending.id}
+            key={pending?.id ?? saved?.id}
             initial={{ opacity: 0, y: 16, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.95 }}
@@ -144,15 +180,31 @@ export function PasteInterceptor() {
                 <ClipboardPaste size={18} strokeWidth={2.5} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold uppercase text-ink-soft mb-0.5">
-                  Pegaste · {pending.type}
-                </p>
-                <p className="text-sm font-bold truncate">
-                  {pending.title || '(vacío)'}
-                </p>
-                <p className="text-xs text-ink-soft truncate mt-0.5">
-                  {previewLine(pending.raw)}
-                </p>
+                {pending ? (
+                  <>
+                    <p className="text-xs font-bold uppercase text-ink-soft mb-0.5">
+                      Pegaste · {pending.type}
+                    </p>
+                    <p className="text-sm font-bold truncate">
+                      {pending.title || '(vacío)'}
+                    </p>
+                    <p className="text-xs text-ink-soft truncate mt-0.5">
+                      {previewLine(pending.raw)}
+                    </p>
+                  </>
+                ) : saved ? (
+                  <>
+                    <p className="text-xs font-bold uppercase text-ink-soft mb-0.5">
+                      {saved.duplicate ? 'Ya estaba guardado' : 'Guardado'} · {saved.type}
+                    </p>
+                    <p className="text-sm font-bold truncate">
+                      {saved.title || 'Item guardado'}
+                    </p>
+                    <p className="text-xs text-ink-soft truncate mt-0.5">
+                      Listo en tu vault
+                    </p>
+                  </>
+                ) : null}
               </div>
               <button
                 type="button"
@@ -165,24 +217,43 @@ export function PasteInterceptor() {
             </div>
 
             <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => openExpanded(pending.raw)}
-                className="text-xs font-bold uppercase border-2 border-ink px-2 py-1
-                           bg-bg-card hover:bg-accent-yellow/60 transition-colors"
-              >
-                Expandir
-              </button>
-              <button
-                type="button"
-                onClick={() => onQuickSave(pending)}
-                disabled={capture.isPending}
-                className="text-xs font-bold uppercase border-2 border-ink px-2 py-1
-                           bg-accent-lime shadow-hard-sm hover:bg-accent-lime/80
-                           disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-              >
-                {capture.isPending ? '…' : 'Guardar'}
-              </button>
+              {pending && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => openExpanded(pending.raw)}
+                    className="text-xs font-bold uppercase border-2 border-ink px-2 py-1
+                               bg-bg-card hover:bg-accent-yellow/60 transition-colors"
+                  >
+                    Expandir
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onQuickSave(pending)}
+                    disabled={capture.isPending}
+                    className="text-xs font-bold uppercase border-2 border-ink px-2 py-1
+                               bg-accent-lime shadow-hard-sm hover:bg-accent-lime/80
+                               disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {capture.isPending ? '…' : 'Guardar'}
+                  </button>
+                </>
+              )}
+              {saved && onOpenItem && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onOpenItem(saved.id)
+                    dismiss()
+                  }}
+                  className="text-xs font-bold uppercase border-2 border-ink px-2 py-1
+                             bg-accent-lime shadow-hard-sm hover:bg-accent-lime/80
+                             transition-colors inline-flex items-center gap-1"
+                >
+                  <ExternalLink size={12} strokeWidth={3} />
+                  Abrir
+                </button>
+              )}
             </div>
 
             <div className="mt-3 h-0.5 bg-ink/10 overflow-hidden">
@@ -204,6 +275,7 @@ export function PasteInterceptor() {
           setModalPrefill(undefined)
         }}
         prefill={modalPrefill}
+        onOpenItem={onOpenItem}
         source="web-paste"
       />
     </>
@@ -218,13 +290,27 @@ function isEditableTarget(el: HTMLElement | null): boolean {
   return false
 }
 
-function looksLikeURL(s: string): boolean {
-  if (!/^https?:\/\//i.test(s)) return false
-  try {
-    return !!new URL(s).hostname
-  } catch {
-    return false
+function buildQuickCaptureInput(p: PendingPaste): CaptureInput {
+  const raw = p.raw.trim()
+  const normalizedUrl = normalizeURLInput(raw)
+  const tags = suggestCaptureTags({
+    type: p.type,
+    url: looksLikeURL(normalizedUrl) ? normalizedUrl : undefined,
+    text: looksLikeURL(normalizedUrl) ? undefined : raw,
+  })
+  const deckId = getLastUsedDeck()
+  const input: CaptureInput = {
+    source: 'web-paste',
+    type_hint: p.type,
+    tags,
+    deck_id: deckId || undefined,
   }
+  if (looksLikeURL(normalizedUrl)) {
+    input.url = normalizedUrl
+  } else {
+    input.text = raw
+  }
+  return input
 }
 
 function previewLine(s: string): string {

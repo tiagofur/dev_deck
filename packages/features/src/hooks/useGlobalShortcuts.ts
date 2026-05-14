@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 
 interface UseGlobalShortcutsOptions {
   /** Callback when cmd+K is pressed */
+  onGlobalSearch?: () => void
+  /** Callback when cmd+N is pressed */
   onCapture?: () => void
   /** Callback when cmd+/ is pressed */
   onShortcuts?: () => void
@@ -15,6 +17,7 @@ interface UseGlobalShortcutsOptions {
  * Must be used inside a Router context (uses useNavigate).
  */
 export function useGlobalShortcuts({
+  onGlobalSearch,
   onCapture,
   onShortcuts,
   onSearchFocus,
@@ -34,10 +37,10 @@ export function useGlobalShortcuts({
         target?.isContentEditable
       if (isTyping && e.key !== 'Escape') return
 
-      // Cmd+K: Open capture modal
+      // Cmd+K: Open global search
       if (modKey && e.key.toLowerCase() === 'k') {
         e.preventDefault()
-        onCapture?.()
+        onGlobalSearch?.()
         return
       }
 
@@ -68,7 +71,7 @@ export function useGlobalShortcuts({
 
       // Escape: Close any modal (handled by individual modals)
     },
-    [navigate, onCapture, onShortcuts, onSearchFocus]
+    [navigate, onCapture, onGlobalSearch, onShortcuts, onSearchFocus]
   )
 
   useEffect(() => {

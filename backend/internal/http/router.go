@@ -212,6 +212,10 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 
 			// Deck import (auth required)
 			r.Post("/decks/{id}/import", importH.Import)
+
+			r.Route("/admin", func(ar chi.Router) {
+				ar.Get("/users", adminH.ListUsers)
+			})
 		})
 
 		// Public deck (no auth)
@@ -220,11 +224,6 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		// Public profile (no auth)
 		r.Get("/users/{username}/public", profileH.GetPublic)
 		r.Get("/users/{username}/public/decks", profileH.GetPublicDecks)
-	})
-
-	// Admin routes (no auth yet - TODO: add auth)
-	r.Route("/api/admin", func(r chi.Router) {
-		r.Get("/users", adminH.ListUsers)
 	})
 
 	return r

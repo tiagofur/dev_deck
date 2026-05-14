@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest'
-import { detectType, looksLikeURL, quickDetectFromClipboard } from './detect'
+import {
+  detectType,
+  looksLikePotentialURL,
+  looksLikeURL,
+  normalizeURLInput,
+  parseCaptureTags,
+  quickDetectFromClipboard,
+  suggestCaptureTags,
+} from './detect'
 import type { ItemType } from './types'
 
 // This matrix mirrors backend/internal/domain/items/detect_test.go so
@@ -134,6 +142,12 @@ describe('quickDetectFromClipboard', () => {
     expect(got.title).toBe('charmbracelet/bubbletea')
   })
 
+  it('classifies a bare URL pasted from clipboard', () => {
+    const got = quickDetectFromClipboard('github.com/charmbracelet/bubbletea')
+    expect(got.type).toBe('repo')
+    expect(got.title).toBe('charmbracelet/bubbletea')
+  })
+
   it('classifies a command pasted from clipboard', () => {
     const got = quickDetectFromClipboard('brew install ripgrep')
     expect(got.type).toBe('cli')
@@ -165,5 +179,32 @@ describe('looksLikeURL', () => {
   it('rejects non-URLs', () => {
     expect(looksLikeURL('')).toBe(false)
     expect(looksLikeURL('brew install ripgrep')).toBe(false)
+  })
+})
+
+describe('capture input helpers', () => {
+  it('recognizes and normalizes bare URLs', () => {
+    expect(looksLikePotentialURL('github.com/foo/bar')).toBe(true)
+    expect(normalizeURLInput('github.com/foo/bar')).toBe('https://github.com/foo/bar')
+  })
+
+  it('keeps non-URLs unchanged during URL normalization', () => {
+    expect(looksLikePotentialURL('brew install ripgrep')).toBe(false)
+    expect(normalizeURLInput('brew install ripgrep')).toBe('brew install ripgrep')
+  })
+
+  it('normalizes comma-separated tags', () => {
+    expect(parseCaptureTags('CLI, terminal tools, cli')).toEqual([
+      'cli',
+      'terminal-tools',
+    ])
+  })
+
+  it('suggests tags from type, host, and text', () => {
+    expect(suggestCaptureTags({
+      type: 'repo',
+      url: 'https://github.com/foo/bar',
+      text: 'go docker helper',
+    })).toEqual(['repo', 'github', 'terminal', 'go', 'docker'])
   })
 })

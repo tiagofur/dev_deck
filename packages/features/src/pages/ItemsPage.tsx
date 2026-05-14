@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, Plus } from 'lucide-react'
+import { Box, Plus, Users } from 'lucide-react'
 import { CaptureModal } from '../components/CaptureModal'
 import { ItemCard } from '../components/ItemCard'
 import { useItems } from '@devdeck/api-client'
@@ -19,6 +19,7 @@ type TypeFilter = 'all' | ItemType
 const STACKS = ['go', 'node', 'python', 'rust', 'typescript', 'react', 'vue', 'ai', 'cli', 'db'] as const
 
 type StackFilter = typeof STACKS[number]
+type WorkflowFilter = 'team-review'
 
 const TYPE_FILTERS: Array<{ key: TypeFilter; label: string }> = [
   { key: 'all', label: 'All' },
@@ -29,6 +30,7 @@ export function ItemsPage() {
   const navigate = useNavigate()
   const [type, setType] = useState<TypeFilter>('all')
   const [stack, setStack] = useState<StackFilter[]>([])
+  const [workflow, setWorkflow] = useState<WorkflowFilter | ''>('')
   const [query, setQuery] = useState('')
   const [captureOpen, setCaptureOpen] = useState(false)
 
@@ -37,13 +39,20 @@ export function ItemsPage() {
 
   const { data, isLoading, error } = useItems({
     type: type === 'all' ? undefined : type,
+    tag: workflow || undefined,
     stack: stackParam,
     q: query || undefined,
     limit: 200,
     sort: 'added_desc',
   })
+  const { data: reviewData } = useItems({
+    tag: 'team-review',
+    limit: 1,
+    sort: 'updated_desc',
+  })
 
   const items = data?.items ?? []
+  const reviewCount = reviewData?.total ?? 0
 
   // Handler: toggle a stack in the filter
   function toggleStack(s: StackFilter) {
@@ -54,10 +63,11 @@ export function ItemsPage() {
   function clearFilters() {
     setType('all')
     setStack([])
+    setWorkflow('')
     setQuery('')
   }
 
-  const hasFilters = type !== 'all' || stack.length > 0 || query.length > 0
+  const hasFilters = type !== 'all' || stack.length > 0 || workflow || query.length > 0
 
   // Count by type for the chip badges. The UI doesn't paginate between
   // types so this is a single pass over the current page, not a
@@ -69,24 +79,6 @@ export function ItemsPage() {
     }
     return out
   }, [items])
-
-  // Keyboard shortcuts: Cmd/Ctrl+K → open capture modal
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      const target = e.target as HTMLElement | null
-      const isTyping =
-        target?.tagName === 'INPUT' ||
-        target?.tagName === 'TEXTAREA' ||
-        target?.isContentEditable
-
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault()
-        setCaptureOpen(true)
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [])
 
   return (
     <div className="h-screen flex flex-col bg-bg-primary">
@@ -121,6 +113,21 @@ export function ItemsPage() {
         >
           <Plus size={16} strokeWidth={3} />
           Capturar
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/review')}
+          className="border-3 border-ink px-3 py-2 bg-bg-card shadow-hard-sm
+                     font-display font-bold uppercase text-sm hover:bg-accent-yellow/40
+                     flex items-center gap-1.5"
+        >
+          <Users size={16} strokeWidth={3} />
+          Review
+          {reviewCount > 0 && (
+            <span className="ml-1 border-2 border-ink bg-accent-yellow px-1.5 py-0.5 text-[10px] leading-none">
+              {reviewCount > 99 ? '99+' : reviewCount}
+            </span>
+          )}
         </button>
       </header>
 
@@ -187,6 +194,26 @@ export function ItemsPage() {
             </button>
           )}
         </div>
+
+        <div className="flex gap-2 mt-3 pt-3 border-t border-ink/30">
+          <span className="text-xs font-mono text-ink-soft uppercase tracking-wide py-1">
+            Flujo:
+          </span>
+          <button
+            type="button"
+            onClick={() => setWorkflow((current) => current === 'team-review' ? '' : 'team-review')}
+            className={`border-3 border-ink px-2 py-0.5 text-xs font-mono
+                        transition-colors whitespace-nowrap inline-flex items-center gap-1.5
+                        ${
+                          workflow === 'team-review'
+                            ? 'bg-accent-yellow shadow-hard-sm'
+                            : 'bg-bg-card hover:bg-accent-yellow/40'
+                        }`}
+          >
+            <Users size={12} strokeWidth={3} />
+            team review
+          </button>
+        </div>
       </nav>
 
       <main className="flex-1 overflow-y-auto p-6">
@@ -224,6 +251,7 @@ export function ItemsPage() {
               {data?.total} items
               {type !== 'all' && ` · tipo: ${type}`}
               {stack.length > 0 && ` · stack: ${stack.join(', ')}`}
+              {workflow && ` · flujo: ${workflow}`}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {items.map((it) => (
@@ -243,6 +271,7 @@ export function ItemsPage() {
       <CaptureModal
         open={captureOpen}
         onClose={() => setCaptureOpen(false)}
+        onOpenItem={(id) => navigate(`/items/${id}`)}
         source="manual"
       />
     </div>

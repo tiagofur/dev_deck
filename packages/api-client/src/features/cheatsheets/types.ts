@@ -58,7 +58,7 @@ export interface UpdateEntryInput {
 }
 
 export interface SearchResult {
-  type: 'repo' | 'cheatsheet' | 'entry'
+  type: 'item' | 'repo' | 'cheatsheet' | 'entry'
   id: string
   title: string
   subtitle: string

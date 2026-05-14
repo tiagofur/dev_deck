@@ -1,4 +1,4 @@
-import { BookOpen, Code2, Search, X } from 'lucide-react'
+import { BookOpen, Boxes, Code2, Search, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGlobalSearch } from '@devdeck/api-client'
@@ -35,12 +35,14 @@ export function GlobalSearchModal({ open, onClose }: Props) {
 
   function selectResult(r: SearchResult) {
     onClose()
-    if (r.type === 'repo') navigate(`/repo/${r.id}`)
+    if (r.type === 'item') navigate(`/items/${r.id}`)
+    else if (r.type === 'repo') navigate(`/repo/${r.id}`)
     else if (r.type === 'cheatsheet') navigate(`/cheatsheets/${r.id}`)
     // entries navigate to their parent cheatsheet (we don't have cheatsheet id in SearchResult)
   }
 
   // Group results by type.
+  const items = results.filter((r) => r.type === 'item')
   const repos = results.filter((r) => r.type === 'repo')
   const cheats = results.filter((r) => r.type === 'cheatsheet')
   const entries = results.filter((r) => r.type === 'entry')
@@ -62,7 +64,7 @@ export function GlobalSearchModal({ open, onClose }: Props) {
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar repos, cheatsheets, comandos…"
+            placeholder="Buscar items, repos, cheatsheets, comandos…"
             className="flex-1 font-mono text-sm bg-transparent focus:outline-none"
           />
           {isLoading && (
@@ -85,6 +87,9 @@ export function GlobalSearchModal({ open, onClose }: Props) {
             </div>
           ) : (
             <div className="py-2">
+              {items.length > 0 && (
+                <ResultGroup icon={<Boxes size={14} strokeWidth={3} />} label="Items" items={items} onSelect={selectResult} />
+              )}
               {repos.length > 0 && (
                 <ResultGroup icon={<Code2 size={14} strokeWidth={3} />} label="Repos" items={repos} onSelect={selectResult} />
               )}

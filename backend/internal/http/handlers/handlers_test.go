@@ -144,6 +144,17 @@ func TestHandlers_Auth_RejectsWrongToken(t *testing.T) {
 	}
 }
 
+func TestHandlers_Auth_ProtectsAdminRoutes(t *testing.T) {
+	ts := newTestServer(t)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/admin/users", nil)
+	rec := httptest.NewRecorder()
+	ts.router.ServeHTTP(rec, req)
+	if rec.Code != http.StatusUnauthorized {
+		t.Errorf("expected 401, got %d", rec.Code)
+	}
+}
+
 func TestHandlers_Health_Public(t *testing.T) {
 	ts := newTestServer(t)
 
@@ -490,6 +501,11 @@ func TestHandlers_Search_FindsAcrossEntities(t *testing.T) {
 	_ = ts.do(t, http.MethodPost, "/api/repos", map[string]any{
 		"url": "https://github.com/charmbracelet/bubbletea",
 	})
+	_ = seedCapture(t, ts, capturePayload{
+		Text:     "brew install bubbletea",
+		TypeHint: "cli",
+		WhySaved: "terminal UI experiments",
+	})
 	c := decodeJSON[cheatsheetResp](t, ts.do(t, http.MethodPost, "/api/cheatsheets", map[string]any{
 		"slug": "tui-cheats", "title": "TUI cheats", "category": "tool",
 	}))
@@ -508,6 +524,13 @@ func TestHandlers_Search_FindsAcrossEntities(t *testing.T) {
 	out := decodeJSON[searchResp](t, rec)
 	if len(out.Results) == 0 {
 		t.Fatal("expected at least one search result")
+	}
+	seen := map[string]bool{}
+	for _, result := range out.Results {
+		seen[result.Type] = true
+	}
+	if !seen["item"] {
+		t.Fatalf("expected item result, got %+v", out.Results)
 	}
 }
 

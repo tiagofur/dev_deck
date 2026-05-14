@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"devdeck/internal/authctx"
 	"devdeck/internal/domain/items"
@@ -47,11 +48,12 @@ func NewItemsHandler(s *store.Store, q *jobs.EnrichQueue) *ItemsHandler {
 func (h *ItemsHandler) List(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	p := items.ListParams{
-		Type:       q.Get("type"),
-		Tag:        q.Get("tag"),
-		Q:          q.Get("q"),
-		Sort:       q.Get("sort"),
-		Favorites:  q.Get("favorites") == "true",
+		Type:      q.Get("type"),
+		Tag:       q.Get("tag"),
+		Stack:     parseCSVParam(q.Get("stack")),
+		Q:         q.Get("q"),
+		Sort:      q.Get("sort"),
+		Favorites: q.Get("favorites") == "true",
 	}
 	if v := q.Get("archived"); v != "" {
 		if b, err := strconv.ParseBool(v); err == nil {
@@ -238,4 +240,22 @@ func parseItemID(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) {
 		return uuid.Nil, false
 	}
 	return id, true
+}
+
+func parseCSVParam(raw string) []string {
+	if raw == "" {
+		return nil
+	}
+	parts := strings.Split(raw, ",")
+	out := make([]string, 0, len(parts))
+	seen := map[string]bool{}
+	for _, part := range parts {
+		v := strings.ToLower(strings.TrimSpace(part))
+		if v == "" || seen[v] {
+			continue
+		}
+		seen[v] = true
+		out = append(out, v)
+	}
+	return out
 }

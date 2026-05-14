@@ -117,6 +117,9 @@ type ListParams struct {
 	Type string
 	// Tag narrows to items that contain the given tag.
 	Tag string
+	// Stack narrows to one or more tech stacks (comma-separated in the API).
+	// Matches manual tags, AI tags, language metadata, and topic metadata.
+	Stack []string
 	// Favorites filters to only favorite items.
 	Favorites bool
 	// Q is a fuzzy text filter over title + description + tags.

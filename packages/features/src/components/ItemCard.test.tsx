@@ -1,8 +1,23 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ItemCard } from './ItemCard'
 import type { Item } from '@devdeck/api-client'
+
+function renderItemCard(ui: React.ReactElement) {
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  })
+  return render(
+    <QueryClientProvider client={client}>
+      {ui}
+    </QueryClientProvider>,
+  )
+}
 
 // Fixture factory. Anything not overridden picks a safe default so
 // tests spell out only the fields they're asserting on.
@@ -34,13 +49,13 @@ function makeItem(patch: Partial<Item> = {}): Item {
 
 describe('<ItemCard>', () => {
   it('renders title and description', () => {
-    render(<ItemCard item={makeItem()} />)
+    renderItemCard(<ItemCard item={makeItem()} />)
     expect(screen.getByRole('heading')).toHaveTextContent('charmbracelet/bubbletea')
     expect(screen.getByText('A powerful TUI framework')).toBeInTheDocument()
   })
 
   it('prefers ai_summary over description when present', () => {
-    render(
+    renderItemCard(
       <ItemCard
         item={makeItem({
           description: 'Raw upstream description',
@@ -53,12 +68,12 @@ describe('<ItemCard>', () => {
   })
 
   it('renders the type ribbon for repos', () => {
-    render(<ItemCard item={makeItem({ item_type: 'repo' })} />)
+    renderItemCard(<ItemCard item={makeItem({ item_type: 'repo' })} />)
     expect(screen.getByText('REPO')).toBeInTheDocument()
   })
 
   it('renders a different ribbon for non-repo types', () => {
-    render(
+    renderItemCard(
       <ItemCard
         item={makeItem({ item_type: 'cli', title: 'ripgrep', url: null, meta: {} })}
       />,
@@ -67,13 +82,13 @@ describe('<ItemCard>', () => {
   })
 
   it('shows stars + language for repo items', () => {
-    render(<ItemCard item={makeItem()} />)
+    renderItemCard(<ItemCard item={makeItem()} />)
     expect(screen.getByText(/28\.4k/)).toBeInTheDocument()
     expect(screen.getByText('Go')).toBeInTheDocument()
   })
 
   it('hides the stars row for non-repo items', () => {
-    render(
+    renderItemCard(
       <ItemCard
         item={makeItem({
           item_type: 'article',
@@ -87,7 +102,7 @@ describe('<ItemCard>', () => {
   })
 
   it('renders why_saved as an inline blockquote when present', () => {
-    render(
+    renderItemCard(
       <ItemCard
         item={makeItem({
           why_saved: 'para grep cuando estoy en codebases gigantes',
@@ -100,38 +115,43 @@ describe('<ItemCard>', () => {
   })
 
   it('renders all tags', () => {
-    render(<ItemCard item={makeItem({ tags: ['alpha', 'beta', 'gamma'] })} />)
+    renderItemCard(<ItemCard item={makeItem({ tags: ['alpha', 'beta', 'gamma'] })} />)
     expect(screen.getByText('alpha')).toBeInTheDocument()
     expect(screen.getByText('beta')).toBeInTheDocument()
     expect(screen.getByText('gamma')).toBeInTheDocument()
   })
 
+  it('surfaces items marked for team review', () => {
+    renderItemCard(<ItemCard item={makeItem({ tags: ['team-review', 'go'] })} />)
+    expect(screen.getByText(/team review/i)).toBeInTheDocument()
+  })
+
   it('falls back to ai_tags when manual tags are empty', () => {
-    render(<ItemCard item={makeItem({ tags: [], ai_tags: ['suggested', 'go'] })} />)
+    renderItemCard(<ItemCard item={makeItem({ tags: [], ai_tags: ['suggested', 'go'] })} />)
     expect(screen.getByText('suggested')).toBeInTheDocument()
     expect(screen.getByText('go')).toBeInTheDocument()
   })
 
   it('shows queued analysis status', () => {
-    render(<ItemCard item={makeItem({ enrichment_status: 'queued' })} />)
+    renderItemCard(<ItemCard item={makeItem({ enrichment_status: 'queued' })} />)
     expect(screen.getByText(/analizando/i)).toBeInTheDocument()
   })
 
   it('fires onClick when clicked', async () => {
     const user = userEvent.setup()
     const onClick = vi.fn()
-    render(<ItemCard item={makeItem()} onClick={onClick} />)
+    renderItemCard(<ItemCard item={makeItem()} onClick={onClick} />)
     await user.click(screen.getByRole('heading'))
     expect(onClick).toHaveBeenCalledTimes(1)
   })
 
   it('falls back to a placeholder title when empty', () => {
-    render(<ItemCard item={makeItem({ title: '' })} />)
+    renderItemCard(<ItemCard item={makeItem({ title: '' })} />)
     expect(screen.getByText('(sin título)')).toBeInTheDocument()
   })
 
   it('renders a pretty URL (stripped scheme + www + trailing slash)', () => {
-    render(
+    renderItemCard(
       <ItemCard
         item={makeItem({
           url: 'https://www.ripgrep.dev/docs/',

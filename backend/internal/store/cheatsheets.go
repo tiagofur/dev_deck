@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"devdeck/internal/domain/cheatsheets"
+	domainitems "devdeck/internal/domain/items"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -542,7 +543,7 @@ func (s *Store) ListCheatsheetsByRepo(ctx context.Context, repoID uuid.UUID) ([]
 
 // SearchResult is a unified search hit.
 type SearchResult struct {
-	Type     string `json:"type"` // "repo", "cheatsheet", "entry"
+	Type     string `json:"type"` // "item", "repo", "cheatsheet", "entry"
 	ID       string `json:"id"`
 	Title    string `json:"title"`
 	Subtitle string `json:"subtitle"`
@@ -557,10 +558,57 @@ func (s *Store) Search(ctx context.Context, query string, limit int) ([]SearchRe
 	pattern := "%" + query + "%"
 	out := []SearchResult{}
 
+	// Search polymorphic items first. This is the canonical vault surface.
+	itemScopeSQL, itemScopeArgs := ownerClause(ctx, "user_id", 4)
+	itemArgs := append([]any{pattern, query, limit}, itemScopeArgs...)
+	rows, err := s.pool.Query(ctx, `
+		SELECT id, item_type, title, COALESCE(description,''), notes,
+		       COALESCE(why_saved,''), COALESCE(ai_summary,''), url
+		FROM items
+		WHERE archived = false
+		  AND (
+		    title ILIKE $1
+		    OR COALESCE(description,'') ILIKE $1
+		    OR notes ILIKE $1
+		    OR COALESCE(why_saved,'') ILIKE $1
+		    OR COALESCE(ai_summary,'') ILIKE $1
+		    OR EXISTS (SELECT 1 FROM unnest(tags) t WHERE t ILIKE $1)
+		    OR EXISTS (SELECT 1 FROM unnest(ai_tags) t WHERE t ILIKE $1)
+		  )
+		  AND `+itemScopeSQL+`
+		ORDER BY GREATEST(
+			similarity(title, $2),
+			similarity(COALESCE(why_saved,''), $2),
+			similarity(COALESCE(ai_summary,''), $2)
+		) DESC, updated_at DESC
+		LIMIT $3
+	`, itemArgs...)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id uuid.UUID
+		var itemType domainitems.Type
+		var title, desc, notes, why, summary string
+		var url *string
+		if err := rows.Scan(&id, &itemType, &title, &desc, &notes, &why, &summary, &url); err != nil {
+			rows.Close()
+			return nil, err
+		}
+		out = append(out, SearchResult{
+			Type:     "item",
+			ID:       id.String(),
+			Title:    title,
+			Subtitle: itemSearchSubtitle(itemType, why, summary, desc),
+			Extra:    itemSearchExtra(url, notes),
+		})
+	}
+	rows.Close()
+
 	// Search repos
 	repoScopeSQL, repoScopeArgs := ownerClause(ctx, "user_id", 4)
 	repoArgs := append([]any{pattern, query, limit}, repoScopeArgs...)
-	rows, err := s.pool.Query(ctx, `
+	rows, err = s.pool.Query(ctx, `
 		SELECT id, name, COALESCE(owner,''), COALESCE(description,''), COALESCE(language,'')
 		FROM repos
 		WHERE (name ILIKE $1 OR description ILIKE $1 OR COALESCE(language,'') ILIKE $1)
@@ -656,6 +704,25 @@ func (s *Store) Search(ctx context.Context, query string, limit int) ([]SearchRe
 	rows.Close()
 
 	return out, nil
+}
+
+func itemSearchSubtitle(itemType domainitems.Type, why, summary, desc string) string {
+	parts := []string{string(itemType)}
+	if why != "" {
+		parts = append(parts, why)
+	} else if summary != "" {
+		parts = append(parts, summary)
+	} else if desc != "" {
+		parts = append(parts, desc)
+	}
+	return strings.Join(parts, " · ")
+}
+
+func itemSearchExtra(url *string, notes string) string {
+	if url != nil && *url != "" {
+		return *url
+	}
+	return notes
 }
 
 // ───── Seed helpers ─────
