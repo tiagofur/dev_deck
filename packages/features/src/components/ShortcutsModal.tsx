@@ -13,7 +13,7 @@ interface Shortcut {
 }
 
 const shortcuts: Shortcut[] = [
-  { keys: ['Cmd', 'K'], description: 'Abrir captura / Buscar' },
+  { keys: ['Cmd', 'K'], description: 'Búsqueda global' },
   { keys: ['Cmd', 'N'], description: 'Nuevo item' },
   { keys: ['Cmd', 'L'], description: 'Ir a items (buscar)' },
   { keys: ['Cmd', '/'], description: 'Mostrar atajos' },

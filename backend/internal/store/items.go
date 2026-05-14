@@ -216,6 +216,21 @@ func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListR
 		args = append(args, p.Tag)
 		idx++
 	}
+	if len(p.Stack) > 0 {
+		where = append(where, fmt.Sprintf(`(
+			EXISTS (SELECT 1 FROM unnest(tags) t WHERE LOWER(t) = ANY($%d))
+			OR EXISTS (SELECT 1 FROM unnest(ai_tags) t WHERE LOWER(t) = ANY($%d))
+			OR LOWER(COALESCE(meta->>'language', '')) = ANY($%d)
+			OR EXISTS (
+				SELECT 1 FROM jsonb_array_elements_text(
+					CASE WHEN jsonb_typeof(meta->'topics') = 'array' THEN meta->'topics' ELSE '[]'::jsonb END
+				) topic
+				WHERE LOWER(topic) = ANY($%d)
+			)
+		)`, idx, idx, idx, idx))
+		args = append(args, p.Stack)
+		idx++
+	}
 	if p.Favorites {
 		where = append(where, fmt.Sprintf("is_favorite = $%d", idx))
 		args = append(args, true)
@@ -574,19 +589,19 @@ func (s *Store) GetUserTags(ctx context.Context, userID uuid.UUID) ([]string, er
 type SearchMode string
 
 const (
-	SearchModeText    SearchMode = "text"    // pg_trgm only
+	SearchModeText   SearchMode = "text"     // pg_trgm only
 	SearchModeVector SearchMode = "semantic" // embeddings only
-	SearchModeHybrid SearchMode = "hybrid"  // both combined
+	SearchModeHybrid SearchMode = "hybrid"   // both combined
 )
 
 // SearchItemsResult is a single search result with score.
 type SearchItemsResult struct {
-	ID         uuid.UUID    `json:"id"`
+	ID         uuid.UUID  `json:"id"`
 	Type       items.Type `json:"type"`
-	Title      string    `json:"title"`
-	WhySaved   string    `json:"why_saved,omitempty"`
-	URL        string    `json:"url,omitempty"`
-	Similarity float64  `json:"similarity"`
+	Title      string     `json:"title"`
+	WhySaved   string     `json:"why_saved,omitempty"`
+	URL        string     `json:"url,omitempty"`
+	Similarity float64    `json:"similarity"`
 }
 
 // EmbedItem inserts or updates the embedding for an item.
@@ -821,7 +836,7 @@ func (s *Store) GetRelatedItems(ctx context.Context, itemID uuid.UUID, limit int
 
 // AskResult is the response for /api/ask
 type AskResult struct {
-	Answer  string            `json:"answer"`
+	Answer  string              `json:"answer"`
 	Sources []SearchItemsResult `json:"sources"`
 }
 

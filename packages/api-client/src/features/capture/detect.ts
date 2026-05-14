@@ -92,8 +92,8 @@ export function detectType(input: CaptureInput): DetectionResult {
 export function quickDetectFromClipboard(raw: string): DetectionResult {
   const trimmed = raw.trim()
   if (!trimmed) return { type: 'note', title: '' }
-  if (looksLikeURL(trimmed)) {
-    return detectType({ url: trimmed })
+  if (looksLikePotentialURL(trimmed)) {
+    return detectType({ url: normalizeURLInput(trimmed) })
   }
   return detectType({ text: trimmed })
 }
@@ -119,6 +119,68 @@ function safeParseURL(raw: string): URL | null {
 export function looksLikeURL(s: string): boolean {
   if (!/^https?:\/\//i.test(s)) return false
   return safeParseURL(s) !== null
+}
+
+/**
+ * Accepts full http(s) URLs and bare host/path strings like
+ * "github.com/owner/repo". Used by capture UIs so users don't have to
+ * type a scheme for common paste/save flows.
+ */
+export function looksLikePotentialURL(s: string): boolean {
+  const trimmed = s.trim()
+  if (!trimmed || /\s/.test(trimmed)) return false
+  if (looksLikeURL(trimmed)) return true
+  return /^[a-z0-9.-]+\.[a-z]{2,}(\/.*)?$/i.test(trimmed)
+}
+
+export function normalizeURLInput(raw: string): string {
+  const trimmed = raw.trim()
+  if (!trimmed) return ''
+  if (looksLikeURL(trimmed)) return trimmed
+  if (looksLikePotentialURL(trimmed)) return `https://${trimmed}`
+  return trimmed
+}
+
+export function parseCaptureTags(raw: string): string[] {
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const part of raw.split(',')) {
+    const tag = normalizeTag(part)
+    if (!tag || seen.has(tag)) continue
+    seen.add(tag)
+    out.push(tag)
+  }
+  return out
+}
+
+export function suggestCaptureTags(input: {
+  type: ItemType
+  url?: string
+  text?: string
+}): string[] {
+  const tags = new Set<string>([input.type])
+  const host = input.url ? safeHost(normalizeURLInput(input.url)) : ''
+  const lowerText = (input.text ?? '').toLowerCase()
+
+  if (host.includes('github.com')) tags.add('github')
+  if (host.includes('dev.to') || host.includes('medium.com') || host.includes('hashnode')) tags.add('article')
+  if (input.type === 'cli' || isTerminalText(lowerText)) tags.add('terminal')
+  if (input.type === 'snippet') tags.add('code')
+  if (input.type === 'shortcut') tags.add('shortcut')
+  if (input.type === 'prompt' || input.type === 'agent') tags.add('ai')
+
+  if (/\b(go|golang)\b/.test(lowerText) || host.includes('go.dev')) tags.add('go')
+  if (/\b(npm|pnpm|yarn|node|typescript|react)\b/.test(lowerText)) tags.add('node')
+  if (/\b(python|pip|pipx)\b/.test(lowerText)) tags.add('python')
+  if (/\b(rust|cargo)\b/.test(lowerText)) tags.add('rust')
+  if (/\b(docker|compose)\b/.test(lowerText)) tags.add('docker')
+  if (/\b(kubectl|kubernetes|k8s)\b/.test(lowerText)) tags.add('kubernetes')
+
+  return [...tags].map(normalizeTag).filter(Boolean).slice(0, 5)
+}
+
+function normalizeTag(raw: string): string {
+  return raw.trim().toLowerCase().replace(/\s+/g, '-')
 }
 
 const RESERVED_GITHUB_FIRST_SEGMENTS = new Set([
@@ -199,6 +261,18 @@ const COMMAND_PREFIXES = [
 function isCommandText(text: string): boolean {
   const lower = text.toLowerCase()
   return COMMAND_PREFIXES.some((p) => lower.startsWith(p))
+}
+
+function isTerminalText(text: string): boolean {
+  return /^(brew|npm|pnpm|yarn|cargo|go|pip|pipx|docker|kubectl|curl|wget)\b/.test(text)
+}
+
+function safeHost(raw: string): string {
+  try {
+    return new URL(raw).hostname.toLowerCase().replace(/^www\./, '')
+  } catch {
+    return ''
+  }
 }
 
 function isSnippetText(text: string): boolean {

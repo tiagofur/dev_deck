@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"devdeck/internal/domain/cheatsheets"
+	"devdeck/internal/domain/items"
 	"devdeck/internal/domain/repos"
 	"devdeck/internal/store"
 )
@@ -125,6 +126,13 @@ func TestStore_Search_FindsAcrossEntities(t *testing.T) {
 	_, _ = st.CreateEntry(ctx, c.ID, cheatsheets.CreateEntryInput{
 		Label: "go fmt", Command: "go fmt ./...",
 	})
+	_, _ = st.CreateItem(ctx, store.CreateItemInput{
+		Type:     items.TypeCLI,
+		Title:    "goimports",
+		Notes:    "go install golang.org/x/tools/cmd/goimports@latest",
+		WhySaved: "format Go imports automatically",
+		Tags:     []string{"go", "cli"},
+	})
 
 	results, err := st.Search(ctx, "go", 20)
 	if err != nil {
@@ -146,6 +154,9 @@ func TestStore_Search_FindsAcrossEntities(t *testing.T) {
 	}
 	if !seen["entry"] {
 		t.Error("expected at least one entry result")
+	}
+	if !seen["item"] {
+		t.Error("expected at least one item result")
 	}
 }
 

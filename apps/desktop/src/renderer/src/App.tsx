@@ -1,16 +1,21 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AnimatePresence } from 'framer-motion'
 import { HashRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
-import { useEffect, type ReactElement } from 'react'
+import { useEffect, useState, type ReactElement } from 'react'
 import {
   CheatsheetDetailPage,
   CheatsheetsListPage,
+  CaptureModal,
   DiscoveryPage,
+  GlobalSearchModal,
   HomePage,
   ItemDetailPage,
   ItemsPage,
   RepoDetailPage,
   SettingsPage,
+  ShortcutsModal,
+  TeamReviewPage,
+  useGlobalShortcuts,
 } from '@devdeck/features'
 import { ConfirmHost, PageTransition, Toaster } from '@devdeck/ui'
 import { isLoggedIn } from '@devdeck/api-client'
@@ -69,6 +74,17 @@ function AuthBridge(): null {
 
 function AnimatedRoutes() {
   const location = useLocation()
+  const navigate = useNavigate()
+  const [captureOpen, setCaptureOpen] = useState(false)
+  const [globalSearchOpen, setGlobalSearchOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
+
+  useGlobalShortcuts({
+    onGlobalSearch: () => setGlobalSearchOpen(true),
+    onCapture: () => setCaptureOpen(true),
+    onShortcuts: () => setShortcutsOpen(true),
+  })
+
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
@@ -79,6 +95,12 @@ function AnimatedRoutes() {
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route
           path="/"
+          element={
+            <AuthGuard>{withTransition(<ItemsPage />)}</AuthGuard>
+          }
+        />
+        <Route
+          path="/repos"
           element={
             <AuthGuard>{withTransition(<HomePage />)}</AuthGuard>
           }
@@ -93,6 +115,12 @@ function AnimatedRoutes() {
           path="/items/:id"
           element={
             <AuthGuard>{withTransition(<ItemDetailPage />)}</AuthGuard>
+          }
+        />
+        <Route
+          path="/review"
+          element={
+            <AuthGuard>{withTransition(<TeamReviewPage />)}</AuthGuard>
           }
         />
         <Route
@@ -126,6 +154,15 @@ function AnimatedRoutes() {
           }
         />
       </Routes>
+      <GlobalSearchModal open={globalSearchOpen} onClose={() => setGlobalSearchOpen(false)} />
+      <CaptureModal
+        open={captureOpen}
+        onClose={() => setCaptureOpen(false)}
+        onOpenItem={(id) => navigate(`/items/${id}`)}
+        source="manual"
+      />
+      <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+      <PasteInterceptor onOpenItem={(id) => navigate(`/items/${id}`)} />
     </AnimatePresence>
   )
 }
@@ -139,8 +176,6 @@ export function App() {
       </HashRouter>
       <Toaster />
       <ConfirmHost />
-      {/* Wave 4.5 §16.12 — global paste listener + Cmd/Ctrl+Shift+V shortcut. */}
-      <PasteInterceptor />
     </QueryClientProvider>
   )
 }

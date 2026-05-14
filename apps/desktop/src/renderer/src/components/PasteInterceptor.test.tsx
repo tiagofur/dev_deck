@@ -110,8 +110,16 @@ describe('<PasteInterceptor>', () => {
     const body = JSON.parse(init.body as string) as {
       url: string
       source: string
+      type_hint: string
+      tags: string[]
     }
     expect(body.url).toBe('https://github.com/foo/bar')
     expect(body.source).toBe('web-paste')
+    expect(body.type_hint).toBe('repo')
+    expect(body.tags).toContain('repo')
+    expect(body.tags).toContain('github')
+    await waitFor(() => {
+      expect(screen.getByText(/guardado · repo/i)).toBeInTheDocument()
+    })
   })
 })

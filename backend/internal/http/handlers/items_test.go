@@ -95,6 +95,28 @@ func TestItems_List_RejectsInvalidType(t *testing.T) {
 	}
 }
 
+func TestItems_List_FiltersByStack(t *testing.T) {
+	ts := newTestServer(t)
+
+	seedCapture(t, ts, capturePayload{Text: "brew install ripgrep", Tags: []string{"cli", "rust"}})
+	seedCapture(t, ts, capturePayload{Text: "go test ./...", Tags: []string{"go", "testing"}})
+	seedCapture(t, ts, capturePayload{Text: "remember the deploy checklist", Tags: []string{"ops"}})
+
+	rec := ts.do(t, http.MethodGet, "/api/items?stack=go,rust", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("list by stack: %d %s", rec.Code, rec.Body.String())
+	}
+	got := decodeJSON[itemListResp](t, rec)
+	if got.Total != 2 {
+		t.Fatalf("expected 2 stack matches, got %d", got.Total)
+	}
+	for _, it := range got.Items {
+		if it.Title == "remember the deploy checklist" {
+			t.Fatalf("unexpected non-stack item in result: %+v", it)
+		}
+	}
+}
+
 func TestItems_List_HidesArchivedByDefault(t *testing.T) {
 	ts := newTestServer(t)
 

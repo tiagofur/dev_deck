@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
 	useDeleteItem: vi.fn(),
 	useAIEnrichItem: vi.fn(),
 	useReviewItemAITags: vi.fn(),
+	useUserTags: vi.fn(),
 	showToast: vi.fn(),
 	confirm: vi.fn(),
 }))
@@ -25,6 +26,7 @@ vi.mock('@devdeck/api-client', () => ({
 	useDeleteItem: mocks.useDeleteItem,
 	useAIEnrichItem: mocks.useAIEnrichItem,
 	useReviewItemAITags: mocks.useReviewItemAITags,
+	useUserTags: mocks.useUserTags,
 }))
 
 vi.mock('@devdeck/ui', async () => {
@@ -53,6 +55,7 @@ const item = {
 	ai_tags: ['cli', 'search'],
 	enrichment_status: 'ok',
 	archived: false,
+	is_favorite: false,
 	created_at: '2026-04-30T00:00:00Z',
 	updated_at: '2026-04-30T00:00:00Z',
 	last_seen_at: null,
@@ -60,6 +63,11 @@ const item = {
 
 describe('<ItemDetailPage>', () => {
 	beforeEach(() => {
+		Object.assign(navigator, {
+			clipboard: {
+				writeText: vi.fn().mockResolvedValue(undefined),
+			},
+		})
 		mocks.useParams.mockReturnValue({ id: 'item-1' })
 		mocks.useNavigate.mockReturnValue(vi.fn())
 		mocks.useItem.mockReturnValue({ data: item, isLoading: false, error: null })
@@ -67,6 +75,7 @@ describe('<ItemDetailPage>', () => {
 		mocks.useDeleteItem.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
 		mocks.useAIEnrichItem.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
 		mocks.useReviewItemAITags.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+		mocks.useUserTags.mockReturnValue({ data: ['cli', 'search'], isLoading: false })
 	})
 
 	it('renders AI summary and suggested tags', () => {
@@ -94,5 +103,39 @@ describe('<ItemDetailPage>', () => {
 			id: 'item-1',
 			input: { ai_tags: ['cli', 'search'], apply: true },
 		})
+	})
+
+	it('marks an item for team review', async () => {
+		const mutateAsync = vi.fn().mockResolvedValue(item)
+		mocks.useUpdateItem.mockReturnValue({ mutateAsync, isPending: false })
+		render(<ItemDetailPage />)
+		fireEvent.click(screen.getByRole('button', { name: /marcar para revisión/i }))
+		expect(mutateAsync).toHaveBeenCalledWith({
+			id: 'item-1',
+			input: { tags: ['search', 'team-review'] },
+		})
+	})
+
+	it('approves an item already in team review', async () => {
+		const mutateAsync = vi.fn().mockResolvedValue(item)
+		mocks.useUpdateItem.mockReturnValue({ mutateAsync, isPending: false })
+		mocks.useItem.mockReturnValue({
+			data: { ...item, tags: ['search', 'team-review'] },
+			isLoading: false,
+			error: null,
+		})
+		render(<ItemDetailPage />)
+		fireEvent.click(screen.getByRole('button', { name: /aprobar/i }))
+		expect(mutateAsync).toHaveBeenCalledWith({
+			id: 'item-1',
+			input: { tags: ['search'], is_favorite: true },
+		})
+	})
+
+	it('copies a shareable review summary', async () => {
+		render(<ItemDetailPage />)
+		fireEvent.click(screen.getByRole('button', { name: /copiar resumen/i }))
+		expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('# ripgrep'))
+		expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('Por qué importa: para codebases grandes'))
 	})
 })

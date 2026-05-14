@@ -137,6 +137,10 @@ export {
   detectType,
   quickDetectFromClipboard,
   looksLikeURL,
+  looksLikePotentialURL,
+  normalizeURLInput,
+  parseCaptureTags,
+  suggestCaptureTags,
 } from './features/capture/detect'
 export type { DetectionResult } from './features/capture/detect'
 export type {
@@ -172,4 +176,3 @@ export type {
   AddItemsInput,
   DeckItem,
 } from './features/decks/api'
-

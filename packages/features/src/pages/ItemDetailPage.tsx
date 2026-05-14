@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Brain, ExternalLink, Sparkles, Trash2 } from 'lucide-react'
+import { ArrowLeft, Brain, CheckCircle2, Clipboard, ExternalLink, Sparkles, Trash2, Users } from 'lucide-react'
 import { Button, TagChip, confirm, hashIndex, showToast } from '@devdeck/ui'
 import {
 	useAIEnrichItem,
@@ -77,6 +77,55 @@ export function ItemDetailPage() {
 			showToast(currentItem.is_favorite ? 'Eliminado de favoritos' : 'Agregado a favoritos')
 		} catch (e) {
 			showToast((e as Error).message, 'error')
+		}
+	}
+
+	async function markForTeamReview() {
+		if (currentItem.tags.includes('team-review')) return
+		try {
+			await updateItem.mutateAsync({
+				id: currentItem.id,
+				input: { tags: [...currentItem.tags, 'team-review'] },
+			})
+			showToast('Marcado para revisar con el equipo')
+		} catch (e) {
+			showToast((e as Error).message, 'error')
+		}
+	}
+
+	async function removeFromTeamReview() {
+		try {
+			await updateItem.mutateAsync({
+				id: currentItem.id,
+				input: { tags: currentItem.tags.filter((tag) => tag !== 'team-review') },
+			})
+			showToast('Quitado de revisión')
+		} catch (e) {
+			showToast((e as Error).message, 'error')
+		}
+	}
+
+	async function approveTeamReview() {
+		try {
+			await updateItem.mutateAsync({
+				id: currentItem.id,
+				input: {
+					tags: currentItem.tags.filter((tag) => tag !== 'team-review'),
+					is_favorite: true,
+				},
+			})
+			showToast('Aprobado para el vault del equipo')
+		} catch (e) {
+			showToast((e as Error).message, 'error')
+		}
+	}
+
+	async function copyShareSummary() {
+		try {
+			await navigator.clipboard.writeText(buildShareSummary(currentItem))
+			showToast('Resumen copiado')
+		} catch {
+			showToast('No se pudo copiar', 'error')
 		}
 	}
 
@@ -176,6 +225,14 @@ export function ItemDetailPage() {
 
 				<aside>
 					<div className="lg:sticky lg:top-24 space-y-4">
+						<TeamReviewCard
+							item={currentItem}
+							saving={updateItem.isPending}
+							onMark={markForTeamReview}
+							onApprove={approveTeamReview}
+							onRemove={removeFromTeamReview}
+							onCopy={copyShareSummary}
+						/>
 						<div className="bg-bg-card border-3 border-ink shadow-hard p-5">
 							<h3 className="font-display font-black uppercase text-sm tracking-widest mb-3">Acciones</h3>
 							<div className="flex flex-col gap-3">
@@ -244,6 +301,74 @@ function ItemHero({ item, onRerunAI, rerunning }: { item: Item; onRerunAI: () =>
 			)}
 		</section>
 	)
+}
+
+function TeamReviewCard({
+	item,
+	saving,
+	onMark,
+	onApprove,
+	onRemove,
+	onCopy,
+}: {
+	item: Item
+	saving?: boolean
+	onMark: () => Promise<void> | void
+	onApprove: () => Promise<void> | void
+	onRemove: () => Promise<void> | void
+	onCopy: () => Promise<void> | void
+}) {
+	const inReview = item.tags.includes('team-review')
+
+	return (
+		<div className="bg-bg-card border-3 border-ink shadow-hard p-5">
+			<div className="flex items-start gap-3 mb-4">
+				<div className={`border-3 border-ink p-2 ${inReview ? 'bg-accent-yellow' : 'bg-bg-elevated'}`}>
+					<Users size={18} strokeWidth={3} />
+				</div>
+				<div>
+					<h3 className="font-display font-black uppercase text-sm tracking-widest">Revisión del equipo</h3>
+					<p className="font-mono text-xs text-ink-soft mt-1">
+						{inReview ? 'Este item está esperando criterio humano.' : 'Mandalo al flujo de curación compartida.'}
+					</p>
+				</div>
+			</div>
+
+			<div className="flex flex-col gap-3">
+				{inReview ? (
+					<>
+						<Button type="button" variant="accent" onClick={onApprove} disabled={saving}>
+							<span className="flex items-center gap-2"><CheckCircle2 size={16} strokeWidth={3} />Aprobar</span>
+						</Button>
+						<Button type="button" variant="secondary" onClick={onRemove} disabled={saving}>
+							Quitar de revisión
+						</Button>
+					</>
+				) : (
+					<Button type="button" variant="secondary" onClick={onMark} disabled={saving}>
+						<span className="flex items-center gap-2"><Users size={16} strokeWidth={3} />Marcar para revisión</span>
+					</Button>
+				)}
+				<Button type="button" variant="secondary" onClick={onCopy}>
+					<span className="flex items-center gap-2"><Clipboard size={16} strokeWidth={3} />Copiar resumen</span>
+				</Button>
+			</div>
+		</div>
+	)
+}
+
+function buildShareSummary(item: Item): string {
+	const tags = item.tags.filter((tag) => tag !== 'team-review')
+	const lines = [
+		`# ${item.title || '(sin título)'}`,
+		`Tipo: ${item.item_type}`,
+		item.url ? `Fuente: ${item.url}` : '',
+		item.ai_summary || item.description ? `Resumen: ${item.ai_summary || item.description}` : '',
+		item.why_saved ? `Por qué importa: ${item.why_saved}` : '',
+		item.when_to_use ? `Cuándo usarlo: ${item.when_to_use}` : '',
+		tags.length > 0 ? `Tags: ${tags.join(', ')}` : '',
+	]
+	return lines.filter(Boolean).join('\n')
 }
 
 function InlineTextCard({

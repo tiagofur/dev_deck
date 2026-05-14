@@ -6,18 +6,21 @@ import {
   Route,
   Routes,
   useLocation,
+  useNavigate,
 } from 'react-router-dom'
 import type { ReactElement } from 'react'
 import { useState } from 'react'
 import {
   CheatsheetDetailPage,
   CheatsheetsListPage,
+  GlobalSearchModal,
   DiscoveryPage,
   HomePage,
   ItemDetailPage,
   ItemsPage,
   RepoDetailPage,
   SettingsPage,
+  TeamReviewPage,
   useGlobalShortcuts,
 } from '@devdeck/features'
 import { CaptureModal, ShortcutsModal } from '@devdeck/features'
@@ -54,11 +57,14 @@ function withTransition(element: ReactElement): ReactElement {
 
 function AnimatedRoutes(): ReactElement {
   const location = useLocation()
+  const navigate = useNavigate()
   const [captureOpen, setCaptureOpen] = useState(false)
+  const [globalSearchOpen, setGlobalSearchOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
 
   // Global keyboard shortcuts
   useGlobalShortcuts({
+    onGlobalSearch: () => setGlobalSearchOpen(true),
     onCapture: () => setCaptureOpen(true),
     onShortcuts: () => setShortcutsOpen(true),
   })
@@ -76,6 +82,10 @@ function AnimatedRoutes(): ReactElement {
         {/* Protected routes */}
         <Route
           path="/"
+          element={<AuthGuard>{withTransition(<ItemsPage />)}</AuthGuard>}
+        />
+        <Route
+          path="/repos"
           element={<AuthGuard>{withTransition(<HomePage />)}</AuthGuard>}
         />
         <Route
@@ -85,6 +95,10 @@ function AnimatedRoutes(): ReactElement {
         <Route
           path="/items/:id"
           element={<AuthGuard>{withTransition(<ItemDetailPage />)}</AuthGuard>}
+        />
+        <Route
+          path="/review"
+          element={<AuthGuard>{withTransition(<TeamReviewPage />)}</AuthGuard>}
         />
         <Route
           path="/repo/:id"
@@ -116,7 +130,16 @@ function AnimatedRoutes(): ReactElement {
       </Routes>
 
       {/* Global modals */}
-      <CaptureModal open={captureOpen} onClose={() => setCaptureOpen(false)} source="manual" />
+      <GlobalSearchModal open={globalSearchOpen} onClose={() => setGlobalSearchOpen(false)} />
+      <CaptureModal
+        open={captureOpen}
+        onClose={() => setCaptureOpen(false)}
+        onOpenItem={(id) => {
+          setCaptureOpen(false)
+          navigate(`/items/${id}`)
+        }}
+        source="manual"
+      />
       <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
     </AnimatePresence>
   )

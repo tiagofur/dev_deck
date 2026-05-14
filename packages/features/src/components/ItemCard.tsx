@@ -11,6 +11,7 @@ import {
   StickyNote,
   Star,
   Terminal,
+  Users,
   Wrench,
   type LucideIcon,
 } from 'lucide-react'
@@ -64,7 +65,9 @@ export function ItemCard({ item, onClick }: Props) {
   const language = typeof item.meta?.language === 'string' ? (item.meta.language as string) : null
   const languageColor = typeof item.meta?.language_color === 'string' ? (item.meta.language_color as string) : null
   const heroText = item.ai_summary || item.description
-  const visibleTags = item.tags.length > 0 ? item.tags : item.ai_tags
+  const needsTeamReview = item.tags.includes('team-review')
+  const visibleTags = (item.tags.length > 0 ? item.tags : item.ai_tags)
+    .filter((tag) => tag !== 'team-review')
   const statusLabel = item.enrichment_status === EnrichmentStatus.Queued
     ? 'Analizando…'
     : item.enrichment_status === EnrichmentStatus.Error
@@ -107,6 +110,14 @@ export function ItemCard({ item, onClick }: Props) {
 
         {heroText && (
           <p className="text-sm text-ink-soft line-clamp-2 mb-3">{heroText}</p>
+        )}
+
+        {needsTeamReview && (
+          <p className="inline-flex items-center gap-1.5 border-2 border-ink bg-accent-yellow px-2 py-0.5
+                        text-[11px] font-mono font-bold uppercase mb-3">
+            <Users size={12} strokeWidth={3} />
+            Team review
+          </p>
         )}
 
         {statusLabel && (

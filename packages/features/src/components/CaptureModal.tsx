@@ -1,9 +1,18 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react'
-import { X } from 'lucide-react'
+import { FormEvent, KeyboardEvent as ReactKeyboardEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { ExternalLink, Plus, Users, X } from 'lucide-react'
 import { Button } from '@devdeck/ui'
-import { useCapture, usePreview, type PreviewResponse } from '@devdeck/api-client'
+import {
+  normalizeURLInput,
+  parseCaptureTags,
+  suggestCaptureTags,
+  useCapture,
+  useUpdateItem,
+  usePreview,
+  type CaptureResponse,
+  type PreviewResponse,
+} from '@devdeck/api-client'
 import { detectType } from '@devdeck/api-client'
-import { ALL_ITEM_TYPES, type CaptureInput, type ItemType } from '@devdeck/api-client'
+import { ALL_ITEM_TYPES, getLastUsedDeck, looksLikePotentialURL, looksLikeURL, type CaptureInput, type ItemType } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
 import { DeckSelect } from './Deck/DeckSelect'
 
@@ -17,6 +26,8 @@ interface Props {
   prefill?: string
   /** Source channel reported to the backend for metrics. */
   source?: CaptureInput['source']
+  /** Called after a successful capture when the user chooses to open it. */
+  onOpenItem?: (id: string) => void
 }
 
 /**
@@ -25,16 +36,20 @@ interface Props {
  * URL or text and lets the user override the detected type via a
  * chip-style picker. Fields mirror docs/CAPTURE.md §Endpoint unificado.
  */
-export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Props) {
+export function CaptureModal({ open, onClose, prefill, source = 'manual', onOpenItem }: Props) {
   const [url, setUrl] = useState('')
   const [text, setText] = useState('')
   const [typeHint, setTypeHint] = useState<ItemType | ''>('')
   const [whySaved, setWhySaved] = useState('')
   const [tagsRaw, setTagsRaw] = useState('')
+  const [tagsTouched, setTagsTouched] = useState(false)
   const [deckId, setDeckId] = useState<string | null>(null)
   const [preview, setPreview] = useState<PreviewResponse | null>(null)
+  const [lastCapture, setLastCapture] = useState<CaptureResponse | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
   const capture = useCapture()
+  const updateItem = useUpdateItem()
   const previewFetch = usePreview()
 
   // Reset + seed from prefill each time the modal opens.
@@ -45,13 +60,16 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
       setTypeHint('')
       setWhySaved('')
       setTagsRaw('')
+      setTagsTouched(false)
       setDeckId(null)
+      setLastCapture(null)
       capture.reset()
       return
     }
+    setDeckId(getLastUsedDeck())
     if (prefill) {
-      if (looksLikeURL(prefill)) {
-        setUrl(prefill)
+      if (looksLikePotentialURL(prefill)) {
+        setUrl(normalizeURLInput(prefill))
         setText('')
       } else {
         setText(prefill)
@@ -105,21 +123,35 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
     })
   }, [url, text, typeHint])
 
+  const suggestedTags = useMemo(() => {
+    if (!detected) return []
+    return suggestCaptureTags({
+      type: detected.type,
+      url: url.trim() || undefined,
+      text: text.trim() || undefined,
+    })
+  }, [detected, url, text])
+
+  useEffect(() => {
+    if (tagsTouched || tagsRaw.trim() || suggestedTags.length === 0) return
+    setTagsRaw(suggestedTags.join(', '))
+  }, [suggestedTags, tagsRaw, tagsTouched])
+
   const canSubmit = (url.trim() || text.trim()) && !capture.isPending
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
     if (!canSubmit) return
-    const tags = tagsRaw
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean)
+    const tags = parseCaptureTags(tagsRaw)
+    const normalizedUrl = normalizeURLInput(url)
+    const submitUrl = looksLikeURL(normalizedUrl) ? normalizedUrl : ''
+    const submitText = text.trim() || (!submitUrl ? normalizedUrl : '')
     try {
       const res = await capture.mutateAsync({
         source,
         deck_id: deckId || undefined,
-        url: url.trim() || undefined,
-        text: text.trim() || undefined,
+        url: submitUrl || undefined,
+        text: submitText || undefined,
         type_hint: typeHint || undefined,
         why_saved: whySaved.trim() || undefined,
         tags: tags.length > 0 ? tags : undefined,
@@ -129,10 +161,60 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
       } else {
         showToast('Guardado', 'success')
       }
-      onClose()
+      setLastCapture(res)
     } catch {
       /* Error shown inline below */
     }
+  }
+
+  function resetDraftForNext() {
+    setUrl('')
+    setText('')
+    setTypeHint('')
+    setWhySaved('')
+    setTagsRaw('')
+    setTagsTouched(false)
+    setPreview(null)
+    setLastPreviewUrl('')
+    setLastCapture(null)
+    capture.reset()
+  }
+
+  function openCapturedItem() {
+    const id = lastCapture?.item?.id || lastCapture?.duplicate_of
+    if (!id || !onOpenItem) return
+    onOpenItem(id)
+    onClose()
+  }
+
+  async function markForTeamReview() {
+    const item = lastCapture?.item
+    if (!item || item.tags.includes('team-review')) return
+    try {
+      const updated = await updateItem.mutateAsync({
+        id: item.id,
+        input: { tags: [...item.tags, 'team-review'] },
+      })
+      setLastCapture((current) => current ? { ...current, item: updated } : current)
+      showToast('Marcado para revisar con el equipo', 'success')
+    } catch {
+      showToast('No se pudo marcar para revisión', 'error')
+    }
+  }
+
+  function submitFromShortcut(e: ReactKeyboardEvent<HTMLFormElement>) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault()
+      formRef.current?.requestSubmit()
+    }
+  }
+
+  function applySuggestedTags() {
+    if (suggestedTags.length === 0) return
+    const existing = parseCaptureTags(tagsRaw)
+    const merged = [...new Set([...existing, ...suggestedTags])]
+    setTagsRaw(merged.join(', '))
+    setTagsTouched(true)
   }
 
   if (!open) return null
@@ -144,7 +226,9 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
       onClick={onClose}
     >
       <form
+        ref={formRef}
         onSubmit={onSubmit}
+        onKeyDown={submitFromShortcut}
         onClick={(e) => e.stopPropagation()}
         className="bg-bg-card border-5 border-ink shadow-hard-xl p-5 w-full max-w-lg
                    max-h-[85vh] overflow-y-auto"
@@ -163,6 +247,52 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
           </button>
         </header>
 
+        {lastCapture && (
+          <div className="mb-5 border-3 border-ink bg-accent-lime/30 p-4">
+            <p className="font-display font-black uppercase text-lg mb-1">
+              {lastCapture.duplicate_of ? 'Ya estaba guardado' : 'Guardado'}
+            </p>
+            <p className="font-mono text-sm text-ink-soft mb-4">
+              {lastCapture.item?.title || 'El item quedó en tu vault.'}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {onOpenItem && (lastCapture.item?.id || lastCapture.duplicate_of) && (
+                <Button type="button" size="sm" onClick={openCapturedItem}>
+                  <span className="flex items-center gap-2">
+                    <ExternalLink size={14} strokeWidth={3} />
+                    Abrir item
+                  </span>
+                </Button>
+              )}
+              <Button type="button" variant="secondary" size="sm" onClick={resetDraftForNext}>
+                <span className="flex items-center gap-2">
+                  <Plus size={14} strokeWidth={3} />
+                  Capturar otro
+                </span>
+              </Button>
+              {lastCapture.item && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  disabled={lastCapture.item.tags.includes('team-review') || updateItem.isPending}
+                  onClick={markForTeamReview}
+                >
+                  <span className="flex items-center gap-2">
+                    <Users size={14} strokeWidth={3} />
+                    {lastCapture.item.tags.includes('team-review') ? 'En revisión' : 'Revisar con equipo'}
+                  </span>
+                </Button>
+              )}
+              <Button type="button" variant="secondary" size="sm" onClick={onClose}>
+                Cerrar
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {!lastCapture && (
+          <>
         <label
           className={`block mb-3 ${isDragging ? 'bg-accent-yellow/30' : ''}`}
           onDragOver={(e) => {
@@ -182,10 +312,12 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
           <span className="block text-xs font-mono font-bold uppercase mb-1">URL</span>
           <input
             autoFocus={!text}
-            type="url"
-            placeholder="https://…"
+            type="text"
+            inputMode="url"
+            placeholder="https://… o github.com/owner/repo"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
+            onBlur={() => setUrl((current) => normalizeURLInput(current))}
             className="w-full border-3 border-ink p-3 font-mono text-base
                        focus:outline-none focus:bg-accent-yellow/20"
           />
@@ -200,6 +332,15 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
             placeholder="brew install ripgrep"
             value={text}
             onChange={(e) => setText(e.target.value)}
+            onPaste={(e) => {
+              const pasted = e.clipboardData.getData('text/plain').trim()
+              if (!pasted || text.trim() || url.trim()) return
+              if (looksLikePotentialURL(pasted)) {
+                e.preventDefault()
+                setUrl(normalizeURLInput(pasted))
+                setText('')
+              }
+            }}
             className="w-full border-3 border-ink p-3 font-mono text-sm
                        focus:outline-none focus:bg-accent-yellow/20 resize-none"
           />
@@ -284,10 +425,29 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
             type="text"
             placeholder="cli, terminal, productivity"
             value={tagsRaw}
-            onChange={(e) => setTagsRaw(e.target.value)}
+            onChange={(e) => {
+              setTagsRaw(e.target.value)
+              setTagsTouched(true)
+            }}
             className="w-full border-3 border-ink p-3 font-mono text-sm
                        focus:outline-none focus:bg-accent-yellow/20"
           />
+          {suggestedTags.length > 0 && (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className="text-xs font-mono text-ink-soft">Sugeridos:</span>
+              {suggestedTags.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={applySuggestedTags}
+                  className="border-2 border-ink px-2 py-0.5 bg-accent-cyan/30
+                             text-xs font-mono hover:bg-accent-cyan/60"
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          )}
         </label>
 
         <div className="mb-5">
@@ -308,9 +468,11 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual' }: Prop
             Cancelar
           </Button>
           <Button type="submit" disabled={!canSubmit}>
-            {capture.isPending ? 'Guardando…' : 'Guardar'}
+            {capture.isPending ? 'Guardando…' : 'Guardar ⌘Enter'}
           </Button>
         </div>
+          </>
+        )}
       </form>
     </div>
   )
@@ -337,14 +499,4 @@ function TypeChip({
       {label}
     </button>
   )
-}
-
-function looksLikeURL(s: string): boolean {
-  if (!/^https?:\/\//i.test(s)) return false
-  try {
-    const u = new URL(s)
-    return !!u.hostname
-  } catch {
-    return false
-  }
 }
