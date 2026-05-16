@@ -3,25 +3,39 @@
 // Same subscribe pattern as toast/confirm: components subscribe and
 // re-render when preferences change.
 import { useEffect, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid'
 
 const STORAGE_KEY = 'devdeck.prefs.v1'
 
 export interface Preferences {
   mascotEnabled: boolean
+  clientId: string
+  lastSyncAt: string | null
+  activeOrgId: string | null
 }
 
 const defaults: Preferences = {
   mascotEnabled: true,
+  clientId: '',
+  lastSyncAt: null,
+  activeOrgId: null,
 }
 
 export function getPreferences(): Preferences {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return { ...defaults }
-    const parsed = JSON.parse(raw) as Partial<Preferences>
-    return { ...defaults, ...parsed }
+    const parsed = raw ? (JSON.parse(raw) as Partial<Preferences>) : {}
+    const prefs = { ...defaults, ...parsed }
+    
+    // Ensure clientId exists
+    if (!prefs.clientId) {
+      prefs.clientId = uuidv4()
+      setPreferences({ clientId: prefs.clientId })
+    }
+    
+    return prefs
   } catch {
-    return { ...defaults }
+    return { ...defaults, clientId: uuidv4() }
   }
 }
 

@@ -430,6 +430,131 @@
 - Rate limiting por usuario para endpoints de IA (proteger contra abuso de costos)
 - Billing foundation: campo `plan` en `users` (`free`|`pro`); límites por plan (ej: items guardados, embeddings/mes)
 
+## Ola 7 — Colaboración y Extensiones Avanzadas
+
+### Fase 25 — Runbooks y Contexto Operacional
+
+- `migrations/0023_runbooks.sql`: tablas `runbooks` y `runbook_steps` asociados a items
+- Checklist state: soporte para `is_completed` persistente y sincronizado
+- UI: sistema de pestañas en `ItemDetailPage` para alternar entre Notas y Runbooks
+- Sync: integración de nuevas entidades en el Sync Engine offline-first
+
+### Fase 26 — Consolidación de Base de Datos
+
+- `migrations/0024_consolidate_repos_to_items.sql`: migración de la tabla legacy `repos` a la tabla polimórfica `items`
+- Unificación de relaciones: `repo_commands` -> `item_commands`, `repo_cheatsheet_links` -> `item_cheatsheet_links`
+- Refactor del Store: eliminación de lógica duplicada y uso extensivo de JSONB para metadata específica
+
+### Fase 27 — Sistema de Invitaciones y Waitlist
+
+- `migrations/0025_invites.sql`: tablas `invites` y `waitlist`
+- Registro controlado: soporte para `REQUIRE_INVITE=true` en registro local y OAuth
+- Admin: endpoints para generación de códigos beta y visualización de lista de espera
+
+### Fase 28 — Extensión de Navegador v2
+
+- Migración de `extension/` (Vanilla JS) a `apps/extension` (React + Vite + TS)
+- Reuso de `@devdeck/api-client` y `@devdeck/ui` para paridad funcional total
+- Persistencia local: integración de `sqlocal` (SQLite/OPFS) en el worker de la extensión
+
+### Fase 29 — Landing Page v2 y Publicación
+
+- Página de inicio renovada en `apps/web`: Hero brutalista, feature grid y CTAs claros
+- Documentación técnica finalizada para el lanzamiento de Ola 7
+- Preparación de assets para publicación en tiendas (Chrome Web Store, Microsoft Store)
+
+## Ola 8 — Excelencia Operacional y Ejecución
+
+### Fase 30 — Dashboard de Administración y Ejecución
+
+- UI: Panel de administración para gestión de usuarios, waitlist e invitaciones
+- Desktop: Puente IPC en Electron para ejecución de comandos locales desde Runbooks
+- Seguridad: Auditoría de comandos ejecutados y visualización previa obligatoria
+- Analytics: Panel básico de métricas de uso (items guardados, búsquedas, IA)
+
+### Fase 31 — Sugerencias de Copiloto (IA Proactiva)
+
+- Extension: Inyección de widget (Shadow DOM) para detectar items ya guardados al navegar
+- UX: Notificaciones instantáneas en el browser ("Ya tenés este repo en tu vault")
+- Backend: Endpoint `/api/items/check` optimizado para verificaciones rápidas por URL
+
+### Fase 32 — Notificaciones y Digest Semanal
+
+- UI: Centro de notificaciones in-app (campanita) con estados de lectura
+- Backend: Job de Cron semanal para generar resúmenes de actividad con IA
+- Engagement: Notificaciones de sistema para hitos de enriquecimiento y aprobación de waitlist
+
+## Ola 9 — Colaboración en Equipos (Teams)
+
+### Fase 33 — Soporte para Equipos y Roles Avanzados
+
+- Database: Soporte para organizaciones (`orgs`) y pertenencia de miembros
+- Sharing: Vaults compartidos entre miembros del mismo equipo
+- Permisos: Roles granulares (Viewer, Editor, Owner) y control de acceso a decks privados
+- Admin: Gestión de facturación por equipo (Pro for Teams)
+
+### Fase 34 — Edición Colaborativa en Tiempo Real (CRDTs)
+
+- Realtime: Integración de Yjs para edición concurrente de notas y runbooks
+- Backend: Implementación de servidor WebSocket en Go para sincronización de estados compartidos
+- UX: Indicadores de presencia ("X está editando...") y cursores remotos
+
+### Fase 35 — Actividad de Equipo y Feed en Tiempo Real
+
+- Team Feed: Registro de cambios recientes en el vault del equipo
+- Notifications: Notificaciones push para menciones (@username) en notas compartidas
+- Audit Log: Historial de cambios por miembro para administradores de equipo
+
+## Ola 10 — Automatización y Plugins de Terceros
+
+### Fase 38 — Plugin Marketplace e Integraciones
+
+- UI: Galería de descubrimiento de integraciones con "One-click install"
+- Backend: Catálogo estático de templates curados (NPM, YouTube, Slack)
+- DX: Soporte para instalación simplificada de enriquecedores custom
+
+## Ola 11 — Soporte Offline Nativo y Mobile Bridge
+
+### Fase 39 — PWA Avanzada y Mobile Discovery
+
+- PWA: Configuración completa de Service Workers para acceso 100% offline a la Web App
+- Mobile: Implementación de "Share Target" en Android/iOS para capturar links desde otras apps
+- UX: Adaptación brutalista para pantallas móviles (Responsive design 2.0)
+
+### Fase 40 — Mobile Bridge (React Native / Capacitor)
+
+- Bridge: Wrapper nativo para acceder a archivos locales y base de datos persistente en el celular
+- Sync: Optimización de la cola de sincronización para conexiones móviles inestables
+- Push: Integración nativa de notificaciones para el centro de alertas
+
+## Ola 12 — Colaboración Social y Curación Pública
+
+### Fase 41 — Conexión entre Usuarios (Following)
+
+- Social: Implementación de sistema de "Seguir" (Follow/Following) entre perfiles públicos
+- Feed: Muro de actividad global con los items más recientes guardados por los curadores que seguís
+- Notificaciones: Alertas cuando alguien que seguís publica un nuevo Deck
+
+### Fase 42 — Descubrimiento Comunitario y Rankings
+
+- Discover: Feed global con los items más guardados de la semana (Trending)
+- Gamification: Sistema de puntos por contribución y medallas de "Experto en X" (ej: Rust Master)
+- Leaderboard: Ranking de curadores más seguidos y Decks más starreados
+
+## Ola 13 — Despliegue Global y Escalabilidad (Edge Computing)
+
+### Fase 43 — Réplicas de Lectura y Caching en el Edge
+
+- Infra: Configuración de réplicas de lectura de PostgreSQL para reducir latencia global
+- Cache: Implementación de capa de caching distribuida (Redis/Dragonfly) para perfiles públicos y trending feeds
+- Edge: Despliegue de funciones Edge para el renderizado inicial de Decks públicos (SEO dinámico)
+
+### Fase 44 — Autenticación Multi-región y Sincronización Global
+
+- Auth: Migración a sistema de identidad multi-región para sesiones ultra-rápidas
+- Sync: Sincronización de bases de datos distribuidas (Postgres Bidireccional) para equipos globales
+- Monitoring: Panel de observabilidad global (métricas por región, latencia p99)
+
 ---
 
 ## Stack actualizado

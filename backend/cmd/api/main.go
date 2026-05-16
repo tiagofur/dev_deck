@@ -23,6 +23,7 @@ import (
 	"devdeck/internal/jobs"
 	"devdeck/internal/seed"
 	"devdeck/internal/store"
+	"devdeck/internal/webhooks"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -66,8 +67,12 @@ func main() {
 	logger.Info("connected to postgres")
 
 	st := store.New(pool)
+	wh := webhooks.New(st)
+	st.SetWebhookService(wh)
+
 	en := enricher.New(cfg.GithubToken)
 	aiSvc := ai.NewFromConfig(cfg)
+	embSvc := ai.NewEmbeddingsServiceFromConfig(cfg)
 
 	// Email sender (Local Auth)
 	var emailSender email.Sender = &email.NoopSender{}
@@ -111,6 +116,8 @@ func main() {
 		AuthService: authService,
 		EnrichQueue: enrichQueue,
 		EmailSender: emailSender,
+		AI:          aiSvc,
+		Embeddings:  embSvc,
 	})
 
 	// Background refresher: re-enriches stale repos so stars/desc don't drift.
@@ -122,6 +129,23 @@ func main() {
 		"github_token", cfg.GithubToken != "",
 		"ai_provider", cfg.AIProvider,
 	)
+
+	// Weekly Digest job
+	digestJob := cron.NewDigestJob(st, aiSvc)
+	go func() {
+		// Run once on startup (for dev) then every week
+		digestJob.Run(ctx)
+		ticker := time.NewTicker(7 * 24 * time.Hour)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				digestJob.Run(ctx)
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,

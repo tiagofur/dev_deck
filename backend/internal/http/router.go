@@ -29,14 +29,17 @@ type Deps struct {
 	EnrichQueue *jobs.EnrichQueue
 	EmailSender email.Sender
 	AI          *ai.Service
+	Embeddings  *ai.EmbeddingsService
 }
 
-func NewRouter(cfg config.Config, st *store.Store, en *enricher.Service, as *authservice.Service) http.Handler {
+func NewRouter(cfg config.Config, st *store.Store, en *enricher.Service, as *authservice.Service, aiSvc *ai.Service, embSvc *ai.EmbeddingsService) http.Handler {
 	return NewRouterWithDeps(cfg, Deps{
 		Store:       st,
 		Enricher:    en,
 		AuthService: as,
 		EmailSender: &email.NoopSender{},
+		AI:          aiSvc,
+		Embeddings:  embSvc,
 	})
 }
 
@@ -62,15 +65,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	st := deps.Store
 	en := deps.Enricher
 	as := deps.AuthService
-
-	// Initialize AI embeddings service if AI is enabled
-	var embSvc *ai.EmbeddingsService
-	if deps.AI != nil && deps.AI.Enabled() {
-		// Create appropriate embedder based on config
-		// This would use same provider as AI summary/tags
-		// For now, we'll create based on config defaults
-		embSvc = ai.NewEmbeddingsService(nil) // placeholder until config integration
-	}
+	embSvc := deps.Embeddings
 
 	var authH *handlers.AuthHandler
 	if cfg.AuthMode == "jwt" && as != nil {
@@ -80,6 +75,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			GitHubOAuthCallbackURL:  cfg.GitHubOAuthCallbackURL,
 			WebOAuthRedirectURL:     cfg.WebOAuthRedirectURL,
 			DesktopOAuthRedirectURL: cfg.DesktopOAuthRedirectURL,
+			RequireInvite:           cfg.RequireInvite,
 		})
 	}
 
@@ -94,20 +90,34 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	previewH := handlers.NewPreviewHandler(deps.Enricher)
 	askH := handlers.NewAskHandler(st, embSvc)
 	relatedH := handlers.NewItemRelatedHandler(st)
-	syncH := handlers.NewSyncHandler()
-	devicesH := handlers.NewDevicesHandler()
+	syncH := handlers.NewSyncHandler(st)
+	devicesH := handlers.NewDevicesHandler(st)
 	deckH := handlers.NewDeckHandler(st)
-	publicDeckH := handlers.NewPublicDeckHandler()
-	importH := handlers.NewImportHandler()
-	profileH := handlers.NewProfileHandler()
-	adminH := handlers.NewAdminHandler()
+	publicDeckH := handlers.NewPublicDeckHandler(st)
+	importH := handlers.NewImportHandler(st)
+	profileH := handlers.NewProfileHandler(st)
+	adminH := handlers.NewAdminHandler(st)
+	runbooksH := handlers.NewRunbooksHandler(st)
+	invitesH := handlers.NewInvitesHandler(st)
+	notificationsH := handlers.NewNotificationsHandler(st)
+	orgsH := handlers.NewOrgsHandler(st)
+	realtimeH := handlers.NewRealtimeHandler()
+	keysH := handlers.NewKeysHandler(st)
+	enrichersH := handlers.NewEnrichersHandler(st)
+	webhooksH := handlers.NewWebhooksHandler(st)
+	pluginsH := handlers.NewPluginsHandler()
+	socialH := handlers.NewSocialHandler(st)
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/suggestions/commands", suggestionsH.Commands)
+		r.Get("/plugins/featured", pluginsH.ListFeatured)
+		r.Post("/waitlist", invitesH.JoinWaitlist)
 
 		if authH != nil {
 			r.Route("/auth", func(r chi.Router) {
 				r.Get("/providers", authH.Providers)
+				r.Post("/register", authH.Register)
+				r.Post("/login", authH.LoginLocal)
 				r.Get("/github/login", authH.Login)
 				r.Get("/github/callback", authH.Callback)
 				r.Post("/refresh", authH.Refresh)
@@ -116,12 +126,14 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				r.Group(func(r chi.Router) {
 					r.Use(mw.JWTAuth(as))
 					r.Get("/me", authH.Me)
+					r.Patch("/me", authH.UpdateMe)
 				})
 			})
 		}
 
 		r.Group(func(r chi.Router) {
-			r.Use(mw.TokenAuth(cfg, as))
+			r.Use(mw.TokenAuth(cfg, as, st))
+			r.Use(mw.ContextOrg)
 
 			if !cfg.RateLimitDisabled {
 				r.Use(httprate.Limit(
@@ -174,23 +186,63 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 
 			r.Get("/search", cheatsH.Search)
 			r.Get("/stats", statsH.Get)
-			r.Get("/discovery/next", discoveryH.Next)
+			r.Route("/discovery", func(dr chi.Router) {
+				dr.Get("/next", discoveryH.Next)
+				dr.Get("/trending", discoveryH.Trending)
+				dr.Get("/leaderboard", discoveryH.Leaderboard)
+			})
+
+			r.Route("/feed", func(fr chi.Router) {
+				fr.Get("/following", socialH.GetFollowingFeed)
+			})
+
+			r.Route("/orgs", func(or chi.Router) {
+				or.Post("/", orgsH.Create)
+				or.Get("/", orgsH.List)
+				or.Get("/{id}/feed", orgsH.GetFeed)
+				or.Post("/{id}/members", orgsH.AddMember)
+			})
 
 			r.Route("/items", func(ir chi.Router) {
 				ir.Post("/capture", captureH.Capture)
 				ir.Post("/preview", previewH.Preview)
+				ir.Post("/check", itemsH.Check)
 				ir.Get("/", itemsH.List)
 				ir.Get("/tags", itemsH.ListTags)
 				ir.Get("/{id}", itemsH.Get)
 				ir.Patch("/{id}", itemsH.Update)
 				ir.Delete("/{id}", itemsH.Delete)
-				ir.Post("/{id}/ai-enrich", itemsH.AIEnrich)
+				
+				ir.Group(func(ir chi.Router) {
+					ir.Use(mw.IARateLimit(100, 10))
+					ir.Post("/{id}/ai-enrich", itemsH.AIEnrich)
+				})
+
 				ir.Patch("/{id}/ai-tags", itemsH.ReviewAITags)
 				ir.Post("/{id}/seen", itemsH.MarkSeen)
 				ir.Get("/{id}/related", relatedH.Related)
+
+				// Runbooks (contextual to item)
+				ir.Get("/{id}/runbooks", runbooksH.List)
+				ir.Post("/{id}/runbooks", runbooksH.Create)
 			})
 
-			r.Post("/ask", askH.Ask)
+			r.Group(func(r chi.Router) {
+				r.Use(mw.IARateLimit(100, 10))
+				r.Post("/ask", askH.Ask)
+			})
+
+			r.Route("/runbooks/{id}", func(r chi.Router) {
+				r.Patch("/", runbooksH.Update)
+				r.Delete("/", runbooksH.Delete)
+				r.Post("/steps", runbooksH.CreateStep)
+				r.Post("/steps/reorder", runbooksH.ReorderSteps)
+			})
+
+			r.Route("/runbook-steps/{id}", func(r chi.Router) {
+				r.Patch("/", runbooksH.UpdateStep)
+				r.Delete("/", runbooksH.DeleteStep)
+			})
 
 			r.Post("/sync/batch", syncH.BatchSync)
 			r.Get("/sync/delta", syncH.Delta)
@@ -198,6 +250,31 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Get("/me/devices", devicesH.List)
 			r.Post("/me/devices/register", devicesH.Register)
 			r.Delete("/me/devices/{clientId}", devicesH.Delete)
+
+			r.Route("/me/notifications", func(nr chi.Router) {
+				nr.Get("/", notificationsH.List)
+				nr.Get("/count", notificationsH.Count)
+				nr.Post("/read-all", notificationsH.MarkAllRead)
+				nr.Patch("/{id}/read", notificationsH.MarkRead)
+			})
+
+			r.Route("/me/keys", func(kr chi.Router) {
+				kr.Get("/", keysH.List)
+				kr.Post("/", keysH.Create)
+				kr.Delete("/{id}", keysH.Delete)
+			})
+
+			r.Route("/me/enrichers", func(er chi.Router) {
+				er.Get("/", enrichersH.List)
+				er.Post("/", enrichersH.Create)
+				er.Delete("/{id}", enrichersH.Delete)
+			})
+
+			r.Route("/me/webhooks", func(wr chi.Router) {
+				wr.Get("/", webhooksH.List)
+				wr.Post("/", webhooksH.Create)
+				wr.Delete("/{id}", webhooksH.Delete)
+			})
 
 			// Decks (auth required)
 			r.Get("/decks", deckH.List)
@@ -214,16 +291,28 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Post("/decks/{id}/import", importH.Import)
 
 			r.Route("/admin", func(ar chi.Router) {
+				ar.Use(mw.RequireAdmin)
 				ar.Get("/users", adminH.ListUsers)
+				ar.Get("/waitlist", invitesH.ListWaitlist)
+				ar.Get("/invites", invitesH.ListInvites)
+				ar.Post("/invites", invitesH.CreateInvite)
 			})
 		})
 
 		// Public deck (no auth)
 		r.Get("/decks/{slug}/public", publicDeckH.Get)
+		r.Get("/realtime/{roomID}", realtimeH.Connect)
 
 		// Public profile (no auth)
 		r.Get("/users/{username}/public", profileH.GetPublic)
 		r.Get("/users/{username}/public/decks", profileH.GetPublicDecks)
+
+		// Social (auth required)
+		r.Group(func(r chi.Router) {
+			r.Use(mw.TokenAuth(cfg, as, st))
+			r.Post("/users/{username}/follow", socialH.Follow)
+			r.Delete("/users/{username}/follow", socialH.Unfollow)
+		})
 	})
 
 	return r

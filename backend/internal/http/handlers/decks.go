@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"devdeck/internal/authctx"
 	"devdeck/internal/store"
@@ -25,10 +26,12 @@ type Profile struct {
 }
 
 // ProfileHandler handles public profile operations.
-type ProfileHandler struct{}
+type ProfileHandler struct {
+	store *store.Store
+}
 
-func NewProfileHandler() *ProfileHandler {
-	return &ProfileHandler{}
+func NewProfileHandler(s *store.Store) *ProfileHandler {
+	return &ProfileHandler{store: s}
 }
 
 // GET /api/users/:username/public — public profile (no auth)
@@ -39,9 +42,30 @@ func (h *ProfileHandler) GetPublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Query profile from DB using get_user_by_username()
+	profile, err := h.store.GetPublicProfile(r.Context(), username)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "NOT_FOUND", "user not found")
+			return
+		}
+		writeInternal(w, err)
+		return
+	}
+
+	// Optional: check if following
+	isFollowing := false
+	if currentID, ok := authctx.UserID(r.Context()); ok {
+		profileID := profile["id"].(uuid.UUID)
+		if currentID != profileID {
+			if followed, err := h.store.IsFollowing(r.Context(), currentID, profileID); err == nil {
+				isFollowing = followed
+			}
+		}
+	}
+	profile["is_following"] = isFollowing
+
 	writeJSON(w, http.StatusOK, map[string]any{
-		"profile": Profile{},
+		"profile": profile,
 	})
 }
 
@@ -53,9 +77,51 @@ func (h *ProfileHandler) GetPublicDecks(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// TODO: Query public decks from DB
+	// 1. Get user ID first
+	profile, err := h.store.GetPublicProfile(r.Context(), username)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "NOT_FOUND", "user not found")
+			return
+		}
+		writeInternal(w, err)
+		return
+	}
+
+	userID := profile["id"].(uuid.UUID)
+
+	// 2. Query public decks (this method might need to be implemented/exported)
+	// For now, we'll implement a query here or add to store.
+	rows, err := h.store.Pool().Query(r.Context(), `
+		SELECT id, slug, title, description, is_public, created_at, updated_at
+		FROM decks
+		WHERE user_id = $1 AND is_public = true
+		ORDER BY created_at DESC
+	`, userID)
+
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+	defer rows.Close()
+
+	decks := []Deck{}
+	for rows.Next() {
+		var d Deck
+		var desc *string
+		var createdAt, updatedAt time.Time
+		if err := rows.Scan(&d.ID, &d.Slug, &d.Title, &desc, &d.IsPublic, &createdAt, &updatedAt); err != nil {
+			writeInternal(w, err)
+			return
+		}
+		d.Description = desc
+		d.CreatedAt = createdAt.Format(time.RFC3339)
+		d.UpdatedAt = updatedAt.Format(time.RFC3339)
+		decks = append(decks, d)
+	}
+
 	writeJSON(w, http.StatusOK, map[string]any{
-		"decks": []Deck{},
+		"decks": decks,
 	})
 }
 
@@ -334,10 +400,12 @@ func (h *DeckHandler) RemoveItem(w http.ResponseWriter, r *http.Request) {
 // ───── Public Deck (no auth) ─────
 
 // PublicDeckHandler handles public deck operations.
-type PublicDeckHandler struct{}
+type PublicDeckHandler struct {
+	store *store.Store
+}
 
-func NewPublicDeckHandler() *PublicDeckHandler {
-	return &PublicDeckHandler{}
+func NewPublicDeckHandler(s *store.Store) *PublicDeckHandler {
+	return &PublicDeckHandler{store: s}
 }
 
 // GET /api/decks/:slug/public — get public deck (no auth)
@@ -348,20 +416,37 @@ func (h *PublicDeckHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Query public deck from DB
+	deck, err := h.store.GetPublicDeckBySlug(r.Context(), slug)
+	if errors.Is(err, store.ErrDeckNotFound) {
+		writeError(w, http.StatusNotFound, "NOT_FOUND", "public deck not found")
+		return
+	}
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	items, err := h.store.GetPublicDeckItems(r.Context(), deck.ID)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
 	writeJSON(w, http.StatusOK, map[string]any{
-		"deck":  Deck{},
-		"items": []DeckItem{},
+		"deck":  deck,
+		"items": items,
 	})
 }
 
 // ───── Import ─────
 
 // ImportHandler handles importing decks.
-type ImportHandler struct{}
+type ImportHandler struct {
+	store *store.Store
+}
 
-func NewImportHandler() *ImportHandler {
-	return &ImportHandler{}
+func NewImportHandler(s *store.Store) *ImportHandler {
+	return &ImportHandler{store: s}
 }
 
 // POST /api/decks/:id/import — import deck to user's vault
@@ -378,11 +463,14 @@ func (h *ImportHandler) Import(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = userID
-	_ = id // TODO: Import items to user's vault
+	count, err := h.store.ImportDeckItems(r.Context(), userID, id)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
 
 	writeJSON(w, http.StatusOK, map[string]any{
-		"imported": 0,
+		"imported": count,
 	})
 }
 
@@ -429,17 +517,23 @@ func (h *ImportHandler) Unstar(w http.ResponseWriter, r *http.Request) {
 // ───── Admin Users ─────
 
 // AdminHandler handles admin user management.
-type AdminHandler struct{}
+type AdminHandler struct {
+	store *store.Store
+}
 
-func NewAdminHandler() *AdminHandler {
-	return &AdminHandler{}
+func NewAdminHandler(s *store.Store) *AdminHandler {
+	return &AdminHandler{store: s}
 }
 
 // GET /api/admin/users — list all users (admin only)
 func (h *AdminHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
-	// TODO: Check admin role/permission
+	users, err := h.store.ListUsersAdmin(r.Context())
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
 	writeJSON(w, http.StatusOK, map[string]any{
-		"users": []UserInfo{},
+		"users": users,
 	})
 }
 

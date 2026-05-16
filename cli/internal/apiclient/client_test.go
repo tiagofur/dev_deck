@@ -130,7 +130,7 @@ func TestSearch_BuildsQueryString(t *testing.T) {
 		_, _ = w.Write([]byte(`{"query":"ripgrep","results":[{"type":"repo","id":"1","title":"ripgrep"}]}`))
 	})
 	client := New(fb.server.URL, "t")
-	results, err := client.Search(context.Background(), "ripgrep turbo", 5)
+	results, err := client.Search(context.Background(), "ripgrep turbo", 5, "")
 	if err != nil {
 		t.Fatalf("Search: %v", err)
 	}

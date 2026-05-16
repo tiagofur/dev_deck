@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
 	"devdeck/internal/authctx"
+	"devdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -12,31 +14,14 @@ import (
 
 // SyncRequest represents a single sync operation from the client.
 type SyncRequest struct {
-	ClientID    uuid.UUID      `json:"client_id"`
-	Operations []SyncOperation `json:"operations"`
-}
-
-// SyncOperation represents one CRUD operation to sync.
-type SyncOperation struct {
-	OperationID uuid.UUID     `json:"operation_id"`
-	Operation  string       `json:"operation"` // create, update, delete
-	EntityType string       `json:"entity_type"`
-	EntityID  uuid.UUID    `json:"entity_id"`
-	Payload   interface{} `json:"payload,omitempty"`
+	ClientID   uuid.UUID             `json:"client_id"`
+	Operations []store.SyncOperation `json:"operations"`
 }
 
 // SyncResponse is the response for sync operations.
 type SyncResponse struct {
-	Operations []SyncOperationResult `json:"operations"`
-	Delta      []SyncDeltaResult      `json:"delta,omitempty"`
-}
-
-// SyncOperationResult describes the result of a single operation.
-type SyncOperationResult struct {
-	OperationID    uuid.UUID `json:"operation_id"`
-	Status       string   `json:"status"` // success, error, already_synced
-	Error        string   `json:"error,omitempty"`
-	ServerVersion int      `json:"server_version,omitempty"`
+	Operations []store.SyncOperationResult `json:"operations"`
+	Delta      []SyncDeltaResult           `json:"delta,omitempty"`
 }
 
 // SyncDeltaResult describes a delta change from the server.
@@ -50,45 +35,85 @@ type SyncDeltaResult struct {
 }
 
 // SyncHandler handles offline sync operations.
-// Full implementation pending - returns stub for now.
-type SyncHandler struct{}
+type SyncHandler struct {
+	store *store.Store
+}
 
-func NewSyncHandler() *SyncHandler {
-	return &SyncHandler{}
+func NewSyncHandler(s *store.Store) *SyncHandler {
+	return &SyncHandler{store: s}
 }
 
 // POST /api/sync/batch
 // Body: {"client_id": "uuid", "operations": [...]}
 func (h *SyncHandler) BatchSync(w http.ResponseWriter, r *http.Request) {
-	_, ok := authctx.UserID(r.Context())
+	userID, ok := authctx.UserID(r.Context())
 	if !ok {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
 		return
 	}
 
-	// TODO: Full sync implementation
-	// - Insert operations into sync_log
-	// - Process each idempotently
-	// - Return results with server_version
+	var req SyncRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
+		return
+	}
 
-	writeJSON(w, http.StatusOK, map[string]any{
-		"operations": []SyncOperationResult{},
-		"delta":      []SyncDeltaResult{},
+	if req.ClientID == uuid.Nil {
+		writeError(w, http.StatusBadRequest, "INVALID_CLIENT", "client_id is required")
+		return
+	}
+
+	results, err := h.store.ProcessSyncBatch(r.Context(), userID, req.ClientID, req.Operations)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, SyncResponse{
+		Operations: results,
 	})
 }
 
 // GET /api/sync/delta?since=...&client_id=...
 func (h *SyncHandler) Delta(w http.ResponseWriter, r *http.Request) {
-	_, ok := authctx.UserID(r.Context())
+	userID, ok := authctx.UserID(r.Context())
 	if !ok {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
 		return
 	}
 
-	// TODO: Query sync_log for changes since timestamp
+	sinceStr := r.URL.Query().Get("since")
+	var since time.Time
+	if sinceStr != "" {
+		var err error
+		since, err = time.Parse(time.RFC3339, sinceStr)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "INVALID_TIMESTAMP", "since must be RFC3339")
+			return
+		}
+	}
+
+	clientIDRaw := r.URL.Query().Get("client_id")
+	clientID, err := uuid.Parse(clientIDRaw)
+	if err != nil && clientIDRaw != "" {
+		writeError(w, http.StatusBadRequest, "INVALID_CLIENT", "client_id must be a valid UUID")
+		return
+	}
+
+	ops, err := h.store.GetSyncDelta(r.Context(), userID, clientID, since)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	// Update device last seen/sync when they pull
+	if clientID != uuid.Nil {
+		_ = h.store.UpdateDeviceSync(r.Context(), clientID)
+	}
 
 	writeJSON(w, http.StatusOK, map[string]any{
-		"delta": []SyncDeltaResult{},
+		"operations": ops,
+		"now":        time.Now().Format(time.RFC3339),
 	})
 }
 
@@ -178,31 +203,36 @@ type Device struct {
 }
 
 // DevicesHandler manages user devices.
-type DevicesHandler struct{}
+type DevicesHandler struct {
+	store *store.Store
+}
 
-func NewDevicesHandler() *DevicesHandler {
-	return &DevicesHandler{}
+func NewDevicesHandler(s *store.Store) *DevicesHandler {
+	return &DevicesHandler{store: s}
 }
 
 // GET /api/me/devices
 func (h *DevicesHandler) List(w http.ResponseWriter, r *http.Request) {
-	_, ok := authctx.UserID(r.Context())
+	userID, ok := authctx.UserID(r.Context())
 	if !ok {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
 		return
 	}
 
-	// TODO: Query devices from DB based on userID
-	// For now, return stub response
+	devices, err := h.store.ListDevices(r.Context(), userID)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
 
 	writeJSON(w, http.StatusOK, map[string]any{
-		"devices": []Device{},
+		"devices": devices,
 	})
 }
 
 // DELETE /api/me/devices/:clientId
 func (h *DevicesHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	_, ok := authctx.UserID(r.Context())
+	userID, ok := authctx.UserID(r.Context())
 	if !ok {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
 		return
@@ -214,8 +244,10 @@ func (h *DevicesHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = clientID // TODO: Delete device from DB
-	// For now, return success
+	if err := h.store.DeleteDevice(r.Context(), userID, clientID); err != nil {
+		writeInternal(w, err)
+		return
+	}
 
 	writeJSON(w, http.StatusOK, map[string]any{
 		"deleted": true,
@@ -225,7 +257,7 @@ func (h *DevicesHandler) Delete(w http.ResponseWriter, r *http.Request) {
 // POST /api/me/devices/register
 // Body: {"client_id": "uuid", "name": "My Laptop", "device_type": "desktop"}
 func (h *DevicesHandler) Register(w http.ResponseWriter, r *http.Request) {
-	_, ok := authctx.UserID(r.Context())
+	userID, ok := authctx.UserID(r.Context())
 	if !ok {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
 		return
@@ -233,11 +265,23 @@ func (h *DevicesHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	var req struct {
 		ClientID   uuid.UUID `json:"client_id"`
-		Name      string   `json:"name,omitempty"`
-		DeviceType string   `json:"device_type,omitempty"`
+		Name       string    `json:"name,omitempty"`
+		DeviceType string    `json:"device_type,omitempty"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
+		return
 	}
 
-	_ = req // TODO: Parse from body and register device in DB
+	if req.ClientID == uuid.Nil {
+		writeError(w, http.StatusBadRequest, "INVALID_CLIENT", "client_id is required")
+		return
+	}
+
+	if err := h.store.RegisterDevice(r.Context(), userID, req.ClientID, req.Name, req.DeviceType); err != nil {
+		writeInternal(w, err)
+		return
+	}
 
 	writeJSON(w, http.StatusOK, map[string]any{
 		"registered": true,

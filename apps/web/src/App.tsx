@@ -9,18 +9,26 @@ import {
   useNavigate,
 } from 'react-router-dom'
 import type { ReactElement } from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   CheatsheetDetailPage,
   CheatsheetsListPage,
-  GlobalSearchModal,
   DiscoveryPage,
   HomePage,
   ItemDetailPage,
+  CaptureSharePage,
   ItemsPage,
+  LandingPage,
   RepoDetailPage,
   SettingsPage,
+  AdminDashboardPage,
+  WaitlistPage,
+  PublicDeckPage,
+  PublicProfilePage,
   TeamReviewPage,
+  TeamFeedPage,
+  FollowingFeedPage,
+  UnifiedCommandPalette,
   useGlobalShortcuts,
 } from '@devdeck/features'
 import { CaptureModal, ShortcutsModal } from '@devdeck/features'
@@ -69,68 +77,108 @@ function AnimatedRoutes(): ReactElement {
     onShortcuts: () => setShortcutsOpen(true),
   })
 
+  useEffect(() => {
+    const onOpenCapture = () => setCaptureOpen(true)
+    window.addEventListener('devdeck:open-capture', onOpenCapture)
+    return () => window.removeEventListener('devdeck:open-capture', onOpenCapture)
+  }, [])
+
+  // Auto-capture from Share Target
+  useEffect(() => {
+    if (location.state?.autoCapture) {
+      setCaptureOpen(true)
+      // Clear state so it doesn't re-open on refresh
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, [location, navigate])
+
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        {/* Public routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/auth/callback" element={<AuthCallbackPage />} />
+    <>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          {/* Public routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
-        {/* Protected routes */}
-        <Route
-          path="/"
-          element={<AuthGuard>{withTransition(<ItemsPage />)}</AuthGuard>}
-        />
-        <Route
-          path="/repos"
-          element={<AuthGuard>{withTransition(<HomePage />)}</AuthGuard>}
-        />
-        <Route
-          path="/items"
-          element={<AuthGuard>{withTransition(<ItemsPage />)}</AuthGuard>}
-        />
-        <Route
-          path="/items/:id"
-          element={<AuthGuard>{withTransition(<ItemDetailPage />)}</AuthGuard>}
-        />
-        <Route
-          path="/review"
-          element={<AuthGuard>{withTransition(<TeamReviewPage />)}</AuthGuard>}
-        />
-        <Route
-          path="/repo/:id"
-          element={<AuthGuard>{withTransition(<RepoDetailPage />)}</AuthGuard>}
-        />
-        <Route
-          path="/discovery"
-          element={<AuthGuard>{withTransition(<DiscoveryPage />)}</AuthGuard>}
-        />
-        <Route
-          path="/settings"
-          element={<AuthGuard>{withTransition(<SettingsPage />)}</AuthGuard>}
-        />
-        <Route
-          path="/cheatsheets"
-          element={
-            <AuthGuard>{withTransition(<CheatsheetsListPage />)}</AuthGuard>
-          }
-        />
-        <Route
-          path="/cheatsheets/:id"
-          element={
-            <AuthGuard>{withTransition(<CheatsheetDetailPage />)}</AuthGuard>
-          }
-        />
+          <Route
+            path="/"
+            element={
+              isLoggedIn() ? (
+                <Navigate to="/items" replace />
+              ) : (
+                withTransition(<LandingPage />)
+              )
+            }
+          />
+          <Route
+            path="/repos"
+            element={<AuthGuard>{withTransition(<HomePage />)}</AuthGuard>}
+          />
+          <Route
+            path="/items"
+            element={<AuthGuard>{withTransition(<ItemsPage />)}</AuthGuard>}
+          />
+          <Route
+            path="/items/:id"
+            element={<AuthGuard>{withTransition(<ItemDetailPage />)}</AuthGuard>}
+          />
+          <Route
+            path="/capture-share"
+            element={<AuthGuard>{withTransition(<CaptureSharePage />)}</AuthGuard>}
+          />
+          <Route
+            path="/review"
+            element={<AuthGuard>{withTransition(<TeamReviewPage />)}</AuthGuard>}
+          />
+          <Route
+            path="/feed"
+            element={<AuthGuard>{withTransition(<TeamFeedPage />)}</AuthGuard>}
+          />
+          <Route
+            path="/following"
+            element={<AuthGuard>{withTransition(<FollowingFeedPage />)}</AuthGuard>}
+          />
+          <Route
+            path="/repo/:id"
+            element={<AuthGuard>{withTransition(<RepoDetailPage />)}</AuthGuard>}
+          />
+          <Route
+            path="/discovery"
+            element={<AuthGuard>{withTransition(<DiscoveryPage />)}</AuthGuard>}
+          />
+          <Route
+            path="/settings"
+            element={<AuthGuard>{withTransition(<SettingsPage />)}</AuthGuard>}
+          />
+          <Route
+            path="/admin"
+            element={<AuthGuard>{withTransition(<AdminDashboardPage />)}</AuthGuard>}
+          />
+          <Route
+            path="/cheatsheets"
+            element={
+              <AuthGuard>{withTransition(<CheatsheetsListPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/cheatsheets/:id"
+            element={
+              <AuthGuard>{withTransition(<CheatsheetDetailPage />)}</AuthGuard>
+            }
+          />
+          <Route path="/deck/:slug" element={withTransition(<PublicDeckPage />)} />
+          <Route path="/waitlist" element={withTransition(<WaitlistPage />)} />
+          <Route path="/u/:username" element={withTransition(<PublicProfilePage />)} />
 
-        {/* 404 */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </AnimatePresence>
 
       {/* Global modals */}
-      <GlobalSearchModal open={globalSearchOpen} onClose={() => setGlobalSearchOpen(false)} />
+      <UnifiedCommandPalette open={globalSearchOpen} onClose={() => setGlobalSearchOpen(false)} />
       <CaptureModal
         open={captureOpen}
         onClose={() => setCaptureOpen(false)}
@@ -139,16 +187,18 @@ function AnimatedRoutes(): ReactElement {
           navigate(`/items/${id}`)
         }}
         source="manual"
+        initialUrl={location.state?.url}
+        initialTitle={location.state?.title}
       />
       <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
-    </AnimatePresence>
+    </>
   )
 }
 
 export function App(): ReactElement {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AnimatedRoutes />
       </BrowserRouter>
       <Toaster />

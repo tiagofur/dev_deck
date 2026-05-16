@@ -1,6 +1,7 @@
 import { app, BrowserWindow, shell, ipcMain, globalShortcut, safeStorage } from 'electron'
 import { join } from 'path'
 import { readFileSync, writeFileSync, existsSync } from 'fs'
+import { exec } from 'child_process'
 
 // ---------------------------------------------------------------------------
 // Token storage — encrypted via OS keychain (safeStorage)
@@ -66,6 +67,24 @@ function registerIpcHandlers(): void {
   ipcMain.on('auth:get-pending-url', (event) => {
     event.returnValue = pendingAuthCallbackURL
     pendingAuthCallbackURL = null
+  })
+
+  ipcMain.handle('shell:run', async (_event, cmd: string) => {
+    return new Promise((resolve, reject) => {
+      // Execute the command in the user's shell
+      exec(cmd, (error, stdout, stderr) => {
+        if (error) {
+          reject(error.message)
+          return
+        }
+        if (stderr) {
+          // Some commands use stderr for non-error output, but usually it's better to show it.
+          resolve(stderr)
+          return
+        }
+        resolve(stdout)
+      })
+    })
   })
 }
 

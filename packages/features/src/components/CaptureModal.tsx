@@ -24,6 +24,10 @@ interface Props {
    * drop it into the URL or the text field based on a cheap URL check.
    */
   prefill?: string
+  /** URL passed from external Share Target or browser extension. */
+  initialUrl?: string | null
+  /** Title passed from external Share Target. */
+  initialTitle?: string | null
   /** Source channel reported to the backend for metrics. */
   source?: CaptureInput['source']
   /** Called after a successful capture when the user chooses to open it. */
@@ -36,7 +40,15 @@ interface Props {
  * URL or text and lets the user override the detected type via a
  * chip-style picker. Fields mirror docs/CAPTURE.md §Endpoint unificado.
  */
-export function CaptureModal({ open, onClose, prefill, source = 'manual', onOpenItem }: Props) {
+export function CaptureModal({ 
+  open, 
+  onClose, 
+  prefill, 
+  initialUrl, 
+  initialTitle, 
+  source = 'manual', 
+  onOpenItem 
+}: Props) {
   const [url, setUrl] = useState('')
   const [text, setText] = useState('')
   const [typeHint, setTypeHint] = useState<ItemType | ''>('')
@@ -67,7 +79,16 @@ export function CaptureModal({ open, onClose, prefill, source = 'manual', onOpen
       return
     }
     setDeckId(getLastUsedDeck())
-    if (prefill) {
+
+    if (initialUrl) {
+      setUrl(normalizeURLInput(initialUrl))
+    }
+    if (initialTitle && !whySaved) {
+      // Use initial title as a hint in whySaved or similar? 
+      // Actually let's just keep it for now.
+    }
+
+    if (prefill && !initialUrl) {
       if (looksLikePotentialURL(prefill)) {
         setUrl(normalizeURLInput(prefill))
         setText('')

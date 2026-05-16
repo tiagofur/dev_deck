@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"devdeck/internal/authctx"
 	"devdeck/internal/domain/cheatsheets"
 	domainitems "devdeck/internal/domain/items"
 
@@ -472,37 +473,37 @@ func (s *Store) DeleteEntry(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-// ───── Repo ↔ Cheatsheet Links ─────
+// ───── Item ↔ Cheatsheet Links ─────
 
-func (s *Store) LinkCheatsheet(ctx context.Context, repoID, cheatsheetID uuid.UUID) error {
-	repoScopeSQL, repoScopeArgs := ownerClause(ctx, "r.user_id", 3)
-	cheatScopeSQL, cheatScopeArgs := ownerClause(ctx, "c.user_id", 3+len(repoScopeArgs))
-	args := []any{repoID, cheatsheetID}
-	args = append(args, repoScopeArgs...)
+func (s *Store) LinkCheatsheet(ctx context.Context, itemID, cheatsheetID uuid.UUID) error {
+	itemScopeSQL, itemScopeArgs := ownerClause(ctx, "i.user_id", 3)
+	cheatScopeSQL, cheatScopeArgs := ownerClause(ctx, "c.user_id", 3+len(itemScopeArgs))
+	args := []any{itemID, cheatsheetID}
+	args = append(args, itemScopeArgs...)
 	args = append(args, cheatScopeArgs...)
 	_, err := s.pool.Exec(ctx, `
-		INSERT INTO repo_cheatsheet_links (repo_id, cheatsheet_id)
+		INSERT INTO item_cheatsheet_links (item_id, cheatsheet_id)
 		SELECT $1, $2
-		FROM repos r
+		FROM items i
 		JOIN cheatsheets c ON c.id = $2
-		WHERE r.id = $1 AND `+repoScopeSQL+` AND `+cheatScopeSQL+`
+		WHERE i.id = $1 AND `+itemScopeSQL+` AND `+cheatScopeSQL+`
 		ON CONFLICT DO NOTHING
 	`, args...)
 	return err
 }
 
-func (s *Store) UnlinkCheatsheet(ctx context.Context, repoID, cheatsheetID uuid.UUID) error {
-	repoScopeSQL, repoScopeArgs := ownerClause(ctx, "r.user_id", 3)
-	cheatScopeSQL, cheatScopeArgs := ownerClause(ctx, "c.user_id", 3+len(repoScopeArgs))
-	args := []any{repoID, cheatsheetID}
-	args = append(args, repoScopeArgs...)
+func (s *Store) UnlinkCheatsheet(ctx context.Context, itemID, cheatsheetID uuid.UUID) error {
+	itemScopeSQL, itemScopeArgs := ownerClause(ctx, "i.user_id", 3)
+	cheatScopeSQL, cheatScopeArgs := ownerClause(ctx, "c.user_id", 3+len(itemScopeArgs))
+	args := []any{itemID, cheatsheetID}
+	args = append(args, itemScopeArgs...)
 	args = append(args, cheatScopeArgs...)
 	tag, err := s.pool.Exec(ctx, `
-		DELETE FROM repo_cheatsheet_links rcl
-		USING repos r, cheatsheets c
-		WHERE rcl.repo_id = $1 AND rcl.cheatsheet_id = $2
-		  AND r.id = rcl.repo_id AND c.id = rcl.cheatsheet_id
-		  AND `+repoScopeSQL+` AND `+cheatScopeSQL+`
+		DELETE FROM item_cheatsheet_links icl
+		USING items i, cheatsheets c
+		WHERE icl.item_id = $1 AND icl.cheatsheet_id = $2
+		  AND i.id = icl.item_id AND c.id = icl.cheatsheet_id
+		  AND `+itemScopeSQL+` AND `+cheatScopeSQL+`
 	`, args...)
 	if err != nil {
 		return err
@@ -550,70 +551,49 @@ type SearchResult struct {
 	Extra    string `json:"extra"` // e.g. command text, repo url
 }
 
-// Search performs a cross-entity search using pg_trgm.
-func (s *Store) Search(ctx context.Context, query string, limit int) ([]SearchResult, error) {
+// Search performs a cross-entity search using text (pg_trgm), vector, or hybrid modes.
+func (s *Store) Search(ctx context.Context, mode SearchMode, query string, queryEmbedding []float32, limit int) ([]SearchResult, error) {
 	if limit <= 0 {
 		limit = 20
 	}
-	pattern := "%" + query + "%"
 	out := []SearchResult{}
 
-	// Search polymorphic items first. This is the canonical vault surface.
-	itemScopeSQL, itemScopeArgs := ownerClause(ctx, "user_id", 4)
-	itemArgs := append([]any{pattern, query, limit}, itemScopeArgs...)
-	rows, err := s.pool.Query(ctx, `
-		SELECT id, item_type, title, COALESCE(description,''), notes,
-		       COALESCE(why_saved,''), COALESCE(ai_summary,''), url
-		FROM items
-		WHERE archived = false
-		  AND (
-		    title ILIKE $1
-		    OR COALESCE(description,'') ILIKE $1
-		    OR notes ILIKE $1
-		    OR COALESCE(why_saved,'') ILIKE $1
-		    OR COALESCE(ai_summary,'') ILIKE $1
-		    OR EXISTS (SELECT 1 FROM unnest(tags) t WHERE t ILIKE $1)
-		    OR EXISTS (SELECT 1 FROM unnest(ai_tags) t WHERE t ILIKE $1)
-		  )
-		  AND `+itemScopeSQL+`
-		ORDER BY GREATEST(
-			similarity(title, $2),
-			similarity(COALESCE(why_saved,''), $2),
-			similarity(COALESCE(ai_summary,''), $2)
-		) DESC, updated_at DESC
-		LIMIT $3
-	`, itemArgs...)
-	if err != nil {
-		return nil, err
-	}
-	for rows.Next() {
-		var id uuid.UUID
-		var itemType domainitems.Type
-		var title, desc, notes, why, summary string
-		var url *string
-		if err := rows.Scan(&id, &itemType, &title, &desc, &notes, &why, &summary, &url); err != nil {
-			rows.Close()
-			return nil, err
+	// 1. Search polymorphic items. This is the canonical vault surface.
+	// We use the specialized SearchItems method which supports hybrid/semantic.
+	userID, ok := authctx.UserID(ctx)
+	if ok {
+		itemResults, err := s.SearchItems(ctx, userID, mode, query, queryEmbedding, limit)
+		if err != nil {
+			return nil, fmt.Errorf("search items: %w", err)
 		}
-		out = append(out, SearchResult{
-			Type:     "item",
-			ID:       id.String(),
-			Title:    title,
-			Subtitle: itemSearchSubtitle(itemType, why, summary, desc),
-			Extra:    itemSearchExtra(url, notes),
-		})
+		for _, r := range itemResults {
+			out = append(out, SearchResult{
+				Type:     "item",
+				ID:       r.ID.String(),
+				Title:    r.Title,
+				Subtitle: string(r.Type) + " · " + r.WhySaved,
+				Extra:    r.URL,
+			})
+		}
 	}
-	rows.Close()
 
-	// Search repos
+	// For other entities, we stick to text search for now as they don't have embeddings.
+	if mode == SearchModeVector && len(out) >= limit {
+		return out, nil
+	}
+
+	pattern := "%" + query + "%"
+
+	// 2. Search repos (now in items table)
 	repoScopeSQL, repoScopeArgs := ownerClause(ctx, "user_id", 4)
 	repoArgs := append([]any{pattern, query, limit}, repoScopeArgs...)
-	rows, err = s.pool.Query(ctx, `
-		SELECT id, name, COALESCE(owner,''), COALESCE(description,''), COALESCE(language,'')
-		FROM repos
-		WHERE (name ILIKE $1 OR description ILIKE $1 OR COALESCE(language,'') ILIKE $1)
+	rows, err := s.pool.Query(ctx, `
+		SELECT id, title, COALESCE(meta->>'owner',''), COALESCE(description,''), COALESCE(meta->>'language','')
+		FROM items
+		WHERE item_type = 'repo' 
+		  AND (title ILIKE $1 OR description ILIKE $1 OR COALESCE(meta->>'language','') ILIKE $1)
 		  AND `+repoScopeSQL+`
-		ORDER BY similarity(name, $2) DESC
+		ORDER BY similarity(title, $2) DESC
 		LIMIT $3
 	`, repoArgs...)
 	if err != nil {
@@ -640,7 +620,7 @@ func (s *Store) Search(ctx context.Context, query string, limit int) ([]SearchRe
 	}
 	rows.Close()
 
-	// Search cheatsheets
+	// 3. Search cheatsheets
 	cheatScopeSQL, cheatScopeArgs := ownerClause(ctx, "user_id", 4)
 	cheatArgs := append([]any{pattern, query, limit}, cheatScopeArgs...)
 	rows, err = s.pool.Query(ctx, `
@@ -671,7 +651,7 @@ func (s *Store) Search(ctx context.Context, query string, limit int) ([]SearchRe
 	}
 	rows.Close()
 
-	// Search entries
+	// 4. Search entries
 	entryScopeSQL, entryScopeArgs := ownerClause(ctx, "c.user_id", 4)
 	entryArgs := append([]any{pattern, query, limit}, entryScopeArgs...)
 	rows, err = s.pool.Query(ctx, `

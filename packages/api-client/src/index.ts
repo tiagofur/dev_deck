@@ -31,7 +31,6 @@ export {
 export type { TokenStorage } from './auth/storage/types'
 export { localStorageAdapter } from './auth/storage/localStorage'
 export { electronSafeStorageAdapter } from './auth/storage/electron'
-
 // Shared utilities
 export { formatCount } from './format'
 export {
@@ -41,6 +40,67 @@ export {
   usePreferences,
 } from './preferences'
 export type { Preferences } from './preferences'
+
+// Local DB + Sync (Ola 6)
+export { getLocalDB, queryLocal, execLocal } from './local-db/client'
+export { enqueueSync, getPendingOps, markSynced, getPendingCount } from './sync/queue'
+export { startSyncEngine, stopSyncEngine, syncNow } from './sync/engine'
+
+// Feature hooks — sync (Ola 6)
+export { useDevices, useDeleteDevice } from './features/sync/api'
+
+// Feature hooks — users (Ola 6)
+export {
+  useMe,
+  useUpdateMe,
+  usePublicProfile,
+  useUserPublicDecks,
+  useAdminUsers,
+  useJoinWaitlist,
+  useAdminWaitlist,
+  useAdminInvites,
+  useCreateInvite,
+  useFollowUser,
+  useUnfollowUser,
+  useFollowingFeed,
+} from './features/users/api'
+export type { User, PublicProfile, UpdateUserInput, FeedEvent } from './features/users/api'
+
+// Feature hooks — notifications (Ola 8)
+export {
+  useNotifications,
+  useUnreadNotificationsCount,
+  useMarkNotificationRead,
+  useMarkAllNotificationsRead,
+} from './features/notifications/api'
+export type { Notification } from './features/notifications/api'
+
+// Feature hooks — orgs (Ola 9)
+export { useUserOrgs, useCreateOrg, useAddOrgMember, useOrgFeed } from './features/orgs/api'
+export type { Organization, ActivityEntry } from './features/orgs/api'
+
+// Feature hooks — ecosystem (Ola 10)
+export {
+  useAPIKeys,
+  useCreateAPIKey,
+  useDeleteAPIKey,
+  useCustomEnrichers,
+  useCreateCustomEnricher,
+  useDeleteCustomEnricher,
+  useFeaturedPlugins,
+} from './features/ecosystem/api'
+export type { APIKey, CreateKeyResponse, CustomEnricher, PluginTemplate } from './features/ecosystem/api'
+
+// Feature hooks — webhooks (Ola 10)
+export { useWebhooks, useCreateWebhook, useDeleteWebhook } from './features/webhooks/api'
+export type { Webhook } from './features/webhooks/api'
+
+// Feature hooks — discovery (Ola 12)
+export {
+  useTrendingTools,
+  useCuratorLeaderboard,
+} from './features/discovery/api'
+export type { TrendingItem, CuratorRanking } from './features/discovery/api'
 
 // Feature hooks — repos
 export {
@@ -70,6 +130,7 @@ export {
 	useDeleteItem,
 	useAIEnrichItem,
 	useReviewItemAITags,
+	useRelatedItems,
 	useMarkItemSeen,
 	useUserTags,
 	ITEMS_KEY,
@@ -129,6 +190,10 @@ export type {
 export { useStats } from './features/stats/api'
 export type { Stats, MascotMood } from './features/stats/types'
 
+// Feature hooks — ask
+export { useAsk } from './features/ask/api'
+export type { AskRequest, AskResponse, AskCitation } from './features/ask/api'
+
 // Feature hooks — capture
 export { useCapture } from './features/capture/api'
 export { usePreview } from './features/capture/preview'
@@ -169,6 +234,16 @@ export {
   setLastUsedDeck,
   getLastUsedDeck,
 } from './features/decks/api'
+
+// Feature hooks — runbooks (Ola 5+)
+export {
+	useItemRunbooks,
+	useCreateRunbook,
+	useAddRunbookStep,
+	useUpdateRunbookStep,
+	useDeleteRunbook,
+} from './features/runbooks/api'
+export type { Runbook, RunbookStep } from './features/runbooks/api'
 export type {
   Deck,
   CreateDeckInput,

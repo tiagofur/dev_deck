@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bg-primary: #f0f0f0;
+    --color-bg-card: #ffffff;
+    --color-bg-elevated: #e5e5e5;
+    --color-ink: #000000;
+    --color-ink-soft: #666666;
+    --color-accent-yellow: #facc15;
+    --color-accent-pink: #f472b6;
+    --color-accent-lime: #a3e635;
+    --color-accent-cyan: #22d3ee;
+    --color-accent-lavender: #c084fc;
+    --color-accent-orange: #fb923c;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}

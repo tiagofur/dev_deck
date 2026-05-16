@@ -125,12 +125,12 @@ export function useUnlinkCheatsheet(repoId: string) {
 
 // ─── Global search ───
 
-export function useGlobalSearch(query: string) {
+export function useGlobalSearch(query: string, mode: 'text' | 'semantic' | 'hybrid' = 'text') {
   return useQuery({
-    queryKey: ['search', query],
+    queryKey: ['search', query, mode],
     queryFn: async () => {
       const res = await api.get<{ query: string; results: SearchResult[] }>(
-        `/api/search?q=${encodeURIComponent(query)}&limit=20`,
+        `/api/search?q=${encodeURIComponent(query)}&limit=20&mode=${mode}`,
       )
       return res.results
     },

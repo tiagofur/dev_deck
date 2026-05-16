@@ -15,6 +15,7 @@ func TestService_GenerateAndValidateAccessToken(t *testing.T) {
 	user := auth.User{
 		ID:    uuid.New(),
 		Login: "ada",
+		Role:  "admin",
 	}
 
 	token, ttl, err := svc.GenerateAccessToken(user)
@@ -31,31 +32,34 @@ func TestService_GenerateAndValidateAccessToken(t *testing.T) {
 		t.Errorf("token does not look like a JWT: %q", token)
 	}
 
-	got, err := svc.ValidateAccessToken(token)
+	gotID, gotRole, err := svc.ValidateAccessToken(token)
 	if err != nil {
 		t.Fatalf("validate: %v", err)
 	}
-	if got != user.ID {
-		t.Errorf("expected user id %s, got %s", user.ID, got)
+	if gotID != user.ID {
+		t.Errorf("expected user id %s, got %s", user.ID, gotID)
+	}
+	if gotRole != user.Role {
+		t.Errorf("expected role %s, got %s", user.Role, gotRole)
 	}
 }
 
 func TestService_ValidateAccessToken_RejectsTamperedToken(t *testing.T) {
 	svc := New("secret", 1*time.Hour, 24*time.Hour)
-	user := auth.User{ID: uuid.New(), Login: "x"}
+	user := auth.User{ID: uuid.New(), Login: "x", Role: "user"}
 	token, _, _ := svc.GenerateAccessToken(user)
 
 	// Flip a character in the signature.
 	tampered := token[:len(token)-2] + "AA"
-	if _, err := svc.ValidateAccessToken(tampered); err != ErrInvalidToken {
+	if _, _, err := svc.ValidateAccessToken(tampered); err != ErrInvalidToken {
 		t.Errorf("expected ErrInvalidToken on tampered jwt, got %v", err)
 	}
 }
 
 func TestService_ValidateAccessToken_RejectsExpired(t *testing.T) {
 	svc := New("secret", -1*time.Second, 24*time.Hour) // already expired
-	token, _, _ := svc.GenerateAccessToken(auth.User{ID: uuid.New(), Login: "x"})
-	if _, err := svc.ValidateAccessToken(token); err != ErrInvalidToken {
+	token, _, _ := svc.GenerateAccessToken(auth.User{ID: uuid.New(), Login: "x", Role: "user"})
+	if _, _, err := svc.ValidateAccessToken(token); err != ErrInvalidToken {
 		t.Errorf("expected ErrInvalidToken on expired jwt, got %v", err)
 	}
 }
@@ -64,8 +68,8 @@ func TestService_ValidateAccessToken_RejectsWrongSecret(t *testing.T) {
 	a := New("secret-A", 1*time.Hour, 24*time.Hour)
 	b := New("secret-B", 1*time.Hour, 24*time.Hour)
 
-	token, _, _ := a.GenerateAccessToken(auth.User{ID: uuid.New(), Login: "x"})
-	if _, err := b.ValidateAccessToken(token); err != ErrInvalidToken {
+	token, _, _ := a.GenerateAccessToken(auth.User{ID: uuid.New(), Login: "x", Role: "user"})
+	if _, _, err := b.ValidateAccessToken(token); err != ErrInvalidToken {
 		t.Errorf("expected ErrInvalidToken when verifying with wrong secret, got %v", err)
 	}
 }

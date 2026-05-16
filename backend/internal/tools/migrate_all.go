@@ -1,4 +1,4 @@
-package main
+package tools
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func main() {
+func MigrateAll() {
 	dbURL := "postgres://devdeck:devdeck_local_pass@localhost:5432/devdeck?sslmode=disable"
 	conn, err := pgx.Connect(context.Background(), dbURL)
 	if err != nil {

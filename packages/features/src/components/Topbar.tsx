@@ -1,6 +1,10 @@
-import { BookOpen, Boxes, Plus, Search, Settings as SettingsIcon, Sparkles } from 'lucide-react'
+import { Activity, BookOpen, Boxes, Plus, Search, Settings as SettingsIcon, Sparkles, Users } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@devdeck/ui'
+import { usePreferences } from '@devdeck/api-client'
+import { SyncStatusIndicator } from './SyncStatusIndicator'
+import { NotificationCenter } from './NotificationCenter'
+import { WorkspaceSwitcher } from './WorkspaceSwitcher'
 
 interface Props {
   query: string
@@ -20,9 +24,11 @@ export function Topbar({
   onGlobalSearch,
 }: Props) {
   const navigate = useNavigate()
+  const { activeOrgId } = usePreferences()
 
   return (
     <header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex items-center gap-6">
+      <WorkspaceSwitcher />
       <h1
         className="font-display font-black text-2xl uppercase tracking-tight whitespace-nowrap cursor-pointer"
         onClick={() => navigate('/')}
@@ -86,6 +92,34 @@ export function Topbar({
         </span>
       </Button>
 
+      {activeOrgId && (
+        <Button
+          onClick={() => navigate('/feed')}
+          size="sm"
+          variant="secondary"
+          className="whitespace-nowrap"
+          title="Team Activity"
+        >
+          <span className="flex items-center gap-2">
+            <Activity size={16} strokeWidth={3} />
+            <span className="hidden sm:inline">Activity</span>
+          </span>
+        </Button>
+      )}
+
+      <Button
+        onClick={() => navigate('/following')}
+        size="sm"
+        variant="secondary"
+        className="whitespace-nowrap"
+        title="Network Feed (Ola 12)"
+      >
+        <span className="flex items-center gap-2">
+          <Users size={16} strokeWidth={3} />
+          <span className="hidden sm:inline">Network</span>
+        </span>
+      </Button>
+
       <Button
         onClick={onDiscovery}
         size="sm"
@@ -105,6 +139,9 @@ export function Topbar({
           Add
         </span>
       </Button>
+
+      <SyncStatusIndicator />
+      <NotificationCenter />
 
       <button
         type="button"

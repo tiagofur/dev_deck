@@ -12,16 +12,17 @@ interface Props {
   label: string
   /** Hash-stable index so the same tag always gets the same color */
   colorIndex?: number
+  variant?: 'solid' | 'outline'
 }
 
-export function TagChip({ label, colorIndex = 0 }: Props) {
+export function TagChip({ label, colorIndex = 0, variant = 'solid' }: Props) {
   const color = tagColors[Math.abs(colorIndex) % tagColors.length]
   return (
     <span
       className={clsx(
         'inline-block px-2 py-0.5 text-xs font-mono font-semibold',
         'border-2 border-ink shadow-hard-sm',
-        color,
+        variant === 'solid' ? color : 'bg-transparent border-dashed',
       )}
     >
       {label}

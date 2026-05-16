@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: devdeck-db-local
     restart: unless-stopped
     environment:
@@ -31,15 +31,10 @@ services:
     # This avoids running the rollback section when using plain psql -f.
     command: >
       sh -c "
-        run() { awk '/-- [+]goose Down/{exit} {print}' /migrations/$$1 | psql -h db -U devdeck -d devdeck; }
-        run 0001_init.sql &&
-        run 0002_commands.sql &&
-        run 0003_cheatsheets.sql &&
-        run 0004_auth_users_sessions.sql &&
-        run 0005_items.sql &&
-        run 0006_auth_multi_provider.sql &&
-        run 0007_auth_local_password.sql &&
-        run 0008_social_deck_features.sql &&
+        for f in /migrations/*.sql; do
+          echo \"Applying $$f...\"
+          awk '/-- [+]goose Down/{exit} {print}' \"$$f\" | psql -h db -U devdeck -d devdeck || exit 1
+        done
         echo All migrations applied.
       "
     restart: on-failure

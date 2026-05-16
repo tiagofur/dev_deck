@@ -7,6 +7,9 @@ import {
   Link as LinkIcon,
   Play,
   Puzzle,
+  RefreshCw,
+  Check,
+  X,
   Sparkles,
   StickyNote,
   Star,
@@ -16,7 +19,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import type { Item, ItemType } from '@devdeck/api-client'
-import { formatCount, EnrichmentStatus, useUpdateItem } from '@devdeck/api-client'
+import { formatCount, EnrichmentStatus, useUpdateItem, useAIEnrichItem, useReviewItemAITags } from '@devdeck/api-client'
 import { TagChip, hashIndex } from '@devdeck/ui'
 
 interface TypeStyle {
@@ -50,6 +53,8 @@ interface Props {
 
 export function ItemCard({ item, onClick }: Props) {
   const updateItem = useUpdateItem()
+  const aiEnrich = useAIEnrichItem()
+  const reviewAITags = useReviewItemAITags()
   const { hue, icon: Icon, label } = styleFor(item.item_type)
 
   async function toggleFavorite(e: React.MouseEvent) {
@@ -60,13 +65,38 @@ export function ItemCard({ item, onClick }: Props) {
     })
   }
 
+  async function handleAIEnrich(e: React.MouseEvent) {
+    e.stopPropagation()
+    await aiEnrich.mutateAsync(item.id)
+  }
+
+  async function acceptAITags(e: React.MouseEvent) {
+    e.stopPropagation()
+    await reviewAITags.mutateAsync({
+      id: item.id,
+      input: { ai_tags: item.ai_tags, apply: true },
+    })
+  }
+
+  async function discardAITags(e: React.MouseEvent) {
+    e.stopPropagation()
+    await reviewAITags.mutateAsync({
+      id: item.id,
+      input: { ai_tags: [], apply: false },
+    })
+  }
+
   const rotation = (item.id.charCodeAt(0) % 3) - 1
   const stars = typeof item.meta?.stars === 'number' ? (item.meta.stars as number) : 0
   const language = typeof item.meta?.language === 'string' ? (item.meta.language as string) : null
   const languageColor = typeof item.meta?.language_color === 'string' ? (item.meta.language_color as string) : null
   const heroText = item.ai_summary || item.description
   const needsTeamReview = item.tags.includes('team-review')
-  const visibleTags = (item.tags.length > 0 ? item.tags : item.ai_tags)
+  const hasManualTags = item.tags.length > 0
+  const hasAITags = item.ai_tags.length > 0
+  const showAIReview = !hasManualTags && hasAITags && item.enrichment_status === EnrichmentStatus.Ok
+
+  const visibleTags = (hasManualTags ? item.tags : item.ai_tags)
     .filter((tag) => tag !== 'team-review')
   const statusLabel = item.enrichment_status === EnrichmentStatus.Queued
     ? 'Analizando…'
@@ -121,9 +151,21 @@ export function ItemCard({ item, onClick }: Props) {
         )}
 
         {statusLabel && (
-          <p className="text-[11px] font-mono uppercase tracking-wide mb-3 text-ink-soft">
-            ✦ {statusLabel}
+          <p className="text-[11px] font-mono uppercase tracking-wide mb-3 text-ink-soft flex items-center gap-2">
+            <Sparkles size={12} className="text-accent-pink animate-pulse" />
+            {statusLabel}
           </p>
+        )}
+
+        {item.enrichment_status === EnrichmentStatus.Error && (
+          <button
+            onClick={handleAIEnrich}
+            className="text-[10px] font-mono uppercase border-2 border-ink px-2 py-0.5 mb-3
+                       bg-accent-yellow hover:bg-accent-yellow-dark flex items-center gap-1.5 transition-colors"
+          >
+            <RefreshCw size={10} strokeWidth={3} className={aiEnrich.isPending ? 'animate-spin' : ''} />
+            Reintentar análisis
+          </button>
         )}
 
         {item.why_saved && (
@@ -152,10 +194,40 @@ export function ItemCard({ item, onClick }: Props) {
         )}
 
         {visibleTags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {visibleTags.slice(0, 5).map((t) => (
-              <TagChip key={t} label={t} colorIndex={hashIndex(t)} />
-            ))}
+          <div className={`space-y-2 ${showAIReview ? 'mt-4 pt-4 border-t-2 border-ink border-dashed' : ''}`}>
+            {showAIReview && (
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-mono uppercase font-bold text-ink-soft flex items-center gap-1.5">
+                  <Sparkles size={10} /> Sugerencias IA
+                </span>
+                <div className="flex gap-1">
+                  <button
+                    onClick={discardAITags}
+                    title="Descartar sugerencias"
+                    className="p-1 hover:bg-accent-pink border-2 border-transparent hover:border-ink transition-all"
+                  >
+                    <X size={12} strokeWidth={3} />
+                  </button>
+                  <button
+                    onClick={acceptAITags}
+                    title="Aceptar todas"
+                    className="p-1 hover:bg-accent-lime border-2 border-transparent hover:border-ink transition-all"
+                  >
+                    <Check size={12} strokeWidth={3} />
+                  </button>
+                </div>
+              </div>
+            )}
+            <div className="flex flex-wrap gap-1.5">
+              {visibleTags.slice(0, 6).map((t) => (
+                <TagChip 
+                  key={t} 
+                  label={t} 
+                  colorIndex={hashIndex(t)} 
+                  variant={showAIReview ? 'outline' : 'solid'}
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>

@@ -10,6 +10,7 @@ import (
 
 var searchFlags struct {
 	limit int
+	mode  string
 }
 
 // `devdeck search <query>` hits GET /api/search and prints a
@@ -29,7 +30,7 @@ var searchCmd = &cobra.Command{
 
 		ctx, cancel := withTimeout(cmd.Context(), 10*time.Second)
 		defer cancel()
-		results, err := client.Search(ctx, query, searchFlags.limit)
+		results, err := client.Search(ctx, query, searchFlags.limit, searchFlags.mode)
 		if err != nil {
 			return err
 		}
@@ -59,6 +60,7 @@ var searchCmd = &cobra.Command{
 
 func init() {
 	searchCmd.Flags().IntVarP(&searchFlags.limit, "limit", "n", 20, "max results")
+	searchCmd.Flags().StringVarP(&searchFlags.mode, "mode", "m", "text", "search mode: text, semantic, hybrid")
 }
 
 func truncate(s string, n int) string {

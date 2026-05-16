@@ -63,6 +63,8 @@ func NewFromConfig(cfg config.Config) *Service {
 	switch strings.ToLower(strings.TrimSpace(cfg.AIProvider)) {
 	case "openai":
 		return NewOpenAI(cfg.OpenAIAPIKey, cfg.OpenAIModel)
+	case "ollama":
+		return NewOllama(cfg.OllamaBaseURL, cfg.OllamaModel)
 	case "qwen":
 		return NewQwen(cfg.QwenAPIKey, cfg.QwenModel)
 	case "deepseek":

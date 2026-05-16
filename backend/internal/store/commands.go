@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-const commandColumns = `id, repo_id, label, command, description, category, position, created_at`
+const commandColumns = `id, item_id, label, command, description, category, position, created_at`
 
 func scanCommand(row pgx.Row) (*commands.Command, error) {
 	var c commands.Command
@@ -26,16 +26,16 @@ func scanCommand(row pgx.Row) (*commands.Command, error) {
 	return &c, nil
 }
 
-// ListCommandsByRepo returns all commands for a repo, ordered by position.
-func (s *Store) ListCommandsByRepo(ctx context.Context, repoID uuid.UUID) ([]*commands.Command, error) {
-	scopeSQL, scopeArgs := ownerClause(ctx, "r.user_id", 2)
-	args := append([]any{repoID}, scopeArgs...)
+// ListCommandsByRepo returns all commands for an item, ordered by position.
+func (s *Store) ListCommandsByRepo(ctx context.Context, itemID uuid.UUID) ([]*commands.Command, error) {
+	scopeSQL, scopeArgs := ownerClause(ctx, "i.user_id", 2)
+	args := append([]any{itemID}, scopeArgs...)
 	rows, err := s.pool.Query(ctx, `
-		SELECT rc.id, rc.repo_id, rc.label, rc.command, rc.description, rc.category, rc.position, rc.created_at
-		FROM repo_commands rc
-		JOIN repos r ON r.id = rc.repo_id
-		WHERE rc.repo_id = $1 AND `+scopeSQL+`
-		ORDER BY rc.position ASC, rc.created_at ASC
+		SELECT ic.id, ic.item_id, ic.label, ic.command, ic.description, ic.category, ic.position, ic.created_at
+		FROM item_commands ic
+		JOIN items i ON i.id = ic.item_id
+		WHERE ic.item_id = $1 AND `+scopeSQL+`
+		ORDER BY ic.position ASC, ic.created_at ASC
 	`, args...)
 	if err != nil {
 		return nil, err
@@ -54,17 +54,16 @@ func (s *Store) ListCommandsByRepo(ctx context.Context, repoID uuid.UUID) ([]*co
 }
 
 // CreateCommand inserts a new command at the bottom of the list (max position + 1).
-// We compute position in the same statement to avoid races.
-func (s *Store) CreateCommand(ctx context.Context, repoID uuid.UUID, in commands.CreateInput) (*commands.Command, error) {
+func (s *Store) CreateCommand(ctx context.Context, itemID uuid.UUID, in commands.CreateInput) (*commands.Command, error) {
 	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 6)
-	args := []any{repoID, in.Label, in.Command, in.Description, in.Category}
+	args := []any{itemID, in.Label, in.Command, in.Description, in.Category}
 	args = append(args, scopeArgs...)
 	row := s.pool.QueryRow(ctx, `
-		INSERT INTO repo_commands (repo_id, label, command, description, category, position)
+		INSERT INTO item_commands (item_id, label, command, description, category, position)
 		SELECT
 			$1, $2, $3, $4, $5,
-			COALESCE((SELECT MAX(position) + 1 FROM repo_commands WHERE repo_id = $1), 0)
-		FROM repos
+			COALESCE((SELECT MAX(position) + 1 FROM item_commands WHERE item_id = $1), 0)
+		FROM items
 		WHERE id = $1 AND `+scopeSQL+`
 		RETURNING `+commandColumns,
 		args...)
@@ -108,11 +107,11 @@ func (s *Store) UpdateCommand(ctx context.Context, id uuid.UUID, in commands.Upd
 		return s.GetCommand(ctx, id)
 	}
 
-	scopeSQL, scopeArgs := ownerClause(ctx, "r.user_id", idx+1)
+	scopeSQL, scopeArgs := ownerClause(ctx, "i.user_id", idx+1)
 	args = append(args, id)
 	args = append(args, scopeArgs...)
 	q := fmt.Sprintf(
-		"UPDATE repo_commands rc SET %s FROM repos r WHERE rc.repo_id = r.id AND rc.id = $%d AND %s RETURNING rc.id, rc.repo_id, rc.label, rc.command, rc.description, rc.category, rc.position, rc.created_at",
+		"UPDATE item_commands ic SET %s FROM items i WHERE ic.item_id = i.id AND ic.id = $%d AND %s RETURNING ic.id, ic.item_id, ic.label, ic.command, ic.description, ic.category, ic.position, ic.created_at",
 		strings.Join(sets, ", "), idx, scopeSQL,
 	)
 	row := s.pool.QueryRow(ctx, q, args...)
@@ -127,10 +126,10 @@ func (s *Store) UpdateCommand(ctx context.Context, id uuid.UUID, in commands.Upd
 }
 
 func (s *Store) GetCommand(ctx context.Context, id uuid.UUID) (*commands.Command, error) {
-	scopeSQL, scopeArgs := ownerClause(ctx, "r.user_id", 2)
+	scopeSQL, scopeArgs := ownerClause(ctx, "i.user_id", 2)
 	args := append([]any{id}, scopeArgs...)
 	row := s.pool.QueryRow(ctx,
-		`SELECT rc.`+commandColumns+` FROM repo_commands rc JOIN repos r ON r.id = rc.repo_id WHERE rc.id = $1 AND `+scopeSQL,
+		`SELECT ic.`+commandColumns+` FROM item_commands ic JOIN items i ON i.id = ic.item_id WHERE ic.id = $1 AND `+scopeSQL,
 		args...)
 	c, err := scanCommand(row)
 	if err != nil {
@@ -143,12 +142,12 @@ func (s *Store) GetCommand(ctx context.Context, id uuid.UUID) (*commands.Command
 }
 
 func (s *Store) DeleteCommand(ctx context.Context, id uuid.UUID) error {
-	scopeSQL, scopeArgs := ownerClause(ctx, "r.user_id", 2)
+	scopeSQL, scopeArgs := ownerClause(ctx, "i.user_id", 2)
 	args := append([]any{id}, scopeArgs...)
 	tag, err := s.pool.Exec(ctx, `
-		DELETE FROM repo_commands rc
-		USING repos r
-		WHERE rc.repo_id = r.id AND rc.id = $1 AND `+scopeSQL, args...)
+		DELETE FROM item_commands ic
+		USING items i
+		WHERE ic.item_id = i.id AND ic.id = $1 AND `+scopeSQL, args...)
 	if err != nil {
 		return err
 	}
@@ -159,9 +158,7 @@ func (s *Store) DeleteCommand(ctx context.Context, id uuid.UUID) error {
 }
 
 // BatchCreateCommands inserts multiple commands in a single transaction.
-// Each command gets an auto-incremented position starting after the current max.
-// Returns the created commands in order.
-func (s *Store) BatchCreateCommands(ctx context.Context, repoID uuid.UUID, inputs []commands.CreateInput) ([]*commands.Command, error) {
+func (s *Store) BatchCreateCommands(ctx context.Context, itemID uuid.UUID, inputs []commands.CreateInput) ([]*commands.Command, error) {
 	if len(inputs) == 0 {
 		return nil, nil
 	}
@@ -174,15 +171,15 @@ func (s *Store) BatchCreateCommands(ctx context.Context, repoID uuid.UUID, input
 	// Get current max position in the same tx to avoid races.
 	var maxPos *int
 	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
-	args := append([]any{repoID}, scopeArgs...)
-	if err := tx.QueryRow(ctx, `SELECT MAX(position) FROM repo_commands WHERE repo_id = $1`, repoID).Scan(&maxPos); err != nil {
+	args := append([]any{itemID}, scopeArgs...)
+	if err := tx.QueryRow(ctx, `SELECT MAX(position) FROM item_commands WHERE item_id = $1`, itemID).Scan(&maxPos); err != nil {
 		return nil, err
 	}
-	var repoExists bool
-	if err := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM repos WHERE id = $1 AND `+scopeSQL+`)`, args...).Scan(&repoExists); err != nil {
+	var itemExists bool
+	if err := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM items WHERE id = $1 AND `+scopeSQL+`)`, args...).Scan(&itemExists); err != nil {
 		return nil, err
 	}
-	if !repoExists {
+	if !itemExists {
 		return nil, ErrNotFound
 	}
 	startPos := 0
@@ -193,10 +190,10 @@ func (s *Store) BatchCreateCommands(ctx context.Context, repoID uuid.UUID, input
 	out := make([]*commands.Command, 0, len(inputs))
 	for i, in := range inputs {
 		row := tx.QueryRow(ctx, `
-			INSERT INTO repo_commands (repo_id, label, command, description, category, position)
+			INSERT INTO item_commands (item_id, label, command, description, category, position)
 			VALUES ($1, $2, $3, $4, $5, $6)
 			RETURNING `+commandColumns,
-			repoID, in.Label, in.Command, in.Description, in.Category, startPos+i,
+			itemID, in.Label, in.Command, in.Description, in.Category, startPos+i,
 		)
 		c, err := scanCommand(row)
 		if err != nil {
@@ -210,13 +207,8 @@ func (s *Store) BatchCreateCommands(ctx context.Context, repoID uuid.UUID, input
 	return out, nil
 }
 
-// ReorderCommands updates positions to match the order of `ids`. Done in a
-// transaction so the list is never half-updated.
-//
-// We use a temporary offset (1000+) before assigning final positions to
-// avoid hitting the (repo_id, position) uniqueness expectation if anyone
-// adds a unique constraint later.
-func (s *Store) ReorderCommands(ctx context.Context, repoID uuid.UUID, ids []uuid.UUID) error {
+// ReorderCommands updates positions to match the order of `ids`.
+func (s *Store) ReorderCommands(ctx context.Context, itemID uuid.UUID, ids []uuid.UUID) error {
 	if len(ids) == 0 {
 		return nil
 	}
@@ -227,26 +219,26 @@ func (s *Store) ReorderCommands(ctx context.Context, repoID uuid.UUID, ids []uui
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
-	args := append([]any{repoID}, scopeArgs...)
-	var repoExists bool
-	if err := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM repos WHERE id = $1 AND `+scopeSQL+`)`, args...).Scan(&repoExists); err != nil {
+	args := append([]any{itemID}, scopeArgs...)
+	var itemExists bool
+	if err := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM items WHERE id = $1 AND `+scopeSQL+`)`, args...).Scan(&itemExists); err != nil {
 		return err
 	}
-	if !repoExists {
+	if !itemExists {
 		return ErrNotFound
 	}
 
 	for i, id := range ids {
 		tag, err := tx.Exec(ctx, `
-			UPDATE repo_commands
+			UPDATE item_commands
 			SET position = $1
-			WHERE id = $2 AND repo_id = $3
-		`, i, id, repoID)
+			WHERE id = $2 AND item_id = $3
+		`, i, id, itemID)
 		if err != nil {
 			return err
 		}
 		if tag.RowsAffected() == 0 {
-			return fmt.Errorf("command %s not found in repo %s", id, repoID)
+			return fmt.Errorf("command %s not found in item %s", id, itemID)
 		}
 	}
 	return tx.Commit(ctx)

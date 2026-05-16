@@ -38,6 +38,8 @@ func (s *Service) GenerateAccessToken(user auth.User) (string, int64, error) {
 	claims := jwt.MapClaims{
 		"sub":   user.ID.String(),
 		"login": user.Login,
+		"role":  user.Role,
+		"plan":  user.Plan,
 		"exp":   expiresAt.Unix(),
 		"iat":   time.Now().Unix(),
 	}
@@ -49,8 +51,8 @@ func (s *Service) GenerateAccessToken(user auth.User) (string, int64, error) {
 	return signed, int64(s.accessTTL.Seconds()), nil
 }
 
-// ValidateAccessToken parses and validates a JWT, returning the user ID.
-func (s *Service) ValidateAccessToken(tokenStr string) (uuid.UUID, error) {
+// ValidateAccessToken parses and validates a JWT, returning the user ID, role, and plan.
+func (s *Service) ValidateAccessToken(tokenStr string) (uuid.UUID, string, string, error) {
 	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
@@ -58,17 +60,26 @@ func (s *Service) ValidateAccessToken(tokenStr string) (uuid.UUID, error) {
 		return s.accessSecret, nil
 	})
 	if err != nil {
-		return uuid.Nil, ErrInvalidToken
+		return uuid.Nil, "", "", ErrInvalidToken
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
-		return uuid.Nil, ErrInvalidToken
+		return uuid.Nil, "", "", ErrInvalidToken
 	}
 	sub, ok := claims["sub"].(string)
 	if !ok {
-		return uuid.Nil, ErrInvalidToken
+		return uuid.Nil, "", "", ErrInvalidToken
 	}
-	return uuid.Parse(sub)
+	role, _ := claims["role"].(string)
+	plan, _ := claims["plan"].(string)
+	if plan == "" {
+		plan = "free"
+	}
+	id, err := uuid.Parse(sub)
+	if err != nil {
+		return uuid.Nil, "", "", ErrInvalidToken
+	}
+	return id, role, plan, nil
 }
 
 // GenerateRefreshToken creates a random refresh token and returns

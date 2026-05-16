@@ -134,7 +134,7 @@ func TestStore_Search_FindsAcrossEntities(t *testing.T) {
 		Tags:     []string{"go", "cli"},
 	})
 
-	results, err := st.Search(ctx, "go", 20)
+	results, err := st.Search(ctx, SearchModeText, "go", nil, 20)
 	if err != nil {
 		t.Fatalf("search: %v", err)
 	}

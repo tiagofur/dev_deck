@@ -6,6 +6,7 @@ export { EmptyState } from './EmptyState'
 export { PageTransition } from './PageTransition'
 export { Toaster } from './Toaster'
 export { ConfirmHost } from './ConfirmHost'
+export { CommandPalette } from './CommandPalette'
 
 // Singletons used by Toaster and ConfirmHost. Components in apps + features
 // import `showToast`, `confirm` from here to emit events.

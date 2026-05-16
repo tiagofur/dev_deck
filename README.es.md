@@ -91,8 +91,7 @@ Ambas apps importan pages y componentes del package `@devdeck/features` — solo
 
 ## Estado
 
-🚧 **Olas 1–4 completas.** **Ola 4.5 (Hardening & Capture) en curso** — red de seguridad (tests + CI) y canales de captura (CLI + extensión + paste). Ver [docs/REVIEW_2026_04.md](docs/REVIEW_2026_04.md) para el análisis que la motiva.
-
-Próximo: Ola 5 (Items generales + IA) → Ola 6 (Offline-first + Sync + Multi-usuario).
+✅ **Olas 1–6 completas.** **Ola 7 (Colaboración e IA Avanzada) en curso**.
+El proyecto evolucionó de un simple directorio a un Knowledge OS offline-first con búsqueda semántica, sincronización multi-dispositivo y decks públicos compartibles.
 
 Roadmap completo en [ROADMAP.md](ROADMAP.md).
