@@ -15,6 +15,7 @@ import (
 
 	"devdeck/internal/ai"
 	"devdeck/internal/authservice"
+	"devdeck/internal/cache"
 	"devdeck/internal/config"
 	"devdeck/internal/cron"
 	"devdeck/internal/email"
@@ -49,26 +50,48 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// DB pool
-	pool, err := pgxpool.New(ctx, cfg.DBURL)
+	// DB pool (Primary)
+	primaryPool, err := pgxpool.New(ctx, cfg.DBURL)
 	if err != nil {
 		logger.Error("db connect failed", "err", err)
 		os.Exit(1)
 	}
-	defer pool.Close()
+	defer primaryPool.Close()
 
-	pingCtx, pingCancel := context.WithTimeout(ctx, 5*time.Second)
-	if err := pool.Ping(pingCtx); err != nil {
-		pingCancel()
+	if err := primaryPool.Ping(ctx); err != nil {
 		logger.Error("db ping failed", "err", err)
 		os.Exit(1)
 	}
-	pingCancel()
-	logger.Info("connected to postgres")
+	logger.Info("connected to postgres (primary)")
 
-	st := store.New(pool)
+	// DB pool (Replica)
+	replicaPool := primaryPool
+	if cfg.DBURLReadOnly != "" {
+		replicaPool, err = pgxpool.New(ctx, cfg.DBURLReadOnly)
+		if err != nil {
+			logger.Error("read-only db connect failed", "err", err)
+			os.Exit(1)
+		}
+		defer replicaPool.Close()
+		if err := replicaPool.Ping(ctx); err != nil {
+			logger.Error("read-only db ping failed", "err", err)
+			os.Exit(1)
+		}
+		logger.Info("connected to postgres (replica)")
+	}
+
+	st := store.NewWithReplica(primaryPool, replicaPool)
 	wh := webhooks.New(st)
 	st.SetWebhookService(wh)
+
+	c, err := cache.New(cfg.RedisURL)
+	if err != nil {
+		logger.Error("cache init failed", "err", err)
+		os.Exit(1)
+	}
+	if c.Enabled() {
+		logger.Info("cache (Redis) initialized")
+	}
 
 	en := enricher.New(cfg.GithubToken)
 	aiSvc := ai.NewFromConfig(cfg)
@@ -118,6 +141,7 @@ func main() {
 		EmailSender: emailSender,
 		AI:          aiSvc,
 		Embeddings:  embSvc,
+		Cache:       c,
 	})
 
 	// Background refresher: re-enriches stale repos so stars/desc don't drift.

@@ -3,16 +3,19 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"time"
 
+	"devdeck/internal/cache"
 	"devdeck/internal/store"
 )
 
 type DiscoveryHandler struct {
 	store *store.Store
+	cache *cache.Cache
 }
 
-func NewDiscoveryHandler(s *store.Store) *DiscoveryHandler {
-	return &DiscoveryHandler{store: s}
+func NewDiscoveryHandler(s *store.Store, c *cache.Cache) *DiscoveryHandler {
+	return &DiscoveryHandler{store: s, cache: c}
 }
 
 // GET /api/discovery/next
@@ -36,21 +39,43 @@ func (h *DiscoveryHandler) Next(w http.ResponseWriter, r *http.Request) {
 // GET /api/discovery/trending
 func (h *DiscoveryHandler) Trending(w http.ResponseWriter, r *http.Request) {
 	limit := parseLimitFromQuery(r.URL.Query().Get("limit"), 10, 50)
+	cacheKey := "trending:list"
+
+	var items []store.TrendingItem
+	found, _ := h.cache.Get(r.Context(), cacheKey, &items)
+	if found {
+		writeJSON(w, http.StatusOK, map[string]any{"items": items, "cached": true})
+		return
+	}
+
 	items, err := h.store.GetTrendingItems(r.Context(), limit)
 	if err != nil {
 		writeInternal(w, err)
 		return
 	}
+
+	_ = h.cache.Set(r.Context(), cacheKey, items, 1*time.Hour)
 	writeJSON(w, http.StatusOK, map[string]any{"items": items})
 }
 
 // GET /api/discovery/leaderboard
 func (h *DiscoveryHandler) Leaderboard(w http.ResponseWriter, r *http.Request) {
 	limit := parseLimitFromQuery(r.URL.Query().Get("limit"), 10, 50)
+	cacheKey := "leaderboard:top"
+
+	var rankings []store.CuratorRanking
+	found, _ := h.cache.Get(r.Context(), cacheKey, &rankings)
+	if found {
+		writeJSON(w, http.StatusOK, map[string]any{"rankings": rankings, "cached": true})
+		return
+	}
+
 	rankings, err := h.store.GetCuratorLeaderboard(r.Context(), limit)
 	if err != nil {
 		writeInternal(w, err)
 		return
 	}
+
+	_ = h.cache.Set(r.Context(), cacheKey, rankings, 30*time.Minute)
 	writeJSON(w, http.StatusOK, map[string]any{"rankings": rankings})
 }

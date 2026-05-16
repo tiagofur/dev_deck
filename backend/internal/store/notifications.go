@@ -20,7 +20,7 @@ type Notification struct {
 
 func (s *Store) CreateNotification(ctx context.Context, userID uuid.UUID, nType, title, body string, actionURL *string) (*Notification, error) {
 	var n Notification
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		INSERT INTO notifications (user_id, type, title, body, action_url)
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, user_id, type, title, body, action_url, read_at, created_at
@@ -37,7 +37,7 @@ func (s *Store) ListNotifications(ctx context.Context, userID uuid.UUID, unreadO
 		where += " AND read_at IS NULL"
 	}
 
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT id, user_id, type, title, body, action_url, read_at, created_at
 		FROM notifications
 		WHERE `+where+`
@@ -61,7 +61,7 @@ func (s *Store) ListNotifications(ctx context.Context, userID uuid.UUID, unreadO
 }
 
 func (s *Store) MarkNotificationRead(ctx context.Context, userID, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.Writer().Exec(ctx, `
 		UPDATE notifications SET read_at = NOW()
 		WHERE id = $1 AND user_id = $2 AND read_at IS NULL
 	`, id, userID)
@@ -69,7 +69,7 @@ func (s *Store) MarkNotificationRead(ctx context.Context, userID, id uuid.UUID) 
 }
 
 func (s *Store) MarkAllNotificationsRead(ctx context.Context, userID uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.Writer().Exec(ctx, `
 		UPDATE notifications SET read_at = NOW()
 		WHERE user_id = $1 AND read_at IS NULL
 	`, userID)
@@ -78,7 +78,7 @@ func (s *Store) MarkAllNotificationsRead(ctx context.Context, userID uuid.UUID) 
 
 func (s *Store) GetUnreadNotificationsCount(ctx context.Context, userID uuid.UUID) (int, error) {
 	var count int
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		SELECT COUNT(*) FROM notifications WHERE user_id = $1 AND read_at IS NULL
 	`, userID).Scan(&count)
 	return count, err

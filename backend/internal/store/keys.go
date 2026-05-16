@@ -31,7 +31,7 @@ func (s *Store) CreateAPIKey(ctx context.Context, userID uuid.UUID, name string)
 	hash := hashToken(raw)
 
 	var k APIKey
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		INSERT INTO api_keys (user_id, name, token_hash)
 		VALUES ($1, $2, $3)
 		RETURNING id, user_id, name, last_used_at, created_at
@@ -44,7 +44,7 @@ func (s *Store) CreateAPIKey(ctx context.Context, userID uuid.UUID, name string)
 }
 
 func (s *Store) ListAPIKeys(ctx context.Context, userID uuid.UUID) ([]APIKey, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT id, user_id, name, last_used_at, created_at
 		FROM api_keys
 		WHERE user_id = $1
@@ -67,7 +67,7 @@ func (s *Store) ListAPIKeys(ctx context.Context, userID uuid.UUID) ([]APIKey, er
 }
 
 func (s *Store) DeleteAPIKey(ctx context.Context, userID, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM api_keys WHERE id = $1 AND user_id = $2`, id, userID)
+	_, err := s.Writer().Exec(ctx, `DELETE FROM api_keys WHERE id = $1 AND user_id = $2`, id, userID)
 	return err
 }
 
@@ -76,7 +76,7 @@ func (s *Store) ValidateAPIKey(ctx context.Context, rawToken string) (uuid.UUID,
 	hash := hashToken(rawToken)
 	var userID uuid.UUID
 	var id uuid.UUID
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		UPDATE api_keys
 		SET last_used_at = NOW()
 		WHERE token_hash = $1

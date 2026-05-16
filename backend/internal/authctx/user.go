@@ -10,6 +10,7 @@ type userIDKey struct{}
 type userRoleKey struct{}
 type userPlanKey struct{}
 type orgIDKey struct{}
+type userRegionKey struct{}
 
 // WithUserID stores the authenticated user ID in the request context.
 func WithUserID(ctx context.Context, userID uuid.UUID) context.Context {
@@ -53,4 +54,15 @@ func WithOrgID(ctx context.Context, orgID uuid.UUID) context.Context {
 func OrgID(ctx context.Context) (uuid.UUID, bool) {
 	orgID, ok := ctx.Value(orgIDKey{}).(uuid.UUID)
 	return orgID, ok
+}
+
+// WithUserRegion stores the user's home region in the request context.
+func WithUserRegion(ctx context.Context, region string) context.Context {
+	return context.WithValue(ctx, userRegionKey{}, region)
+}
+
+// UserRegion returns the user's home region when present.
+func UserRegion(ctx context.Context) (string, bool) {
+	region, ok := ctx.Value(userRegionKey{}).(string)
+	return region, ok
 }

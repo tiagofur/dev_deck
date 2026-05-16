@@ -11,9 +11,12 @@ import (
 // Config holds all environment-driven configuration for the API.
 // Wave 1 only uses the `token` AuthMode. JWT/OAuth fields land in Wave 4.
 type Config struct {
-	Port        string `env:"PORT" envDefault:"8080"`
-	DBURL       string `env:"DB_URL,required"`
-	AuthMode    string `env:"AUTH_MODE" envDefault:"token"`
+	Port           string `env:"PORT" envDefault:"8080"`
+	DBURL          string `env:"DB_URL,required"`
+	DBURLReadOnly  string `env:"DB_READ_ONLY_URL"`
+	RedisURL       string `env:"REDIS_URL"`
+	AppRegion      string `env:"APP_REGION" envDefault:"us-east"`
+	AuthMode       string `env:"AUTH_MODE" envDefault:"token"`
 	APIToken    string `env:"API_TOKEN"`
 	GithubToken string `env:"GITHUB_TOKEN"`
 	LogLevel    string `env:"LOG_LEVEL" envDefault:"info"`

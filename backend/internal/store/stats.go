@@ -26,13 +26,9 @@ func mascotStateKey(ctx context.Context) string {
 	return "mascot_state"
 }
 
-// Heartbeat updates last_open_at and the streak counter, returning:
-//   - the streak BEFORE the current visit was counted (for "fresh streak" UX),
-//   - the previous last_open_at (so the handler can detect "long absence").
-//
-// This runs in a transaction with FOR UPDATE so concurrent calls behave.
+// Heartbeat updates last_open_at and the streak counter.
 func (s *Store) Heartbeat(ctx context.Context) (streak int, prevLastOpen *time.Time, err error) {
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.Writer().Begin(ctx)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -83,14 +79,12 @@ func (s *Store) Heartbeat(ctx context.Context) (streak int, prevLastOpen *time.T
 	return st.StreakCount, prevLastOpen, nil
 }
 
-// GetRepoAggregates returns counts and dominant-language stats over the
-// non-archived repos.
+// GetRepoAggregates returns counts and dominant-language stats.
 func (s *Store) GetRepoAggregates(ctx context.Context) (*stats.RepoAggregates, error) {
 	a := &stats.RepoAggregates{}
 	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 1)
 
-	// Total active + archived + last added
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		SELECT
 			COUNT(*) FILTER (WHERE archived = false AND item_type = 'repo'),
 			COUNT(*) FILTER (WHERE archived = true AND item_type = 'repo'),
@@ -101,11 +95,10 @@ func (s *Store) GetRepoAggregates(ctx context.Context) (*stats.RepoAggregates, e
 		return nil, err
 	}
 
-	// Top language (among non-archived repos)
 	var lang *string
 	var langCount int
 	langArgs := append([]any{}, scopeArgs...)
-	err = s.pool.QueryRow(ctx, `
+	err = s.Reader().QueryRow(ctx, `
 		SELECT meta->>'language' as lang, COUNT(*) AS c FROM items
 		WHERE archived = false AND item_type = 'repo' AND meta->>'language' IS NOT NULL AND `+scopeSQL+`
 		GROUP BY lang
@@ -120,4 +113,43 @@ func (s *Store) GetRepoAggregates(ctx context.Context) (*stats.RepoAggregates, e
 		a.TopLanguageShare = float64(langCount) / float64(a.Total)
 	}
 	return a, nil
+}
+
+// GetGlobalStats returns regional distribution metrics.
+func (s *Store) GetGlobalStats(ctx context.Context) (map[string]any, error) {
+	var userRegions []map[string]any
+	rows, err := s.Reader().Query(ctx, `
+		SELECT region, COUNT(*) as count FROM users GROUP BY region ORDER BY count DESC
+	`)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var r string
+			var c int
+			if err := rows.Scan(&r, &c); err == nil {
+				userRegions = append(userRegions, map[string]any{"region": r, "count": c})
+			}
+		}
+	}
+
+	var opRegions []map[string]any
+	rows, err = s.Reader().Query(ctx, `
+		SELECT region, COUNT(*) as count FROM sync_operations GROUP BY region ORDER BY count DESC
+	`)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var r string
+			var c int
+			if err := rows.Scan(&r, &c); err == nil {
+				opRegions = append(opRegions, map[string]any{"region": r, "count": c})
+			}
+		}
+	}
+
+	return map[string]any{
+		"current_region": s.appRegion,
+		"user_distribution": userRegions,
+		"sync_distribution": opRegions,
+	}, nil
 }

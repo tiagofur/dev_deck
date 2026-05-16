@@ -22,7 +22,7 @@ type CustomEnricher struct {
 
 func (s *Store) CreateCustomEnricher(ctx context.Context, userID, orgID *uuid.UUID, name, pattern, endpoint string, auth *string) (*CustomEnricher, error) {
 	var e CustomEnricher
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		INSERT INTO custom_enrichers (user_id, org_id, name, url_pattern, endpoint_url, auth_header)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, org_id, user_id, name, url_pattern, endpoint_url, auth_header, created_at, updated_at
@@ -37,9 +37,9 @@ func (s *Store) ListCustomEnrichers(ctx context.Context, userID uuid.UUID, orgID
 	var err error
 	
 	if orgID != nil {
-		rows, err = s.pool.Query(ctx, `SELECT id, org_id, user_id, name, url_pattern, endpoint_url, auth_header, created_at, updated_at FROM custom_enrichers WHERE org_id = $1`, *orgID)
+		rows, err = s.Reader().Query(ctx, `SELECT id, org_id, user_id, name, url_pattern, endpoint_url, auth_header, created_at, updated_at FROM custom_enrichers WHERE org_id = $1`, *orgID)
 	} else {
-		rows, err = s.pool.Query(ctx, `SELECT id, org_id, user_id, name, url_pattern, endpoint_url, auth_header, created_at, updated_at FROM custom_enrichers WHERE user_id = $1 AND org_id IS NULL`, userID)
+		rows, err = s.Reader().Query(ctx, `SELECT id, org_id, user_id, name, url_pattern, endpoint_url, auth_header, created_at, updated_at FROM custom_enrichers WHERE user_id = $1 AND org_id IS NULL`, userID)
 	}
 	
 	if err != nil {
@@ -59,6 +59,6 @@ func (s *Store) ListCustomEnrichers(ctx context.Context, userID uuid.UUID, orgID
 }
 
 func (s *Store) DeleteCustomEnricher(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM custom_enrichers WHERE id = $1`, id)
+	_, err := s.Writer().Exec(ctx, `DELETE FROM custom_enrichers WHERE id = $1`, id)
 	return err
 }

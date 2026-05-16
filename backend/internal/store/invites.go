@@ -33,7 +33,7 @@ type WaitlistEntry struct {
 // ───── Waitlist ─────
 
 func (s *Store) JoinWaitlist(ctx context.Context, email string) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.Writer().Exec(ctx, `
 		INSERT INTO waitlist (email) VALUES ($1)
 		ON CONFLICT (email) DO NOTHING
 	`, strings.ToLower(strings.TrimSpace(email)))
@@ -41,7 +41,7 @@ func (s *Store) JoinWaitlist(ctx context.Context, email string) error {
 }
 
 func (s *Store) ListWaitlist(ctx context.Context) ([]WaitlistEntry, error) {
-	rows, err := s.pool.Query(ctx, `SELECT id, email, status, created_at FROM waitlist ORDER BY created_at DESC`)
+	rows, err := s.Reader().Query(ctx, `SELECT id, email, status, created_at FROM waitlist ORDER BY created_at DESC`)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (s *Store) ListWaitlist(ctx context.Context) ([]WaitlistEntry, error) {
 
 func (s *Store) CreateInvite(ctx context.Context, adminID uuid.UUID, code string) (*Invite, error) {
 	var inv Invite
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		INSERT INTO invites (code, creator_id)
 		VALUES ($1, $2)
 		RETURNING id, code, creator_id, created_at
@@ -74,7 +74,7 @@ func (s *Store) CreateInvite(ctx context.Context, adminID uuid.UUID, code string
 }
 
 func (s *Store) ListInvites(ctx context.Context) ([]Invite, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT id, code, creator_id, used_by_id, created_at, used_at
 		FROM invites
 		ORDER BY created_at DESC
@@ -97,7 +97,7 @@ func (s *Store) ListInvites(ctx context.Context) ([]Invite, error) {
 
 func (s *Store) ValidateInviteCode(ctx context.Context, code string) (uuid.UUID, error) {
 	var id uuid.UUID
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		SELECT id FROM invites WHERE code = $1 AND used_by_id IS NULL
 	`, strings.ToUpper(code)).Scan(&id)
 	if err != nil {

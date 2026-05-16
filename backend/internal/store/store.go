@@ -16,20 +16,48 @@ type WebhookService interface {
 // Store is the data access layer wrapping a pgx connection pool.
 // Methods live in the per-entity files (repos.go, etc.).
 type Store struct {
-	pool     *pgxpool.Pool
-	webhooks WebhookService
+	primary   *pgxpool.Pool
+	replica   *pgxpool.Pool
+	webhooks  WebhookService
+	appRegion string
 }
 
 func New(pool *pgxpool.Pool) *Store {
-	return &Store{pool: pool}
+	return &Store{
+		primary:   pool,
+		replica:   pool, // default to primary
+		appRegion: "us-east",
+	}
+}
+
+func NewWithReplica(primary, replica *pgxpool.Pool) *Store {
+	return &Store{
+		primary:   primary,
+		replica:   replica,
+		appRegion: "us-east",
+	}
+}
+
+func (s *Store) SetAppRegion(region string) {
+	s.appRegion = region
 }
 
 func (s *Store) SetWebhookService(svc WebhookService) {
 	s.webhooks = svc
 }
 
+// Writer returns the primary pool for write operations.
+func (s *Store) Writer() *pgxpool.Pool {
+	return s.primary
+}
+
+// Reader returns the replica pool for read operations.
+func (s *Store) Reader() *pgxpool.Pool {
+	return s.replica
+}
+
 func (s *Store) Pool() *pgxpool.Pool {
-	return s.pool
+	return s.primary
 }
 
 // Sentinel errors used by handlers to map to HTTP status codes.

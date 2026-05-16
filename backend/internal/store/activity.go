@@ -36,7 +36,7 @@ func (s *Store) RecordActivity(ctx context.Context, orgID, userID uuid.UUID, act
 		return fmt.Errorf("marshal activity metadata: %w", err)
 	}
 
-	_, err = s.pool.Exec(ctx, `
+	_, err = s.Writer().Exec(ctx, `
 		INSERT INTO activity_log (org_id, user_id, action, entity_type, entity_id, metadata)
 		VALUES ($1, $2, $3, $4, $5, $6)
 	`, orgID, userID, action, entityType, entityID, metaJSON)
@@ -57,7 +57,7 @@ func (s *Store) ListOrgActivity(ctx context.Context, orgID uuid.UUID, limit int)
 		limit = 50
 	}
 
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT 
 			a.id, a.org_id, a.user_id, a.action, a.entity_type, a.entity_id, a.metadata, a.created_at,
 			u.display_name, u.avatar_url

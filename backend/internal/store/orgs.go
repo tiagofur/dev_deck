@@ -9,7 +9,7 @@ import (
 )
 
 func (s *Store) CreateOrganization(ctx context.Context, userID uuid.UUID, name string) (*auth.Organization, error) {
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.Writer().Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (s *Store) CreateOrganization(ctx context.Context, userID uuid.UUID, name s
 }
 
 func (s *Store) ListUserOrganizations(ctx context.Context, userID uuid.UUID) ([]auth.Organization, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT o.id, o.name, o.slug, o.plan, o.created_at, o.updated_at
 		FROM orgs o
 		JOIN org_members om ON om.org_id = o.id
@@ -66,7 +66,7 @@ func (s *Store) ListUserOrganizations(ctx context.Context, userID uuid.UUID) ([]
 
 func (s *Store) IsOrgMember(ctx context.Context, userID, orgID uuid.UUID) (string, bool) {
 	var role string
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		SELECT role FROM org_members WHERE user_id = $1 AND org_id = $2
 	`, userID, orgID).Scan(&role)
 	if err != nil {
@@ -76,7 +76,7 @@ func (s *Store) IsOrgMember(ctx context.Context, userID, orgID uuid.UUID) (strin
 }
 
 func (s *Store) AddOrgMember(ctx context.Context, orgID, userID uuid.UUID, role string) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.Writer().Exec(ctx, `
 		INSERT INTO org_members (org_id, user_id, role)
 		VALUES ($1, $2, $3)
 		ON CONFLICT (org_id, user_id) DO UPDATE SET role = EXCLUDED.role

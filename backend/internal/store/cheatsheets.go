@@ -59,7 +59,7 @@ func (s *Store) ListCheatsheets(ctx context.Context, category string) ([]*cheats
 	}
 	q += ` ORDER BY title ASC`
 
-	rows, err := s.pool.Query(ctx, q, args...)
+	rows, err := s.Reader().Query(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (s *Store) GetCheatsheet(ctx context.Context, id uuid.UUID) (*cheatsheets.C
 		WHERE id = $1 AND (is_official = TRUE OR visibility = 'public' OR %s)
 	`, cheatColumns, scopeSQL)
 
-	row := s.pool.QueryRow(ctx, q, args...)
+	row := s.Reader().QueryRow(ctx, q, args...)
 	c, err := scanCheatsheet(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -121,7 +121,7 @@ func (s *Store) CreateCheatsheet(ctx context.Context, in cheatsheets.CreateCheat
 		visibility = cheatsheets.VisibilityPrivate
 	}
 
-	row := s.pool.QueryRow(ctx, `
+	row := s.Reader().QueryRow(ctx, `
 		INSERT INTO cheatsheets (user_id, slug, title, category, icon, color, description, visibility)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING `+cheatColumns,
@@ -185,7 +185,7 @@ func (s *Store) UpdateCheatsheet(ctx context.Context, id uuid.UUID, in cheatshee
 		"UPDATE cheatsheets SET %s WHERE id = $%d AND %s RETURNING %s",
 		strings.Join(sets, ", "), idx, scopeSQL, cheatColumns,
 	)
-	row := s.pool.QueryRow(ctx, q, args...)
+	row := s.Reader().QueryRow(ctx, q, args...)
 	c, err := scanCheatsheet(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -202,7 +202,7 @@ func (s *Store) UpdateCheatsheet(ctx context.Context, id uuid.UUID, in cheatshee
 func (s *Store) DeleteCheatsheet(ctx context.Context, id uuid.UUID) error {
 	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
 	args := append([]any{id}, scopeArgs...)
-	tag, err := s.pool.Exec(ctx, `DELETE FROM cheatsheets WHERE id = $1 AND `+scopeSQL, args...)
+	tag, err := s.Writer().Exec(ctx, `DELETE FROM cheatsheets WHERE id = $1 AND `+scopeSQL, args...)
 	if err != nil {
 		return err
 	}
@@ -231,7 +231,7 @@ func (s *Store) ExploreCheatsheets(ctx context.Context, category string, officia
 
 	q += ` ORDER BY is_official DESC, fork_count DESC, title ASC LIMIT 50`
 
-	rows, err := s.pool.Query(ctx, q, args...)
+	rows, err := s.Reader().Query(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -280,7 +280,7 @@ func (s *Store) ForkCheatsheet(ctx context.Context, id uuid.UUID) (*cheatsheets.
 	}
 
 	// Update parent_id
-	_, err = s.pool.Exec(ctx, `UPDATE cheatsheets SET parent_id = $1 WHERE id = $2`, original.ID, forked.ID)
+	_, err = s.Writer().Exec(ctx, `UPDATE cheatsheets SET parent_id = $1 WHERE id = $2`, original.ID, forked.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -300,7 +300,7 @@ func (s *Store) ForkCheatsheet(ctx context.Context, id uuid.UUID) (*cheatsheets.
 	}
 
 	// 4. Increment fork count on original
-	_, _ = s.pool.Exec(ctx, `UPDATE cheatsheets SET fork_count = fork_count + 1 WHERE id = $1`, original.ID)
+	_, _ = s.Writer().Exec(ctx, `UPDATE cheatsheets SET fork_count = fork_count + 1 WHERE id = $1`, original.ID)
 
 	return forked, nil
 }
@@ -311,7 +311,7 @@ func (s *Store) StarCheatsheet(ctx context.Context, id uuid.UUID) error {
 		return errors.New("unauthorized")
 	}
 
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.Writer().Exec(ctx, `
 		INSERT INTO cheatsheet_stars (user_id, cheatsheet_id)
 		VALUES ($1, $2)
 		ON CONFLICT (user_id, cheatsheet_id) DO DELETE
@@ -320,17 +320,17 @@ func (s *Store) StarCheatsheet(ctx context.Context, id uuid.UUID) error {
 
 	// Better toggle logic:
 	var exists bool
-	_ = s.pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM cheatsheet_stars WHERE user_id = $1 AND cheatsheet_id = $2)`, userID, id).Scan(&exists)
+	_ = s.Reader().QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM cheatsheet_stars WHERE user_id = $1 AND cheatsheet_id = $2)`, userID, id).Scan(&exists)
 
 	if exists {
-		_, err = s.pool.Exec(ctx, `DELETE FROM cheatsheet_stars WHERE user_id = $1 AND cheatsheet_id = $2`, userID, id)
+		_, err = s.Writer().Exec(ctx, `DELETE FROM cheatsheet_stars WHERE user_id = $1 AND cheatsheet_id = $2`, userID, id)
 		if err == nil {
-			_, _ = s.pool.Exec(ctx, `UPDATE cheatsheets SET stars_count = stars_count - 1 WHERE id = $1`, id)
+			_, _ = s.Writer().Exec(ctx, `UPDATE cheatsheets SET stars_count = stars_count - 1 WHERE id = $1`, id)
 		}
 	} else {
-		_, err = s.pool.Exec(ctx, `INSERT INTO cheatsheet_stars (user_id, cheatsheet_id) VALUES ($1, $2)`, userID, id)
+		_, err = s.Writer().Exec(ctx, `INSERT INTO cheatsheet_stars (user_id, cheatsheet_id) VALUES ($1, $2)`, userID, id)
 		if err == nil {
-			_, _ = s.pool.Exec(ctx, `UPDATE cheatsheets SET stars_count = stars_count + 1 WHERE id = $1`, id)
+			_, _ = s.Writer().Exec(ctx, `UPDATE cheatsheets SET stars_count = stars_count + 1 WHERE id = $1`, id)
 		}
 	}
 
@@ -342,7 +342,7 @@ func (s *Store) StarCheatsheet(ctx context.Context, id uuid.UUID) error {
 func (s *Store) ListEntriesByCheatsheet(ctx context.Context, cheatsheetID uuid.UUID) ([]cheatsheets.Entry, error) {
 	scopeSQL, scopeArgs := ownerClause(ctx, "c.user_id", 2)
 	args := append([]any{cheatsheetID}, scopeArgs...)
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT `+entryColumnsPrefixed+` FROM cheatsheet_entries ce
 		JOIN cheatsheets c ON c.id = ce.cheatsheet_id
 		WHERE ce.cheatsheet_id = $1 AND `+scopeSQL+`
@@ -372,7 +372,7 @@ func (s *Store) CreateEntry(ctx context.Context, cheatsheetID uuid.UUID, in chea
 	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 6)
 	args := []any{cheatsheetID, in.Label, in.Command, in.Description, tags}
 	args = append(args, scopeArgs...)
-	row := s.pool.QueryRow(ctx, `
+	row := s.Reader().QueryRow(ctx, `
 		INSERT INTO cheatsheet_entries (cheatsheet_id, label, command, description, tags, position)
 		SELECT $1, $2, $3, $4, $5,
 			COALESCE((SELECT MAX(position) + 1 FROM cheatsheet_entries WHERE cheatsheet_id = $1), 0)
@@ -394,7 +394,7 @@ func (s *Store) CreateEntry(ctx context.Context, cheatsheetID uuid.UUID, in chea
 func (s *Store) GetEntry(ctx context.Context, id uuid.UUID) (*cheatsheets.Entry, error) {
 	scopeSQL, scopeArgs := ownerClause(ctx, "c.user_id", 2)
 	args := append([]any{id}, scopeArgs...)
-	row := s.pool.QueryRow(ctx, `
+	row := s.Reader().QueryRow(ctx, `
 		SELECT `+entryColumnsPrefixed+`
 		FROM cheatsheet_entries ce
 		JOIN cheatsheets c ON c.id = ce.cheatsheet_id
@@ -446,7 +446,7 @@ func (s *Store) UpdateEntry(ctx context.Context, id uuid.UUID, in cheatsheets.Up
 		"UPDATE cheatsheet_entries ce SET %s FROM cheatsheets c WHERE ce.cheatsheet_id = c.id AND ce.id = $%d AND %s RETURNING %s",
 		strings.Join(sets, ", "), idx, scopeSQL, entryColumnsPrefixed,
 	)
-	row := s.pool.QueryRow(ctx, q, args...)
+	row := s.Reader().QueryRow(ctx, q, args...)
 	e, err := scanEntry(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -460,7 +460,7 @@ func (s *Store) UpdateEntry(ctx context.Context, id uuid.UUID, in cheatsheets.Up
 func (s *Store) DeleteEntry(ctx context.Context, id uuid.UUID) error {
 	scopeSQL, scopeArgs := ownerClause(ctx, "c.user_id", 2)
 	args := append([]any{id}, scopeArgs...)
-	tag, err := s.pool.Exec(ctx, `
+	tag, err := s.Writer().Exec(ctx, `
 		DELETE FROM cheatsheet_entries ce
 		USING cheatsheets c
 		WHERE ce.cheatsheet_id = c.id AND ce.id = $1 AND `+scopeSQL, args...)
@@ -481,7 +481,7 @@ func (s *Store) LinkCheatsheet(ctx context.Context, itemID, cheatsheetID uuid.UU
 	args := []any{itemID, cheatsheetID}
 	args = append(args, itemScopeArgs...)
 	args = append(args, cheatScopeArgs...)
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.Writer().Exec(ctx, `
 		INSERT INTO item_cheatsheet_links (item_id, cheatsheet_id)
 		SELECT $1, $2
 		FROM items i
@@ -498,7 +498,7 @@ func (s *Store) UnlinkCheatsheet(ctx context.Context, itemID, cheatsheetID uuid.
 	args := []any{itemID, cheatsheetID}
 	args = append(args, itemScopeArgs...)
 	args = append(args, cheatScopeArgs...)
-	tag, err := s.pool.Exec(ctx, `
+	tag, err := s.Writer().Exec(ctx, `
 		DELETE FROM item_cheatsheet_links icl
 		USING items i, cheatsheets c
 		WHERE icl.item_id = $1 AND icl.cheatsheet_id = $2
@@ -517,7 +517,7 @@ func (s *Store) UnlinkCheatsheet(ctx context.Context, itemID, cheatsheetID uuid.
 func (s *Store) ListCheatsheetsByRepo(ctx context.Context, repoID uuid.UUID) ([]*cheatsheets.Cheatsheet, error) {
 	scopeSQL, scopeArgs := ownerClause(ctx, "r.user_id", 2)
 	args := append([]any{repoID}, scopeArgs...)
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT `+cheatColumnsPrefixed+` FROM cheatsheets c
 		JOIN repo_cheatsheet_links rcl ON rcl.cheatsheet_id = c.id
 		JOIN repos r ON r.id = rcl.repo_id
@@ -587,7 +587,7 @@ func (s *Store) Search(ctx context.Context, mode SearchMode, query string, query
 	// 2. Search repos (now in items table)
 	repoScopeSQL, repoScopeArgs := ownerClause(ctx, "user_id", 4)
 	repoArgs := append([]any{pattern, query, limit}, repoScopeArgs...)
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT id, title, COALESCE(meta->>'owner',''), COALESCE(description,''), COALESCE(meta->>'language','')
 		FROM items
 		WHERE item_type = 'repo' 
@@ -623,7 +623,7 @@ func (s *Store) Search(ctx context.Context, mode SearchMode, query string, query
 	// 3. Search cheatsheets
 	cheatScopeSQL, cheatScopeArgs := ownerClause(ctx, "user_id", 4)
 	cheatArgs := append([]any{pattern, query, limit}, cheatScopeArgs...)
-	rows, err = s.pool.Query(ctx, `
+	rows, err = s.Reader().Query(ctx, `
 		SELECT id, title, category, description
 		FROM cheatsheets
 		WHERE (title ILIKE $1 OR description ILIKE $1 OR category ILIKE $1)
@@ -654,7 +654,7 @@ func (s *Store) Search(ctx context.Context, mode SearchMode, query string, query
 	// 4. Search entries
 	entryScopeSQL, entryScopeArgs := ownerClause(ctx, "c.user_id", 4)
 	entryArgs := append([]any{pattern, query, limit}, entryScopeArgs...)
-	rows, err = s.pool.Query(ctx, `
+	rows, err = s.Reader().Query(ctx, `
 		SELECT ce.id, ce.label, ce.command, ce.description, c.title
 		FROM cheatsheet_entries ce
 		JOIN cheatsheets c ON c.id = ce.cheatsheet_id
@@ -712,7 +712,7 @@ func (s *Store) GetCheatsheetBySlug(ctx context.Context, slug string) (*cheatshe
 	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
 	args := append([]any{slug}, scopeArgs...)
 	q := fmt.Sprintf(`SELECT %s FROM cheatsheets WHERE slug = $1 AND (is_official = TRUE OR visibility = 'public' OR %s)`, cheatColumns, scopeSQL)
-	row := s.pool.QueryRow(ctx, q, args...)
+	row := s.Reader().QueryRow(ctx, q, args...)
 	c, err := scanCheatsheet(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -749,7 +749,7 @@ func (s *Store) SeedCheatsheet(ctx context.Context, sc cheatsheets.SeedCheatshee
 	}
 
 	// Mark as seed and official.
-	_, err = s.pool.Exec(ctx, `UPDATE cheatsheets SET is_seed = TRUE, is_official = TRUE WHERE id = $1`, c.ID)
+	_, err = s.Writer().Exec(ctx, `UPDATE cheatsheets SET is_seed = TRUE, is_official = TRUE WHERE id = $1`, c.ID)
 	if err != nil {
 		return err
 	}

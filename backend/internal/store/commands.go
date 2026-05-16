@@ -30,7 +30,7 @@ func scanCommand(row pgx.Row) (*commands.Command, error) {
 func (s *Store) ListCommandsByRepo(ctx context.Context, itemID uuid.UUID) ([]*commands.Command, error) {
 	scopeSQL, scopeArgs := ownerClause(ctx, "i.user_id", 2)
 	args := append([]any{itemID}, scopeArgs...)
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT ic.id, ic.item_id, ic.label, ic.command, ic.description, ic.category, ic.position, ic.created_at
 		FROM item_commands ic
 		JOIN items i ON i.id = ic.item_id
@@ -58,7 +58,7 @@ func (s *Store) CreateCommand(ctx context.Context, itemID uuid.UUID, in commands
 	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 6)
 	args := []any{itemID, in.Label, in.Command, in.Description, in.Category}
 	args = append(args, scopeArgs...)
-	row := s.pool.QueryRow(ctx, `
+	row := s.Reader().QueryRow(ctx, `
 		INSERT INTO item_commands (item_id, label, command, description, category, position)
 		SELECT
 			$1, $2, $3, $4, $5,
@@ -114,7 +114,7 @@ func (s *Store) UpdateCommand(ctx context.Context, id uuid.UUID, in commands.Upd
 		"UPDATE item_commands ic SET %s FROM items i WHERE ic.item_id = i.id AND ic.id = $%d AND %s RETURNING ic.id, ic.item_id, ic.label, ic.command, ic.description, ic.category, ic.position, ic.created_at",
 		strings.Join(sets, ", "), idx, scopeSQL,
 	)
-	row := s.pool.QueryRow(ctx, q, args...)
+	row := s.Reader().QueryRow(ctx, q, args...)
 	c, err := scanCommand(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -128,7 +128,7 @@ func (s *Store) UpdateCommand(ctx context.Context, id uuid.UUID, in commands.Upd
 func (s *Store) GetCommand(ctx context.Context, id uuid.UUID) (*commands.Command, error) {
 	scopeSQL, scopeArgs := ownerClause(ctx, "i.user_id", 2)
 	args := append([]any{id}, scopeArgs...)
-	row := s.pool.QueryRow(ctx,
+	row := s.Reader().QueryRow(ctx,
 		`SELECT ic.`+commandColumns+` FROM item_commands ic JOIN items i ON i.id = ic.item_id WHERE ic.id = $1 AND `+scopeSQL,
 		args...)
 	c, err := scanCommand(row)
@@ -144,7 +144,7 @@ func (s *Store) GetCommand(ctx context.Context, id uuid.UUID) (*commands.Command
 func (s *Store) DeleteCommand(ctx context.Context, id uuid.UUID) error {
 	scopeSQL, scopeArgs := ownerClause(ctx, "i.user_id", 2)
 	args := append([]any{id}, scopeArgs...)
-	tag, err := s.pool.Exec(ctx, `
+	tag, err := s.Writer().Exec(ctx, `
 		DELETE FROM item_commands ic
 		USING items i
 		WHERE ic.item_id = i.id AND ic.id = $1 AND `+scopeSQL, args...)
@@ -162,7 +162,7 @@ func (s *Store) BatchCreateCommands(ctx context.Context, itemID uuid.UUID, input
 	if len(inputs) == 0 {
 		return nil, nil
 	}
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.Writer().Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +212,7 @@ func (s *Store) ReorderCommands(ctx context.Context, itemID uuid.UUID, ids []uui
 	if len(ids) == 0 {
 		return nil
 	}
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.Writer().Begin(ctx)
 	if err != nil {
 		return err
 	}
