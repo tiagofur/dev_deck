@@ -15,6 +15,7 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -26,9 +27,20 @@ var (
 	ErrNotFound   = errors.New("upstream not found")
 )
 
+type ExternalEnricher interface {
+	Name() string
+	URLPattern() string
+	Fetch(ctx context.Context, rawURL string) (*repos.Metadata, error)
+}
+
 type Service struct {
-	github  *GitHubEnricher
-	generic *OpenGraphEnricher
+	github   *GitHubEnricher
+	generic  *OpenGraphEnricher
+	external []ExternalEnricher
+}
+
+func (s *Service) SetExternalEnrichers(ext []ExternalEnricher) {
+	s.external = ext
 }
 
 // defaultGitHubAPIBase is the public GitHub REST API root. Tests inject a
@@ -80,7 +92,22 @@ func newGitHubEnricher(token, apiBase string, httpc *http.Client) *GitHubEnriche
 
 // Enrich resolves metadata for the given URL. Returns ErrInvalidURL if the
 // URL can't be parsed; other errors come from the underlying strategy.
-func (s *Service) Enrich(ctx context.Context, rawURL string) (*repos.Metadata, error) {
+func (s *Service) Enrich(ctx context.Context, rawURL string, extra []ExternalEnricher) (*repos.Metadata, error) {
+	// 1. Try external plugins first
+	allExternal := append([]ExternalEnricher{}, s.external...)
+	allExternal = append(allExternal, extra...)
+
+	for _, ext := range allExternal {
+		matched, _ := regexp.MatchString(ext.URLPattern(), rawURL)
+		if matched {
+			md, err := ext.Fetch(ctx, rawURL)
+			if err == nil && md != nil {
+				return md, nil
+			}
+		}
+	}
+
+	// 2. Built-in providers
 	u, err := url.Parse(rawURL)
 	if err != nil || u.Host == "" {
 		return nil, ErrInvalidURL

@@ -9,10 +9,14 @@ import (
 // User represents an authenticated user (sourced from GitHub OAuth).
 type User struct {
 	ID          uuid.UUID `json:"id"`
-	GitHubID    int64     `json:"github_id"`
+	GitHubID    *int64    `json:"github_id"`
 	Login       string    `json:"login"`
+	Username    *string   `json:"username,omitempty"`
+	Bio         *string   `json:"bio,omitempty"`
+	Plan        string    `json:"plan"`
 	AvatarURL   string    `json:"avatar_url"`
 	DisplayName string    `json:"display_name"`
+	Role        string    `json:"role"`
 	CreatedAt   time.Time `json:"created_at"`
 }
 

@@ -105,9 +105,13 @@ type searchResponse struct {
 }
 
 // Search hits GET /api/search. Empty query returns an error upstream.
-func (c *Client) Search(ctx context.Context, query string, limit int) ([]SearchResult, error) {
+// mode can be "text", "semantic", or "hybrid".
+func (c *Client) Search(ctx context.Context, query string, limit int, mode string) ([]SearchResult, error) {
 	var body searchResponse
-	path := fmt.Sprintf("/api/search?q=%s&limit=%d", urlQueryEscape(query), limit)
+	if mode == "" {
+		mode = "text"
+	}
+	path := fmt.Sprintf("/api/search?q=%s&limit=%d&mode=%s", urlQueryEscape(query), limit, mode)
 	if err := c.do(ctx, http.MethodGet, path, nil, &body); err != nil {
 		return nil, err
 	}

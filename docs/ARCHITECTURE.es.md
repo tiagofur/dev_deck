@@ -529,7 +529,7 @@ Cliente Electron lee `API_BASE_URL` y `API_TOKEN` de un config encriptado con `s
 ```yaml
 services:
   db:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     environment:
       POSTGRES_PASSWORD: ${PG_PASS}
       POSTGRES_DB: devdeck

@@ -67,7 +67,7 @@ func (h *ReposHandler) Create(w http.ResponseWriter, r *http.Request) {
 		enrichCtx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
 		defer cancel()
 
-		if md, err := h.enricher.Enrich(enrichCtx, repo.URL); err != nil {
+		if md, err := h.enricher.Enrich(enrichCtx, repo.URL, nil); err != nil {
 			slog.Warn("create: enrich failed (continuing)", "err", err, "url", repo.URL)
 		} else if updated, err := h.store.UpdateMetadata(r.Context(), repo.ID, md); err != nil {
 			slog.Warn("create: update metadata failed", "err", err, "url", repo.URL)
@@ -246,7 +246,7 @@ func (h *ReposHandler) MarkSeen(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if err := h.store.MarkSeen(r.Context(), id); err != nil {
+	if err := h.store.MarkSeenRepo(r.Context(), id); err != nil {
 		if errors.Is(err, store.ErrNotFound) {
 			writeError(w, http.StatusNotFound, "REPO_NOT_FOUND", "repo not found")
 			return
@@ -279,7 +279,9 @@ func (h *ReposHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		writeInternal(w, err)
 		return
 	}
-	md, err := h.enricher.Enrich(r.Context(), repo.URL)
+	md, err := h.enricher.Enrich(r.Context(), repo.URL, nil)
+
+
 	if err != nil {
 		writeError(w, http.StatusUnprocessableEntity, "ENRICH_FAILED", err.Error())
 		return

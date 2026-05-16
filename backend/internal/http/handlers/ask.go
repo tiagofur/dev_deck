@@ -28,13 +28,14 @@ type AskRequest struct {
 }
 
 type AskResponse struct {
-	Answer  string                    `json:"answer"`
-	Sources []store.SearchItemsResult `json:"sources,omitempty"`
+	Answer    string                    `json:"answer"`
+	Sources   []store.SearchItemsResult `json:"sources,omitempty"`
+	Citations []store.Citation          `json:"citations,omitempty"`
 }
 
 // POST /api/ask
 // Body: {"question": "..."}
-// Returns: {"answer": "...", "sources": [...]}
+// Returns: {"answer": "...", "sources": [...], "citations": [...]}
 func (h *AskHandler) Ask(w http.ResponseWriter, r *http.Request) {
 	var req AskRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -71,8 +72,9 @@ func (h *AskHandler) Ask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, AskResponse{
-		Answer:  result.Answer,
-		Sources: result.Sources,
+		Answer:    result.Answer,
+		Sources:   result.Sources,
+		Citations: result.Citations,
 	})
 }
 

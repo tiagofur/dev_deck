@@ -128,6 +128,30 @@ func (h *ItemsHandler) Update(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, it)
 }
 
+// POST /api/items/check — check if a URL exists in the vault.
+func (h *ItemsHandler) Check(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		URL string `json:"url"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
+		return
+	}
+
+	norm := items.NormalizeURL(body.URL)
+	it, err := h.store.FindItemByNormalizedURL(r.Context(), norm)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeJSON(w, http.StatusOK, map[string]any{"item": nil})
+			return
+		}
+		writeInternal(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"item": it})
+}
+
 // DELETE /api/items/{id}
 func (h *ItemsHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, ok := parseItemID(w, r)
@@ -177,7 +201,17 @@ func (h *ItemsHandler) AIEnrich(w http.ResponseWriter, r *http.Request) {
 		writeInternal(w, err)
 		return
 	}
-	job := jobs.EnrichJob{Kind: jobs.KindItem, ID: it.ID, Type: it.Type}
+	orgID, _ := authctx.OrgID(r.Context())
+	job := jobs.EnrichJob{
+		Kind:   jobs.KindItem,
+		ID:     it.ID,
+		UserID: it.UserID,
+		URL:    "",
+		Type:   it.Type,
+	}
+	if orgID != uuid.Nil {
+		job.OrgID = &orgID
+	}
 	if it.URL != nil {
 		job.URL = *it.URL
 	}

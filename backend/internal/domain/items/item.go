@@ -65,6 +65,8 @@ const (
 // contract and mirror what the desktop/web clients deserialize.
 type Item struct {
 	ID               uuid.UUID        `json:"id"`
+	UserID           uuid.UUID        `json:"user_id"`
+	OrgID            *uuid.UUID       `json:"org_id,omitempty"`
 	Type             Type             `json:"item_type"`
 	Title            string           `json:"title"`
 	URL              *string          `json:"url"`
@@ -134,6 +136,8 @@ type ListParams struct {
 	Limit int
 	// Offset for pagination.
 	Offset int
+	// CreatedAfter filters items created after this timestamp.
+	CreatedAfter *time.Time
 }
 
 // ListResult is the paginated response for GET /api/items.

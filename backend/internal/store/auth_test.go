@@ -22,7 +22,7 @@ func TestStore_Auth_GitHub(t *testing.T) {
 	if err != nil {
 		t.Fatalf("UpsertUser failed: %v", err)
 	}
-	if user.GitHubID != ghUser.ID || user.Login != ghUser.Login {
+	if user.GitHubID == nil || *user.GitHubID != ghUser.ID || user.Login != ghUser.Login {
 		t.Errorf("unexpected user data: %+v", user)
 	}
 
@@ -50,7 +50,7 @@ func TestStore_Auth_GitHub(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetUserByID failed: %v", err)
 	}
-	if byID.GitHubID != ghUser.ID {
+	if byID.GitHubID == nil || *byID.GitHubID != ghUser.ID {
 		t.Errorf("github id mismatch: %d", byID.GitHubID)
 	}
 }

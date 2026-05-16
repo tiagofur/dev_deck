@@ -58,7 +58,7 @@ func (h *PreviewHandler) Preview(w http.ResponseWriter, r *http.Request) {
 
 	// Try to fetch OG metadata for title/description/image
 	// This is best-effort — failure to fetch shouldn't block preview
-	if md, err := h.enricher.Enrich(r.Context(), in.URL); err == nil && md != nil {
+	if md, err := h.enricher.Enrich(r.Context(), in.URL, nil); err == nil && md != nil {
 		if md.Description != nil && *md.Description != "" {
 			resp.Description = *md.Description
 		}

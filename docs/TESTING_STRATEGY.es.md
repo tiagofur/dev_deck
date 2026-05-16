@@ -45,7 +45,7 @@
 func SetupPostgres(t *testing.T) (*pgxpool.Pool, func()) {
     ctx := context.Background()
     pgContainer, err := postgres.RunContainer(ctx,
-        testcontainers.WithImage("postgres:16-alpine"),
+        testcontainers.WithImage("pgvector/pgvector:pg16"),
         postgres.WithDatabase("devdeck_test"),
         postgres.WithUsername("test"),
         postgres.WithPassword("test"),

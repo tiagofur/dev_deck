@@ -53,6 +53,7 @@ type Config struct {
 
 	// ─── Wave 7: Local Auth & Email ───
 	LocalAuthEnabled bool   `env:"LOCAL_AUTH_ENABLED" envDefault:"false"`
+	RequireInvite    bool   `env:"REQUIRE_INVITE" envDefault:"false"`
 	ResendAPIKey     string `env:"RESEND_API_KEY"`
 	FrontendURL      string `env:"FRONTEND_URL" envDefault:"http://localhost:5173"`
 
@@ -60,6 +61,8 @@ type Config struct {
 	AIProvider       string `env:"AI_PROVIDER" envDefault:"heuristic"`
 	OpenAIAPIKey    string `env:"OPENAI_API_KEY"`
 	OpenAIModel    string `env:"OPENAI_MODEL" envDefault:"gpt-4o-mini"`
+	OllamaBaseURL  string `env:"OLLAMA_BASE_URL" envDefault:"http://localhost:11434"`
+	OllamaModel    string `env:"OLLAMA_MODEL" envDefault:"llama3"`
 	QwenAPIKey     string `env:"QWEN_API_KEY"`     // Alibaba DashScope
 	QwenModel      string `env:"QWEN_MODEL" envDefault:"qwen-turbo"`
 	DeepSeekAPIKey string `env:"DEEPSEEK_API_KEY"`
@@ -131,9 +134,9 @@ func Load() (Config, error) {
 		}
 	}
 	switch strings.ToLower(strings.TrimSpace(c.AIProvider)) {
-	case "", "heuristic", "local", "disabled", "off", "none", "openai", "qwen", "deepseek":
+	case "", "heuristic", "local", "disabled", "off", "none", "openai", "qwen", "deepseek", "ollama":
 	default:
-		return c, errors.New("AI_PROVIDER must be one of: heuristic, local, disabled, openai, qwen, deepseek")
+		return c, errors.New("AI_PROVIDER must be one of: heuristic, local, disabled, openai, qwen, deepseek, ollama")
 	}
 	if strings.EqualFold(strings.TrimSpace(c.AIProvider), "openai") {
 		if !c.AIExternalOptIn {

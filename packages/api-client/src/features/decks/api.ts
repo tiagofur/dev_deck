@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { api } from '../../api-client'
+import type { Item } from '../capture/types'
 
 export interface Deck {
   id: string
@@ -145,7 +146,7 @@ export function useRemoveDeckItem() {
 export function usePublicDeck(slug: string) {
   return useQuery({
     queryKey: [...DECKS_KEY, 'public', slug],
-    queryFn: () => api.get<{ deck: Deck; items: DeckItem[] }>(`/api/decks/${slug}/public`),
+    queryFn: () => api.get<{ deck: Deck; items: Item[] }>(`/api/decks/${slug}/public`),
     enabled: !!slug,
   })
 }

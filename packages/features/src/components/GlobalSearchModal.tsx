@@ -11,7 +11,8 @@ interface Props {
 
 export function GlobalSearchModal({ open, onClose }: Props) {
   const [query, setQuery] = useState('')
-  const { data: results = [], isLoading } = useGlobalSearch(query)
+  const [mode, setMode] = useState<'text' | 'semantic' | 'hybrid'>('text')
+  const { data: results = [], isLoading } = useGlobalSearch(query, mode)
   const navigate = useNavigate()
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -73,6 +74,29 @@ export function GlobalSearchModal({ open, onClose }: Props) {
           <button onClick={onClose} className="border-2 border-ink p-1 hover:bg-accent-pink">
             <X size={14} strokeWidth={3} />
           </button>
+        </div>
+
+        {/* Mode selector */}
+        <div className="flex items-center gap-2 p-3 bg-bg-elevated border-b-3 border-ink overflow-x-auto no-scrollbar shrink-0">
+          <span className="text-[10px] font-mono uppercase font-bold text-ink-soft ml-1 mr-2">Modo:</span>
+          <ModeButton 
+            active={mode === 'text'} 
+            onClick={() => setMode('text')} 
+            label="Texto" 
+            title="Búsqueda clásica por palabras clave"
+          />
+          <ModeButton 
+            active={mode === 'semantic'} 
+            onClick={() => setMode('semantic')} 
+            label="IA (Semántica)" 
+            title="Busca por significado usando embeddings"
+          />
+          <ModeButton 
+            active={mode === 'hybrid'} 
+            onClick={() => setMode('hybrid')} 
+            label="Híbrida" 
+            title="Combina texto + IA para mejores resultados"
+          />
         </div>
 
         {/* Results */}
@@ -143,5 +167,31 @@ function ResultGroup({
         </button>
       ))}
     </div>
+  )
+}
+
+function ModeButton({ 
+  active, 
+  onClick, 
+  label, 
+  title 
+}: { 
+  active: boolean
+  onClick: () => void
+  label: string
+  title?: string 
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      className={`px-3 py-1 text-[10px] font-mono uppercase font-bold border-2 border-ink transition-all
+        ${active 
+          ? 'bg-accent-yellow shadow-hard-sm translate-x-[-1px] translate-y-[-1px]' 
+          : 'bg-bg-card hover:bg-bg-elevated'
+        }`}
+    >
+      {label}
+    </button>
   )
 }

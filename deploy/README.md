@@ -69,7 +69,7 @@ docker compose up -d --build
 Esto va a:
 1. Buildear `devdeck-api:latest` desde `../backend/Dockerfile`
 2. Buildear `devdeck-web:latest` desde `../apps/web/Dockerfile`
-3. Bajar `postgres:16-alpine`, `nginx:alpine`, y `caddy:2-alpine`
+3. Bajar `pgvector/pgvector:pg16`, `nginx:alpine`, y `caddy:2-alpine`
 4. Levantar los 4 servicios (db, api, web, caddy)
 5. **Caddy provisiona el certificado TLS automáticamente**
 

@@ -8,6 +8,7 @@ import {
   getRefreshToken,
   localStorageAdapter,
   setTokenStorage,
+  startSyncEngine,
 } from '@devdeck/api-client'
 import { App } from './App'
 import '@devdeck/ui/styles/globals.css'
@@ -35,6 +36,8 @@ configureApiClient({
   authMode,
   staticToken: import.meta.env.VITE_API_TOKEN || undefined,
 })
+
+startSyncEngine().catch((err) => console.error('Failed to start sync engine:', err))
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

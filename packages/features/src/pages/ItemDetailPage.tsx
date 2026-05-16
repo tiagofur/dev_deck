@@ -1,93 +1,83 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Brain, CheckCircle2, Clipboard, ExternalLink, Sparkles, Trash2, Users } from 'lucide-react'
+import {
+	ArrowLeft,
+	Brain,
+	CheckCircle2,
+	Clipboard,
+	ExternalLink,
+	FileText,
+	Library,
+	Plus,
+	Play,
+	Sparkles,
+	Trash2,
+	Users,
+} from 'lucide-react'
 import { Button, TagChip, confirm, hashIndex, showToast } from '@devdeck/ui'
 import {
 	useAIEnrichItem,
 	useDeleteItem,
 	useItem,
+	useRelatedItems,
 	useReviewItemAITags,
+	useItemRunbooks,
+	useCreateRunbook,
+	useAddRunbookStep,
+	useUpdateRunbookStep,
+	useDeleteRunbook,
 	useUpdateItem,
 	type Item,
+	type Runbook,
+	type RunbookStep,
 } from '@devdeck/api-client'
 import { NotesEditor } from '../components/NotesEditor'
 import { TagsEditor } from '../components/TagsEditor'
+import { TeamReviewCard } from '../components/TeamReviewCard'
 
 export function ItemDetailPage() {
 	const { id } = useParams<{ id: string }>()
 	const navigate = useNavigate()
+	const [activeTab, setActiveTab] = useState<'notes' | 'runbooks'>('notes')
 	const { data: item, isLoading, error } = useItem(id)
 	const updateItem = useUpdateItem()
 	const deleteItem = useDeleteItem()
 	const aiEnrich = useAIEnrichItem()
 	const reviewAITags = useReviewItemAITags()
 
-	if (isLoading) {
-		return <div className="min-h-screen flex items-center justify-center font-mono text-ink-soft">Cargando…</div>
-	}
-	if (error || !item) {
-		return (
-			<div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8">
-				<p className="font-display font-black text-3xl uppercase">Item no encontrado</p>
-				<Button variant="primary" onClick={() => navigate('/items')}>Volver a items</Button>
-			</div>
-		)
-	}
 	const currentItem = item
 
-	async function saveField(field: 'why_saved' | 'when_to_use', next: string) {
-		try {
-			await updateItem.mutateAsync({ id: currentItem.id, input: { [field]: next } })
-			showToast(field === 'why_saved' ? 'Motivo guardado' : 'Cuándo usarlo guardado')
-		} catch (e) {
-			showToast((e as Error).message, 'error')
-		}
-	}
-
 	async function saveNotes(next: string) {
-		try {
-			await updateItem.mutateAsync({ id: currentItem.id, input: { notes: next } })
-			showToast('Notas guardadas')
-		} catch (e) {
-			showToast((e as Error).message, 'error')
-		}
+		await updateItem.mutateAsync({ id: currentItem!.id, input: { notes: next } })
 	}
 
 	async function saveTags(next: string[]) {
-		try {
-			await updateItem.mutateAsync({ id: currentItem.id, input: { tags: next } })
-			showToast('Tags guardados')
-		} catch (e) {
-			showToast((e as Error).message, 'error')
-		}
+		await updateItem.mutateAsync({ id: currentItem!.id, input: { tags: next } })
 	}
 
-	async function rerunAI() {
-		try {
-			await aiEnrich.mutateAsync(currentItem.id)
-			showToast('Análisis encolado')
-		} catch (e) {
-			showToast((e as Error).message, 'error')
-		}
+	async function saveField(field: string, val: string) {
+		await updateItem.mutateAsync({ id: currentItem!.id, input: { [field]: val } })
 	}
 
 	async function toggleFavorite() {
-		try {
-			await updateItem.mutateAsync({ id: currentItem.id, input: { is_favorite: !currentItem.is_favorite } })
-			showToast(currentItem.is_favorite ? 'Eliminado de favoritos' : 'Agregado a favoritos')
-		} catch (e) {
-			showToast((e as Error).message, 'error')
-		}
+		await updateItem.mutateAsync({
+			id: currentItem!.id,
+			input: { is_favorite: !currentItem!.is_favorite },
+		})
+	}
+
+	async function rerunAI() {
+		await aiEnrich.mutateAsync(currentItem!.id)
+		showToast('Análisis en curso...')
 	}
 
 	async function markForTeamReview() {
-		if (currentItem.tags.includes('team-review')) return
 		try {
 			await updateItem.mutateAsync({
-				id: currentItem.id,
-				input: { tags: [...currentItem.tags, 'team-review'] },
+				id: currentItem!.id,
+				input: { tags: [...currentItem!.tags, 'team-review'] },
 			})
-			showToast('Marcado para revisar con el equipo')
+			showToast('Marcado para revisión de equipo')
 		} catch (e) {
 			showToast((e as Error).message, 'error')
 		}
@@ -96,8 +86,8 @@ export function ItemDetailPage() {
 	async function removeFromTeamReview() {
 		try {
 			await updateItem.mutateAsync({
-				id: currentItem.id,
-				input: { tags: currentItem.tags.filter((tag) => tag !== 'team-review') },
+				id: currentItem!.id,
+				input: { tags: currentItem!.tags.filter((tag) => tag !== 'team-review') },
 			})
 			showToast('Quitado de revisión')
 		} catch (e) {
@@ -108,9 +98,9 @@ export function ItemDetailPage() {
 	async function approveTeamReview() {
 		try {
 			await updateItem.mutateAsync({
-				id: currentItem.id,
+				id: currentItem!.id,
 				input: {
-					tags: currentItem.tags.filter((tag) => tag !== 'team-review'),
+					tags: currentItem!.tags.filter((tag) => tag !== 'team-review'),
 					is_favorite: true,
 				},
 			})
@@ -122,7 +112,7 @@ export function ItemDetailPage() {
 
 	async function copyShareSummary() {
 		try {
-			await navigator.clipboard.writeText(buildShareSummary(currentItem))
+			await navigator.clipboard.writeText(buildShareSummary(currentItem!))
 			showToast('Resumen copiado')
 		} catch {
 			showToast('No se pudo copiar', 'error')
@@ -141,11 +131,11 @@ export function ItemDetailPage() {
 		}
 		window.addEventListener('keydown', onKey)
 		return () => window.removeEventListener('keydown', onKey)
-	}, [currentItem.id, currentItem.is_favorite])
+	}, [currentItem?.id, currentItem?.is_favorite])
 
 	async function saveAITags(next: string[]) {
 		try {
-			await reviewAITags.mutateAsync({ id: currentItem.id, input: { ai_tags: next, apply: false } })
+			await reviewAITags.mutateAsync({ id: currentItem!.id, input: { ai_tags: next, apply: false } })
 			showToast('Sugerencias guardadas')
 		} catch (e) {
 			showToast((e as Error).message, 'error')
@@ -154,7 +144,7 @@ export function ItemDetailPage() {
 
 	async function applyAITags(next: string[]) {
 		try {
-			await reviewAITags.mutateAsync({ id: currentItem.id, input: { ai_tags: next, apply: true } })
+			await reviewAITags.mutateAsync({ id: currentItem!.id, input: { ai_tags: next, apply: true } })
 			showToast('Tags sugeridos aplicados')
 		} catch (e) {
 			showToast((e as Error).message, 'error')
@@ -164,20 +154,23 @@ export function ItemDetailPage() {
 	async function onDelete() {
 		const ok = await confirm({
 			title: 'Borrar item',
-			message: `Esto va a eliminar "${currentItem.title || '(sin título)'}" para siempre. No se puede deshacer.`,
+			message: `Esto va a eliminar "${currentItem?.title || '(sin título)'}" para siempre. No se puede deshacer.`,
 			confirmLabel: 'Borrar',
 			cancelLabel: 'Cancelar',
 			variant: 'danger',
 		})
 		if (!ok) return
 		try {
-			await deleteItem.mutateAsync(currentItem.id)
+			await deleteItem.mutateAsync(currentItem!.id)
 			showToast('Item borrado')
 			navigate('/items')
 		} catch (e) {
 			showToast((e as Error).message, 'error')
 		}
 	}
+
+	if (isLoading) return <div className="p-12 text-center animate-pulse">Cargando item…</div>
+	if (error || !currentItem) return <div className="p-12 text-center text-accent-pink">Error al cargar el item.</div>
 
 	return (
 		<div className="min-h-screen bg-bg-primary">
@@ -213,7 +206,35 @@ export function ItemDetailPage() {
 						onSave={(next) => saveField('when_to_use', next)}
 						saving={updateItem.isPending}
 					/>
-					<NotesEditor value={currentItem.notes} onSave={saveNotes} saving={updateItem.isPending} />
+					
+					{/* Tabs */}
+					<div className="flex border-b-3 border-ink">
+						<TabButton
+							active={activeTab === 'notes'}
+							onClick={() => setActiveTab('notes')}
+							label="Notas"
+							icon={<FileText size={16} />}
+						/>
+						<TabButton
+							active={activeTab === 'runbooks'}
+							onClick={() => setActiveTab('runbooks')}
+							label="Runbooks"
+							icon={<Library size={16} />}
+						/>
+					</div>
+
+					{activeTab === 'notes' ? (
+						<NotesEditor
+							value={currentItem.notes}
+							onSave={saveNotes}
+							saving={updateItem.isPending}
+							roomID={`item-${currentItem.id}`}
+						/>
+
+					) : (
+						<RunbookList itemId={id} />
+					)}
+
 					<TagsEditor value={currentItem.tags} onChange={saveTags} saving={updateItem.isPending} />
 					<AITagsReviewCard
 						value={currentItem.ai_tags}
@@ -225,6 +246,7 @@ export function ItemDetailPage() {
 
 				<aside>
 					<div className="lg:sticky lg:top-24 space-y-4">
+						<RelatedItemsCard id={id} />
 						<TeamReviewCard
 							item={currentItem}
 							saving={updateItem.isPending}
@@ -240,17 +262,220 @@ export function ItemDetailPage() {
 								<Button type="button" variant="secondary" onClick={() => window.open(currentItem.url!, '_blank', 'noopener')}>
 										<span className="flex items-center gap-2"><ExternalLink size={16} strokeWidth={3} />Abrir fuente</span>
 									</Button>
-								)}
-								<Button type="button" variant="accent" onClick={rerunAI} disabled={aiEnrich.isPending}>
-									<span className="flex items-center gap-2"><Brain size={16} strokeWidth={3} />{aiEnrich.isPending ? 'Analizando…' : 'Re-ejecutar IA'}</span>
+							)}
+								<Button type="button" variant={currentItem.is_favorite ? 'accent' : 'secondary'} onClick={toggleFavorite}>
+									<span className="flex items-center gap-2">
+										<Sparkles size={16} strokeWidth={3} className={currentItem.is_favorite ? 'fill-ink' : ''} />
+										{currentItem.is_favorite ? 'Favorito' : 'Marcar favorito'}
+									</span>
 								</Button>
-								<Button type="button" variant="danger" onClick={onDelete} disabled={deleteItem.isPending}>
-									<span className="flex items-center gap-2"><Trash2 size={16} strokeWidth={3} />Borrar item</span>
-								</Button>
+								<div className="h-px bg-ink/10 my-1" />
+								<button
+									onClick={onDelete}
+									className="flex items-center gap-2 px-4 py-2 text-sm font-bold uppercase text-accent-pink hover:bg-accent-pink/10 transition-colors text-left"
+								>
+									<Trash2 size={16} />
+									Borrar para siempre
+								</button>
 							</div>
 						</div>
 					</div>
 				</aside>
+			</div>
+		</div>
+	)
+}
+
+function TabButton({ active, onClick, label, icon }: { active: boolean; onClick: () => void; label: string; icon: React.ReactNode }) {
+	return (
+		<button
+			onClick={onClick}
+			className={`flex items-center gap-2 px-6 py-3 font-display font-black uppercase text-xs tracking-widest transition-all
+				${active ? 'bg-bg-card border-x-3 border-t-3 border-ink -mb-[3px] z-10' : 'text-ink-soft hover:text-ink'}
+			`}
+		>
+			{icon}
+			{label}
+		</button>
+	)
+}
+
+function RunbookList({ itemId }: { itemId: string | undefined }) {
+	const { data: runbooks = [], isLoading } = useItemRunbooks(itemId)
+	const createRunbook = useCreateRunbook()
+
+	async function handleAdd() {
+		const title = window.prompt('Título del Runbook (ej: Setup Local)')
+		if (!title || !itemId) return
+		await createRunbook.mutateAsync({ itemId, title })
+	}
+
+	if (isLoading) return <div className="font-mono text-sm animate-pulse p-8 text-center">Cargando runbooks…</div>
+
+	return (
+		<div className="space-y-6">
+			{runbooks.map((rb) => (
+				<RunbookCard key={rb.id} runbook={rb} />
+			))}
+
+			<button
+				onClick={handleAdd}
+				className="w-full border-3 border-ink border-dashed p-8 font-display font-black uppercase text-sm tracking-widest text-ink-soft hover:text-ink hover:bg-bg-elevated transition-all flex items-center justify-center gap-2"
+			>
+				<Plus size={20} strokeWidth={3} />
+				Nuevo Runbook
+			</button>
+		</div>
+	)
+}
+
+function RunbookCard({ runbook }: { runbook: Runbook }) {
+	const addStep = useAddRunbookStep()
+	const deleteRunbook = useDeleteRunbook()
+
+	async function handleAddStep() {
+		const label = window.prompt('Etiqueta del paso (ej: Instalar dependencias)')
+		if (!label) return
+		await addStep.mutateAsync({ runbookId: runbook.id, label })
+	}
+
+	async function handleDelete() {
+		const ok = await confirm({
+			title: 'Borrar Runbook',
+			message: `¿Estás seguro de que querés borrar "${runbook.title}" y todos sus pasos?`,
+			variant: 'danger'
+		})
+		if (!ok) return
+		await deleteRunbook.mutateAsync({ id: runbook.id, itemId: runbook.item_id })
+	}
+
+	return (
+		<div className="bg-bg-card border-3 border-ink shadow-hard overflow-hidden">
+			<div className="bg-bg-elevated border-b-3 border-ink p-4 flex items-center justify-between">
+				<div>
+					<h3 className="font-display font-black uppercase text-base tracking-tight">{runbook.title}</h3>
+					{runbook.description && <p className="text-xs text-ink-soft mt-1">{runbook.description}</p>}
+				</div>
+				<button onClick={handleDelete} className="p-1.5 hover:bg-accent-pink border-2 border-transparent hover:border-ink transition-all">
+					<Trash2 size={16} />
+				</button>
+			</div>
+
+			<div className="p-4 space-y-2">
+				{runbook.steps.map((st) => (
+					<RunbookStepItem key={st.id} step={st} />
+				))}
+
+				{runbook.steps.length === 0 && (
+					<p className="text-center py-4 text-xs font-mono text-ink-soft italic">Sin pasos todavía.</p>
+				)}
+
+				<button
+					onClick={handleAddStep}
+					className="w-full mt-2 py-2 border-2 border-ink border-dashed text-[10px] font-mono uppercase font-bold text-ink-soft hover:text-ink hover:bg-bg-primary transition-all"
+				>
+					+ Agregar paso
+				</button>
+			</div>
+		</div>
+	)
+}
+
+function RunbookStepItem({ step }: { step: RunbookStep }) {
+	const updateStep = useUpdateRunbookStep()
+	const [running, setRunning] = useState(false)
+	const isDesktop = typeof (window as any).electronAPI !== 'undefined'
+
+	async function handleRun() {
+		if (!step.command || !isDesktop) return
+		setRunning(true)
+		try {
+			const output = await (window as any).electronAPI.shell.runCommand(step.command)
+			showToast('Ejecutado con éxito')
+			if (output) console.log('[shell output]', output)
+		} catch (err) {
+			showToast(`Error: ${err}`, 'error')
+		} finally {
+			setRunning(false)
+		}
+	}
+	
+	return (
+		<div className={`flex items-start gap-3 p-2 border-2 border-ink transition-colors ${step.is_completed ? 'bg-accent-lime/10' : 'bg-bg-primary'}`}>
+			<button
+				onClick={() => updateStep.mutate({ id: step.id, input: { is_completed: !step.is_completed } })}
+				className={`mt-0.5 w-5 h-5 border-2 border-ink flex items-center justify-center transition-all ${step.is_completed ? 'bg-accent-lime' : 'bg-bg-card'}`}
+			>
+				{step.is_completed && <CheckCircle2 size={14} strokeWidth={4} />}
+			</button>
+			<div className="flex-1 min-w-0">
+				<p className={`text-sm font-bold uppercase tracking-tight ${step.is_completed ? 'line-through text-ink-soft' : ''}`}>
+					{step.label}
+				</p>
+				{step.description && <p className="text-[10px] text-ink-soft mt-0.5">{step.description}</p>}
+				{step.command && (
+					<div className="mt-2 flex items-center gap-2">
+						<code className="text-[10px] font-mono bg-ink text-bg-primary px-2 py-1 flex-1 truncate">
+							{step.command}
+						</code>
+						<div className="flex gap-1">
+							{isDesktop && (
+								<button
+									onClick={handleRun}
+									disabled={running}
+									title="Ejecutar comando"
+									className="p-1 border-2 border-ink bg-bg-card hover:bg-accent-lime transition-all disabled:opacity-50"
+								>
+									<Play size={12} strokeWidth={3} className={running ? 'animate-pulse' : ''} />
+								</button>
+							)}
+							<button
+								onClick={() => {
+									navigator.clipboard.writeText(step.command!)
+									showToast('Comando copiado')
+								}}
+								className="p-1 border-2 border-ink bg-bg-card hover:bg-accent-yellow transition-all"
+							>
+								<Clipboard size={12} strokeWidth={3} />
+							</button>
+						</div>
+					</div>
+				)}
+			</div>
+		</div>
+	)
+}
+
+function RelatedItemsCard({ id }: { id: string | undefined }) {
+	const navigate = useNavigate()
+	const { data, isLoading } = useRelatedItems(id)
+	const related = data?.related || []
+
+	if (isLoading) return null
+	if (related.length === 0) return null
+
+	return (
+		<div className="bg-bg-card border-3 border-ink shadow-hard p-5">
+			<h3 className="font-display font-black uppercase text-sm tracking-widest mb-4 flex items-center gap-2">
+				<Sparkles size={16} strokeWidth={3} className="text-accent-lavender" />
+				También te puede interesar
+			</h3>
+			<div className="space-y-3">
+				{related.map((r) => (
+					<button
+						key={r.id}
+						onClick={() => navigate(`/items/${r.id}`)}
+						className="w-full text-left group"
+					>
+						<p className="font-display font-bold text-xs uppercase group-hover:text-accent-pink transition-colors truncate">
+							{r.title}
+						</p>
+						<p className="font-mono text-[10px] text-ink-soft line-clamp-1">
+							{r.why_saved || 'Sin descripción'}
+						</p>
+						<div className="mt-1 h-0.5 w-0 group-hover:w-full bg-accent-lavender transition-all duration-300" />
+					</button>
+				))}
 			</div>
 		</div>
 	)
@@ -262,113 +487,47 @@ function ItemHero({ item, onRerunAI, rerunning }: { item: Item; onRerunAI: () =>
 			case 'queued':
 				return 'bg-accent-yellow'
 			case 'error':
-				return 'bg-danger text-white'
-			case 'ok':
-				return 'bg-accent-lime'
+				return 'bg-accent-pink'
 			default:
 				return 'bg-bg-elevated'
 		}
 	}, [item.enrichment_status])
 
+	const Icon = item.is_favorite ? Sparkles : Brain
+
 	return (
-		<section className="bg-bg-card border-3 border-ink shadow-hard p-6 space-y-4">
-			<div className="flex items-start justify-between gap-4">
-				<div className="min-w-0 flex-1">
-					{item.ai_summary ? (
-						<p className="text-lg text-ink leading-relaxed">{item.ai_summary}</p>
-					) : item.description ? (
-						<p className="text-lg text-ink-soft leading-relaxed">{item.description}</p>
-					) : (
-						<p className="font-mono text-sm text-ink-soft italic">Todavía no hay summary.</p>
-					)}
+		<div className={`border-3 border-ink p-6 shadow-hard ${statusTone} transition-colors`}>
+			<div className="flex items-start justify-between">
+				<div className="p-3 border-3 border-ink bg-bg-card shadow-hard-sm mb-4">
+					<Icon size={32} strokeWidth={3} className={item.is_favorite ? 'text-accent-yellow fill-accent-yellow' : ''} />
 				</div>
-				<div className={`px-3 py-1 text-xs font-display font-black uppercase border-3 border-ink shrink-0 ${statusTone}`}>
-					{item.enrichment_status}
+				<div className="flex items-center gap-2">
+					<span className="text-[10px] font-mono uppercase font-black px-2 py-0.5 border-2 border-ink bg-bg-card">
+						{item.enrichment_status}
+					</span>
+					<button
+						onClick={onRerunAI}
+						disabled={rerunning}
+						className="p-1.5 border-2 border-ink bg-bg-card hover:bg-accent-cyan transition-all disabled:opacity-50"
+						title="Rerun AI Enrichment"
+					>
+						<Sparkles size={14} className={rerunning ? 'animate-spin' : ''} />
+					</button>
 				</div>
 			</div>
+			<p className="text-sm font-medium leading-relaxed mb-4">{item.ai_summary || item.description || 'Sin resumen disponible.'}</p>
 			{item.url && (
-				<p className="font-mono text-xs text-ink-soft break-all">{item.url}</p>
+				<a
+					href={item.url}
+					target="_blank"
+					rel="noopener noreferrer"
+					className="text-[10px] font-mono font-bold uppercase underline hover:text-accent-pink truncate block"
+				>
+					{item.url}
+				</a>
 			)}
-			<div className="flex flex-wrap gap-2">
-				{item.ai_tags.length > 0 ? item.ai_tags.map((tag) => (
-					<TagChip key={tag} label={tag} colorIndex={hashIndex(tag)} />
-				)) : <span className="font-mono text-sm text-ink-soft italic">Sin sugerencias todavía.</span>}
-			</div>
-			{item.enrichment_status === 'error' && (
-				<Button type="button" variant="accent" size="sm" onClick={onRerunAI} disabled={rerunning}>
-					<span className="flex items-center gap-2"><Sparkles size={14} strokeWidth={3} />Reintentar análisis</span>
-				</Button>
-			)}
-		</section>
-	)
-}
-
-function TeamReviewCard({
-	item,
-	saving,
-	onMark,
-	onApprove,
-	onRemove,
-	onCopy,
-}: {
-	item: Item
-	saving?: boolean
-	onMark: () => Promise<void> | void
-	onApprove: () => Promise<void> | void
-	onRemove: () => Promise<void> | void
-	onCopy: () => Promise<void> | void
-}) {
-	const inReview = item.tags.includes('team-review')
-
-	return (
-		<div className="bg-bg-card border-3 border-ink shadow-hard p-5">
-			<div className="flex items-start gap-3 mb-4">
-				<div className={`border-3 border-ink p-2 ${inReview ? 'bg-accent-yellow' : 'bg-bg-elevated'}`}>
-					<Users size={18} strokeWidth={3} />
-				</div>
-				<div>
-					<h3 className="font-display font-black uppercase text-sm tracking-widest">Revisión del equipo</h3>
-					<p className="font-mono text-xs text-ink-soft mt-1">
-						{inReview ? 'Este item está esperando criterio humano.' : 'Mandalo al flujo de curación compartida.'}
-					</p>
-				</div>
-			</div>
-
-			<div className="flex flex-col gap-3">
-				{inReview ? (
-					<>
-						<Button type="button" variant="accent" onClick={onApprove} disabled={saving}>
-							<span className="flex items-center gap-2"><CheckCircle2 size={16} strokeWidth={3} />Aprobar</span>
-						</Button>
-						<Button type="button" variant="secondary" onClick={onRemove} disabled={saving}>
-							Quitar de revisión
-						</Button>
-					</>
-				) : (
-					<Button type="button" variant="secondary" onClick={onMark} disabled={saving}>
-						<span className="flex items-center gap-2"><Users size={16} strokeWidth={3} />Marcar para revisión</span>
-					</Button>
-				)}
-				<Button type="button" variant="secondary" onClick={onCopy}>
-					<span className="flex items-center gap-2"><Clipboard size={16} strokeWidth={3} />Copiar resumen</span>
-				</Button>
-			</div>
 		</div>
 	)
-}
-
-function buildShareSummary(item: Item): string {
-	const tags = item.tags.filter((tag) => tag !== 'team-review')
-	const lines = [
-		`# ${item.title || '(sin título)'}`,
-		`Tipo: ${item.item_type}`,
-		item.url ? `Fuente: ${item.url}` : '',
-		item.ai_summary || item.description ? `Resumen: ${item.ai_summary || item.description}` : '',
-		item.why_saved ? `Por qué importa: ${item.why_saved}` : '',
-		item.when_to_use ? `Cuándo usarlo: ${item.when_to_use}` : '',
-		tags.length > 0 ? `Tags: ${tags.join(', ')}` : '',
-	]
-	return lines.filter(Boolean).join('\n')
 }
 
 function InlineTextCard({
@@ -379,48 +538,58 @@ function InlineTextCard({
 	saving,
 }: {
 	title: string
-	value: string
+	value?: string
 	placeholder: string
-	onSave: (next: string) => Promise<void> | void
-	saving?: boolean
+	onSave: (val: string) => void
+	saving: boolean
 }) {
+	const [local, setLocal] = useState(value || '')
 	const [editing, setEditing] = useState(false)
-	const [draft, setDraft] = useState(value)
 
 	useEffect(() => {
-		if (!editing) setDraft(value)
-	}, [editing, value])
+		setLocal(value || '')
+	}, [value])
 
-	async function save() {
-		await onSave(draft)
+	function handleSave() {
+		onSave(local)
 		setEditing(false)
 	}
 
 	return (
 		<div className="bg-bg-card border-3 border-ink shadow-hard p-5">
-			<div className="flex items-center justify-between mb-3 gap-3">
-				<h3 className="font-display font-black uppercase text-sm tracking-widest">{title}</h3>
-				{editing ? (
-					<div className="flex gap-2">
-						<Button type="button" variant="secondary" size="sm" onClick={() => { setDraft(value); setEditing(false) }} disabled={saving}>Cancelar</Button>
-						<Button type="button" variant="accent" size="sm" onClick={save} disabled={saving}>{saving ? 'Guardando…' : 'Guardar'}</Button>
-					</div>
-				) : (
-					<Button type="button" variant="secondary" size="sm" onClick={() => setEditing(true)}>Editar</Button>
+			<div className="flex items-center justify-between mb-3">
+				<h3 className="font-display font-black uppercase text-xs tracking-widest text-ink-soft">{title}</h3>
+				{!editing && (
+					<button
+						onClick={() => setEditing(true)}
+						className="text-[10px] font-mono uppercase font-bold underline hover:text-accent-pink"
+					>
+						Editar
+					</button>
 				)}
 			</div>
 			{editing ? (
-				<textarea
-					value={draft}
-					onChange={(e) => setDraft(e.target.value)}
-					rows={3}
-					placeholder={placeholder}
-					className="w-full border-2 border-ink p-3 font-mono text-sm focus:outline-none focus:bg-accent-yellow/10 resize-y"
-				/>
-			) : value.trim() ? (
-				<p className="font-mono text-sm leading-relaxed">{value}</p>
+				<div className="space-y-3">
+					<textarea
+						value={local}
+						onChange={(e) => setLocal(e.target.value)}
+						className="w-full border-2 border-ink p-3 font-mono text-sm focus:outline-none focus:bg-accent-yellow/5"
+						placeholder={placeholder}
+						rows={3}
+					/>
+					<div className="flex gap-2">
+						<Button size="sm" onClick={handleSave} disabled={saving}>
+							{saving ? 'Guardando…' : 'Guardar'}
+						</Button>
+						<Button size="sm" variant="secondary" onClick={() => setEditing(false)}>
+							Cancelar
+						</Button>
+					</div>
+				</div>
 			) : (
-				<p className="font-mono text-sm text-ink-soft italic">{placeholder}</p>
+				<p className={`text-sm ${local ? 'font-medium' : 'text-ink-soft italic'}`}>
+					{local ? `"${local}"` : placeholder}
+				</p>
 			)}
 		</div>
 	)
@@ -433,73 +602,56 @@ function AITagsReviewCard({
 	saving,
 }: {
 	value: string[]
-	onSave: (next: string[]) => Promise<void> | void
-	onApply: (next: string[]) => Promise<void> | void
-	saving?: boolean
+	onSave: (next: string[]) => void
+	onApply: (next: string[]) => void
+	saving: boolean
 }) {
-	const [draft, setDraft] = useState('')
 	const [tags, setTags] = useState(value)
 
 	useEffect(() => {
 		setTags(value)
 	}, [value])
 
-	function normalize(raw: string) {
-		return raw.trim().toLowerCase().replace(/\s+/g, '-')
-	}
-
-	function addTag(raw: string) {
-		const next = normalize(raw)
-		if (!next || tags.includes(next)) {
-			setDraft('')
-			return
-		}
-		setTags([...tags, next].sort())
-		setDraft('')
-	}
-
-	function removeTag(tag: string) {
-		setTags(tags.filter((t) => t !== tag))
-	}
+	if (tags.length === 0) return null
 
 	return (
-		<div className="bg-bg-card border-3 border-ink shadow-hard p-5">
-			<div className="flex items-center justify-between mb-3 gap-3">
-				<div>
-					<h3 className="font-display font-black uppercase text-sm tracking-widest">Tags sugeridos por IA</h3>
-					<p className="font-mono text-xs text-ink-soft mt-1">La IA propone. Vos confirmás o editás.</p>
-				</div>
-				<div className="flex gap-2">
-					<Button type="button" variant="secondary" size="sm" onClick={() => void onSave(tags)} disabled={saving}>Guardar sugerencias</Button>
-					<Button type="button" variant="accent" size="sm" onClick={() => void onApply(tags)} disabled={saving}>Aplicar a mis tags</Button>
-				</div>
+		<div className="bg-bg-elevated border-3 border-ink shadow-hard p-5">
+			<div className="flex items-center gap-2 mb-4">
+				<Sparkles size={18} strokeWidth={3} className="text-accent-pink" />
+				<h3 className="font-display font-black uppercase text-sm tracking-widest">Sugerencias de IA</h3>
 			</div>
-
-			<div className="flex flex-wrap gap-2 mb-3">
-				{tags.length === 0 ? (
-					<p className="font-mono text-sm text-ink-soft italic">— sin sugerencias —</p>
-				) : tags.map((tag) => (
-					<span key={tag} className="inline-flex items-center gap-1 pl-2 pr-1 py-0.5 text-xs font-mono font-semibold border-2 border-ink shadow-hard-sm bg-accent-cyan">
-						{tag}
-						<button type="button" onClick={() => removeTag(tag)} disabled={saving} className="border-l-2 border-ink/40 ml-1 pl-1 hover:text-danger">×</button>
-					</span>
+			<div className="flex flex-wrap gap-2 mb-6">
+				{tags.map((t, i) => (
+					<button
+						key={t}
+						onClick={() => setTags(tags.filter((_, idx) => i !== idx))}
+						className="group flex items-center gap-1.5 px-3 py-1 border-2 border-ink bg-bg-card font-mono text-xs font-bold uppercase hover:bg-accent-pink transition-all"
+					>
+						{t}
+						<Trash2 size={10} className="opacity-0 group-hover:opacity-100" />
+					</button>
 				))}
 			</div>
-
-			<input
-				type="text"
-				value={draft}
-				onChange={(e) => setDraft(e.target.value)}
-				onKeyDown={(e) => {
-					if (e.key === 'Enter' || e.key === ',') {
-						e.preventDefault()
-						addTag(draft)
-					}
-				}}
-				placeholder="Editar sugerencias (Enter)"
-				disabled={saving}
-				className="w-full border-2 border-ink px-2 py-1 font-mono text-sm focus:outline-none focus:bg-accent-yellow/10"
-			/>
+			<div className="flex flex-wrap gap-3">
+				<Button size="sm" onClick={() => onApply(tags)} disabled={saving} variant="accent">
+					Aceptar y aplicar
+				</Button>
+				<Button size="sm" onClick={() => onSave(tags)} disabled={saving} variant="secondary">
+					Guardar borrador
+				</Button>
+			</div>
 		</div>
 	)
+}
+
+function buildShareSummary(item: Item): string {
+	let s = `# ${item.title}\n`
+	if (item.url) s += `${item.url}\n`
+	if (item.why_saved) s += `\nPor qué importa: ${item.why_saved}\n`
+	s += `\n${item.ai_summary || item.description || ''}\n`
+	if (item.tags.length > 0) {
+		const tags = item.tags.filter((t) => t !== 'team-review')
+		if (tags.length > 0) s += `\nTags: ${tags.join(', ')}`
+	}
+	return s
 }

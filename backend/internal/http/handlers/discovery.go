@@ -32,3 +32,25 @@ func (h *DiscoveryHandler) Next(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, repo)
 }
+
+// GET /api/discovery/trending
+func (h *DiscoveryHandler) Trending(w http.ResponseWriter, r *http.Request) {
+	limit := parseLimitFromQuery(r.URL.Query().Get("limit"), 10, 50)
+	items, err := h.store.GetTrendingItems(r.Context(), limit)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"items": items})
+}
+
+// GET /api/discovery/leaderboard
+func (h *DiscoveryHandler) Leaderboard(w http.ResponseWriter, r *http.Request) {
+	limit := parseLimitFromQuery(r.URL.Query().Get("limit"), 10, 50)
+	rankings, err := h.store.GetCuratorLeaderboard(r.Context(), limit)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"rankings": rankings})
+}

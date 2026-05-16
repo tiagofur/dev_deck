@@ -1,10 +1,10 @@
 import clsx from 'clsx'
 import { useMemo, useState } from 'react'
 import { Menu, X } from 'lucide-react'
-import type { Repo } from '@devdeck/api-client'
+import type { Item } from '@devdeck/api-client'
 
 interface Props {
-  repos: Repo[]
+  items: Item[]
   selectedTag: string | null
   selectedLang: string | null
   onSelectTag: (tag: string | null) => void
@@ -12,7 +12,7 @@ interface Props {
 }
 
 export function Sidebar({
-  repos,
+  items,
   selectedTag,
   selectedLang,
   onSelectTag,
@@ -20,20 +20,33 @@ export function Sidebar({
 }: Props) {
   const [isOpen, setIsOpen] = useState(false)
 
-  // ⚡ Bolt: Memoized expensive tag and language counting/sorting
-  // Prevents O(N * T) iteration and sorting on every render where N is repos and T is tags.
   const { tags, langs } = useMemo(() => {
     const tagCounts = new Map<string, number>()
     const langCounts = new Map<string, { count: number; color: string | null }>()
 
-    for (const r of repos) {
-      for (const t of r.tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1)
-      if (r.language) {
-        const cur = langCounts.get(r.language)
-        langCounts.set(r.language, {
+    for (const it of items) {
+      // Manual tags
+      for (const t of it.tags) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1)
+      
+      // Metadata: Language
+      const language = it.meta?.language as string | undefined
+      const languageColor = it.meta?.language_color as string | undefined
+      if (language) {
+        const cur = langCounts.get(language)
+        langCounts.set(language, {
           count: (cur?.count ?? 0) + 1,
-          color: r.language_color,
+          color: languageColor ?? null,
         })
+      }
+
+      // Metadata: Topics as tags (if not already in tags)
+      const topics = it.meta?.topics as string[] | undefined
+      if (Array.isArray(topics)) {
+        for (const t of topics) {
+          if (!it.tags.includes(t)) {
+            tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1)
+          }
+        }
       }
     }
 
@@ -41,7 +54,7 @@ export function Sidebar({
       tags: [...tagCounts.entries()].sort((a, b) => b[1] - a[1]),
       langs: [...langCounts.entries()].sort((a, b) => b[1].count - a[1].count),
     }
-  }, [repos])
+  }, [items])
 
   // Mobile: toggle button
   const MobileToggle = (

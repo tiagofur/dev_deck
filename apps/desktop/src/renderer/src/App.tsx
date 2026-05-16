@@ -7,14 +7,19 @@ import {
   CheatsheetsListPage,
   CaptureModal,
   DiscoveryPage,
-  GlobalSearchModal,
   HomePage,
   ItemDetailPage,
   ItemsPage,
   RepoDetailPage,
   SettingsPage,
+  AdminDashboardPage,
+  PublicDeckPage,
+  PublicProfilePage,
   ShortcutsModal,
   TeamReviewPage,
+  TeamFeedPage,
+  FollowingFeedPage,
+  UnifiedCommandPalette,
   useGlobalShortcuts,
 } from '@devdeck/features'
 import { ConfirmHost, PageTransition, Toaster } from '@devdeck/ui'
@@ -60,11 +65,11 @@ function AuthBridge(): null {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const pending = window.electronAPI?.auth.getPendingCallbackURL()
+    const pending = (window as any).electronAPI?.auth.getPendingCallbackURL()
     if (pending) {
       navigate(desktopCallbackPath(pending), { replace: true })
     }
-    return window.electronAPI?.auth.onCallbackURL((url) => {
+    return (window as any).electronAPI?.auth.onCallbackURL((url: string) => {
       navigate(desktopCallbackPath(url), { replace: true })
     })
   }, [navigate])
@@ -85,76 +90,104 @@ function AnimatedRoutes() {
     onShortcuts: () => setShortcutsOpen(true),
   })
 
+  useEffect(() => {
+    const onOpenCapture = () => setCaptureOpen(true)
+    window.addEventListener('devdeck:open-capture', onOpenCapture)
+    return () => window.removeEventListener('devdeck:open-capture', onOpenCapture)
+  }, [])
+
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/auth/callback" element={<AuthCallbackPage />} />
-        <Route
-          path="/"
-          element={
-            <AuthGuard>{withTransition(<ItemsPage />)}</AuthGuard>
-          }
-        />
-        <Route
-          path="/repos"
-          element={
-            <AuthGuard>{withTransition(<HomePage />)}</AuthGuard>
-          }
-        />
-        <Route
-          path="/items"
-          element={
-            <AuthGuard>{withTransition(<ItemsPage />)}</AuthGuard>
-          }
-        />
-        <Route
-          path="/items/:id"
-          element={
-            <AuthGuard>{withTransition(<ItemDetailPage />)}</AuthGuard>
-          }
-        />
-        <Route
-          path="/review"
-          element={
-            <AuthGuard>{withTransition(<TeamReviewPage />)}</AuthGuard>
-          }
-        />
-        <Route
-          path="/repo/:id"
-          element={
-            <AuthGuard>{withTransition(<RepoDetailPage />)}</AuthGuard>
-          }
-        />
-        <Route
-          path="/discovery"
-          element={
-            <AuthGuard>{withTransition(<DiscoveryPage />)}</AuthGuard>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <AuthGuard>{withTransition(<SettingsPage />)}</AuthGuard>
-          }
-        />
-        <Route
-          path="/cheatsheets"
-          element={
-            <AuthGuard>{withTransition(<CheatsheetsListPage />)}</AuthGuard>
-          }
-        />
-        <Route
-          path="/cheatsheets/:id"
-          element={
-            <AuthGuard>{withTransition(<CheatsheetDetailPage />)}</AuthGuard>
-          }
-        />
-      </Routes>
-      <GlobalSearchModal open={globalSearchOpen} onClose={() => setGlobalSearchOpen(false)} />
+    <>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route
+            path="/"
+            element={
+              <AuthGuard>{withTransition(<ItemsPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/repos"
+            element={
+              <AuthGuard>{withTransition(<HomePage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/items"
+            element={
+              <AuthGuard>{withTransition(<ItemsPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/items/:id"
+            element={
+              <AuthGuard>{withTransition(<ItemDetailPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/review"
+            element={
+              <AuthGuard>{withTransition(<TeamReviewPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/feed"
+            element={
+              <AuthGuard>{withTransition(<TeamFeedPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/following"
+            element={
+              <AuthGuard>{withTransition(<FollowingFeedPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/repo/:id"
+            element={
+              <AuthGuard>{withTransition(<RepoDetailPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/discovery"
+            element={
+              <AuthGuard>{withTransition(<DiscoveryPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <AuthGuard>{withTransition(<SettingsPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <AuthGuard>{withTransition(<AdminDashboardPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/cheatsheets"
+            element={
+              <AuthGuard>{withTransition(<CheatsheetsListPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/cheatsheets/:id"
+            element={
+              <AuthGuard>{withTransition(<CheatsheetDetailPage />)}</AuthGuard>
+            }
+          />
+          <Route path="/deck/:slug" element={withTransition(<PublicDeckPage />)} />
+          <Route path="/u/:username" element={withTransition(<PublicProfilePage />)} />
+        </Routes>
+      </AnimatePresence>
+      <UnifiedCommandPalette open={globalSearchOpen} onClose={() => setGlobalSearchOpen(false)} />
       <CaptureModal
         open={captureOpen}
         onClose={() => setCaptureOpen(false)}
@@ -163,7 +196,7 @@ function AnimatedRoutes() {
       />
       <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <PasteInterceptor onOpenItem={(id) => navigate(`/items/${id}`)} />
-    </AnimatePresence>
+    </>
   )
 }
 

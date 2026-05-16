@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"devdeck/internal/config"
 )
 
 const (
@@ -199,6 +201,18 @@ type EmbeddingsService struct {
 
 func NewEmbeddingsService(embedder Embedder) *EmbeddingsService {
 	return &EmbeddingsService{embedder: embedder}
+}
+
+func NewEmbeddingsServiceFromConfig(cfg config.Config) *EmbeddingsService {
+	switch strings.ToLower(strings.TrimSpace(cfg.AIProvider)) {
+	case "openai":
+		return NewEmbeddingsService(NewOpenAIEmbedder(cfg.OpenAIAPIKey))
+	case "qwen":
+		return NewEmbeddingsService(NewQwenEmbedder(cfg.QwenAPIKey))
+	default:
+		// Other providers (heuristic, deepseek, disabled) don't have embeddings yet
+		return NewEmbeddingsService(nil)
+	}
 }
 
 func (s *EmbeddingsService) Enabled() bool {

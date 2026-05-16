@@ -95,8 +95,7 @@ Both apps import pages and components from the `@devdeck/features` package — t
 
 ## Status
 
-🚧 **Waves 1–4 complete.** **Wave 4.5 (Hardening & Capture) in progress** — safety net (tests + CI) and capture channels (CLI + extension + paste). See [docs/REVIEW_2026_04.md](docs/REVIEW_2026_04.md) for the analysis behind it.
-
-Next: Wave 5 (General Items + AI) → Wave 6 (Offline-first + Sync + Multi-user).
+✅ **Waves 1–6 complete.** **Wave 7 (Collaboration & Advanced IA) in progress**.
+The project has evolved from a simple directory to an offline-first knowledge OS with semantic search, multi-device synchronization, and public shareable decks.
 
 Full roadmap at [ROADMAP.md](ROADMAP.md).

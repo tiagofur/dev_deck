@@ -94,8 +94,8 @@ export async function logoutCurrentSession(): Promise<void> {
   clearTokens()
 }
 
-export async function registerUser(email: string, password: string): Promise<{ message: string }> {
-  return api.post<{ message: string }>('/api/auth/register', { email, password })
+export async function registerUser(email: string, password: string, inviteCode?: string): Promise<{ message: string }> {
+  return api.post<{ message: string }>('/api/auth/register', { email, password, invite_code: inviteCode })
 }
 
 export async function loginLocal(email: string, password: string): Promise<{ access_token: string; refresh_token: string; expires_in: number }> {

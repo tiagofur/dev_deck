@@ -8,6 +8,7 @@ export function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [inviteCode, setInviteCode] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -26,7 +27,7 @@ export function RegisterPage() {
     setLoading(true)
     setError(null)
     try {
-      await registerUser(email, password)
+      await registerUser(email, password, inviteCode)
       setSuccess(true)
     } catch (err: any) {
       setError(err.message || 'Error al crear la cuenta')
@@ -109,6 +110,19 @@ export function RegisterPage() {
               className="w-full border-3 border-ink bg-bg-primary px-4 py-3 font-mono text-sm focus:outline-none focus:bg-white shadow-hard-sm"
               placeholder="Repetí tu contraseña"
             />
+          </div>
+          <div>
+            <label className="block font-display font-bold uppercase text-xs mb-1 ml-1">Código de Invitación</label>
+            <input
+              type="text"
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value)}
+              className="w-full border-3 border-ink bg-bg-primary px-4 py-3 font-mono text-sm focus:outline-none focus:bg-white shadow-hard-sm"
+              placeholder="Ej: DEVDECK-XXXX-XXXX"
+            />
+            <p className="text-[10px] font-mono text-ink-soft mt-1 ml-1">
+              Si no tenés uno, unite a la waitlist en la web.
+            </p>
           </div>
           <button
             type="submit"

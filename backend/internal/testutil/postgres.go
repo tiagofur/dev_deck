@@ -41,9 +41,6 @@ var (
 	sharedMu        sync.Mutex
 	sharedContainer *tcpostgres.PostgresContainer
 	sharedDSN       string
-	migrationsSQL   []string
-	migrationsOnce  sync.Once
-	migrationsErr   error
 )
 
 // SetupPostgres returns a pgxpool.Pool connected to a Postgres instance with
@@ -151,96 +148,4 @@ func preflightDocker(_ context.Context) error {
 		}
 	}
 	return errors.New("no docker daemon reachable (set DOCKER_HOST or start docker)")
-}
-
-func waitReady(ctx context.Context, pool *pgxpool.Pool) error {
-	deadline := time.Now().Add(10 * time.Second)
-	for time.Now().Before(deadline) {
-		pingCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
-		err := pool.Ping(pingCtx)
-		cancel()
-		if err == nil {
-			return nil
-		}
-		time.Sleep(200 * time.Millisecond)
-	}
-	return errors.New("postgres pool never became ready")
-}
-
-// applyMigrations runs every backend/migrations/*.sql file once per process.
-// SQL files are loaded relative to this source file so callers don't need to
-// know the working directory.
-func applyMigrations(ctx context.Context, pool *pgxpool.Pool) error {
-	migrationsOnce.Do(func() {
-		if len(migrationsSQL) == 0 {
-			dir, err := migrationsDir()
-			if err != nil {
-				migrationsErr = err
-				return
-			}
-			entries, err := os.ReadDir(dir)
-			if err != nil {
-				migrationsErr = err
-				return
-			}
-			var files []string
-			for _, e := range entries {
-				if !e.IsDir() && strings.HasSuffix(e.Name(), ".sql") {
-					files = append(files, filepath.Join(dir, e.Name()))
-				}
-			}
-			sort.Strings(files)
-			for _, f := range files {
-				data, err := os.ReadFile(f)
-				if err != nil {
-					migrationsErr = err
-					return
-				}
-				migrationsSQL = append(migrationsSQL, string(data))
-			}
-		}
-		for _, sql := range migrationsSQL {
-			// goose markers (-- +goose Up / Down) are harmless to plain Postgres
-			// only when we strip the Down section. Keep just the Up half.
-			up := stripGooseDown(sql)
-			for _, stmt := range splitSQLStatements(up) {
-				if _, err := pool.Exec(ctx, stmt); err != nil {
-					migrationsErr = err
-					return
-				}
-			}
-		}
-	})
-	return migrationsErr
-}
-
-// truncateAll wipes user data between tests. We use TRUNCATE … RESTART IDENTITY
-// CASCADE so refresh sessions, links, etc. all get cleared atomically.
-func truncateAll(ctx context.Context, pool *pgxpool.Pool) error {
-	if _, err := pool.Exec(ctx, `
-		TRUNCATE TABLE
-			deck_stars,
-			deck_items,
-			decks,
-			items,
-			refresh_sessions,
-			repo_cheatsheet_links,
-			cheatsheet_entries,
-			cheatsheets,
-			repo_commands,
-			repos,
-			users,
-			app_state
-		RESTART IDENTITY CASCADE
-	`); err != nil {
-		return err
-	}
-
-	// Re-seed the Test User used by handlers_test.go / middleware
-	_, err := pool.Exec(ctx, `
-		INSERT INTO users (id, github_id, login, display_name)
-		VALUES ('00000000-0000-0000-0000-000000000001', -1, 'devdeck-test', 'Test User')
-		ON CONFLICT DO NOTHING
-	`)
-	return err
 }

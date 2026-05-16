@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"devdeck/internal/authctx"
 	"devdeck/internal/domain/items"
 	"devdeck/internal/jobs"
 	"devdeck/internal/metrics"
@@ -94,23 +95,8 @@ func (h *CaptureHandler) Capture(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// 2. Legacy repos table (pre-items rows). If it exists there we
-		//    still return a "duplicate" response so the client doesn't
-		//    double-save, but we don't synthesise an item — we just point
-		//    at the repo's id. Clients can dereference /api/repos/{id}.
-		if repoID, err := h.store.FindRepoIDByNormalizedURL(r.Context(), *normPtr); err == nil {
-			metrics.CaptureItems.WithLabelValues(sourceLabel(in.Source), "repo", "duplicate").Inc()
-			id := repoID
-			writeJSON(w, http.StatusOK, items.CaptureResponse{
-				Item:             nil,
-				EnrichmentStatus: items.EnrichmentSkipped,
-				DuplicateOf:      &id,
-			})
-			return
-		} else if !errors.Is(err, store.ErrNotFound) {
-			writeInternal(w, err)
-			return
-		}
+		// 2. We skip legacy repos check since Phase 26 consolidated them into items.
+		//    The FindItemByNormalizedURL call above already covers them.
 	}
 
 	// ─── Persist ───
@@ -162,10 +148,16 @@ func (h *CaptureHandler) Capture(w http.ResponseWriter, r *http.Request) {
 
 	// ─── Enqueue enrichment / AI analysis ───
 	enrichStatus := items.EnrichmentSkipped
+	orgID, _ := authctx.OrgID(r.Context())
 	job := jobs.EnrichJob{
-		Kind: jobs.KindItem,
-		ID:   item.ID,
-		Type: item.Type,
+		Kind:   jobs.KindItem,
+		ID:     item.ID,
+		UserID: item.UserID,
+		URL:    "",
+		Type:   item.Type,
+	}
+	if orgID != uuid.Nil {
+		job.OrgID = &orgID
 	}
 	if item.URL != nil {
 		job.URL = *item.URL

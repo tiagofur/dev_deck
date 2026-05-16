@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AddRepoModal } from '../components/AddRepoModal'
+import { CaptureModal } from '../components/CaptureModal'
 import { EmptyState } from '@devdeck/ui'
 import { GlobalSearchModal } from '../components/GlobalSearchModal'
 import { Mascot } from '../components/Mascot/Mascot'
-import { RepoGrid } from '../components/RepoGrid'
+import { ItemGrid } from '../components/ItemGrid'
 import { ShortcutsModal } from '../components/ShortcutsModal'
 import { Sidebar } from '../components/Sidebar'
 import { Topbar } from '../components/Topbar'
-import { useRepos } from '@devdeck/api-client'
+import { useItems } from '@devdeck/api-client'
 
 export function HomePage() {
   const navigate = useNavigate()
@@ -19,10 +19,12 @@ export function HomePage() {
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false)
 
-  const { data, isLoading, error } = useRepos({
+  const { data, isLoading, error } = useItems({
     q: query || undefined,
     tag: tag || undefined,
-    lang: lang || undefined,
+    stack: lang || undefined, // Sidebar 'lang' maps to 'stack' filter in items
+    sort: 'added_desc',
+    limit: 100,
   })
 
   // JS-level keyboard shortcuts (window focused):
@@ -104,7 +106,7 @@ export function HomePage() {
 
       <div className="flex-1 flex overflow-hidden">
         <Sidebar
-          repos={items}
+          items={items}
           selectedTag={tag}
           selectedLang={lang}
           onSelectTag={setTag}
@@ -125,7 +127,7 @@ export function HomePage() {
                 {(error as Error).message}
               </p>
               <p className="text-xs font-mono mt-2 opacity-90">
-                ¿Está corriendo `make run` en /backend? ¿VITE_API_TOKEN coincide con API_TOKEN?
+                ¿Está corriendo `make run` en /backend?
               </p>
             </div>
           )}
@@ -143,20 +145,21 @@ export function HomePage() {
           {items.length > 0 && (
             <>
               <p className="font-mono text-xs text-ink-soft mb-4">
-                {data?.total} repos
+                {data?.total} items
               </p>
-              <RepoGrid
-                repos={items}
-                onSelect={(r) => navigate(`/repo/${r.id}`)}
+              <ItemGrid
+                items={items}
+                onSelect={(it) => navigate(`/items/${it.id}`)}
               />
             </>
           )}
         </main>
       </div>
 
-      <AddRepoModal
+      <CaptureModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
+        source="manual"
       />
 
       <ShortcutsModal

@@ -7,6 +7,7 @@
 
 import { getAccessToken, getRefreshToken, setTokens, clearTokens } from './auth/auth'
 import { getConfig } from './config'
+import { getPreferences } from './preferences'
 
 export class APIError extends Error {
   constructor(
@@ -61,14 +62,21 @@ function getBearerToken(): string {
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const { baseUrl, authMode } = getConfig()
+  const { activeOrgId } = getPreferences()
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${getBearerToken()}`,
+    ...(init.headers as Record<string, string> || {}),
+  }
+
+  if (activeOrgId) {
+    headers['X-Org-ID'] = activeOrgId
+  }
 
   const res = await fetch(`${baseUrl}${path}`, {
     ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getBearerToken()}`,
-      ...(init.headers || {}),
-    },
+    headers,
   })
 
   // Auto-refresh on 401 for JWT mode.
@@ -78,11 +86,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
       // Retry the original request with new token.
       const retryRes = await fetch(`${baseUrl}${path}`, {
         ...init,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getBearerToken()}`,
-          ...(init.headers || {}),
-        },
+        headers,
       })
       if (!retryRes.ok) {
         let code = 'UNKNOWN'

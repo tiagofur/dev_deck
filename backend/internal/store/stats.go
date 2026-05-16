@@ -92,23 +92,23 @@ func (s *Store) GetRepoAggregates(ctx context.Context) (*stats.RepoAggregates, e
 	// Total active + archived + last added
 	err := s.pool.QueryRow(ctx, `
 		SELECT
-			COUNT(*) FILTER (WHERE archived = false),
-			COUNT(*) FILTER (WHERE archived = true),
-			MAX(added_at)
-		FROM repos
+			COUNT(*) FILTER (WHERE archived = false AND item_type = 'repo'),
+			COUNT(*) FILTER (WHERE archived = true AND item_type = 'repo'),
+			MAX(created_at)
+		FROM items
 		WHERE `+scopeSQL, scopeArgs...).Scan(&a.Total, &a.Archived, &a.LastAddedAt)
 	if err != nil {
 		return nil, err
 	}
 
-	// Top language (among non-archived)
+	// Top language (among non-archived repos)
 	var lang *string
 	var langCount int
 	langArgs := append([]any{}, scopeArgs...)
 	err = s.pool.QueryRow(ctx, `
-		SELECT language, COUNT(*) AS c FROM repos
-		WHERE archived = false AND language IS NOT NULL AND `+scopeSQL+`
-		GROUP BY language
+		SELECT meta->>'language' as lang, COUNT(*) AS c FROM items
+		WHERE archived = false AND item_type = 'repo' AND meta->>'language' IS NOT NULL AND `+scopeSQL+`
+		GROUP BY lang
 		ORDER BY c DESC
 		LIMIT 1
 	`, langArgs...).Scan(&lang, &langCount)

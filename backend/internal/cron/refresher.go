@@ -75,7 +75,8 @@ func (r *Refresher) runOnce(ctx context.Context) {
 		if ctx.Err() != nil {
 			return
 		}
-		md, err := r.enricher.Enrich(ctx, repo.URL)
+		md, err := r.enricher.Enrich(ctx, repo.URL, nil)
+
 		if err != nil {
 			fail++
 			level := slog.LevelWarn

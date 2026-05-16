@@ -28,4 +28,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       return () => ipcRenderer.removeListener('auth-callback-url', handler)
     },
   },
+
+  shell: {
+    runCommand: (cmd: string): Promise<string> => ipcRenderer.invoke('shell:run', cmd),
+  },
 })

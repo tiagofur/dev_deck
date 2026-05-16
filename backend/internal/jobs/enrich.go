@@ -40,10 +40,12 @@ const (
 
 // EnrichJob is the unit of work the queue processes.
 type EnrichJob struct {
-	Kind EnrichKind
-	ID   uuid.UUID
-	URL  string
-	Type items.Type
+	Kind   EnrichKind
+	ID     uuid.UUID
+	UserID uuid.UUID
+	OrgID  *uuid.UUID
+	URL    string
+	Type   items.Type
 }
 
 // EnrichQueue is the producer-facing handle. Handlers call Enqueue;
@@ -128,7 +130,16 @@ func (q *EnrichQueue) run(parent context.Context, job EnrichJob) {
 	hadError := false
 
 	if q.canFetchMetadata(job) {
-		md, err := q.enricher.Enrich(ctx, job.URL)
+		// Load custom enrichers for this user/org
+		var extra []enricher.ExternalEnricher
+		customs, err := q.store.ListCustomEnrichers(ctx, job.UserID, job.OrgID)
+		if err == nil {
+			for _, c := range customs {
+				extra = append(extra, enricher.NewWebhookEnricher(c.Name, c.URLPattern, c.EndpointURL, c.AuthHeader))
+			}
+		}
+
+		md, err := q.enricher.Enrich(ctx, job.URL, extra)
 		if err != nil {
 			level := slog.LevelWarn
 			if errors.Is(err, enricher.ErrNotFound) {

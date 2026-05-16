@@ -15,7 +15,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-const itemColumns = `id, item_type, title, url, url_normalized, description,
+const itemColumns = `id, user_id, org_id, item_type, title, url, url_normalized, description,
 	notes, tags, why_saved, when_to_use, source_channel, meta, ai_summary,
 	ai_tags, enrichment_status, archived, is_favorite, created_at, updated_at, last_seen_at`
 
@@ -24,7 +24,7 @@ func scanItem(row pgx.Row) (*items.Item, error) {
 	var rawMeta []byte
 	var itemType, enrichStatus string
 	err := row.Scan(
-		&it.ID, &itemType, &it.Title, &it.URL, &it.URLNormalized,
+		&it.ID, &it.UserID, &it.OrgID, &itemType, &it.Title, &it.URL, &it.URLNormalized,
 		&it.Description, &it.Notes, &it.Tags, &it.WhySaved, &it.WhenToUse,
 		&it.SourceChannel, &rawMeta, &it.AISummary, &it.AITags,
 		&enrichStatus, &it.Archived, &it.IsFavorite, &it.CreatedAt, &it.UpdatedAt, &it.LastSeenAt,
@@ -91,12 +91,12 @@ func (s *Store) CreateItem(ctx context.Context, in CreateItemInput) (*items.Item
 
 	row := s.pool.QueryRow(ctx, `
 		INSERT INTO items (
-			user_id, item_type, title, url, url_normalized, description, notes, tags,
+			user_id, org_id, item_type, title, url, url_normalized, description, notes, tags,
 			why_saved, source_channel, meta, enrichment_status
 		)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
 		RETURNING `+itemColumns,
-		currentUserIDPtr(ctx), string(in.Type), in.Title, in.URL, in.URLNormalized, in.Description,
+		currentUserIDPtr(ctx), currentOrgIDPtr(ctx), string(in.Type), in.Title, in.URL, in.URLNormalized, in.Description,
 		in.Notes, in.Tags, in.WhySaved, in.SourceChannel, metaJSON,
 		string(in.EnrichmentStatus),
 	)
@@ -107,6 +107,21 @@ func (s *Store) CreateItem(ctx context.Context, in CreateItemInput) (*items.Item
 		}
 		return nil, err
 	}
+
+	// Record activity
+	if orgIDPtr := currentOrgIDPtr(ctx); orgIDPtr != nil {
+		if userID, ok := currentUserID(ctx); ok {
+			_ = s.RecordActivity(ctx, *orgIDPtr, userID, "item.created", "item", it.ID, map[string]any{
+				"title": it.Title,
+			})
+		}
+	} else {
+		// Public curation points (only if not in an org)
+		if userID, ok := currentUserID(ctx); ok {
+			_ = s.AwardPointsIfPublicItem(ctx, userID, it.Meta)
+		}
+	}
+
 	return it, nil
 }
 
@@ -142,28 +157,9 @@ func (s *Store) FindItemByNormalizedURL(ctx context.Context, norm string) (*item
 	return it, nil
 }
 
-// FindRepoIDByNormalizedURL looks up a legacy repos row by its normalized
-// URL. Used by the capture handler so a POST /api/items/capture with a
-// github URL that was originally added via /api/repos still dedupes.
-func (s *Store) FindRepoIDByNormalizedURL(ctx context.Context, norm string) (uuid.UUID, error) {
-	var id uuid.UUID
-	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
-	args := append([]any{norm}, scopeArgs...)
-	err := s.pool.QueryRow(ctx,
-		`SELECT id FROM repos WHERE url_normalized = $1 AND `+scopeSQL+` LIMIT 1`, args...).Scan(&id)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return uuid.Nil, ErrNotFound
-		}
-		return uuid.Nil, err
-	}
-	return id, nil
-}
-
-// SetRepoURLNormalized backfills the legacy repos.url_normalized column
-// for newly created rows. Called from the capture handler's repo path.
-func (s *Store) SetRepoURLNormalized(ctx context.Context, id uuid.UUID, norm string) error {
-	_, err := s.pool.Exec(ctx, `UPDATE repos SET url_normalized = $1 WHERE id = $2`, norm, id)
+// SetItemURLNormalized updates the url_normalized column for an item.
+func (s *Store) SetItemURLNormalized(ctx context.Context, id uuid.UUID, norm string) error {
+	_, err := s.pool.Exec(ctx, `UPDATE items SET url_normalized = $1 WHERE id = $2`, norm, id)
 	return err
 }
 
@@ -216,7 +212,17 @@ func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListR
 		args = append(args, p.Tag)
 		idx++
 	}
+	if p.CreatedAfter != nil {
+		where = append(where, fmt.Sprintf("created_at > $%d", idx))
+		args = append(args, *p.CreatedAfter)
+		idx++
+	}
 	if len(p.Stack) > 0 {
+		// Ensure stack inputs are lowercased for comparison
+		loweredStack := make([]string, len(p.Stack))
+		for i, s := range p.Stack {
+			loweredStack[i] = strings.ToLower(s)
+		}
 		where = append(where, fmt.Sprintf(`(
 			EXISTS (SELECT 1 FROM unnest(tags) t WHERE LOWER(t) = ANY($%d))
 			OR EXISTS (SELECT 1 FROM unnest(ai_tags) t WHERE LOWER(t) = ANY($%d))
@@ -228,7 +234,7 @@ func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListR
 				WHERE LOWER(topic) = ANY($%d)
 			)
 		)`, idx, idx, idx, idx))
-		args = append(args, p.Stack)
+		args = append(args, loweredStack)
 		idx++
 	}
 	if p.Favorites {
@@ -358,6 +364,22 @@ func (s *Store) UpdateItem(ctx context.Context, id uuid.UUID, in items.UpdateInp
 		}
 		return nil, err
 	}
+
+	// Record activity
+	if orgIDPtr := currentOrgIDPtr(ctx); orgIDPtr != nil {
+		if userID, ok := currentUserID(ctx); ok {
+			action := "item.updated"
+			if in.Notes != nil {
+				action = "item.updated_notes"
+			} else if in.Tags != nil {
+				action = "item.updated_tags"
+			}
+			_ = s.RecordActivity(ctx, *orgIDPtr, userID, action, "item", it.ID, map[string]any{
+				"title": it.Title,
+			})
+		}
+	}
+
 	return it, nil
 }
 
@@ -834,10 +856,18 @@ func (s *Store) GetRelatedItems(ctx context.Context, itemID uuid.UUID, limit int
 	return results, rows.Err()
 }
 
+// Citation is a reference to a source item in an AI response.
+type Citation struct {
+	ID    uuid.UUID `json:"id"`
+	Title string    `json:"title"`
+	URL   string    `json:"url,omitempty"`
+}
+
 // AskResult is the response for /api/ask
 type AskResult struct {
-	Answer  string              `json:"answer"`
-	Sources []SearchItemsResult `json:"sources"`
+	Answer    string              `json:"answer"`
+	Sources   []SearchItemsResult `json:"sources"`
+	Citations []Citation          `json:"citations"`
 }
 
 // AskDevDeck searches the user's vault and returns an answer with sources (RAG).
@@ -846,27 +876,45 @@ func (s *Store) AskDevDeck(ctx context.Context, userID uuid.UUID, question strin
 		limit = 5
 	}
 
+	var results []SearchItemsResult
+	var err error
+
 	if len(embedding) == 0 {
 		// Fallback to text search if no embedding
-		textResults, err := s.searchItemsText(ctx, userID, question, limit)
-		if err != nil {
-			return nil, err
-		}
-		return &AskResult{
-			Answer:  formatTextAnswer(question, textResults),
-			Sources: textResults,
-		}, nil
+		results, err = s.searchItemsText(ctx, userID, question, limit)
+	} else {
+		// Search by embedding
+		results, err = s.searchItemsHybrid(ctx, userID, question, embedding, limit, false)
 	}
 
-	// Search by embedding
-	results, err := s.searchItemsHybrid(ctx, userID, question, embedding, limit, false)
 	if err != nil {
 		return nil, err
 	}
 
+	citations := make([]Citation, 0, len(results))
+	for _, r := range results {
+		citations = append(citations, Citation{
+			ID:    r.ID,
+			Title: r.Title,
+			URL:   r.URL,
+		})
+	}
+
+	answer := ""
+	if len(results) == 0 {
+		answer = "No encontré información relevante en tu vault para responder esa pregunta."
+	} else {
+		if len(embedding) == 0 {
+			answer = formatTextAnswer(question, results)
+		} else {
+			answer = formatRAGAnswer(question, results)
+		}
+	}
+
 	return &AskResult{
-		Answer:  formatRAGAnswer(question, results),
-		Sources: results,
+		Answer:    answer,
+		Sources:   results,
+		Citations: citations,
 	}, nil
 }
 

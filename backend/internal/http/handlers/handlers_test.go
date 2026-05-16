@@ -79,7 +79,14 @@ func newTestServer(t *testing.T) *testServer {
 		APIToken:          testToken,
 		RateLimitDisabled: true, // so burst tests don't hit 429 on the shared IP
 	}
-	router := httpapi.NewRouterWithDeps(cfg, httpapi.Deps{Store: st, Enricher: en, EnrichQueue: q})
+	router := httpapi.NewRouterWithDeps(cfg, httpapi.Deps{
+		Store:       st,
+		Enricher:    en,
+		EnrichQueue: q,
+		AI:          aiSvc,
+		Embeddings:  ai.NewEmbeddingsService(nil),
+		EmailSender: &email.NoopSender{},
+	})
 	return &testServer{
 		router:      router,
 		store:       st,

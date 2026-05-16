@@ -269,7 +269,7 @@ func (h *CheatsheetsHandler) DeleteEntry(w http.ResponseWriter, r *http.Request)
 
 // ───── Search ─────
 
-// GET /api/search?q=...&limit=...
+// GET /api/search?q=...&limit=...&mode=text|semantic|hybrid
 func (h *CheatsheetsHandler) Search(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	if q == "" {
@@ -283,12 +283,32 @@ func (h *CheatsheetsHandler) Search(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	mode := store.SearchMode(r.URL.Query().Get("mode"))
+	if mode == "" {
+		mode = store.SearchModeText
+	}
+
 	if _, ok := authctx.UserID(r.Context()); !ok {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
 		return
 	}
 
-	results, err := h.store.Search(r.Context(), q, limit)
+	var embedding []float32
+	if (mode == store.SearchModeVector || mode == store.SearchModeHybrid) && h.embeddings != nil && h.embeddings.Enabled() {
+		emb, err := h.embeddings.EmbedSearch(r.Context(), q)
+		if err != nil {
+			// Log error but fallback to text search if hybrid, or fail if semantic-only
+			if mode == store.SearchModeVector {
+				writeError(w, http.StatusInternalServerError, "EMBEDDING_ERROR", "failed to generate search embedding")
+				return
+			}
+			mode = store.SearchModeText
+		} else {
+			embedding = emb
+		}
+	}
+
+	results, err := h.store.Search(r.Context(), mode, q, embedding, limit)
 	if err != nil {
 		writeInternal(w, err)
 		return
@@ -298,6 +318,7 @@ func (h *CheatsheetsHandler) Search(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
 		"query":   q,
+		"mode":    mode,
 		"results": results,
 	})
 }
