@@ -31,7 +31,7 @@ type RunbookStep struct {
 }
 
 func (s *Store) ListRunbooksByItem(ctx context.Context, itemID uuid.UUID) ([]Runbook, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT id, user_id, item_id, title, description, created_at, updated_at
 		FROM runbooks
 		WHERE item_id = $1
@@ -62,7 +62,7 @@ func (s *Store) ListRunbooksByItem(ctx context.Context, itemID uuid.UUID) ([]Run
 }
 
 func (s *Store) listRunbookSteps(ctx context.Context, runbookID uuid.UUID) ([]RunbookStep, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT id, runbook_id, label, command, description, position, is_completed, created_at, updated_at
 		FROM runbook_steps
 		WHERE runbook_id = $1
@@ -86,7 +86,7 @@ func (s *Store) listRunbookSteps(ctx context.Context, runbookID uuid.UUID) ([]Ru
 
 func (s *Store) CreateRunbook(ctx context.Context, userID, itemID uuid.UUID, title string, desc *string) (*Runbook, error) {
 	var rb Runbook
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		INSERT INTO runbooks (user_id, org_id, item_id, title, description)
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, user_id, item_id, title, description, created_at, updated_at
@@ -108,7 +108,7 @@ func (s *Store) CreateRunbook(ctx context.Context, userID, itemID uuid.UUID, tit
 
 func (s *Store) UpdateRunbook(ctx context.Context, id, userID uuid.UUID, title *string, desc *string) (*Runbook, error) {
 	var rb Runbook
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		UPDATE runbooks SET
 			title = COALESCE($1, title),
 			description = COALESCE($2, description),
@@ -123,19 +123,19 @@ func (s *Store) UpdateRunbook(ctx context.Context, id, userID uuid.UUID, title *
 }
 
 func (s *Store) DeleteRunbook(ctx context.Context, id, userID uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, "DELETE FROM runbooks WHERE id = $1 AND user_id = $2", id, userID)
+	_, err := s.Writer().Exec(ctx, "DELETE FROM runbooks WHERE id = $1 AND user_id = $2", id, userID)
 	return err
 }
 
 func (s *Store) CreateRunbookStep(ctx context.Context, runbookID uuid.UUID, label string, cmd, desc *string) (*RunbookStep, error) {
 	var maxPos int
-	err := s.pool.QueryRow(ctx, "SELECT COALESCE(MAX(position), -1) FROM runbook_steps WHERE runbook_id = $1", runbookID).Scan(&maxPos)
+	err := s.Reader().QueryRow(ctx, "SELECT COALESCE(MAX(position), -1) FROM runbook_steps WHERE runbook_id = $1", runbookID).Scan(&maxPos)
 	if err != nil {
 		return nil, err
 	}
 
 	var st RunbookStep
-	err = s.pool.QueryRow(ctx, `
+	err = s.Reader().QueryRow(ctx, `
 		INSERT INTO runbook_steps (runbook_id, label, command, description, position)
 		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id, runbook_id, label, command, description, position, is_completed, created_at, updated_at
@@ -145,7 +145,7 @@ func (s *Store) CreateRunbookStep(ctx context.Context, runbookID uuid.UUID, labe
 
 func (s *Store) UpdateRunbookStep(ctx context.Context, id uuid.UUID, label, cmd, desc *string, isCompleted *bool) (*RunbookStep, error) {
 	var st RunbookStep
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		UPDATE runbook_steps SET
 			label = COALESCE($1, label),
 			command = COALESCE($2, command),
@@ -159,12 +159,12 @@ func (s *Store) UpdateRunbookStep(ctx context.Context, id uuid.UUID, label, cmd,
 }
 
 func (s *Store) DeleteRunbookStep(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, "DELETE FROM runbook_steps WHERE id = $1", id)
+	_, err := s.Writer().Exec(ctx, "DELETE FROM runbook_steps WHERE id = $1", id)
 	return err
 }
 
 func (s *Store) ReorderRunbookSteps(ctx context.Context, runbookID uuid.UUID, stepIDs []uuid.UUID) error {
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.Writer().Begin(ctx)
 	if err != nil {
 		return err
 	}

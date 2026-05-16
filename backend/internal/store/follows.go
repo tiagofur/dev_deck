@@ -16,7 +16,7 @@ type FeedEvent struct {
 }
 
 func (s *Store) FollowUser(ctx context.Context, followerID, followingID uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.Writer().Exec(ctx, `
 		INSERT INTO follows (follower_id, following_id)
 		VALUES ($1, $2)
 		ON CONFLICT (follower_id, following_id) DO NOTHING
@@ -30,7 +30,7 @@ func (s *Store) FollowUser(ctx context.Context, followerID, followingID uuid.UUI
 }
 
 func (s *Store) UnfollowUser(ctx context.Context, followerID, followingID uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.Writer().Exec(ctx, `
 		DELETE FROM follows
 		WHERE follower_id = $1 AND following_id = $2
 	`, followerID, followingID)
@@ -39,7 +39,7 @@ func (s *Store) UnfollowUser(ctx context.Context, followerID, followingID uuid.U
 
 func (s *Store) IsFollowing(ctx context.Context, followerID, followingID uuid.UUID) (bool, error) {
 	var exists bool
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		SELECT EXISTS (
 			SELECT 1 FROM follows WHERE follower_id = $1 AND following_id = $2
 		)
@@ -53,7 +53,7 @@ func (s *Store) GetFollowingFeed(ctx context.Context, followerID uuid.UUID, limi
 	}
 
 	// itemColumns has 22 fields
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT 
 			`+itemColumns+`,
 			u.username, u.avatar_url

@@ -11,7 +11,7 @@ func (s *Store) AwardPoints(ctx context.Context, userID uuid.UUID, points int) e
 	if userID == uuid.Nil {
 		return nil
 	}
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.Writer().Exec(ctx, `
 		UPDATE users SET reputation_points = reputation_points + $1
 		WHERE id = $2
 	`, points, userID)
@@ -31,7 +31,7 @@ func (s *Store) AwardPointsIfPublicItem(ctx context.Context, userID uuid.UUID, i
 	}
 
 	var isPublic bool
-	err = s.pool.QueryRow(ctx, `SELECT is_public FROM decks WHERE id = $1`, deckID).Scan(&isPublic)
+	err = s.Reader().QueryRow(ctx, `SELECT is_public FROM decks WHERE id = $1`, deckID).Scan(&isPublic)
 	if err != nil || !isPublic {
 		return nil
 	}

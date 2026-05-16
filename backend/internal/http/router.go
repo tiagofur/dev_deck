@@ -6,6 +6,7 @@ import (
 
 	"devdeck/internal/ai"
 	"devdeck/internal/authservice"
+	"devdeck/internal/cache"
 	"devdeck/internal/config"
 	"devdeck/internal/email"
 	"devdeck/internal/enricher"
@@ -30,9 +31,10 @@ type Deps struct {
 	EmailSender email.Sender
 	AI          *ai.Service
 	Embeddings  *ai.EmbeddingsService
+	Cache       *cache.Cache
 }
 
-func NewRouter(cfg config.Config, st *store.Store, en *enricher.Service, as *authservice.Service, aiSvc *ai.Service, embSvc *ai.EmbeddingsService) http.Handler {
+func NewRouter(cfg config.Config, st *store.Store, en *enricher.Service, as *authservice.Service, aiSvc *ai.Service, embSvc *ai.EmbeddingsService, c *cache.Cache) http.Handler {
 	return NewRouterWithDeps(cfg, Deps{
 		Store:       st,
 		Enricher:    en,
@@ -40,6 +42,7 @@ func NewRouter(cfg config.Config, st *store.Store, en *enricher.Service, as *aut
 		EmailSender: &email.NoopSender{},
 		AI:          aiSvc,
 		Embeddings:  embSvc,
+		Cache:       c,
 	})
 }
 
@@ -81,7 +84,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 
 	reposH := handlers.NewReposHandler(st, en)
 	statsH := handlers.NewStatsHandler(st)
-	discoveryH := handlers.NewDiscoveryHandler(st)
+	discoveryH := handlers.NewDiscoveryHandler(st, deps.Cache)
 	commandsH := handlers.NewCommandsHandler(st)
 	cheatsH := handlers.NewCheatsheetsHandler(st, embSvc)
 	suggestionsH := handlers.NewSuggestionsHandler(st)
@@ -95,7 +98,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	deckH := handlers.NewDeckHandler(st)
 	publicDeckH := handlers.NewPublicDeckHandler(st)
 	importH := handlers.NewImportHandler(st)
-	profileH := handlers.NewProfileHandler(st)
+	profileH := handlers.NewProfileHandler(st, deps.Cache)
 	adminH := handlers.NewAdminHandler(st)
 	runbooksH := handlers.NewRunbooksHandler(st)
 	invitesH := handlers.NewInvitesHandler(st)

@@ -28,7 +28,7 @@ type SyncOperationResult struct {
 func (s *Store) ProcessSyncBatch(ctx context.Context, userID, clientID uuid.UUID, ops []SyncOperation) ([]SyncOperationResult, error) {
 	results := make([]SyncOperationResult, 0, len(ops))
 
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.Writer().Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -63,9 +63,9 @@ func (s *Store) ProcessSyncBatch(ctx context.Context, userID, clientID uuid.UUID
 
 		// 3. Record operation
 		_, err = tx.Exec(ctx, `
-			INSERT INTO sync_operations (client_id, operation_id, user_id, entity, entity_id, op, payload, client_updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-		`, clientID, op.OperationID, userID, op.EntityType, op.EntityID, op.Operation, payloadJSON, op.ClientUpdatedAt)
+			INSERT INTO sync_operations (client_id, operation_id, user_id, entity, entity_id, op, payload, client_updated_at, region)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		`, clientID, op.OperationID, userID, op.EntityType, op.EntityID, op.Operation, payloadJSON, op.ClientUpdatedAt, s.appRegion)
 		if err != nil {
 			return nil, err
 		}
@@ -150,7 +150,7 @@ type Device struct {
 }
 
 func (s *Store) RegisterDevice(ctx context.Context, userID, clientID uuid.UUID, name, deviceType string) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.Writer().Exec(ctx, `
 		INSERT INTO devices (user_id, client_id, name, device_type)
 		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (client_id) DO UPDATE SET
@@ -163,7 +163,7 @@ func (s *Store) RegisterDevice(ctx context.Context, userID, clientID uuid.UUID, 
 }
 
 func (s *Store) ListDevices(ctx context.Context, userID uuid.UUID) ([]Device, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT id, client_id, COALESCE(name, 'Unknown Device'), device_type, last_sync_at, last_seen_at, created_at, is_active
 		FROM devices
 		WHERE user_id = $1
@@ -186,14 +186,14 @@ func (s *Store) ListDevices(ctx context.Context, userID uuid.UUID) ([]Device, er
 }
 
 func (s *Store) DeleteDevice(ctx context.Context, userID, clientID uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.Writer().Exec(ctx, `
 		DELETE FROM devices WHERE user_id = $1 AND client_id = $2
 	`, userID, clientID)
 	return err
 }
 
 func (s *Store) UpdateDeviceSync(ctx context.Context, clientID uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.Writer().Exec(ctx, `
 		UPDATE devices SET last_sync_at = NOW(), last_seen_at = NOW() WHERE client_id = $1
 	`, clientID)
 	return err
@@ -202,7 +202,7 @@ func (s *Store) UpdateDeviceSync(ctx context.Context, clientID uuid.UUID) error 
 // GetSyncDelta returns operations applied on the server since the given timestamp,
 // excluding those from the requesting client.
 func (s *Store) GetSyncDelta(ctx context.Context, userID, excludeClientID uuid.UUID, since time.Time) ([]SyncOperation, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT operation_id, op, entity, entity_id, payload, server_applied_at
 		FROM sync_operations
 		WHERE user_id = $1 

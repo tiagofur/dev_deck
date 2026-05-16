@@ -117,7 +117,7 @@ func (s *Store) CreateRepo(ctx context.Context, in repos.CreateInput) (*repos.Re
 func (s *Store) GetRepo(ctx context.Context, id uuid.UUID) (*repos.Repo, error) {
 	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
 	args := append([]any{id}, scopeArgs...)
-	row := s.pool.QueryRow(ctx,
+	row := s.Reader().QueryRow(ctx,
 		`SELECT `+itemColumns+` FROM items WHERE id = $1 AND item_type = 'repo' AND `+scopeSQL,
 		args...)
 	return scanRepoLegacy(row)
@@ -176,7 +176,7 @@ func (s *Store) ListRepos(ctx context.Context, p repos.ListParams) (*repos.ListR
 
 	var total int
 	countSQL := "SELECT COUNT(*) FROM items WHERE " + whereSQL
-	if err := s.pool.QueryRow(ctx, countSQL, args...).Scan(&total); err != nil {
+	if err := s.Reader().QueryRow(ctx, countSQL, args...).Scan(&total); err != nil {
 		return nil, err
 	}
 
@@ -185,7 +185,7 @@ func (s *Store) ListRepos(ctx context.Context, p repos.ListParams) (*repos.ListR
 		"SELECT %s FROM items WHERE %s ORDER BY %s LIMIT $%d OFFSET $%d",
 		itemColumns, whereSQL, orderBy, idx, idx+1,
 	)
-	rows, err := s.pool.Query(ctx, listSQL, listArgs...)
+	rows, err := s.Reader().Query(ctx, listSQL, listArgs...)
 	if err != nil {
 		return nil, err
 	}
@@ -240,7 +240,7 @@ func (s *Store) UpdateMetadata(ctx context.Context, id uuid.UUID, md *repos.Meta
 	meta["last_fetched_at"] = time.Now().Format(time.RFC3339)
 
 	metaJSON, _ := json.Marshal(meta)
-	_, err = s.pool.Exec(ctx, `
+	_, err = s.Writer().Exec(ctx, `
 		UPDATE items SET
 			description = $2,
 			meta = $3,
@@ -255,7 +255,7 @@ func (s *Store) UpdateMetadata(ctx context.Context, id uuid.UUID, md *repos.Meta
 
 func (s *Store) GetDiscoveryNext(ctx context.Context) (*repos.Repo, error) {
 	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 1)
-	row := s.pool.QueryRow(ctx, `
+	row := s.Reader().QueryRow(ctx, `
 		SELECT `+itemColumns+` FROM items
 		WHERE archived = false AND item_type = 'repo'
 		  AND `+scopeSQL+`
@@ -273,7 +273,7 @@ func (s *Store) ListStaleRepos(ctx context.Context, before time.Time, limit int)
 	if limit <= 0 {
 		limit = 20
 	}
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT `+itemColumns+` FROM items
 		WHERE archived = false AND item_type = 'repo'
 		  AND ((meta->>'last_fetched_at') IS NULL OR (meta->>'last_fetched_at')::timestamptz < $1)

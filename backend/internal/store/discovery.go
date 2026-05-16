@@ -18,7 +18,7 @@ func (s *Store) GetTrendingItems(ctx context.Context, limit int) ([]TrendingItem
 		limit = 10
 	}
 
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT url_normalized, MAX(title), COUNT(*) as save_count
 		FROM items
 		WHERE created_at > NOW() - INTERVAL '7 days'
@@ -60,7 +60,7 @@ func (s *Store) GetCuratorLeaderboard(ctx context.Context, limit int) ([]Curator
 		limit = 10
 	}
 
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT 
 			u.id, u.username, u.display_name, u.avatar_url, u.reputation_points,
 			(SELECT count(*) FROM follows WHERE following_id = u.id) as followers_count

@@ -33,7 +33,7 @@ func (s *Store) CreateWebhook(ctx context.Context, userID, orgID *uuid.UUID, nam
 	secret := hex.EncodeToString(b)
 
 	var w Webhook
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		INSERT INTO webhooks (user_id, org_id, name, url, secret, events)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id, user_id, org_id, name, url, secret, events, is_active, created_at
@@ -53,13 +53,13 @@ func (s *Store) ListWebhooks(ctx context.Context, userID uuid.UUID, orgID *uuid.
 	var err error
 
 	if orgID != nil {
-		rows, err = s.pool.Query(ctx, `
+		rows, err = s.Reader().Query(ctx, `
 			SELECT id, user_id, org_id, name, url, secret, events, is_active, created_at
 			FROM webhooks
 			WHERE org_id = $1
 		`, *orgID)
 	} else {
-		rows, err = s.pool.Query(ctx, `
+		rows, err = s.Reader().Query(ctx, `
 			SELECT id, user_id, org_id, name, url, secret, events, is_active, created_at
 			FROM webhooks
 			WHERE user_id = $1 AND org_id IS NULL
@@ -85,7 +85,7 @@ func (s *Store) ListWebhooks(ctx context.Context, userID uuid.UUID, orgID *uuid.
 func (s *Store) DeleteWebhook(ctx context.Context, userID uuid.UUID, id uuid.UUID) error {
 	// Simple owner check: must match user_id OR be in an org the user is member of (for simplicity, we assume org_id was checked in handler or we check it here).
 	// Let's do a strict check on user_id OR org_membership.
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.Writer().Exec(ctx, `
 		DELETE FROM webhooks
 		WHERE id = $1 AND (user_id = $2 OR org_id IN (SELECT org_id FROM org_members WHERE user_id = $2))
 	`, id, userID)
@@ -99,13 +99,13 @@ func (s *Store) FindWebhooksForEvent(ctx context.Context, orgID, userID uuid.UUI
 	var err error
 
 	if orgID != uuid.Nil {
-		rows, err = s.pool.Query(ctx, `
+		rows, err = s.Reader().Query(ctx, `
 			SELECT id, url, secret
 			FROM webhooks
 			WHERE org_id = $1 AND is_active = true AND events ? $2
 		`, orgID, event)
 	} else {
-		rows, err = s.pool.Query(ctx, `
+		rows, err = s.Reader().Query(ctx, `
 			SELECT id, url, secret
 			FROM webhooks
 			WHERE user_id = $1 AND org_id IS NULL AND is_active = true AND events ? $2

@@ -3,11 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
 	"devdeck/internal/authctx"
+	"devdeck/internal/cache"
 	"devdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
@@ -28,10 +30,11 @@ type Profile struct {
 // ProfileHandler handles public profile operations.
 type ProfileHandler struct {
 	store *store.Store
+	cache *cache.Cache
 }
 
-func NewProfileHandler(s *store.Store) *ProfileHandler {
-	return &ProfileHandler{store: s}
+func NewProfileHandler(s *store.Store, c *cache.Cache) *ProfileHandler {
+	return &ProfileHandler{store: s, cache: c}
 }
 
 // GET /api/users/:username/public — public profile (no auth)
@@ -42,20 +45,28 @@ func (h *ProfileHandler) GetPublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	profile, err := h.store.GetPublicProfile(r.Context(), username)
-	if err != nil {
-		if errors.Is(err, store.ErrNotFound) {
-			writeError(w, http.StatusNotFound, "NOT_FOUND", "user not found")
+	cacheKey := fmt.Sprintf("profile:%s", username)
+	var profile map[string]any
+	found, _ := h.cache.Get(r.Context(), cacheKey, &profile)
+	if !found {
+		p, err := h.store.GetPublicProfile(r.Context(), username)
+		if err != nil {
+			if errors.Is(err, store.ErrNotFound) {
+				writeError(w, http.StatusNotFound, "NOT_FOUND", "user not found")
+				return
+			}
+			writeInternal(w, err)
 			return
 		}
-		writeInternal(w, err)
-		return
+		profile = p
+		_ = h.cache.Set(r.Context(), cacheKey, profile, 5*time.Minute)
 	}
 
-	// Optional: check if following
+	// Optional: check if following (always dynamic)
 	isFollowing := false
 	if currentID, ok := authctx.UserID(r.Context()); ok {
-		profileID := profile["id"].(uuid.UUID)
+		profileIDStr, _ := profile["id"].(string)
+		profileID, _ := uuid.Parse(profileIDStr)
 		if currentID != profileID {
 			if followed, err := h.store.IsFollowing(r.Context(), currentID, profileID); err == nil {
 				isFollowing = followed

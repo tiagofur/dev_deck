@@ -89,7 +89,7 @@ func (s *Store) CreateItem(ctx context.Context, in CreateItemInput) (*items.Item
 		return nil, fmt.Errorf("encode item meta: %w", err)
 	}
 
-	row := s.pool.QueryRow(ctx, `
+	row := s.Reader().QueryRow(ctx, `
 		INSERT INTO items (
 			user_id, org_id, item_type, title, url, url_normalized, description, notes, tags,
 			why_saved, source_channel, meta, enrichment_status
@@ -129,7 +129,7 @@ func (s *Store) CreateItem(ctx context.Context, in CreateItemInput) (*items.Item
 func (s *Store) GetItem(ctx context.Context, id uuid.UUID) (*items.Item, error) {
 	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
 	args := append([]any{id}, scopeArgs...)
-	row := s.pool.QueryRow(ctx, `SELECT `+itemColumns+` FROM items WHERE id = $1 AND `+scopeSQL, args...)
+	row := s.Reader().QueryRow(ctx, `SELECT `+itemColumns+` FROM items WHERE id = $1 AND `+scopeSQL, args...)
 	it, err := scanItem(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -145,7 +145,7 @@ func (s *Store) GetItem(ctx context.Context, id uuid.UUID) (*items.Item, error) 
 func (s *Store) FindItemByNormalizedURL(ctx context.Context, norm string) (*items.Item, error) {
 	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
 	args := append([]any{norm}, scopeArgs...)
-	row := s.pool.QueryRow(ctx,
+	row := s.Reader().QueryRow(ctx,
 		`SELECT `+itemColumns+` FROM items WHERE url_normalized = $1 AND `+scopeSQL+` LIMIT 1`, args...)
 	it, err := scanItem(row)
 	if err != nil {
@@ -159,14 +159,14 @@ func (s *Store) FindItemByNormalizedURL(ctx context.Context, norm string) (*item
 
 // SetItemURLNormalized updates the url_normalized column for an item.
 func (s *Store) SetItemURLNormalized(ctx context.Context, id uuid.UUID, norm string) error {
-	_, err := s.pool.Exec(ctx, `UPDATE items SET url_normalized = $1 WHERE id = $2`, norm, id)
+	_, err := s.Writer().Exec(ctx, `UPDATE items SET url_normalized = $1 WHERE id = $2`, norm, id)
 	return err
 }
 
 // UpdateItemEnrichmentStatus sets the enrichment_status column. Used by
 // the capture handler after enqueueing a job.
 func (s *Store) UpdateItemEnrichmentStatus(ctx context.Context, id uuid.UUID, status items.EnrichmentStatus) error {
-	tag, err := s.pool.Exec(ctx,
+	tag, err := s.Writer().Exec(ctx,
 		`UPDATE items SET enrichment_status = $1, updated_at = NOW() WHERE id = $2`,
 		string(status), id)
 	if err != nil {
@@ -264,7 +264,7 @@ func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListR
 	whereSQL := strings.Join(where, " AND ")
 
 	var total int
-	if err := s.pool.QueryRow(ctx,
+	if err := s.Reader().QueryRow(ctx,
 		"SELECT COUNT(*) FROM items WHERE "+whereSQL, args...).Scan(&total); err != nil {
 		return nil, err
 	}
@@ -274,7 +274,7 @@ func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListR
 		"SELECT %s FROM items WHERE %s ORDER BY %s LIMIT $%d OFFSET $%d",
 		itemColumns, whereSQL, orderBy, idx, idx+1,
 	)
-	rows, err := s.pool.Query(ctx, listSQL, listArgs...)
+	rows, err := s.Reader().Query(ctx, listSQL, listArgs...)
 	if err != nil {
 		return nil, err
 	}
@@ -356,7 +356,7 @@ func (s *Store) UpdateItem(ctx context.Context, id uuid.UUID, in items.UpdateInp
 		"UPDATE items SET %s WHERE id = $%d AND %s RETURNING %s",
 		strings.Join(sets, ", "), idx, scopeSQL, itemColumns,
 	)
-	row := s.pool.QueryRow(ctx, q, args...)
+	row := s.Reader().QueryRow(ctx, q, args...)
 	it, err := scanItem(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -387,7 +387,7 @@ func (s *Store) UpdateItem(ctx context.Context, id uuid.UUID, in items.UpdateInp
 func (s *Store) DeleteItem(ctx context.Context, id uuid.UUID) error {
 	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
 	args := append([]any{id}, scopeArgs...)
-	tag, err := s.pool.Exec(ctx, `DELETE FROM items WHERE id = $1 AND `+scopeSQL, args...)
+	tag, err := s.Writer().Exec(ctx, `DELETE FROM items WHERE id = $1 AND `+scopeSQL, args...)
 	if err != nil {
 		return err
 	}
@@ -402,7 +402,7 @@ func (s *Store) DeleteItem(ctx context.Context, id uuid.UUID) error {
 func (s *Store) MarkItemSeen(ctx context.Context, id uuid.UUID) error {
 	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
 	args := append([]any{id}, scopeArgs...)
-	tag, err := s.pool.Exec(ctx,
+	tag, err := s.Writer().Exec(ctx,
 		`UPDATE items SET last_seen_at = NOW() WHERE id = $1 AND `+scopeSQL, args...)
 	if err != nil {
 		return err
@@ -422,7 +422,7 @@ func (s *Store) UpdateItemFromMetadata(ctx context.Context, id uuid.UUID, md *re
 	}
 	// Fetch current meta, merge, write back. We keep this in a single
 	// transaction so concurrent enrichments don't stomp each other.
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.Writer().Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -483,7 +483,7 @@ func (s *Store) UpdateItemAIFields(ctx context.Context, id uuid.UUID, summary st
 	if tags == nil {
 		tags = []string{}
 	}
-	tag, err := s.pool.Exec(ctx, `
+	tag, err := s.Writer().Exec(ctx, `
 		UPDATE items
 		SET ai_summary = $1,
 		    ai_tags = $2,
@@ -502,7 +502,7 @@ func (s *Store) UpdateItemAIFields(ctx context.Context, id uuid.UUID, summary st
 // ReviewItemAITags updates the editable AI suggestion set and optionally
 // merges the reviewed suggestions into the user's manual tags.
 func (s *Store) ReviewItemAITags(ctx context.Context, id uuid.UUID, in items.ReviewAITagsInput) (*items.Item, error) {
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.Writer().Begin(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -587,7 +587,7 @@ func (s *Store) GetUserTags(ctx context.Context, userID uuid.UUID) ([]string, er
 		ORDER BY cnt DESC, tag ASC
 		LIMIT 50
 	`
-	rows, err := s.pool.Query(ctx, q, userID)
+	rows, err := s.Reader().Query(ctx, q, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -631,7 +631,7 @@ func (s *Store) EmbedItem(ctx context.Context, id uuid.UUID, embedding []float32
 	if embedding == nil {
 		return nil // no-op
 	}
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.Writer().Exec(ctx, `
 		UPDATE items
 		SET embedding = $1, updated_at = NOW()
 		WHERE id = $2
@@ -672,7 +672,7 @@ func (s *Store) searchItemsText(ctx context.Context, userID uuid.UUID, query str
 		ORDER BY sim DESC
 		LIMIT $2
 	`
-	rows, err := s.pool.Query(ctx, q, userID, limit, query)
+	rows, err := s.Reader().Query(ctx, q, userID, limit, query)
 	if err != nil {
 		return nil, err
 	}
@@ -706,7 +706,7 @@ func (s *Store) searchItemsHybrid(ctx context.Context, userID uuid.UUID, query s
 		ORDER BY embedding <=> $3
 		LIMIT $2
 	`
-	rows, err := s.pool.Query(ctx, vecQ, userID, limit, embedding)
+	rows, err := s.Reader().Query(ctx, vecQ, userID, limit, embedding)
 	if err != nil {
 		return nil, err
 	}
@@ -809,7 +809,7 @@ func (s *Store) GetRelatedItems(ctx context.Context, itemID uuid.UUID, limit int
 	}
 	// Get the source item's embedding
 	var srcEmbedding []float32
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		SELECT embedding FROM items WHERE id = $1 AND embedding IS NOT NULL
 	`, itemID).Scan(&srcEmbedding)
 	if err != nil {
@@ -834,7 +834,7 @@ func (s *Store) GetRelatedItems(ctx context.Context, itemID uuid.UUID, limit int
 		ORDER BY embedding <=> $1
 		LIMIT $3
 	`
-	rows, err := s.pool.Query(ctx, q, srcEmbedding, itemID, limit)
+	rows, err := s.Reader().Query(ctx, q, srcEmbedding, itemID, limit)
 	if err != nil {
 		return nil, err
 	}

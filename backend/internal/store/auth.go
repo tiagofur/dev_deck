@@ -40,27 +40,28 @@ func scanUserWithHash(row pgx.Row) (*auth.User, string, error) {
 }
 
 func (s *Store) GetUserByGitHubID(ctx context.Context, githubID int64) (*auth.User, error) {
-	row := s.pool.QueryRow(ctx, `SELECT `+userColumns+` FROM users WHERE github_id = $1`, githubID)
+	row := s.Reader().QueryRow(ctx, `SELECT `+userColumns+` FROM users WHERE github_id = $1`, githubID)
 	return scanUser(row)
 }
 
 func (s *Store) GetUserByID(ctx context.Context, id uuid.UUID) (*auth.User, error) {
-	row := s.pool.QueryRow(ctx, `SELECT `+userColumns+` FROM users WHERE id = $1`, id)
+	row := s.Reader().QueryRow(ctx, `SELECT `+userColumns+` FROM users WHERE id = $1`, id)
 	return scanUser(row)
 }
 
 func (s *Store) UpsertUser(ctx context.Context, ghUser auth.GitHubUser) (*auth.User, error) {
-	row := s.pool.QueryRow(ctx, `
-		INSERT INTO users (github_id, login, username, avatar_url, display_name, role)
-		VALUES ($1, $2, $2, $3, $4, 'user')
+	row := s.Writer().QueryRow(ctx, `
+		INSERT INTO users (github_id, login, username, avatar_url, display_name, role, region)
+		VALUES ($1, $2, $2, $3, $4, 'user', $5)
 		ON CONFLICT (github_id) DO UPDATE SET
 			login = EXCLUDED.login,
 			avatar_url = EXCLUDED.avatar_url,
 			display_name = EXCLUDED.display_name,
 			updated_at = NOW()
-		RETURNING `+userColumns, ghUser.ID, ghUser.Login, ghUser.AvatarURL, ghUser.Name)
+		RETURNING `+userColumns, ghUser.ID, ghUser.Login, ghUser.AvatarURL, ghUser.Name, s.appRegion)
 	return scanUser(row)
 }
+
 
 func (s *Store) GetPublicProfile(ctx context.Context, username string) (map[string]any, error) {
 	var profile struct {
@@ -74,7 +75,7 @@ func (s *Store) GetPublicProfile(ctx context.Context, username string) (map[stri
 		FollowingCount   int64
 		ReputationPoints int32
 	}
-	err := s.pool.QueryRow(ctx, `
+	err := s.Reader().QueryRow(ctx, `
 		SELECT id, username, bio, avatar_url, created_at, public_decks_count, followers_count, following_count, reputation_points
 		FROM get_user_by_username($1)
 	`, username).Scan(
@@ -103,7 +104,7 @@ func (s *Store) GetPublicProfile(ctx context.Context, username string) (map[stri
 }
 
 func (s *Store) ListUsersAdmin(ctx context.Context) ([]map[string]any, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.Reader().Query(ctx, `
 		SELECT u.id, u.login, u.username, u.plan, u.role, u.created_at,
 		       (SELECT COUNT(*) FROM items WHERE user_id = u.id) as item_count
 		FROM users u
@@ -138,7 +139,7 @@ func (s *Store) ListUsersAdmin(ctx context.Context) ([]map[string]any, error) {
 }
 
 func (s *Store) UpdateUser(ctx context.Context, userID uuid.UUID, bio *string, username *string) (*auth.User, error) {
-	row := s.pool.QueryRow(ctx, `
+	row := s.Reader().QueryRow(ctx, `
 		UPDATE users SET
 			bio = COALESCE($2, bio),
 			username = COALESCE($3, username),
@@ -151,7 +152,7 @@ func (s *Store) UpdateUser(ctx context.Context, userID uuid.UUID, bio *string, u
 // ─── Refresh Sessions ───
 
 func (s *Store) CreateRefreshSession(ctx context.Context, userID uuid.UUID, tokenHash string, expiresAt time.Time) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.Writer().Exec(ctx, `
 		INSERT INTO refresh_sessions (user_id, token_hash, expires_at)
 		VALUES ($1, $2, $3)
 	`, userID, tokenHash, expiresAt)
@@ -159,7 +160,7 @@ func (s *Store) CreateRefreshSession(ctx context.Context, userID uuid.UUID, toke
 }
 
 func (s *Store) GetRefreshSession(ctx context.Context, tokenHash string) (*uuid.UUID, error) {
-	row := s.pool.QueryRow(ctx, `
+	row := s.Reader().QueryRow(ctx, `
 		DELETE FROM refresh_sessions
 		WHERE token_hash = $1 AND expires_at > NOW()
 		RETURNING user_id
@@ -175,7 +176,7 @@ func (s *Store) GetRefreshSession(ctx context.Context, tokenHash string) (*uuid.
 }
 
 func (s *Store) GetUserByLogin(ctx context.Context, login string) (*auth.User, string, error) {
-	row := s.pool.QueryRow(ctx, `SELECT `+userColumns+` FROM users WHERE login = $1`, login)
+	row := s.Reader().QueryRow(ctx, `SELECT `+userColumns+` FROM users WHERE login = $1`, login)
 	return scanUserWithHash(row)
 }
 
@@ -185,16 +186,17 @@ func (s *Store) CreateUserLocal(ctx context.Context, login, passwordHash string)
 
 func (s *Store) CreateUserLocalTx(ctx context.Context, tx pgx.Tx, login, passwordHash string) (*auth.User, error) {
 	var row pgx.Row
-	q := `INSERT INTO users (login, password_hash, display_name, role)
-		  VALUES ($1, $2, $1, 'user')
+	q := `INSERT INTO users (login, password_hash, display_name, role, region)
+		  VALUES ($1, $2, $1, 'user', $3)
 		  ON CONFLICT (login) DO NOTHING
 		  RETURNING ` + userColumns
-	
+
 	if tx != nil {
-		row = tx.QueryRow(ctx, q, login, passwordHash)
+		row = tx.QueryRow(ctx, q, login, passwordHash, s.appRegion)
 	} else {
-		row = s.pool.QueryRow(ctx, q, login, passwordHash)
+		row = s.Writer().QueryRow(ctx, q, login, passwordHash, s.appRegion)
 	}
+
 
 	u, err := scanUser(row)
 	if err != nil {
