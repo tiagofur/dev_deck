@@ -59,6 +59,24 @@ var CaptureItems = promauto.NewCounterVec(
 	[]string{"source", "item_type", "outcome"},
 )
 
+// AgentToolCalls counts how many times the AI agent uses a specific tool.
+var AgentToolCalls = promauto.NewCounterVec(
+	prometheus.CounterOpts{
+		Name: "devdeck_agent_tool_calls_total",
+		Help: "Total tool calls made by the AI agent, labelled by tool name.",
+	},
+	[]string{"tool_name"},
+)
+
+// AgentChatDuration measures the time it takes for the agent to finish a complete orchestrator loop.
+var AgentChatDuration = promauto.NewHistogram(
+	prometheus.HistogramOpts{
+		Name:    "devdeck_agent_chat_loop_duration_seconds",
+		Help:    "Latency of a full AI agent orchestration loop.",
+		Buckets: prometheus.LinearBuckets(0.5, 2.0, 15), // 0.5s to 30s
+	},
+)
+
 // Instrument wraps an http.Handler so every request observes the
 // latency histogram and (if 5xx) the error counter. Call from the
 // router right after chi is set up but before your routes — chi's

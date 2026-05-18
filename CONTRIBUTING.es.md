@@ -10,7 +10,7 @@ Gracias por querer ayudar. DevDeck es un proyecto indie con visión fuerte, así
 
 ## Setup local
 
-El repo es un **monorepo pnpm workspaces**. Una sola `pnpm install` en la raíz instala todo (`apps/desktop`, `apps/web`, `packages/ui`, `packages/api-client`, `packages/features`).
+El repo es un **monorepo pnpm workspaces**. Una sola `pnpm install` en la raíz instala todo (`apps/desktop`, `apps/web`, `apps/extension`, `packages/ui`, `packages/api-client`, `packages/features`, `packages/realtime-client`).
 
 ```bash
 # Una sola vez, desde la raíz del repo
@@ -22,7 +22,7 @@ pnpm install
 cd backend
 cp .env.example .env
 # editar DATABASE_URL, GITHUB_* si vas a testear auth
-docker compose -f ../deploy/docker-compose.dev.yml up -d db
+docker compose -f ../deploy/docker-compose.local.yml up -d db
 go run ./cmd/api
 ```
 
@@ -143,7 +143,7 @@ No sin discusión previa en un issue. El look & feel es parte de la identidad de
 Aún no hay i18n setup. Si querés agregarla, es una feature grande — abrí issue primero.
 
 **¿Puedo vender/fork-ear/usar comercialmente?**
-Ver `LICENSE` (cuando exista). Hasta entonces, asumí que es "all rights reserved" y preguntá.
+Ver `LICENSE`. DevDeck se distribuye bajo la licencia Apache 2.0.
 
 ## Código de conducta
 

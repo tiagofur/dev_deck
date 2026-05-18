@@ -6,17 +6,18 @@ import (
 	"time"
 
 	"devdeck/internal/domain/auth"
+	"devdeck/internal/store/seed"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
-const userColumns = `id, github_id, login, username, bio, plan, avatar_url, display_name, role, created_at`
-const userColumnsWithHash = `id, github_id, login, username, bio, plan, avatar_url, display_name, role, password_hash, created_at`
+const userColumns = `id, github_id, login, username, bio, plan, avatar_url, display_name, role, region, onboarding_completed, created_at`
+const userColumnsWithHash = `id, github_id, login, username, bio, plan, avatar_url, display_name, role, password_hash, region, onboarding_completed, created_at`
 
 func scanUser(row pgx.Row) (*auth.User, error) {
 	var u auth.User
-	err := row.Scan(&u.ID, &u.GitHubID, &u.Login, &u.Username, &u.Bio, &u.Plan, &u.AvatarURL, &u.DisplayName, &u.Role, &u.CreatedAt)
+	err := row.Scan(&u.ID, &u.GitHubID, &u.Login, &u.Username, &u.Bio, &u.Plan, &u.AvatarURL, &u.DisplayName, &u.Role, &u.Region, &u.OnboardingCompleted, &u.CreatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrNotFound
@@ -29,7 +30,7 @@ func scanUser(row pgx.Row) (*auth.User, error) {
 func scanUserWithHash(row pgx.Row) (*auth.User, string, error) {
 	var u auth.User
 	var hash *string
-	err := row.Scan(&u.ID, &u.GitHubID, &u.Login, &u.Username, &u.Bio, &u.Plan, &u.AvatarURL, &u.DisplayName, &u.Role, &hash, &u.CreatedAt)
+	err := row.Scan(&u.ID, &u.GitHubID, &u.Login, &u.Username, &u.Bio, &u.Plan, &u.AvatarURL, &u.DisplayName, &u.Role, &hash, &u.Region, &u.OnboardingCompleted, &u.CreatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, "", ErrNotFound
@@ -147,6 +148,39 @@ func (s *Store) UpdateUser(ctx context.Context, userID uuid.UUID, bio *string, u
 		WHERE id = $1
 		RETURNING `+userColumns, userID, bio, username)
 	return scanUser(row)
+}
+
+func (s *Store) CompleteOnboarding(ctx context.Context, userID uuid.UUID) error {
+	_, err := s.Writer().Exec(ctx, `UPDATE users SET onboarding_completed = true WHERE id = $1`, userID)
+	return err
+}
+
+func (s *Store) InstallStarterKit(ctx context.Context, kitID string) error {
+	kits := seed.GetStarterKits()
+	var selected *seed.StarterKit
+	for _, k := range kits {
+		if k.ID == kitID {
+			selected = &k
+			break
+		}
+	}
+
+	if selected == nil {
+		return ErrNotFound
+	}
+
+	for _, si := range selected.Items {
+		url := si.URL
+		_, _ = s.CreateItem(ctx, CreateItemInput{
+			Type:          si.Type,
+			Title:         si.Title,
+			URL:           &url,
+			Tags:          si.Tags,
+			SourceChannel: "onboarding",
+		})
+	}
+
+	return nil
 }
 
 // ─── Refresh Sessions ───

@@ -4,6 +4,19 @@
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log('DevDeck Extension installed');
+  
+  // Register context menus
+  chrome.contextMenus.create({
+    id: 'save-link',
+    title: 'Guardar link en DevDeck',
+    contexts: ['link']
+  });
+  
+  chrome.contextMenus.create({
+    id: 'save-selection',
+    title: 'Guardar selección como nota en DevDeck',
+    contexts: ['selection']
+  });
 });
 
 // Handle messages from content scripts
@@ -39,6 +52,55 @@ async function handleCheckURL(url: string) {
 // Handle keyboard commands
 chrome.commands.onCommand.addListener((command) => {
   if (command === 'capture-tab') {
-    console.log('Capture command triggered');
+    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+      if (tab?.url) {
+        handleCapture({ url: tab.url, title_hint: tab.title })
+      }
+    })
   }
-});
+})
+
+// Handle context menu clicks
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === 'save-link' && info.linkUrl) {
+    handleCapture({ url: info.linkUrl, source: 'context_menu_link' })
+  } else if (info.menuItemId === 'save-selection' && info.selectionText) {
+    handleCapture({
+      item_type: 'note',
+      notes: info.selectionText,
+      title_hint: `Nota desde: ${tab?.title || 'página web'}`,
+      url: tab?.url,
+      source: 'context_menu_selection',
+    })
+  }
+})
+
+async function handleCapture(payload: any) {
+  try {
+    const { access } = await chrome.storage.local.get('access')
+    if (!access) {
+      console.warn('DevDeck: No access token found')
+      return
+    }
+
+    const resp = await fetch('http://localhost:8080/api/items/capture', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${access}`,
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if (resp.ok) {
+      chrome.action.setBadgeText({ text: 'OK' })
+      chrome.action.setBadgeBackgroundColor({ color: '#4ade80' })
+      setTimeout(() => chrome.action.setBadgeText({ text: '' }), 2000)
+    } else {
+      chrome.action.setBadgeText({ text: 'ERR' })
+      chrome.action.setBadgeBackgroundColor({ color: '#f87171' })
+    }
+  } catch (err) {
+    console.error('Quick capture failed:', err)
+  }
+}

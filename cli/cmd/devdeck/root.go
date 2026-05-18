@@ -21,7 +21,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:     "devdeck",
 	Short:   "DevDeck — capture and search your dev knowledge from the terminal",
-	Version: "0.1.0",
+	Version: "1.0.0",
 	Long: `devdeck is a thin CLI companion to the DevDeck desktop/web clients.
 
 It talks to your backend via the /api/items/capture endpoint and the
@@ -37,6 +37,7 @@ func init() {
 		logoutCmd,
 		configCmd,
 		addCmd,
+		agentCmd,
 		openCmd,
 		searchCmd,
 		listCmd,

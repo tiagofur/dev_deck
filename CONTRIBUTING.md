@@ -16,7 +16,7 @@ Thank you for your interest in contributing to DevDeck! This is an indie project
 
 ## Local Setup
 
-DevDeck is a **pnpm workspaces monorepo**. A single `pnpm install` in the root installs all dependencies for all packages (`apps/desktop`, `apps/web`, `packages/ui`, `packages/api-client`, `packages/features`).
+DevDeck is a **pnpm workspaces monorepo**. A single `pnpm install` in the root installs all dependencies for all packages (`apps/desktop`, `apps/web`, `apps/extension`, `packages/ui`, `packages/api-client`, `packages/features`, `packages/realtime-client`).
 
 ```bash
 # Run this once from the project root
@@ -28,9 +28,14 @@ pnpm install
 cd backend
 cp .env.example .env
 # Edit DATABASE_URL and GITHUB_* credentials
-docker compose -f ../deploy/docker-compose.dev.yml up -d db
+docker compose -f ../deploy/docker-compose.local.yml up -d db
 go run ./cmd/api
 ```
+...
+## Questions & Answers
+
+**Can I use this commercially?**
+Yes. DevDeck is released under the Apache 2.0 License. See the `LICENSE` file for details.
 
 ### Desktop App (Electron + React)
 ```bash

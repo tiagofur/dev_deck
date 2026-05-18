@@ -60,6 +60,10 @@ func (s *Store) Pool() *pgxpool.Pool {
 	return s.primary
 }
 
+func (s *Store) Ping(ctx context.Context) error {
+	return s.primary.Ping(ctx)
+}
+
 // Sentinel errors used by handlers to map to HTTP status codes.
 var (
 	ErrNotFound      = errors.New("not found")

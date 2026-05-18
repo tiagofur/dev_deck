@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-
-	"devdeck/internal/authctx"
 	"devdeck/internal/domain/cheatsheets"
 	domainitems "devdeck/internal/domain/items"
 
@@ -544,11 +542,13 @@ func (s *Store) ListCheatsheetsByRepo(ctx context.Context, repoID uuid.UUID) ([]
 
 // SearchResult is a unified search hit.
 type SearchResult struct {
-	Type     string `json:"type"` // "item", "repo", "cheatsheet", "entry"
-	ID       string `json:"id"`
-	Title    string `json:"title"`
-	Subtitle string `json:"subtitle"`
-	Extra    string `json:"extra"` // e.g. command text, repo url
+	Type        string     `json:"type"` // "item", "repo", "cheatsheet", "entry"
+	ID          string     `json:"id"`
+	Title       string     `json:"title"`
+	Subtitle    string     `json:"subtitle"`
+	Extra       string     `json:"extra"` // e.g. command text, repo url
+	OrgID       *uuid.UUID `json:"org_id,omitempty"`
+	CuratorName string     `json:"curator_name,omitempty"`
 }
 
 // Search performs a cross-entity search using text (pg_trgm), vector, or hybrid modes.
@@ -560,23 +560,22 @@ func (s *Store) Search(ctx context.Context, mode SearchMode, query string, query
 
 	// 1. Search polymorphic items. This is the canonical vault surface.
 	// We use the specialized SearchItems method which supports hybrid/semantic.
-	userID, ok := authctx.UserID(ctx)
-	if ok {
-		itemResults, err := s.SearchItems(ctx, userID, mode, query, queryEmbedding, limit)
-		if err != nil {
-			return nil, fmt.Errorf("search items: %w", err)
-		}
-		for _, r := range itemResults {
-			out = append(out, SearchResult{
-				Type:     "item",
-				ID:       r.ID.String(),
-				Title:    r.Title,
-				Subtitle: string(r.Type) + " · " + r.WhySaved,
-				Extra:    r.URL,
-			})
-		}
+	itemResults, err := s.SearchItems(ctx, mode, query, queryEmbedding, limit)
+	if err != nil {
+		return nil, fmt.Errorf("search items: %w", err)
 	}
+	for _, r := range itemResults {
+		out = append(out, SearchResult{
+			Type:        "item",
+			ID:          r.ID.String(),
+			Title:    r.Title,
+			Subtitle: string(r.Type) + " · " + r.WhySaved,
+			Extra:    derefStr(r.URL),
+			OrgID:    r.OrgID,
 
+			CuratorName: r.CuratorName,
+		})
+	}
 	// For other entities, we stick to text search for now as they don't have embeddings.
 	if mode == SearchModeVector && len(out) >= limit {
 		return out, nil

@@ -71,7 +71,7 @@ export function Topbar({
         size="sm"
         variant="secondary"
         className="whitespace-nowrap"
-        title="Todos los items (Ola 5)"
+        title="Todos los items"
       >
         <span className="flex items-center gap-2">
           <Boxes size={16} strokeWidth={3} />
@@ -112,7 +112,7 @@ export function Topbar({
         size="sm"
         variant="secondary"
         className="whitespace-nowrap"
-        title="Network Feed (Ola 12)"
+        title="Red Social"
       >
         <span className="flex items-center gap-2">
           <Users size={16} strokeWidth={3} />

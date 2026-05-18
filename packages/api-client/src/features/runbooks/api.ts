@@ -28,6 +28,31 @@ export interface RunbookStep {
 
 const RUNBOOKS_KEY = ['runbooks'] as const
 
+async function upsertLocalRunbook(rb: Runbook) {
+	await execLocal(
+		`INSERT INTO runbooks (id, user_id, item_id, title, description, created_at, updated_at, local_updated_at)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		 ON CONFLICT(id) DO UPDATE SET
+			title=excluded.title, description=excluded.description, updated_at=excluded.updated_at, local_updated_at=excluded.local_updated_at`,
+		[rb.id, rb.user_id, rb.item_id, rb.title, rb.description, rb.created_at, rb.updated_at, new Date().toISOString()]
+	)
+	for (const step of rb.steps) {
+		await upsertLocalRunbookStep(step)
+	}
+}
+
+async function upsertLocalRunbookStep(step: RunbookStep) {
+	await execLocal(
+		`INSERT INTO runbook_steps (id, runbook_id, label, command, description, position, is_completed, created_at, updated_at, local_updated_at)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		 ON CONFLICT(id) DO UPDATE SET
+			label=excluded.label, command=excluded.command, description=excluded.description, 
+			position=excluded.position, is_completed=excluded.is_completed, 
+			updated_at=excluded.updated_at, local_updated_at=excluded.local_updated_at`,
+		[step.id, step.runbook_id, step.label, step.command, step.description, step.position, step.is_completed ? 1 : 0, step.created_at, step.updated_at, new Date().toISOString()]
+	)
+}
+
 /** GET /api/items/:id/runbooks */
 export function useItemRunbooks(itemId: string | undefined) {
 	return useQuery({
@@ -35,7 +60,8 @@ export function useItemRunbooks(itemId: string | undefined) {
 		queryFn: async () => {
 			try {
 				const res = await api.get<{ runbooks: Runbook[] }>(`/api/items/${itemId}/runbooks`)
-				// TODO: Sync to local DB
+				// Sync to local DB
+				res.runbooks.forEach(rb => upsertLocalRunbook(rb).catch(console.error))
 				return res.runbooks
 			} catch (err) {
 				// Offline fallback

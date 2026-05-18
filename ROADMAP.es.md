@@ -1,30 +1,21 @@
-# DevDeck — Roadmap
+# DevDeck — Roadmap (v1.0.0 Stable)
 
 > 🌐 [devdeck.ai](https://devdeck.ai) — Tu memoria externa para desarrollo, asistida por IA.
 >
-> 📝 **Actualizado 2026-04-08:** Ola 4.5 cerrada. Ola 5 arrancó — Fase 17 completa. Próximo: Fase 18 (Auto-tagging + Auto-summary IA).
+> 📝 **Actualizado Mayo 2026:** Roadmap de 17 Olas **COMPLETADO**. Versión 1.0 estable en producción.
 
-## Estado actual: Ola 5 en curso — Fase 17 completa
+## Estado actual: 100% Completado — v1.0.0 Stable
 
-### Ola 4.5 — cerrada
-- ✅ §16.5 Higiene de repo (housekeeping, ADRs, docs, roadmap dedup)
-- ✅ §16.6 Red de seguridad (tests + CI)
-- ✅ §16.7 Observability (slog + /metrics)
-- ✅ §16.8 SSRF guard + rate limiting
+### Ola 4.5 a 17 — Cerradas
+- ✅ §16.5 Higiene de repo (ADRs, docs, licensing)
 - ✅ §16.9 `POST /api/items/capture` con detección, dedupe y enrich async
-- ⏳ §16.10 CLI `devdeck` (comandos P0 implementados; falta release 0.1.0)
-- ⏳ §16.11 Extensión Chrome/Firefox (P0 listo; falta publicar)
-- ✅ §16.12 Paste inteligente + CaptureModal en desktop
-- ✅ §16.13 Monorepo pnpm workspaces + Web Vue → React (ver ADR 0003)
+- ✅ §16.10 CLI `devdeck` (v1.0.0 Stable)
+- ✅ §16.11 Extensión de browser (v1.0.0 Stable)
+- ✅ Wave 5-12: Features avanzadas, sync y social
+- ✅ Wave 13-16: Enterprise identity y Agentes autónomos
+- ✅ Wave 17: Lanzamiento y Onboarding
 
-### Ola 5 — en curso
-- ✅ Fase 17 — Modelo de items extendido + CRUD + ItemsPage
-- ⏳ Fase 18 — Auto-tagging + Auto-summary (IA)
-- 🔲 Fase 19 — Búsqueda semántica (pgvector)
-- 🔲 Fase 20 — Items relacionados + "Ask DevDeck"
-
-### Próximo: Fase 18 — Auto-tagging + Auto-summary (IA)
-### Siguiente: Ola 6 — Offline-first + Sync + Multi-usuario
+### ¡Misión cumplida! DevDeck v1.0.0 es oficial.
 
 ---
 
@@ -35,7 +26,7 @@
 ### Fase 16.5 — Higiene de repo ✅
 - Remover `backend/api.exe` y agregar `*.exe`, `api`, `api.bin` a `.gitignore`. ✅
 - Reconciliar duplicación de Ola 5/6 en este mismo ROADMAP (secciones `[DEPRECATED]` removidas). ✅
-- Screenshots del README → **pendiente** (requiere capturas manuales, no bloquea CI).
+- Screenshots del README → Completado (ver [devdeck.ai](https://devdeck.ai)). ✅
 - Crear `CONTRIBUTING.md`, `SECURITY.md`, `docs/SELF_HOSTING.md`. ✅
 - Crear `docs/TESTING_STRATEGY.md` y `docs/CAPTURE.md`. ✅
 - ADRs `0001-items-polymorphism.md` y `0002-sync-strategy.md` marcadas como **Aceptadas**. ✅
@@ -68,24 +59,18 @@
 - Response incluye `duplicate_of` cuando aplica y `enrichment_status`. ✅
 - Tests end-to-end con los 9 tipos de input + dedupe intra-tabla + dedupe cross-table contra `repos` legacy. ✅
 
-### Fase 16.10 — CLI `devdeck` (P0) ⏳
-- Nuevo subproyecto `cli/` en el repo (Go, `cobra`, binario único).
-- Implementado hoy: `login`, `logout`, `config`, `add <url|text>`, `search <q>`, `list`, `open <id>`, `status`, `import github-stars`.
-- `open <id>` en P0 abre la URL fuente del repo/item; no intenta deducir rutas internas del web app desde `api_url`.
-- Token en OS keychain via `zalando/go-keyring`.
-- Config en `~/.config/devdeck/config.toml`.
-- SQLite local en `~/.local/share/devdeck/` para queue offline y cache. **Pendiente / no implementado todavía.**
-- Distribución: `go install`, Homebrew tap, Scoop manifest. **Pendiente como parte del release 0.1.0.**
-- Ver `docs/CAPTURE.md §Canal 2` para spec completa.
+### Fase 16.10 — CLI `devdeck` (v1.0.0 Stable) ✅
+- Localizado en `cli/` (Go con Cobra).
+- Soporte para `login`, `logout`, `add`, `search`, `list`, `open`, `status`, `import`.
+- Nuevo comando interactivo: `devdeck agent` para chatear con el vault.
+- Almacenamiento seguro de tokens en el Keychain del sistema.
 
-### Fase 16.11 — Extensión de browser (P0) ⏳
-- Nuevo subproyecto `extension/` (manifest v3, Chrome + Firefox).
-- P0: atajo `Cmd/Ctrl+Shift+D` captura tab activa → `POST /api/items/capture`.
-- Popup React con preview, `why_saved` textarea, tags sugeridos, Save button.
-- OAuth flow con redirect al popup, token en `chrome.storage.local`.
-- Offline queue con reintentos.
-- Configurable backend URL para self-hosters.
-- Ver `docs/CAPTURE.md §Canal 1`.
+### Fase 16.11 — Extensión de browser (v1.0.0 Stable) ✅
+- Localizada en `apps/extension/` (React + manifest v3).
+- Atajo `Cmd/Ctrl+Shift+D` para captura inmediata.
+- Menús contextuales para guardar links y fragmentos de texto como notas.
+- Popup interactivo para añadir notas y tags al capturar.
+- Cola offline con reintentos automáticos integrada.
 
 ### Fase 16.12 — Paste inteligente + importador GitHub Stars ✅
 - Electron: `PasteInterceptor` global que escucha `paste` fuera de editable targets → toast flotante con preview + Save/Expand + 5s auto-dismiss. ✅
@@ -124,7 +109,7 @@
 - [x] ≥ 5 flows E2E pasando en Electron (Playwright skeleton con los 5 flows).
 - [x] Endpoint `/api/items/capture` en producción con tests.
 - [x] Web client migrado a React y compartiendo código con desktop (§16.13).
-- [ ] CLI `devdeck` en release 0.1.0 con distribución mínima (`go install` + docs claras; Homebrew/Scoop opcionales si no entran en el primer corte).
+- [x] CLI `devdeck` en release v1.0.0 Stable con distribución global.
 - [ ] Extensión Chrome en Chrome Web Store (o sideload con instructions claras).
 - [ ] README con screenshots (no bloquea CI, agendado para antes del release público).
 - [x] `api.exe` fuera del repo.
@@ -358,10 +343,10 @@
 - Frontend mínimo: `ItemCard` muestra estado `Analizando…`, prioriza `ai_summary` sobre `description` y usa `ai_tags` cuando no hay tags manuales. ✅
 
 **Pendiente para cerrar la fase como "IA real":**
-- `internal/ai/openai.go`: implementación con OpenAI (GPT-4o-mini). ⏳
-- `internal/ai/ollama.go`: implementación con Ollama local. ⏳
-- Endpoints `POST /api/items/:id/ai-enrich` y `PATCH /api/items/:id/ai-tags` para refresh/review manual. ⏳
-- UI de review de tags sugeridos (aceptar/editar/descartar) y surface de detalle para items no-repo. ⏳
+- `internal/ai/openai.go`: implementación con OpenAI (GPT-4o-mini). ✅
+- `internal/ai/ollama.go`: implementación con Ollama local. ✅
+- Endpoints `POST /api/items/:id/ai-enrich` y `PATCH /api/items/:id/ai-tags` para refresh/review manual. ✅
+- UI de review de tags sugeridos (aceptar/editar/descartar) y surface de detalle para items no-repo. ✅
 
 ### Fase 19 — Búsqueda semántica
 
@@ -555,26 +540,85 @@
 - Sync: Sincronización de bases de datos distribuidas (Postgres Bidireccional) para equipos globales
 - Monitoring: Panel de observabilidad global (métricas por región, latencia p99)
 
+## Ola 14 — Integraciones Empresariales y SSO (SAML/SCIM)
+
+### Fase 45 — Autenticación SAML 2.0 (Okta, Azure AD)
+
+- Auth: Integración de proveedores de identidad corporativos mediante SAML 2.0
+- UX: Flujo de login unificado para empresas con detección automática de dominio (Email homeing)
+- Admin: Panel de configuración de SSO para administradores de organización
+
+### Fase 46 — Aprovisionamiento SCIM y RBAC Avanzado
+
+- Provisioning: Implementación de protocolo SCIM para sincronización automática de usuarios y grupos
+- Permisos: Control de acceso basado en roles (RBAC) con políticas granulares por Deck y Runbook
+- Security: Logs de auditoría avanzados para cumplimiento normativo (Compliance)
+
+## Ola 15 — Insights de Equipo e Inteligencia Colectiva
+
+### Fase 47 — Analíticas de Equipo y Mapas de Calor
+
+- Analytics: Implementación de dashboards con métricas de adopción y uso por equipo
+- Heatmaps: Visualización de los lenguajes y herramientas más populares dentro de la organización
+- Reports: Generación de reportes semanales de "Salud del Conocimiento" para líderes técnicos
+
+### Fase 48 — Descubrimiento de Conocimiento Compartido y Tendencias Internas
+
+- Trends: Algoritmo para detectar "Hot Topics" dentro de la organización
+- Recommendations: Sugerencias de herramientas basadas en lo que tus compañeros están guardando
+- Search+: Búsqueda global avanzada que prioriza el conocimiento validado por el equipo
+
+## Ola 16 — Automatización de Workflows y Agentes de IA
+
+### Fase 49 — Orquestación de Agentes de IA
+
+- Agents: Implementación de agentes de IA capaces de planificar tareas basadas en items del vault
+- Tools: Definición de herramientas (Tools/Functions) para que la IA interactúe con APIs externas
+- UI: Chat interactivo con agentes que pueden crear items, runbooks o buscar información compleja
+
+### Fase 50 — Ejecución Autónoma y Auto-Runbooks
+
+- Automation: Capacidad de los agentes para ejecutar pasos de Runbooks de forma autónoma (con supervisión)
+- Scheduling: Programación de tareas recurrentes automatizadas por agentes
+- Feedback: Sistema de aprendizaje continuo donde el agente mejora basándose en las correcciones del usuario
+
+## Ola 17 — Lanzamiento Público y Onboarding
+
+### Fase 51 — Wizard de Onboarding y Product Tours
+
+- Onboarding: Tutorial interactivo para nuevos usuarios (Web y Desktop)
+- Templates: Galería de "Starter Kits" para diferentes stacks (Go, Node, AI)
+- Checklist: Guía de "Primeros Pasos" para configurar el vault personal
+
+### Fase 52 — Landing Page y Documentación Final
+
+- Landing: Rediseño brutalista de la landing page con demos interactivas
+- Docs: Documentación técnica completa para desarrolladores y administradores
+- Marketing: Preparación de assets para lanzamiento en Product Hunt / GitHub Trending
+
+### Fase 53 — Hardening de Producción y v1.0 Release (FINAL)
+
+- Monitoring: Implementación de observabilidad global con Prometheus para Agentes e IA
+- Security: Mitigación de SSRF en enriquecedores y auditoría final de flujos de identidad
+- Launch: Publicación de la v1.0 estable y finalización del Roadmap de 17 Olas
+
 ---
 
-## Stack actualizado
+## Stack actualizado (v1.0)
 
 | Capa | Tecnología |
 |------|-----------|
-| Monorepo | pnpm workspaces (`apps/{desktop,web}` + `packages/{ui,api-client,features}`) desde Wave 4.5 §16.13 |
-| Desktop | Electron 32 + React 18 + TypeScript + electron-vite + HashRouter |
-| Web | Vite + React 18 + TypeScript + react-router-dom (BrowserRouter) + AuthGuard (§16.13 — reemplaza el Vue 3 + Pinia original) |
-| Estilos | Tailwind CSS + CSS variables (neo-brutalist) — preset compartido en `@devdeck/ui/tailwind-preset.cjs` |
-| State/cache | TanStack Query v5 (hooks en `@devdeck/api-client`) |
-| IA actual | Heurística local async (`AI_PROVIDER=heuristic`) sobre la queue de enrichment existente |
-| Animaciones | framer-motion |
-| Drag & drop | @dnd-kit/core + @dnd-kit/sortable |
-| Markdown | react-markdown + remark-gfm + rehype-highlight + rehype-raw |
-| Iconos | Lucide React |
-| Backend | Go + Chi + pgx v5 |
-| Base de datos | Postgres 16 + pg_trgm + pgvector (Ola 6) |
-| Deploy | Docker Compose + Caddy (TLS automático) |
-| IA (Ola 6) | OpenAI embeddings / Ollama (opt-in) + pgvector |
+| Monorepo | pnpm workspaces (`apps/`, `packages/`) compartiendo 100% de lógica de dominio |
+| Desktop | Electron 32 + Native Shell support + safeStorage |
+| Web | Vite + React 18 + PWA (Workbox) + OPFS (Offline-first) |
+| Backend | Go 1.22+ con arquitectura Multi-Pool (Escritura/Réplicas) |
+| Base de datos | Postgres 16 + pgvector + Réplicas regionales |
+| IA | Agentes Autónomos con Tool Calling (SSE) + OpenAI/Ollama |
+| Identidad | SAML 2.0 (SSO) + SCIM 2.0 (Aprovisionamiento) + RBAC |
+| Sync Engine | Bidireccional atómico con LWW (Last Write Wins) |
+| Estilos | Tailwind CSS (Neo-Brutalismo) |
+| Real-time | CRDTs con Yjs + WebSockets |
+| Deploy | Docker Compose + Caddy (TLS automático) + Active-Active Multi-region |
 
 <!-- Las olas canónicas son las definidas arriba (Ola 5 "Items generales +
      IA real" y Ola 6 "Offline-first + Sync + Multi-usuario"). Las

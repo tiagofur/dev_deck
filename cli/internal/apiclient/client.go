@@ -201,6 +201,30 @@ func (c *Client) GetItem(ctx context.Context, id string) (*ItemDetail, error) {
 	return &body, nil
 }
 
+// ─── Agent ───
+
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type AgentChatInput struct {
+	History []Message `json:"history"`
+}
+
+type AgentChatResponse struct {
+	History []Message `json:"history"`
+}
+
+// AgentChat hits POST /api/agent/chat.
+func (c *Client) AgentChat(ctx context.Context, in AgentChatInput) (*AgentChatResponse, error) {
+	var out AgentChatResponse
+	if err := c.do(ctx, http.MethodPost, "/api/agent/chat", in, &out); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // ─── Health ───
 
 // Health hits GET /healthz. Used by `devdeck status` as a liveness check.

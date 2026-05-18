@@ -5,13 +5,12 @@ import (
 	"errors"
 	"strings"
 
+	"devdeck/internal/ai/agent"
 	"devdeck/internal/config"
 	"devdeck/internal/domain/items"
 )
 
 // Input is the sanitized subset of an item we allow the AI layer to see.
-// Even for the local heuristic provider we keep the same boundary so future
-// external providers don't accidentally start depending on private fields.
 type Input struct {
 	Type        items.Type
 	Title       string
@@ -36,10 +35,11 @@ type Summarizer interface {
 	Enabled() bool
 }
 
-// Service coordinates tag + summary generation.
+// Service coordinates tag + summary generation and agent chat.
 type Service struct {
 	classifier Classifier
 	summarizer Summarizer
+	agent      agent.Agent
 }
 
 func New(provider string) *Service {
@@ -60,18 +60,29 @@ func New(provider string) *Service {
 }
 
 func NewFromConfig(cfg config.Config) *Service {
+	var s *Service
 	switch strings.ToLower(strings.TrimSpace(cfg.AIProvider)) {
 	case "openai":
-		return NewOpenAI(cfg.OpenAIAPIKey, cfg.OpenAIModel)
+		s = NewOpenAI(cfg.OpenAIAPIKey, cfg.OpenAIModel)
+		s.agent = NewAgentOpenAI(cfg.OpenAIAPIKey, cfg.OpenAIModel)
 	case "ollama":
-		return NewOllama(cfg.OllamaBaseURL, cfg.OllamaModel)
+		s = NewOllama(cfg.OllamaBaseURL, cfg.OllamaModel)
+		s.agent = NewAgentOllama(cfg.OllamaBaseURL, cfg.OllamaModel)
 	case "qwen":
-		return NewQwen(cfg.QwenAPIKey, cfg.QwenModel)
+		s = NewQwen(cfg.QwenAPIKey, cfg.QwenModel)
 	case "deepseek":
-		return NewDeepSeek(cfg.DeepSeekAPIKey, cfg.DeepSeekModel)
+		s = NewDeepSeek(cfg.DeepSeekAPIKey, cfg.DeepSeekModel)
 	default:
-		return New(cfg.AIProvider)
+		s = New(cfg.AIProvider)
 	}
+	return s
+}
+
+func (s *Service) Agent() agent.Agent {
+	if s == nil {
+		return nil
+	}
+	return s.agent
 }
 
 func NewWith(classifier Classifier, summarizer Summarizer) *Service {
@@ -93,7 +104,8 @@ func (s *Service) Enabled() bool {
 		return false
 	}
 	return (s.classifier != nil && s.classifier.Enabled()) ||
-		(s.summarizer != nil && s.summarizer.Enabled())
+		(s.summarizer != nil && s.summarizer.Enabled()) ||
+		(s.agent != nil && s.agent.Enabled())
 }
 
 func (s *Service) EnrichItem(ctx context.Context, item *items.Item) (Output, error) {

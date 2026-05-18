@@ -18,6 +18,7 @@ export {
   fetchAuthProviders,
   logoutCurrentSession,
   registerUser,
+  loginStep1,
   loginLocal,
   forgotPassword,
   resetPassword,
@@ -63,8 +64,11 @@ export {
   useFollowUser,
   useUnfollowUser,
   useFollowingFeed,
+  useCompleteOnboarding,
+  useOnboardingKits,
+  useInstallStarterKit,
 } from './features/users/api'
-export type { User, PublicProfile, UpdateUserInput, FeedEvent } from './features/users/api'
+export type { User, PublicProfile, UpdateUserInput, FeedEvent, StarterKit } from './features/users/api'
 
 // Feature hooks — notifications (Ola 8)
 export {
@@ -76,8 +80,19 @@ export {
 export type { Notification } from './features/notifications/api'
 
 // Feature hooks — orgs (Ola 9)
-export { useUserOrgs, useCreateOrg, useAddOrgMember, useOrgFeed } from './features/orgs/api'
-export type { Organization, ActivityEntry } from './features/orgs/api'
+export { 
+  useUserOrgs, 
+  useCreateOrg, 
+  useAddOrgMember, 
+  useOrgFeed, 
+  useOrgSAML, 
+  useUpdateOrgSAML, 
+  useGenerateSCIMToken, 
+  useOrgInsights,
+  useOrgTrendingTags,
+  useOrgRecommendations
+} from './features/orgs/api'
+export type { Organization, ActivityEntry, SAMLConfig, OrgInsights, HotTopic, Recommendation } from './features/orgs/api'
 
 // Feature hooks — ecosystem (Ola 10)
 export {

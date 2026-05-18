@@ -1,5 +1,6 @@
-import { ArrowLeft, Bell, Check, Eye, EyeOff, Laptop, Settings as SettingsIcon, ShieldCheck, Smartphone, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowLeft, Bell, Check, Eye, EyeOff, Globe, Laptop, Settings as SettingsIcon, ShieldCheck, Smartphone, Trash2 } from 'lucide-react'
+
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, confirm } from '@devdeck/ui'
 import {
@@ -21,12 +22,16 @@ import {
   useWebhooks,
   useCreateWebhook,
   useDeleteWebhook,
+  useOrgSAML,
+  useUpdateOrgSAML,
+  useGenerateSCIMToken,
 } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
 import { WebhookManager } from '../components/WebhookManager'
 import { PluginGallery } from '../components/PluginGallery'
+import { OrgInsights } from '../components/OrgInsights'
 
-const APP_VERSION = '0.1.0'
+const APP_VERSION = '1.0.0'
 
 export function SettingsPage() {
   const navigate = useNavigate()
@@ -211,10 +216,39 @@ export function SettingsPage() {
           <PluginGallery />
         </Section>
 
+        {/* Enterprise */}
+        {prefs.activeOrgId && (
+          <>
+            <Section title="Enterprise: Autenticación SSO (SAML)">
+              <p className="text-[10px] text-ink-soft mb-4 italic">
+                Configurá el inicio de sesión único para tu organización.
+              </p>
+              <OrgSAMLManager orgId={prefs.activeOrgId} />
+            </Section>
+
+            <Section title="Enterprise: Directorio (SCIM)">
+              <p className="text-[10px] text-ink-soft mb-4 italic">
+                Automatizá el aprovisionamiento de usuarios desde Okta o Azure AD.
+              </p>
+              <OrgSCIMManager orgId={prefs.activeOrgId} />
+            </Section>
+
+            <Section title="Enterprise: Insights del Equipo">
+              <OrgInsights orgId={prefs.activeOrgId} />
+            </Section>
+          </>
+        )}
+
         {/* Conexión */}
         <Section title="Conexión">
           <Field label="API URL">
             <code className="font-mono text-sm break-all">{apiUrl}</code>
+          </Field>
+          <Field label="Región Activa">
+             <div className="flex items-center gap-2">
+                <Globe size={14} className="text-accent-cyan" />
+                <span className="font-mono text-xs uppercase font-bold">{me?.region || 'us-east'}</span>
+             </div>
           </Field>
           {cfg.authMode === 'jwt' ? (
             <Field label="Sesión">
@@ -502,6 +536,134 @@ function CustomEnricherManager() {
       <Button onClick={handleCreate} disabled={createEnc.isPending} className="w-full" size="sm" variant="secondary">
         + Registrar Plugin HTTP
       </Button>
+    </div>
+  )
+}
+
+function OrgSAMLManager({ orgId }: { orgId: string }) {
+  const { data: saml, isLoading } = useOrgSAML(orgId)
+  const updateSAML = useUpdateOrgSAML()
+  
+  const [domain, setDomain] = useState(saml?.domain || '')
+  const [ssoUrl, setSsoUrl] = useState(saml?.idp_sso_url || '')
+  const [entityId, setEntityId] = useState(saml?.idp_entity_id || '')
+  const [cert, setCert] = useState(saml?.idp_x509_cert || '')
+
+  useEffect(() => {
+    if (saml) {
+      setDomain(saml.domain)
+      setSsoUrl(saml.idp_sso_url)
+      setEntityId(saml.idp_entity_id)
+      setCert(saml.idp_x509_cert)
+    }
+  }, [saml])
+
+  async function handleSave() {
+    try {
+      await updateSAML.mutateAsync({
+        orgId,
+        input: { domain, idp_sso_url: ssoUrl, idp_entity_id: entityId, idp_x509_cert: cert }
+      })
+      showToast('Configuración SAML guardada')
+    } catch (err) {
+      showToast((err as Error).message, 'error')
+    }
+  }
+
+  if (isLoading) return <div className="animate-pulse font-mono text-[10px]">Cargando SAML…</div>
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-3">
+        <div>
+          <label className="block text-[9px] font-black uppercase mb-1">Dominio Corporativo (ej: acme.com)</label>
+          <input 
+            value={domain} onChange={e => setDomain(e.target.value)}
+            className="w-full border-2 border-ink p-2 font-mono text-xs focus:bg-accent-yellow/5 outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-[9px] font-black uppercase mb-1">IDP SSO URL</label>
+          <input 
+            value={ssoUrl} onChange={e => setSsoUrl(e.target.value)}
+            className="w-full border-2 border-ink p-2 font-mono text-xs focus:bg-accent-yellow/5 outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-[9px] font-black uppercase mb-1">IDP Entity ID</label>
+          <input 
+            value={entityId} onChange={e => setEntityId(e.target.value)}
+            className="w-full border-2 border-ink p-2 font-mono text-xs focus:bg-accent-yellow/5 outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-[9px] font-black uppercase mb-1">X.509 Certificate (PEM)</label>
+          <textarea 
+            value={cert} onChange={e => setCert(e.target.value)}
+            rows={4}
+            className="w-full border-2 border-ink p-2 font-mono text-[10px] focus:bg-accent-yellow/5 outline-none"
+          />
+        </div>
+      </div>
+      <Button onClick={handleSave} disabled={updateSAML.isPending} className="w-full" size="sm">
+        Guardar Configuración SSO
+      </Button>
+    </div>
+  )
+}
+
+function OrgSCIMManager({ orgId }: { orgId: string }) {
+  const generate = useGenerateSCIMToken()
+  const [token, setToken] = useState<string | null>(null)
+  
+  const cfg = getConfig()
+  const scimUrl = `${cfg.baseUrl || window.location.origin}/scim/v2`
+
+  async function handleGenerate() {
+    try {
+      const res = await generate.mutateAsync(orgId)
+      setToken(res.token)
+      showToast('Nuevo Token SCIM generado')
+    } catch (err) {
+      showToast((err as Error).message, 'error')
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <Field label="SCIM Base URL">
+        <code className="bg-bg-primary border-2 border-ink px-3 py-2 text-[10px] font-mono block break-all">
+          {scimUrl}
+        </code>
+      </Field>
+
+      {token ? (
+        <div className="bg-accent-yellow border-3 border-ink p-4 shadow-hard animate-in zoom-in duration-300">
+           <p className="text-xs font-bold uppercase mb-2">¡Token SCIM generado!</p>
+           <p className="text-[10px] mb-3 leading-tight text-ink/70">Copiá esta clave ahora para tu IdP. No se volverá a mostrar.</p>
+           <div className="flex items-center gap-2">
+              <code className="bg-white border-2 border-ink px-3 py-2 text-[10px] font-mono flex-1 break-all select-all">
+                {token}
+              </code>
+              <button 
+                onClick={() => setToken(null)}
+                className="font-mono text-[10px] uppercase font-black underline"
+              >
+                Cerrar
+              </button>
+           </div>
+        </div>
+      ) : (
+        <Button onClick={handleGenerate} disabled={generate.isPending} className="w-full" variant="secondary" size="sm">
+          {generate.isPending ? 'Generando…' : 'Generar Nuevo Token SCIM'}
+        </Button>
+      )}
+
+      <div className="bg-bg-primary border-2 border-ink p-3">
+         <p className="text-[9px] font-mono leading-tight text-ink-soft italic">
+           Tip: Usá esta URL y el token en Okta o Azure AD para automatizar la gestión de tus usuarios.
+         </p>
+      </div>
     </div>
   )
 }

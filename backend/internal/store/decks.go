@@ -348,6 +348,22 @@ func (s *Store) ReorderDeckItems(ctx context.Context, deckID uuid.UUID, itemIDs 
 	return err
 }
 
+func (s *Store) StarDeck(ctx context.Context, userID, deckID uuid.UUID) error {
+	_, err := s.Writer().Exec(ctx, `
+		INSERT INTO deck_stars (user_id, deck_id)
+		VALUES ($1, $2)
+		ON CONFLICT (user_id, deck_id) DO NOTHING
+	`, userID, deckID)
+	return err
+}
+
+func (s *Store) UnstarDeck(ctx context.Context, userID, deckID uuid.UUID) error {
+	_, err := s.Writer().Exec(ctx, `
+		DELETE FROM deck_stars WHERE user_id = $1 AND deck_id = $2
+	`, userID, deckID)
+	return err
+}
+
 func joinComma(parts []string) string {
 	out := ""
 	for i, p := range parts {

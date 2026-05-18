@@ -1,4 +1,4 @@
-# DevDeck.ai API Specification
+# DevDeck.ai API Specification (v1.0)
 
 This document describes the REST API for **DevDeck.ai**.
 
@@ -7,69 +7,83 @@ This document describes the REST API for **DevDeck.ai**.
 ---
 
 ## 1. Authentication
-The API uses **JWT (JSON Web Tokens)** for authentication.
+The API uses **JWT (JSON Web Tokens)** for most operations and **API Keys** for programmatic access.
 
-- **Header:** `Authorization: Bearer <access_token>`
-- **Refresh Flow:** Handled via HttpOnly cookies (`refresh_token`).
-- **CLI/Extension Auth:** Uses a static `API_KEY` passed in the `X-API-KEY` header.
+- **JWT Header:** `Authorization: Bearer <access_token>`
+- **API Key Header:** `X-API-Key: devdeck_<token>`
+- **SAML SSO:** Supported for enterprise organizations.
+- **SCIM 2.0:** Supported for automatic user provisioning.
 
 ---
 
 ## 2. Base URL
-- **Production:** `https://api.devdeck.ai/v1`
-- **Development:** `http://localhost:8080/v1`
+- **Production:** `https://api.devdeck.ai`
+- **Development:** `http://localhost:8080`
 
 ---
 
 ## 3. Endpoints
 
-### 3.1 Items
-Manage repos, URLs, and snippets.
+### 3.1 Polymorphic Items
+Manage the core knowledge vault.
 
-- `GET /items`: List items (paginated).
-- `POST /items`: Create a new item (triggers auto-enrichment).
-- `GET /items/:id`: Get item details.
-- `PATCH /items/:id`: Update item (tags, notes, etc.).
-- `DELETE /items/:id`: Delete item.
-- `POST /items/:id/ai-enrich`: Manually trigger AI enrichment.
+- `GET /api/items`: List all items with advanced filtering (stack, tags, type).
+- `POST /api/items/capture`: Unified capture endpoint for URLs and text.
+- `GET /api/items/:id`: Get detailed metadata and AI summary.
+- `PATCH /api/items/:id`: Update tags, notes, or archive status.
+- `DELETE /api/items/:id`: Permanent removal.
+- `POST /api/items/:id/ai-enrich`: Trigger LLM classification and summarization.
 
-### 3.2 Cheatsheets
-- `GET /cheatsheets`: List cheatsheets.
-- `POST /cheatsheets`: Create a cheatsheet.
-- `GET /cheatsheets/:id`: Get cheatsheet + entries.
-- `PATCH /cheatsheets/:id`: Update cheatsheet.
-- `POST /cheatsheets/:id/entries`: Add entry to cheatsheet.
+### 3.2 AI Agents (Wave 16)
+- `POST /api/agent/chat`: Interactive agent chat (Server-Sent Events).
+- Supports multi-step orchestration and tool calling.
 
-### 3.3 Auth (Internal)
-- `GET /auth/github/login`: Redirect to GitHub OAuth.
-- `GET /auth/github/callback`: OAuth callback handler.
-- `POST /auth/refresh`: Rotate access token.
-- `POST /auth/logout`: Revoke session.
+### 3.3 Organizations & Teams (Wave 15)
+- `GET /api/orgs`: List user organizations.
+- `POST /api/orgs`: Create a new team vault.
+- `GET /api/orgs/:id/insights`: Aggregated adoption analytics (Admin only).
+- `GET /api/orgs/:id/discovery/trending`: Team-wide trending tags (Hot Topics).
+- `GET /api/orgs/:id/discovery/recommendations`: Smart tool suggestions from the team.
 
-### 3.4 Search
-- `GET /search?q=query`: Search items (hybrid: fuzzy + semantic).
+### 3.4 Identity & Enterprise (Wave 14)
+- `GET /api/auth/me`: Current user profile and onboarding status.
+- `PATCH /api/auth/me/onboarding/complete`: Mark product tour as finished.
+- `GET /api/saml/metadata`: SP Metadata for identity providers.
+- `POST /api/scim/v2/Users`: Standard SCIM provisioning endpoint.
+
+### 3.5 Global Search
+- `GET /api/search?q=query&mode=hybrid`: Unified search across items and cheatsheets.
+- Modes: `text` (fuzzy), `vector` (semantic), `hybrid` (RRF merge).
 
 ---
 
-## 4. Error Codes
-The API returns standard HTTP status codes and a JSON error body:
+## 4. Response Format
+
+All responses are JSON envelopes:
 ```json
 {
-  "error": "Short error code",
-  "message": "Human readable description",
-  "code": 400
+  "data": { ... },
+  "meta": { "total": 100 }
 }
 ```
 
-- `400 Bad Request`: Validation failed.
-- `401 Unauthorized`: Missing or invalid token.
-- `403 Forbidden`: User not in allowlist.
-- `404 Not Found`: Resource does not exist.
-- `429 Too Many Requests`: Rate limit exceeded.
-- `500 Internal Server Error`: Something went wrong.
+Errors follow a predictable structure:
+```json
+{
+  "error": {
+    "code": "INVALID_ID",
+    "message": "The provided ID must be a valid UUID"
+  }
+}
+```
 
 ---
 
 ## 5. Rate Limits
-- **Authenticated:** 1000 requests / 5 minutes.
-- **AI Endpoints:** 20 requests / 1 minute (to protect LLM costs).
+- **Standard:** 2000 req/5m.
+- **AI Agent:** 50 req/1h (Cloud Pro) | 5 req/1h (Free).
+- **Public Feed:** 500 req/1m.
+
+---
+
+*Last updated: May 2026 (v1.0.0 Stable)*

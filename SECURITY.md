@@ -48,7 +48,7 @@ If you find a security vulnerability in DevDeck, **please do not open a public i
 
 To guide researchers, these are the areas where we know there is an attack surface:
 
-1.  **SSRF in Open Graph Scraper** (`internal/enricher/generic.go`): We have a scheme whitelist, but private IP range validation is still in the roadmap.
+1.  **Open Graph Scraper** (`internal/enricher/generic.go`): Protected against SSRF using `blockedCIDRs` and dial-time validation in `ssrfSafeTransport`.
 2.  **GitHub Login Allowlist**: Authentication depends on the `ALLOWED_GITHUB_LOGINS` environment variable. Finding a way to bypass this list is considered critical.
 3.  **JWT Refresh Flow**: Revocation depends on DB session deletion. If a stolen refresh token can still generate access tokens after a logout, it's considered critical.
 4.  **Markdown Rendering**: We use `react-markdown` + `rehype-highlight` in Electron. Finding XSS via crafted markdown is considered critical.

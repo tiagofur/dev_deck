@@ -1,23 +1,26 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, Sparkles, Flame, Trophy, Layers } from 'lucide-react'
+import { ArrowLeft, Sparkles, Flame, Trophy, Layers, Users } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@devdeck/ui'
 import { SwipeCard, type SwipeDirection } from '../components/Discovery/SwipeCard'
 import { TrendingFeed } from '../components/Discovery/TrendingFeed'
 import { CuratorLeaderboard } from '../components/Discovery/CuratorLeaderboard'
+import { TeamDiscovery } from '../components/Discovery/TeamDiscovery'
 import {
   useDiscoveryNext,
   useMarkSeen,
   useUpdateRepo,
+  usePreferences,
 } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
 
-type Tab = 'swipe' | 'trending' | 'leaderboard'
+type Tab = 'swipe' | 'trending' | 'leaderboard' | 'team'
 
 export function DiscoveryPage() {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState<Tab>('swipe')
+  const { activeOrgId } = usePreferences()
+  const [activeTab, setActiveTab] = useState<Tab>(activeOrgId ? 'team' : 'swipe')
   const { data: repo, isLoading, error, refetch } = useDiscoveryNext()
   const markSeen = useMarkSeen()
   const updateRepo = useUpdateRepo()
@@ -69,6 +72,9 @@ export function DiscoveryPage() {
         <div className="flex bg-bg-card border-3 border-ink shadow-hard-sm">
            <TabButton active={activeTab === 'swipe'} onClick={() => setActiveTab('swipe')} icon={<Layers size={14} />} label="Revisar" />
            <TabButton active={activeTab === 'trending'} onClick={() => setActiveTab('trending')} icon={<Flame size={14} />} label="Tendencias" />
+           {activeOrgId && (
+             <TabButton active={activeTab === 'team'} onClick={() => setActiveTab('team')} icon={<Users size={14} />} label="Equipo" />
+           )}
            <TabButton active={activeTab === 'leaderboard'} onClick={() => setActiveTab('leaderboard')} icon={<Trophy size={14} />} label="Top" />
         </div>
       </header>
@@ -105,6 +111,7 @@ export function DiscoveryPage() {
 
         {activeTab === 'trending' && <TrendingFeed />}
         {activeTab === 'leaderboard' && <CuratorLeaderboard />}
+        {activeTab === 'team' && activeOrgId && <TeamDiscovery orgId={activeOrgId} />}
       </main>
     </div>
   )

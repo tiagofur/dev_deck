@@ -60,7 +60,8 @@ CREATE TABLE IF NOT EXISTS runbooks (
     title TEXT NOT NULL,
     description TEXT,
     created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    local_updated_at TEXT
 );
 
 -- Runbook Steps
@@ -73,6 +74,7 @@ CREATE TABLE IF NOT EXISTS runbook_steps (
     position INTEGER NOT NULL DEFAULT 0,
     is_completed INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    local_updated_at TEXT
 );
 `;

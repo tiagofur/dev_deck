@@ -81,6 +81,7 @@ func main() {
 	}
 
 	st := store.NewWithReplica(primaryPool, replicaPool)
+	st.SetAppRegion(cfg.AppRegion)
 	wh := webhooks.New(st)
 	st.SetWebhookService(wh)
 

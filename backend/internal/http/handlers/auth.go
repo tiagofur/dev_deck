@@ -410,6 +410,22 @@ func (h *AuthHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, user)
 }
 
+// PATCH /api/auth/me/onboarding/complete
+func (h *AuthHandler) CompleteOnboarding(w http.ResponseWriter, r *http.Request) {
+	userID, ok := authctx.UserID(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "not authenticated")
+		return
+	}
+
+	if err := h.store.CompleteOnboarding(r.Context(), userID); err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (h *AuthHandler) generateTokenPair(r *http.Request, user auth.User) (*auth.TokenPair, error) {
 	accessToken, expiresIn, err := h.authService.GenerateAccessToken(user)
 	if err != nil {

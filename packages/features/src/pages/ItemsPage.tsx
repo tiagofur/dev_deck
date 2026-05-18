@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Box, Plus, Users } from 'lucide-react'
 import { CaptureModal } from '../components/CaptureModal'
 import { ItemCard } from '../components/ItemCard'
+import { OnboardingChecklist } from '../components/OnboardingChecklist'
 import { useItems } from '@devdeck/api-client'
 import { ALL_ITEM_TYPES, type ItemType } from '@devdeck/api-client'
 
@@ -225,25 +226,29 @@ export function ItemsPage() {
             <p className="text-sm font-mono">{(error as Error).message}</p>
           </div>
         )}
+                {!isLoading && !error && items.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-12 text-center gap-8">
+                    <div>
+                        <Box size={64} strokeWidth={2} className="mb-4 opacity-50 mx-auto" />
+                        <p className="font-display font-bold text-xl mb-2">Nada por acá todavía</p>
+                        <p className="font-mono text-sm text-ink-soft max-w-sm">
+                        Capturá una URL, un comando, un atajo o una nota con el botón de arriba.
+                        </p>
+                    </div>
 
-        {!isLoading && !error && items.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <Box size={64} strokeWidth={2} className="mb-4 opacity-50" />
-            <p className="font-display font-bold text-xl mb-2">Nada por acá todavía</p>
-            <p className="font-mono text-sm text-ink-soft max-w-sm mb-6">
-              Capturá una URL, un comando, un atajo o una nota con el botón de arriba,
-              o usá <kbd>⌘⇧V</kbd> con algo en el clipboard.
-            </p>
-            <button
-              type="button"
-              onClick={() => setCaptureOpen(true)}
-              className="border-3 border-ink px-4 py-2 bg-accent-lime shadow-hard
-                         font-display font-bold uppercase"
-            >
-              Capturar algo
-            </button>
-          </div>
-        )}
+                    {!hasFilters && <OnboardingChecklist />}
+
+                    <button
+                      type="button"
+                      onClick={() => setCaptureOpen(true)}
+                      className="border-3 border-ink px-4 py-2 bg-accent-lime shadow-hard
+                                 font-display font-bold uppercase"
+                    >
+                      Capturar algo
+                    </button>
+                  </div>
+                )}
+
 
         {items.length > 0 && (
           <>

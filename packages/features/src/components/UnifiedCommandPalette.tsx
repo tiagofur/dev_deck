@@ -23,7 +23,7 @@ import {
   History,
   MessageSquare,
 } from 'lucide-react'
-import { AskResults } from './AskResults'
+import { AgentChat } from './AgentChat'
 
 interface Props {
   open: boolean
@@ -36,8 +36,6 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
   const [mode, setMode] = React.useState<'command' | 'ask'>('command')
   
   const { data: searchResults = [], isLoading: searchLoading } = useGlobalSearch(query)
-  const ask = useAsk()
-  const [askResult, setAskResult] = React.useState<AskResponse | null>(null)
 
   const inputRef = React.useRef<HTMLInputElement>(null)
 
@@ -45,20 +43,12 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
     if (open) {
       setQuery('')
       setMode('command')
-      setAskResult(null)
     }
   }, [open])
 
-  const handleAsk = async () => {
+  const handleAsk = () => {
     if (!query) return
     setMode('ask')
-    try {
-      const res = await ask.mutateAsync({ question: query })
-      setAskResult(res)
-    } catch (e) {
-      showToast((e as Error).message, 'error')
-      setMode('command')
-    }
   }
 
   const actions = [
@@ -106,7 +96,7 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
     id: `${r.type}-${r.id}`,
     type: r.type,
     title: r.title,
-    subtitle: r.subtitle,
+    subtitle: r.curator_name ? `@${r.curator_name} · ${r.subtitle}` : r.subtitle,
     icon: r.type === 'item' ? <Box size={14} /> : <BookOpen size={14} />,
     onSelect: () => {
       onClose()
@@ -124,24 +114,25 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
       onQueryChange={setQuery}
       actions={actions}
       results={results}
-      isLoading={searchLoading || ask.isPending}
-      renderCustom={mode === 'ask' && askResult ? (
-        <div className="p-4 overflow-y-auto max-h-[50vh]">
-          <div className="flex items-center justify-between mb-4">
+      isLoading={searchLoading}
+      renderCustom={mode === 'ask' ? (
+        <div className="overflow-hidden bg-bg-card">
+          <div className="flex items-center justify-between p-4 border-b-3 border-ink">
             <h3 className="font-display font-black text-sm uppercase flex items-center gap-2">
               <Brain size={16} strokeWidth={3} className="text-accent-orange" />
-              Respuesta de DevDeck
+              Agente de Conocimiento
             </h3>
             <button 
-              onClick={() => { setMode('command'); setAskResult(null); }}
+              onClick={() => { setMode('command'); }}
               className="text-xs font-mono text-ink-soft hover:text-ink"
             >
               [volver]
             </button>
           </div>
-          <AskResults response={askResult} />
+          <AgentChat initialQuery={query} />
         </div>
       ) : null}
-    />
+      />
+
   )
 }

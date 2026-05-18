@@ -47,8 +47,7 @@ func (h *AskHandler) Ask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, ok := authctx.UserID(r.Context())
-	if !ok {
+	if _, ok := authctx.UserID(r.Context()); !ok {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
 		return
 	}
@@ -65,7 +64,7 @@ func (h *AskHandler) Ask(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	result, err := h.store.AskDevDeck(r.Context(), userID, req.Question, embedding, 5)
+	result, err := h.store.AskDevDeck(r.Context(), req.Question, embedding, 5)
 	if err != nil {
 		writeInternal(w, err)
 		return

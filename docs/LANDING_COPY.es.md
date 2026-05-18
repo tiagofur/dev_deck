@@ -1,12 +1,10 @@
 # DevDeck — Copy y estructura de contenido para devdeck.ai (versión en inglés)
 
-> Versión: 1.0 · Última actualización: 2026-04-08
->
-> Este documento define el contenido, copy y estructura de secciones para la landing page de **devdeck.ai**.
-> Está pensado para implementarse en Astro o Next.js, desplegado en Vercel o Cloudflare Pages.
->
-> **Idioma:** inglés (para la landing pública con audiencia global de devs).
-> Para la versión en español (mercado hispanohablante), ver [LANDING.md](LANDING.md).
+> Versión: 1.0.0 (Stable) · Última actualización: Mayo 2026
+
+Este documento define el contenido, copy y estructura de secciones para la landing page de **devdeck.ai**.
+Refleja el estado final del producto tras completar las 17 olas del roadmap.
+
 
 ---
 
@@ -563,14 +561,12 @@ Al ver un repo o tool, DevDeck sugiere cheatsheets, comandos y herramientas rela
 - Comandos por repo
 - Búsqueda fuzzy
 
-#### Pro — $X/mes *(precio a definir)*
+#### Pro — $8/mes
 - Items ilimitados
 - Sync en dispositivos ilimitados
 - IA: auto-tagging + auto-summary + búsqueda semántica + items relacionados
-- Decks compartibles (cuando llegue Ola 6)
+- Decks compartibles e importación social
 - Soporte prioritario
-
-> **Durante el beta, todo es gratis.** Avisamos antes de cobrar.
 
 ---
 
