@@ -135,7 +135,7 @@ func TestStore_AskDevDeck_Citations(t *testing.T) {
 	}
 
 	// Run Ask (text search fallback since embedding is nil)
-	res, err := st.AskDevDeck(ctx, userID, "Citation", nil, 5)
+	res, err := st.AskDevDeck(ctx, "Citation", nil, 5)
 	if err != nil {
 		t.Fatalf("AskDevDeck failed: %v", err)
 	}

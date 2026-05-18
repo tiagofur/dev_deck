@@ -12,6 +12,7 @@ import (
 
 	"devdeck/internal/ai"
 	"devdeck/internal/config"
+	"devdeck/internal/email"
 	"devdeck/internal/enricher"
 	httpapi "devdeck/internal/http"
 	"devdeck/internal/jobs"

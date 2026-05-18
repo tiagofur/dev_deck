@@ -87,7 +87,7 @@ func TestService_Enrich_DispatchesByHost(t *testing.T) {
 
 	// NewForTest bypasses the SSRF guard so httptest.Server on 127.0.0.1 works.
 	svc := NewForTest("")
-	md, err := svc.Enrich(context.Background(), genericSrv.URL)
+	md, err := svc.Enrich(context.Background(), genericSrv.URL, nil)
 	if err != nil {
 		t.Fatalf("Enrich failed: %v", err)
 	}
@@ -98,7 +98,7 @@ func TestService_Enrich_DispatchesByHost(t *testing.T) {
 
 func TestService_Enrich_InvalidURL(t *testing.T) {
 	svc := NewForTest("")
-	_, err := svc.Enrich(context.Background(), "::not-a-url")
+	_, err := svc.Enrich(context.Background(), "::not-a-url", nil)
 	if err != ErrInvalidURL {
 		t.Fatalf("expected ErrInvalidURL, got %v", err)
 	}

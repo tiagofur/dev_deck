@@ -218,7 +218,7 @@ func TestStore_MarkSeenAndDiscoveryNext(t *testing.T) {
 	if first.ID != r1.ID && first.ID != r2.ID {
 		t.Fatalf("unexpected discovery result: %s", first.ID)
 	}
-	if err := st.MarkSeen(ctx, first.ID); err != nil {
+	if err := st.MarkItemSeen(ctx, first.ID); err != nil {
 		t.Fatalf("mark seen: %v", err)
 	}
 	second, err := st.GetDiscoveryNext(ctx)
