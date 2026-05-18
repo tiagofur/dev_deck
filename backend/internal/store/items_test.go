@@ -146,3 +146,22 @@ func TestStore_AskDevDeck_Citations(t *testing.T) {
 		t.Errorf("expected citation for item %s not found or incorrect", it.ID)
 	}
 }
+
+func TestStore_CreateItem_WithoutOrg_SetsNullOrgID(t *testing.T) {
+	st, ctx := newStore(t)
+
+	userID := mustUUID(t, "00000000-0000-0000-0000-000000000001")
+	ctx = authctx.WithUserID(ctx, userID)
+
+	it, err := st.CreateItem(ctx, store.CreateItemInput{
+		Type:  items.TypeNote,
+		Title: "note without org",
+		Notes: "test",
+	})
+	if err != nil {
+		t.Fatalf("create item: %v", err)
+	}
+	if it.OrgID != nil {
+		t.Fatalf("expected org_id to be nil, got %s", *it.OrgID)
+	}
+}

@@ -72,7 +72,7 @@ type CreateItemInput struct {
 
 func (s *Store) CreateItem(ctx context.Context, in CreateItemInput) (*items.Item, error) {
 	userID, _ := authctx.UserID(ctx)
-	orgID, _ := authctx.OrgID(ctx)
+	orgID := currentOrgIDPtr(ctx)
 
 	if in.Tags == nil {
 		in.Tags = []string{}
