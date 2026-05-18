@@ -68,6 +68,9 @@ func NewFromConfig(cfg config.Config) *Service {
 	case "ollama":
 		s = NewOllama(cfg.OllamaBaseURL, cfg.OllamaModel)
 		s.agent = NewAgentOllama(cfg.OllamaBaseURL, cfg.OllamaModel)
+	case "lmstudio":
+		s = NewLMStudio(cfg.LMStudioBaseURL, cfg.LMStudioModel)
+		s.agent = NewAgentLMStudio(cfg.LMStudioBaseURL, cfg.LMStudioModel)
 	case "qwen":
 		s = NewQwen(cfg.QwenAPIKey, cfg.QwenModel)
 	case "deepseek":

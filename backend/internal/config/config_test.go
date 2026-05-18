@@ -210,6 +210,46 @@ func TestLoad(t *testing.T) {
 			t.Fatalf("provider = %q", cfg.AIProvider)
 		}
 	})
+
+	t.Run("LMStudio loads with default base URL", func(t *testing.T) {
+		setenv(t, "DB_URL", "postgres://localhost:5432/db")
+		setenv(t, "AUTH_MODE", "token")
+		setenv(t, "API_TOKEN", "test-token")
+		setenv(t, "AI_PROVIDER", "lmstudio")
+		os.Unsetenv("LM_STUDIO_BASE_URL")
+		os.Unsetenv("LM_STUDIO_MODEL")
+
+		cfg, err := Load()
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if cfg.AIProvider != "lmstudio" {
+			t.Fatalf("provider = %q", cfg.AIProvider)
+		}
+		if cfg.LMStudioBaseURL != "http://localhost:1234" {
+			t.Fatalf("LMStudioBaseURL = %q", cfg.LMStudioBaseURL)
+		}
+	})
+
+	t.Run("LMStudio loads with custom base URL and model", func(t *testing.T) {
+		setenv(t, "DB_URL", "postgres://localhost:5432/db")
+		setenv(t, "AUTH_MODE", "token")
+		setenv(t, "API_TOKEN", "test-token")
+		setenv(t, "AI_PROVIDER", "lmstudio")
+		setenv(t, "LM_STUDIO_BASE_URL", "http://192.168.1.10:1234")
+		setenv(t, "LM_STUDIO_MODEL", "mistral-7b")
+
+		cfg, err := Load()
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if cfg.LMStudioBaseURL != "http://192.168.1.10:1234" {
+			t.Fatalf("LMStudioBaseURL = %q", cfg.LMStudioBaseURL)
+		}
+		if cfg.LMStudioModel != "mistral-7b" {
+			t.Fatalf("LMStudioModel = %q", cfg.LMStudioModel)
+		}
+	})
 }
 
 func TestConfig_EnabledAuthProviders(t *testing.T) {
