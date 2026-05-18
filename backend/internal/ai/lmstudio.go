@@ -127,15 +127,16 @@ func (p *lmStudioProvider) complete(ctx context.Context, messages []lmStudioMess
 		return "", err
 	}
 
+	if resp.StatusCode >= 300 {
+		return "", fmt.Errorf("lmstudio http %d: %s", resp.StatusCode, string(raw))
+	}
+
 	var decoded lmStudioResponse
 	if err := json.Unmarshal(raw, &decoded); err != nil {
 		return "", fmt.Errorf("decode lmstudio response: %w", err)
 	}
 	if decoded.Error != nil {
 		return "", errors.New(decoded.Error.Message)
-	}
-	if resp.StatusCode >= 300 {
-		return "", fmt.Errorf("lmstudio http %d: %s", resp.StatusCode, string(raw))
 	}
 	if len(decoded.Choices) == 0 {
 		return "", errors.New("lmstudio returned no choices")
