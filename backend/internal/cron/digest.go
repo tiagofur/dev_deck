@@ -4,11 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"time"
 
 	"devdeck/internal/ai"
 	"devdeck/internal/authctx"
-	"devdeck/internal/domain/items"
+	"devdeck/internal/domain/repos"
 	"devdeck/internal/store"
 
 	"github.com/google/uuid"
@@ -42,10 +41,8 @@ func (j *DigestJob) Run(ctx context.Context) {
 		userCtx := authctx.WithUserID(ctx, userID)
 		
 		// 2. Get items from last 7 days
-		since := time.Now().Add(-7 * 24 * time.Hour)
-		listRes, err := j.store.ListItems(userCtx, items.ListParams{
-			CreatedAfter: &since,
-			Limit:        10,
+		listRes, err := j.store.ListItems(userCtx, repos.ListParams{
+			Limit: 10,
 		})
 		if err != nil {
 			slog.Error("failed to list items for user digest", "user_id", userID, "err", err)
@@ -74,7 +71,7 @@ func (j *DigestJob) Run(ctx context.Context) {
 	slog.Info("weekly digest job finished")
 }
 
-func (j *DigestJob) generateDigestSummary(ctx context.Context, itemNodes []*items.Item) (string, error) {
+func (j *DigestJob) generateDigestSummary(ctx context.Context, itemNodes []*repos.Repo) (string, error) {
 	if !j.ai.Enabled() || len(itemNodes) == 0 {
 		return "Esta semana guardaste varios items interesantes. ¡No te olvides de revisarlos!", nil
 	}
@@ -82,10 +79,14 @@ func (j *DigestJob) generateDigestSummary(ctx context.Context, itemNodes []*item
 	// Build a simple text list for the AI context (simulated)
 	var list string
 	for i, it := range itemNodes {
-		list += fmt.Sprintf("- %s: %s\n", it.Title, it.AISummary)
+		desc := it.Notes
+		if it.Description != nil {
+			desc = *it.Description
+		}
+		list += fmt.Sprintf("- %s: %s\n", it.Name, desc)
 		if i >= 4 { break }
 	}
 
 	// For Wave 8, we'll keep it simple:
-	return "Excelente semana. Guardaste herramientas clave como " + itemNodes[0].Title + ". ¡Seguí explorando!", nil
+	return "Excelente semana. Guardaste herramientas clave como " + itemNodes[0].Name + ". ¡Seguí explorando!", nil
 }

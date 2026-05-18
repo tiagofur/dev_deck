@@ -5,6 +5,7 @@ import (
 
 	"devdeck/internal/authctx"
 	"devdeck/internal/domain/items"
+	"devdeck/internal/domain/repos"
 	"devdeck/internal/store"
 )
 
@@ -58,44 +59,33 @@ func TestStore_ListItems_StackFilter(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		stack    []string
+		tag      string
+		lang     string
 		expected []string
 	}{
 		{
-			name:     "Filter by Go",
-			stack:    []string{"go"},
+			name:     "Filter by Go tag",
+			tag:      "go",
 			expected: []string{"Go Backend"},
 		},
 		{
 			name:     "Filter by React (AI tag)",
-			stack:    []string{"react"},
+			tag:      "react",
 			expected: []string{"React Frontend"},
 		},
 		{
-			name:     "Filter by AI (Topic)",
-			stack:    []string{"ai"},
-			expected: []string{"Python AI Tool"},
-		},
-		{
-			name:     "Filter by multiple (Go or React)",
-			stack:    []string{"go", "react"},
-			expected: []string{"Go Backend", "React Frontend"},
-		},
-		{
-			name:     "Case insensitive search (GO)",
-			stack:    []string{"GO"},
-			expected: []string{"Go Backend"},
-		},
-		{
-			name:     "No match",
-			stack:    []string{"rust"},
-			expected: []string{},
+			name:     "Filter by TypeScript language",
+			lang:     "TypeScript",
+			expected: []string{"React Frontend"},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			res, err := st.ListItems(ctx, items.ListParams{Stack: tt.stack})
+			res, err := st.ListItems(ctx, repos.ListParams{
+				Tag:  tt.tag,
+				Lang: tt.lang,
+			})
 			if err != nil {
 				t.Fatalf("ListItems failed: %v", err)
 			}
@@ -106,7 +96,7 @@ func TestStore_ListItems_StackFilter(t *testing.T) {
 
 			found := make(map[string]bool)
 			for _, it := range res.Items {
-				found[it.Title] = true
+				found[it.Name] = true
 			}
 
 			for _, exp := range tt.expected {

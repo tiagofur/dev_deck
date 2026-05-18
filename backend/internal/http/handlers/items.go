@@ -5,25 +5,16 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"devdeck/internal/authctx"
 	"devdeck/internal/domain/items"
+	"devdeck/internal/domain/repos"
 	"devdeck/internal/jobs"
 	"devdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
-
-// Ola 5 Fase 17 — generic items CRUD on top of the polymorphic
-// `items` table introduced in Wave 4.5 §16.9.
-//
-// Creation is handled by the existing POST /api/items/capture flow
-// (see handlers/capture.go) because all types share the same "text or
-// URL in, classified item out" contract. This file adds the List/Get/
-// Update/Delete endpoints plus MarkSeen for discovery-mode parity
-// with repos.
 
 type ItemsHandler struct {
 	store *store.Store
@@ -34,26 +25,13 @@ func NewItemsHandler(s *store.Store, q *jobs.EnrichQueue) *ItemsHandler {
 	return &ItemsHandler{store: s, queue: q}
 }
 
-// GET /api/items
-//
-// Query params:
-//
-//	type     — repo|cli|plugin|... (empty = all)
-//	tag      — single tag filter
-//	q        — fuzzy text filter via pg_trgm
-//	archived — true/false (default: hide archived)
-//	sort     — added_desc|added_asc|updated_desc|title_asc
-//	limit    — 1..500 (default 100)
-//	offset   — pagination
 func (h *ItemsHandler) List(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
-	p := items.ListParams{
-		Type:      q.Get("type"),
-		Tag:       q.Get("tag"),
-		Stack:     parseCSVParam(q.Get("stack")),
-		Q:         q.Get("q"),
-		Sort:      q.Get("sort"),
-		Favorites: q.Get("favorites") == "true",
+	p := repos.ListParams{
+		Tag:  q.Get("tag"),
+		Lang: q.Get("lang"),
+		Q:    q.Get("q"),
+		Sort: q.Get("sort"),
 	}
 	if v := q.Get("archived"); v != "" {
 		if b, err := strconv.ParseBool(v); err == nil {
@@ -61,18 +39,10 @@ func (h *ItemsHandler) List(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if v := q.Get("limit"); v != "" {
-		if n, err := strconv.Atoi(v); err == nil {
-			p.Limit = n
-		}
+		p.Limit, _ = strconv.Atoi(v)
 	}
 	if v := q.Get("offset"); v != "" {
-		if n, err := strconv.Atoi(v); err == nil {
-			p.Offset = n
-		}
-	}
-	if p.Type != "" && !items.IsValid(p.Type) {
-		writeError(w, http.StatusUnprocessableEntity, "INVALID_TYPE", "unknown item type filter")
-		return
+		p.Offset, _ = strconv.Atoi(v)
 	}
 
 	res, err := h.store.ListItems(r.Context(), p)
@@ -83,7 +53,6 @@ func (h *ItemsHandler) List(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, res)
 }
 
-// GET /api/items/{id}
 func (h *ItemsHandler) Get(w http.ResponseWriter, r *http.Request) {
 	id, ok := parseItemID(w, r)
 	if !ok {
@@ -101,7 +70,6 @@ func (h *ItemsHandler) Get(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, it)
 }
 
-// PATCH /api/items/{id}
 func (h *ItemsHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, ok := parseItemID(w, r)
 	if !ok {
@@ -110,10 +78,6 @@ func (h *ItemsHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var in items.UpdateInput
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
-		return
-	}
-	if in.ItemType != nil && !items.IsValid(*in.ItemType) {
-		writeError(w, http.StatusUnprocessableEntity, "INVALID_TYPE", "unknown item_type")
 		return
 	}
 	it, err := h.store.UpdateItem(r.Context(), id, in)
@@ -128,7 +92,6 @@ func (h *ItemsHandler) Update(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, it)
 }
 
-// POST /api/items/check — check if a URL exists in the vault.
 func (h *ItemsHandler) Check(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		URL string `json:"url"`
@@ -138,8 +101,9 @@ func (h *ItemsHandler) Check(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID, _ := authctx.UserID(r.Context())
 	norm := items.NormalizeURL(body.URL)
-	it, err := h.store.FindItemByNormalizedURL(r.Context(), norm)
+	it, err := h.store.GetItemByNormalizedURL(r.Context(), userID, norm)
 	if err != nil {
 		if errors.Is(err, store.ErrNotFound) {
 			writeJSON(w, http.StatusOK, map[string]any{"item": nil})
@@ -152,7 +116,6 @@ func (h *ItemsHandler) Check(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"item": it})
 }
 
-// DELETE /api/items/{id}
 func (h *ItemsHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, ok := parseItemID(w, r)
 	if !ok {
@@ -169,7 +132,6 @@ func (h *ItemsHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// POST /api/items/{id}/seen — discovery mode rotation helper.
 func (h *ItemsHandler) MarkSeen(w http.ResponseWriter, r *http.Request) {
 	id, ok := parseItemID(w, r)
 	if !ok {
@@ -186,7 +148,6 @@ func (h *ItemsHandler) MarkSeen(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// POST /api/items/{id}/ai-enrich — re-run async enrichment/AI manually.
 func (h *ItemsHandler) AIEnrich(w http.ResponseWriter, r *http.Request) {
 	id, ok := parseItemID(w, r)
 	if !ok {
@@ -201,34 +162,24 @@ func (h *ItemsHandler) AIEnrich(w http.ResponseWriter, r *http.Request) {
 		writeInternal(w, err)
 		return
 	}
-	orgID, _ := authctx.OrgID(r.Context())
 	job := jobs.EnrichJob{
 		Kind:   jobs.KindItem,
 		ID:     it.ID,
 		UserID: it.UserID,
-		URL:    "",
 		Type:   it.Type,
-	}
-	if orgID != uuid.Nil {
-		job.OrgID = &orgID
 	}
 	if it.URL != nil {
 		job.URL = *it.URL
 	}
 	if h.queue == nil || !h.queue.CanProcess(job) {
-		writeError(w, http.StatusConflict, "ENRICHMENT_UNAVAILABLE", "item cannot be enriched right now")
+		writeError(w, http.StatusConflict, "ENRICHMENT_UNAVAILABLE", "item cannot be enriched")
 		return
 	}
 	h.queue.Enqueue(job)
-	if err := h.store.UpdateItemEnrichmentStatus(r.Context(), it.ID, items.EnrichmentQueued); err != nil {
-		writeInternal(w, err)
-		return
-	}
-	it.EnrichmentStatus = items.EnrichmentQueued
+	_ = h.store.UpdateItemEnrichmentStatus(r.Context(), it.ID, items.EnrichmentQueued)
 	writeJSON(w, http.StatusAccepted, it)
 }
 
-// PATCH /api/items/{id}/ai-tags — review/edit AI suggested tags.
 func (h *ItemsHandler) ReviewAITags(w http.ResponseWriter, r *http.Request) {
 	id, ok := parseItemID(w, r)
 	if !ok {
@@ -251,7 +202,6 @@ func (h *ItemsHandler) ReviewAITags(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, it)
 }
 
-// GET /api/items/tags — all unique tags for the authenticated user.
 func (h *ItemsHandler) ListTags(w http.ResponseWriter, r *http.Request) {
 	userID, ok := authctx.UserID(r.Context())
 	if !ok {
@@ -274,22 +224,4 @@ func parseItemID(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) {
 		return uuid.Nil, false
 	}
 	return id, true
-}
-
-func parseCSVParam(raw string) []string {
-	if raw == "" {
-		return nil
-	}
-	parts := strings.Split(raw, ",")
-	out := make([]string, 0, len(parts))
-	seen := map[string]bool{}
-	for _, part := range parts {
-		v := strings.ToLower(strings.TrimSpace(part))
-		if v == "" || seen[v] {
-			continue
-		}
-		seen[v] = true
-		out = append(out, v)
-	}
-	return out
 }

@@ -158,7 +158,7 @@ func (q *EnrichQueue) run(parent context.Context, job EnrichJob) {
 					processed = true
 				}
 			case KindItem:
-				if err := q.store.UpdateItemFromMetadata(ctx, job.ID, md); err != nil {
+				if err := q.store.UpdateItemMetadata(ctx, job.ID, md); err != nil {
 					slog.Warn("enrich: update item metadata failed", "err", err, "id", job.ID)
 					hadError = true
 				} else {

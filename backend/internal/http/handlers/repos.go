@@ -246,7 +246,7 @@ func (h *ReposHandler) MarkSeen(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if err := h.store.MarkSeenRepo(r.Context(), id); err != nil {
+	if err := h.store.MarkItemSeen(r.Context(), id); err != nil {
 		if errors.Is(err, store.ErrNotFound) {
 			writeError(w, http.StatusNotFound, "REPO_NOT_FOUND", "repo not found")
 			return

@@ -120,7 +120,14 @@ func (s *Store) GetRepo(ctx context.Context, id uuid.UUID) (*repos.Repo, error) 
 	row := s.Reader().QueryRow(ctx,
 		`SELECT `+itemColumns+` FROM items WHERE id = $1 AND item_type = 'repo' AND `+scopeSQL,
 		args...)
-	return scanRepoLegacy(row)
+	r, err := scanRepoLegacy(row)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	return r, nil
 }
 
 func (s *Store) ListRepos(ctx context.Context, p repos.ListParams) (*repos.ListResult, error) {
@@ -251,22 +258,6 @@ func (s *Store) UpdateMetadata(ctx context.Context, id uuid.UUID, md *repos.Meta
 		return nil, err
 	}
 	return s.GetRepo(ctx, id)
-}
-
-func (s *Store) GetDiscoveryNext(ctx context.Context) (*repos.Repo, error) {
-	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 1)
-	row := s.Reader().QueryRow(ctx, `
-		SELECT `+itemColumns+` FROM items
-		WHERE archived = false AND item_type = 'repo'
-		  AND `+scopeSQL+`
-		ORDER BY last_seen_at NULLS FIRST, created_at ASC
-		LIMIT 1
-	`, scopeArgs...)
-	return scanRepoLegacy(row)
-}
-
-func (s *Store) MarkSeenRepo(ctx context.Context, id uuid.UUID) error {
-	return s.MarkItemSeen(ctx, id)
 }
 
 func (s *Store) ListStaleRepos(ctx context.Context, before time.Time, limit int) ([]*repos.Repo, error) {
