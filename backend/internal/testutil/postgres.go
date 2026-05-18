@@ -16,8 +16,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"sort"
-	"strings"
 	"sync"
 	"testing"
 	"time"
