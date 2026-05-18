@@ -225,7 +225,7 @@ jobs:
           set -e
           for f in migrations/*.sql; do
             echo "Applying $f"
-            PGPASSWORD=devdeck psql -h localhost -U devdeck -d devdeck -v ON_ERROR_STOP=1 -f "$f"
+            sed '/-- +goose Down/,$d' "$f" | PGPASSWORD=devdeck psql -h localhost -U devdeck -d devdeck -v ON_ERROR_STOP=1
           done
 
       - name: Start backend
