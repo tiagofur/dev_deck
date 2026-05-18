@@ -8,7 +8,6 @@ import (
 	"sort"
 	"strings"
 
-	"devdeck/internal/authctx"
 	"devdeck/internal/domain/items"
 	"devdeck/internal/domain/repos"
 
@@ -71,7 +70,7 @@ type CreateItemInput struct {
 }
 
 func (s *Store) CreateItem(ctx context.Context, in CreateItemInput) (*items.Item, error) {
-	userID, _ := authctx.UserID(ctx)
+	userID := currentUserIDPtr(ctx)
 	orgID := currentOrgIDPtr(ctx)
 
 	if in.Tags == nil {
@@ -96,7 +95,14 @@ func (s *Store) CreateItem(ctx context.Context, in CreateItemInput) (*items.Item
 		in.SourceChannel, metaJSON,
 	)
 
-	return scanItem(row)
+	it, err := scanItem(row)
+	if err != nil {
+		if isUniqueViolation(err) {
+			return nil, ErrAlreadyExists
+		}
+		return nil, err
+	}
+	return it, nil
 }
 
 func (s *Store) GetItem(ctx context.Context, id uuid.UUID) (*items.Item, error) {
@@ -130,7 +136,7 @@ func (s *Store) GetItemByNormalizedURL(ctx context.Context, userID uuid.UUID, no
 	return it, nil
 }
 
-func (s *Store) ListItems(ctx context.Context, p repos.ListParams) (*repos.ListResult, error) {
+func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListResult, error) {
 	if p.Limit <= 0 || p.Limit > 500 {
 		p.Limit = 100
 	}
@@ -143,16 +149,35 @@ func (s *Store) ListItems(ctx context.Context, p repos.ListParams) (*repos.ListR
 	args := append([]any{}, scopeArgs...)
 	idx := len(args) + 1
 
-	if p.Lang != "" {
-		where = append(where, fmt.Sprintf("meta->>'language' = $%d", idx))
-		args = append(args, p.Lang)
+	if p.Type != "" {
+		where = append(where, fmt.Sprintf("item_type = $%d", idx))
+		args = append(args, p.Type)
 		idx++
 	}
 
 	if p.Tag != "" {
-		where = append(where, fmt.Sprintf("$%d = ANY(tags)", idx))
+		where = append(where, fmt.Sprintf("($%d = ANY(tags) OR $%d = ANY(ai_tags))", idx, idx))
 		args = append(args, p.Tag)
 		idx++
+	}
+
+	if len(p.Stack) > 0 {
+		where = append(where, fmt.Sprintf(`(
+			EXISTS (SELECT 1 FROM unnest(tags) AS t WHERE lower(t) = ANY($%d::text[]))
+			OR EXISTS (SELECT 1 FROM unnest(ai_tags) AS t WHERE lower(t) = ANY($%d::text[]))
+			OR lower(COALESCE(meta->>'language','')) = ANY($%d::text[])
+			OR EXISTS (
+				SELECT 1
+				FROM jsonb_array_elements_text(COALESCE(meta->'topics','[]'::jsonb)) AS topic
+				WHERE lower(topic) = ANY($%d::text[])
+			)
+		)`, idx, idx, idx, idx))
+		args = append(args, p.Stack)
+		idx++
+	}
+
+	if p.Favorites {
+		where = append(where, "is_favorite = true")
 	}
 
 	if p.Archived != nil {
@@ -172,6 +197,12 @@ func (s *Store) ListItems(ctx context.Context, p repos.ListParams) (*repos.ListR
 		idx++
 	}
 
+	if p.CreatedAfter != nil {
+		where = append(where, fmt.Sprintf("created_at > $%d", idx))
+		args = append(args, *p.CreatedAfter)
+		idx++
+	}
+
 	whereSQL := strings.Join(where, " AND ")
 
 	var total int
@@ -184,9 +215,9 @@ func (s *Store) ListItems(ctx context.Context, p repos.ListParams) (*repos.ListR
 	switch p.Sort {
 	case "added_asc":
 		orderBy = "created_at ASC"
-	case "stars_desc":
-		orderBy = "(meta->>'stars')::int DESC NULLS LAST"
-	case "name_asc":
+	case "updated_desc":
+		orderBy = "updated_at DESC"
+	case "title_asc":
 		orderBy = "title ASC"
 	}
 
@@ -201,16 +232,16 @@ func (s *Store) ListItems(ctx context.Context, p repos.ListParams) (*repos.ListR
 	}
 	defer rows.Close()
 
-	var itemsList []*repos.Repo
+	var itemsList []*items.Item
 	for rows.Next() {
-		r, err := scanRepoLegacy(rows)
+		r, err := scanItem(rows)
 		if err != nil {
 			return nil, err
 		}
 		itemsList = append(itemsList, r)
 	}
 
-	return &repos.ListResult{Total: total, Items: itemsList}, rows.Err()
+	return &items.ListResult{Total: total, Items: itemsList}, rows.Err()
 }
 
 func (s *Store) UpdateItem(ctx context.Context, id uuid.UUID, in items.UpdateInput) (*items.Item, error) {
@@ -244,11 +275,35 @@ func (s *Store) UpdateItem(ctx context.Context, id uuid.UUID, in items.UpdateInp
 		it.IsFavorite = *in.IsFavorite
 	}
 
-	updateArgs := append([]any{it.Notes, it.Tags, it.Archived, it.IsFavorite, id}, scopeArgs...)
+	if in.Title != nil {
+		it.Title = *in.Title
+	}
+	if in.WhySaved != nil {
+		it.WhySaved = *in.WhySaved
+	}
+	if in.WhenToUse != nil {
+		it.WhenToUse = *in.WhenToUse
+	}
+	if in.ItemType != nil {
+		it.Type = items.Type(*in.ItemType)
+	}
+
+	updateScopeSQL, updateScopeArgs := ownerClause(ctx, "user_id", 10)
+	updateArgs := append([]any{
+		it.Title, it.Notes, it.Tags, it.Archived, it.IsFavorite, it.WhySaved, it.WhenToUse, string(it.Type), id,
+	}, updateScopeArgs...)
 	updatedRow := tx.QueryRow(ctx, `
 		UPDATE items
-		SET notes = $1, tags = $2, archived = $3, is_favorite = $4, updated_at = NOW()
-		WHERE id = $5 AND `+scopeSQL+`
+		SET title = $1,
+		    notes = $2,
+		    tags = $3,
+		    archived = $4,
+		    is_favorite = $5,
+		    why_saved = $6,
+		    when_to_use = $7,
+		    item_type = $8,
+		    updated_at = NOW()
+		WHERE id = $9 AND `+updateScopeSQL+`
 		RETURNING `+itemColumns,
 		updateArgs...)
 

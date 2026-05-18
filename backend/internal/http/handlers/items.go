@@ -5,10 +5,10 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"devdeck/internal/authctx"
 	"devdeck/internal/domain/items"
-	"devdeck/internal/domain/repos"
 	"devdeck/internal/jobs"
 	"devdeck/internal/store"
 
@@ -27,11 +27,24 @@ func NewItemsHandler(s *store.Store, q *jobs.EnrichQueue) *ItemsHandler {
 
 func (h *ItemsHandler) List(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
-	p := repos.ListParams{
+	p := items.ListParams{
+		Type: q.Get("type"),
 		Tag:  q.Get("tag"),
-		Lang: q.Get("lang"),
 		Q:    q.Get("q"),
 		Sort: q.Get("sort"),
+	}
+	if p.Type != "" && !items.IsValid(p.Type) {
+		writeError(w, http.StatusUnprocessableEntity, "INVALID_TYPE", "invalid item type")
+		return
+	}
+	if v := q.Get("stack"); v != "" {
+		parts := strings.Split(v, ",")
+		for _, part := range parts {
+			part = strings.ToLower(strings.TrimSpace(part))
+			if part != "" {
+				p.Stack = append(p.Stack, part)
+			}
+		}
 	}
 	if v := q.Get("archived"); v != "" {
 		if b, err := strconv.ParseBool(v); err == nil {
@@ -78,6 +91,10 @@ func (h *ItemsHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var in items.UpdateInput
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
+		return
+	}
+	if in.ItemType != nil && !items.IsValid(*in.ItemType) {
+		writeError(w, http.StatusUnprocessableEntity, "INVALID_TYPE", "invalid item type")
 		return
 	}
 	it, err := h.store.UpdateItem(r.Context(), id, in)
