@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, Plus, Users } from 'lucide-react'
+import { Box, Plus, Users, Search } from 'lucide-react'
 import { CaptureModal } from '../components/CaptureModal'
 import { ItemCard } from '../components/ItemCard'
 import { OnboardingChecklist } from '../components/OnboardingChecklist'
@@ -87,10 +87,10 @@ export function ItemsPage() {
         <button
           type="button"
           onClick={() => navigate('/')}
-          className="font-display font-black text-2xl uppercase hover:text-accent-orange transition-colors"
+          className="hover:text-accent-orange transition-colors"
           aria-label="Volver a home"
         >
-          DevDeck
+          <h1 className="font-display font-black text-2xl uppercase">DevDeck</h1>
         </button>
         <span className="font-mono text-sm text-ink-soft">/ items</span>
 
@@ -104,6 +104,17 @@ export function ItemsPage() {
           className="border-3 border-ink px-3 py-2 font-mono text-sm
                      focus:outline-none focus:bg-accent-yellow/20 w-full md:w-64"
         />
+
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent('devdeck:open-search'))}
+          className="border-3 border-ink px-3 py-2 bg-accent-yellow shadow-hard-sm
+                     font-display font-bold uppercase text-sm hover:bg-accent-yellow/80
+                     flex items-center gap-1.5"
+        >
+          <Search size={16} strokeWidth={3} />
+          Search
+        </button>
 
         <button
           type="button"

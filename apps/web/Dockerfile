@@ -20,6 +20,7 @@ WORKDIR /src
 COPY pnpm-workspace.yaml ./
 COPY pnpm-lock.yaml ./
 COPY package.json ./package.json
+COPY tsconfig.base.json ./
 
 # Copy all package.json files
 COPY packages/api-client/package.json ./packages/api-client/

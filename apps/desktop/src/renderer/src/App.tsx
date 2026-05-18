@@ -114,9 +114,17 @@ function AnimatedRoutes() {
       }
       setCaptureOpen(true)
     }
+    const onOpenSearch = () => {
+      setGlobalSearchOpen(true)
+    }
     window.addEventListener('devdeck:open-capture', onOpenCapture)
-    return () => window.removeEventListener('devdeck:open-capture', onOpenCapture)
+    window.addEventListener('devdeck:open-search', onOpenSearch)
+    return () => {
+      window.removeEventListener('devdeck:open-capture', onOpenCapture)
+      window.removeEventListener('devdeck:open-search', onOpenSearch)
+    }
   }, [])
+
 
   return (
     <>
