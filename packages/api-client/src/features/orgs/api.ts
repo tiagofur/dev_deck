@@ -10,6 +10,44 @@ export interface Organization {
   updated_at: string
 }
 
+export interface SAMLConfig {
+  org_id: string
+  idp_entity_id: string
+  idp_sso_url: string
+  idp_x509_cert: string
+  domain: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface OrgInsights {
+  total_items: number
+  top_languages: Array<{
+    language: string
+    count: number
+    share: number
+  }>
+  top_curators: Array<{
+    display_name: string
+    avatar_url: string
+    item_count: number
+  }>
+  recent_activity: number
+}
+
+export interface HotTopic {
+  tag: string
+  count: number
+}
+
+export interface Recommendation {
+  url_normalized: string
+  title: string
+  save_count: number
+  item_type: string
+}
+
 export interface ActivityEntry {
 	id: string
 	org_id: string
@@ -59,4 +97,59 @@ export function useOrgFeed(orgId: string | null | undefined, limit = 50) {
 		queryFn: () => api.get<{ events: ActivityEntry[] }>(`/api/orgs/${orgId}/feed?limit=${limit}`),
 		enabled: !!orgId,
 	})
+}
+
+/** GET /api/orgs/:id/saml — get SAML SSO config. */
+export function useOrgSAML(orgId: string | undefined) {
+  return useQuery({
+    queryKey: [...ORGS_KEY, 'saml', orgId],
+    queryFn: () => api.get<SAMLConfig>(`/api/orgs/${orgId}/saml`),
+    enabled: !!orgId,
+  })
+}
+
+/** POST /api/orgs/:id/saml — update SAML SSO config. */
+export function useUpdateOrgSAML() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ orgId, input }: { orgId: string; input: Partial<SAMLConfig> }) =>
+      api.post<SAMLConfig>(`/api/orgs/${orgId}/saml`, input),
+    onSuccess: (_, { orgId }) => {
+      qc.invalidateQueries({ queryKey: [...ORGS_KEY, 'saml', orgId] })
+    },
+  })
+}
+
+/** POST /api/orgs/:id/scim/token — generate a new SCIM token. */
+export function useGenerateSCIMToken() {
+  return useMutation({
+    mutationFn: (orgId: string) => api.post<{ token: string }>(`/api/orgs/${orgId}/scim/token`, {}),
+  })
+}
+
+/** GET /api/orgs/:id/insights — get organization analytics. */
+export function useOrgInsights(orgId: string | undefined) {
+  return useQuery({
+    queryKey: [...ORGS_KEY, 'insights', orgId],
+    queryFn: () => api.get<OrgInsights>(`/api/orgs/${orgId}/insights`),
+    enabled: !!orgId,
+  })
+}
+
+/** GET /api/orgs/:id/discovery/trending — get trending tags in org. */
+export function useOrgTrendingTags(orgId: string | undefined, limit = 10) {
+  return useQuery({
+    queryKey: [...ORGS_KEY, 'discovery', 'trending', orgId, { limit }],
+    queryFn: () => api.get<{ tags: HotTopic[] }>(`/api/orgs/${orgId}/discovery/trending?limit=${limit}`),
+    enabled: !!orgId,
+  })
+}
+
+/** GET /api/orgs/:id/discovery/recommendations — get tool recs in org. */
+export function useOrgRecommendations(orgId: string | undefined, limit = 5) {
+  return useQuery({
+    queryKey: [...ORGS_KEY, 'discovery', 'recommendations', orgId, { limit }],
+    queryFn: () => api.get<{ recommendations: Recommendation[] }>(`/api/orgs/${orgId}/discovery/recommendations?limit=${limit}`),
+    enabled: !!orgId,
+  })
 }

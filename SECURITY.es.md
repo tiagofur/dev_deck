@@ -43,17 +43,13 @@ Si encontrás una vulnerabilidad de seguridad en DevDeck, **por favor no abras u
 
 ## Áreas sensibles conocidas
 
-Para orientar a researchers: estas son áreas donde sabemos que hay superficie de ataque y estamos trabajando:
+Para orientar a researchers: estas son áreas donde sabemos que hay superficie de ataque y el estado actual de las mitigaciones:
 
-1. **SSRF en scraper de Open Graph** (`internal/enricher/generic.go`). Hay whitelist de esquemas, pero la validación de rangos IP privados está en roadmap. Si encontrás un bypass, reportalo.
-
-2. **Allowlist de GitHub logins.** Autenticación vía `ALLOWED_GITHUB_LOGINS`. Si encontrás forma de pasarlo sin estar en la lista, es crítico.
-
-3. **JWT refresh flow.** Revocación post-logout depende de borrar la sesión en DB. Si un refresh token robado puede seguir generando access tokens después de logout, es crítico.
-
-4. **Markdown rendering.** `react-markdown` + `rehype-highlight` en Electron. Si encontrás XSS vía markdown crafted, es crítico.
-
-5. **Runbooks ejecutables** (Ola 5+, aún no implementado). Cuando exista, el modelo de confianza va a ser: solo ejecuta local, con confirm por paso, nunca ejecuta comandos recibidos del server. Romper eso es crítico.
+1. **Scraper de Open Graph** (`internal/enricher/generic.go`): Protegido contra SSRF mediante validación de IPs prohibidas (CIDRs) en tiempo de dial (`ssrfSafeTransport`).
+2. **Allowlist de GitHub logins**: Autenticación restringida por `ALLOWED_GITHUB_LOGINS`. Bypass de esta lista se considera crítico.
+3. **JWT refresh flow**: La revocación depende de la eliminación de sesiones en DB. Un refresh token robado activo post-logout es crítico.
+4. **Markdown rendering**: Usamos `react-markdown` + `rehype-highlight`. Encontrar XSS vía markdown malicioso es crítico.
+5. **Ejecución de Runbooks (Agentes)**: El modelo de confianza es híbrido (Fase 50). La IA propone comandos pero el cliente (Desktop) requiere **aprobación manual explícita**. Cualquier ejecución no supervisada es un hallazgo crítico.
 
 ## Gracias
 

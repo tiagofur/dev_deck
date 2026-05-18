@@ -1,4 +1,4 @@
-# DevDeck.ai Architecture
+# DevDeck.ai Architecture (v1.0)
 
 This document describes the technical architecture, data model, and system flow of **DevDeck.ai**.
 
@@ -17,34 +17,40 @@ graph TD
         C[CLI - Go]
     end
 
-    subgraph Backend ["Go API (Chi)"]
+    subgraph Backend ["Go API (Chi) - Multi-Pool"]
         G[REST API Handlers]
-        S[Auth Service - JWT]
+        S[Auth Service - JWT/SAML]
         J[Jobs - Background Workers]
+        A[Agent Orchestrator - SSE]
     end
 
-    subgraph Storage ["Infrastructure"]
-        P[(Postgres 16 + pgvector)]
-        R[Redis/Cache - Roadmap]
+    subgraph Infrastructure ["Global Multi-Region"]
+        RW[(Primary DB - Write)]
+        RO[(Read Replicas - Regional)]
+        RE[Redis - Cache Aside]
     end
 
-    D -- "REST + JWT (Secure Storage)" --> G
-    W -- "REST + JWT (Cookies)" --> G
+    D -- "REST + SSE (Local Exec)" --> G
+    W -- "REST + SSE" --> G
     E -- "REST + API Key" --> G
     C -- "REST + API Key" --> G
 
-    G -- SQL --> P
-    G -- Queue --> J
-    J -- AI Tasks --> OpenAI[OpenAI / Ollama]
+    G -- Writes --> RW
+    G -- Reads --> RO
+    G -- Cache --> RE
+    G -- Sync --> RegionB[Secondary Region]
+    
+    A -- Tool Calling --> RW
+    A -- Real-time --> D
 ```
 
 ### Monorepo Strategy
 We use **pnpm workspaces** to share 100% of the domain logic between the Web and Desktop apps.
-- **`apps/desktop`**: Electron shell (React renderer).
-- **`apps/web`**: Web shell (BrowserRouter + Vite).
-- **`packages/features`**: **Shared Core**. Contains all pages, components, and hooks.
+- **`apps/desktop`**: Electron shell with Native shell execution support.
+- **`apps/web`**: Web shell with PWA capabilities.
+- **`packages/features`**: **Shared Core**. Contains all pages, components, hooks, and agent chat UI.
 - **`packages/ui`**: Neo-brutalist design system.
-- **`packages/api-client`**: SDK and TanStack Query integration.
+- **`packages/api-client`**: Unified SDK with TanStack Query.
 
 ---
 
@@ -53,60 +59,60 @@ We use **pnpm workspaces** to share 100% of the domain logic between the Web and
 ### Frontend & Desktop
 - **React 18 + TypeScript**: Core framework.
 - **Tailwind CSS**: Neo-brutalist styling.
-- **Framer Motion**: Smooth micro-animations.
-- **Electron 32**: Native desktop integration (Mac/Win/Linux).
-- **TanStack Query v5**: Server state management.
+- **Electron 32**: Native desktop integration with IPC-based shell execution.
+- **Yjs/WebSockets**: Conflict-free concurrent editing (CRDTs).
 
 ### Backend
 - **Go 1.22+**: High-performance API server.
-- **Chi**: Lightweight idiomatic router.
-- **pgx v5**: Advanced Postgres driver.
-- **JWT**: Stateless authentication with refresh token rotation.
+- **Agent Orchestrator**: Server-side tool execution loop with Server-Sent Events (SSE).
+- **Identity**: SAML 2.0 (SSO), SCIM 2.0 (Provisioning), and RBAC.
 
-### Database
-- **Postgres 16**: Primary relational store.
-- **pgvector**: Vector embeddings for semantic AI search.
-- **pg_trgm**: Trigram-based fuzzy text search.
+### Storage & Scalability
+- **Postgres 16**: Primary relational store with `pgvector`.
+- **Multi-Pool DB**: Decoupled `Reader()` and `Writer()` pools for read replicas.
+- **Multi-Region Sync**: Atomic bidirectional synchronization with LWW (Last Write Wins).
+- **SQLite (Local)**: OPFS on Web and native file storage on Desktop for offline-first.
 
 ---
 
 ## 3. Detailed Data Model
 
-### 3.1 Users and Authentication (GitHub-only)
-We use GitHub OAuth as the sole identity provider.
-- `users`: Stores GitHub profile metadata.
-- `refresh_sessions`: Tracks active refresh tokens for session rotation.
+### 3.1 Users & Enterprise
+- `users`: Core profile with onboarding status.
+- `orgs`: multi-tenant organization support.
+- `org_members`: RBAC mapping (Owner, Admin, Editor, Viewer).
+- `saml_configs`: Enterprise SSO metadata.
 
-### 3.2 Polymorphic Items (Wave 5)
-The central entity is the `Item`. A single table handles multiple types via `item_type`.
-- **Common fields**: `id`, `user_id`, `url`, `title`, `description`, `tags`, `embedding`.
-- **Type-specific metadata**: Stored in JSONB or auxiliary tables (e.g., `repo_commands`).
+### 3.2 Polymorphic Items
+A single table handles multiple types (repos, clis, snippets, etc.) via `item_type`.
+- `embedding`: 1536-dim vector for semantic search.
+- `meta`: JSONB field for type-specific data.
 
-### 3.3 Cheatsheets
-- `cheatsheets`: Collections of commands by topic (e.g., Git, Docker).
-- `cheatsheet_entries`: Individual command/shortcut definitions.
+### 3.3 Activity & Audit
+- `activity_log`: Tracks all meaningful actions for team insights and audit trails.
 
 ---
 
 ## 4. System Flows
 
-### Adding a Repository
-1. User pastes a URL in the UI.
-2. Frontend calls `POST /api/items/capture`.
-3. Backend checks if it's a GitHub URL.
-    - **GitHub**: Fetches rich metadata via GitHub API.
-    - **Generic**: Scrapes HTML for Open Graph tags.
-4. AI Service (background) generates a summary and suggests tags.
-5. Item is persisted in Postgres and the vector embedding is generated.
+### Hybrid Agent Execution
+1. User asks the agent to perform a task (e.g., "Install this repo").
+2. **Backend Orchestrator** receives the request and consults the LLM.
+3. LLM requests `search_vault` tool.
+4. Orchestrator executes search locally on Postgres and returns results to LLM.
+5. LLM requests `execute_shell_command` tool.
+6. Orchestrator detects `IsClientSide: true`, pauses, and sends an SSE event to the **Desktop App**.
+7. Desktop UI requests **User Approval**.
+8. If approved, Desktop executes command via Electron `exec()` and sends stdout back to the Backend.
+9. Orchestrator resumes reasoning and confirms success to the user.
 
 ---
 
-## 5. Deployment & Infrastructure
+## 5. Deployment
 
-- **Docker Compose**: Orchestrates API, DB, and Caddy.
-- **Caddy**: Acts as a reverse proxy with automatic TLS (Let's Encrypt).
-- **GitHub Actions**: Continuous integration and deployment to a VPS.
+- **Infrastructure as Code**: Terraform + Docker Compose.
+- **Security**: HMAC SHA-256 for webhooks, TLS everywhere, PATs with `devdeck_` prefix.
 
 ---
 
-*Last updated: May 2026 (Wave 5)*
+*Last updated: May 2026 (Version 1.0 Release)*

@@ -94,6 +94,84 @@ func (h *OrgsHandler) AddMember(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"added": true})
 }
 
+// POST /api/orgs/{id}/scim/token
+func (h *OrgsHandler) GenerateSCIMToken(w http.ResponseWriter, r *http.Request) {
+	orgID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_ID", "id must be a uuid")
+		return
+	}
+
+	token, err := h.store.CreateSCIMToken(r.Context(), orgID)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"token": token,
+	})
+}
+
+// GET /api/orgs/{id}/insights
+func (h *OrgsHandler) GetInsights(w http.ResponseWriter, r *http.Request) {
+	orgID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_ID", "id must be a uuid")
+		return
+	}
+
+	insights, err := h.store.GetOrgInsights(r.Context(), orgID)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, insights)
+}
+
+// GET /api/orgs/{id}/discovery/trending
+func (h *OrgsHandler) GetDiscoveryTrending(w http.ResponseWriter, r *http.Request) {
+	orgID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_ID", "id must be a uuid")
+		return
+	}
+
+	limit := parseLimitFromQuery(r.URL.Query().Get("limit"), 10, 50)
+	tags, err := h.store.GetOrgTrendingTags(r.Context(), orgID, limit)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"tags": tags})
+}
+
+// GET /api/orgs/{id}/discovery/recommendations
+func (h *OrgsHandler) GetRecommendations(w http.ResponseWriter, r *http.Request) {
+	orgID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_ID", "id must be a uuid")
+		return
+	}
+
+	userID, ok := authctx.UserID(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "auth required")
+		return
+	}
+
+	limit := parseLimitFromQuery(r.URL.Query().Get("limit"), 5, 20)
+	recs, err := h.store.GetOrgRecommendations(r.Context(), orgID, userID, limit)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{"recommendations": recs})
+}
+
 // GET /api/orgs/{id}/feed
 func (h *OrgsHandler) GetFeed(w http.ResponseWriter, r *http.Request) {
 	orgID, err := uuid.Parse(chi.URLParam(r, "id"))

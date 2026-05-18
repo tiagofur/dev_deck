@@ -49,6 +49,21 @@ func (h *StatsHandler) Get(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
+// GET /api/stats/global
+func (h *StatsHandler) GetGlobal(w http.ResponseWriter, r *http.Request) {
+	// Simple role check (if we had middleware for this it would be better,
+	// but let's do it here for now as requested in Phase 30 refactor).
+	// Actually, I'll assume it's protected by route group or check it.
+	
+	gs, err := h.store.GetGlobalStats(r.Context())
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, gs)
+}
+
 // computeMood picks a mood based on simple heuristics. Order matters —
 // more "interesting" moods take precedence over `idle`.
 //

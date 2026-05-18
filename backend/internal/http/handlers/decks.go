@@ -486,8 +486,8 @@ func (h *ImportHandler) Import(w http.ResponseWriter, r *http.Request) {
 }
 
 // POST /api/decks/:id/star — star a deck
-func (h *ImportHandler) Star(w http.ResponseWriter, r *http.Request) {
-	_, ok := authctx.UserID(r.Context())
+func (h *DeckHandler) Star(w http.ResponseWriter, r *http.Request) {
+	userID, ok := authctx.UserID(r.Context())
 	if !ok {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
 		return
@@ -499,15 +499,19 @@ func (h *ImportHandler) Star(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = id // TODO: Star in DB
+	if err := h.store.StarDeck(r.Context(), userID, id); err != nil {
+		writeInternal(w, err)
+		return
+	}
+
 	writeJSON(w, http.StatusOK, map[string]any{
 		"starred": true,
 	})
 }
 
 // DELETE /api/decks/:id/star — unstar a deck
-func (h *ImportHandler) Unstar(w http.ResponseWriter, r *http.Request) {
-	_, ok := authctx.UserID(r.Context())
+func (h *DeckHandler) Unstar(w http.ResponseWriter, r *http.Request) {
+	userID, ok := authctx.UserID(r.Context())
 	if !ok {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
 		return
@@ -519,7 +523,11 @@ func (h *ImportHandler) Unstar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = id // TODO: Unstar in DB
+	if err := h.store.UnstarDeck(r.Context(), userID, id); err != nil {
+		writeInternal(w, err)
+		return
+	}
+
 	writeJSON(w, http.StatusOK, map[string]any{
 		"unstarred": true,
 	})

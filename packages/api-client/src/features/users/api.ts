@@ -12,7 +12,16 @@ export interface User {
   display_name: string
   role: string
   plan: string
+  region: string
+  onboarding_completed: boolean
   created_at: string
+}
+
+export interface StarterKit {
+  id: string
+  name: string
+  description: string
+  icon: string
 }
 
 export interface PublicProfile {
@@ -57,6 +66,32 @@ export function useUpdateMe() {
     onSuccess: (user) => {
       qc.setQueryData([...USERS_KEY, 'me'], user)
     },
+  })
+}
+
+/** PATCH /api/auth/me/onboarding/complete — mark as finished. */
+export function useCompleteOnboarding() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.patch('/api/auth/me/onboarding/complete', {}),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [...USERS_KEY, 'me'] })
+    },
+  })
+}
+
+/** GET /api/onboarding/kits — list available kits. */
+export function useOnboardingKits() {
+  return useQuery({
+    queryKey: ['onboarding', 'kits'],
+    queryFn: () => api.get<{ kits: StarterKit[] }>('/api/onboarding/kits'),
+  })
+}
+
+/** POST /api/onboarding/install — install a kit. */
+export function useInstallStarterKit() {
+  return useMutation({
+    mutationFn: (kitId: string) => api.post('/api/onboarding/install', { kit_id: kitId }),
   })
 }
 

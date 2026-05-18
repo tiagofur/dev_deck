@@ -62,10 +62,11 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		MaxAge:           300,
 	}))
 
-	r.Get("/healthz", handlers.Health)
-	r.Handle("/metrics", promhttp.Handler())
-
 	st := deps.Store
+	healthH := handlers.NewHealthHandler(st)
+
+	r.Get("/healthz", healthH.Health)
+	r.Handle("/metrics", promhttp.Handler())
 	en := deps.Enricher
 	as := deps.AuthService
 	embSvc := deps.Embeddings
@@ -110,6 +111,14 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	webhooksH := handlers.NewWebhooksHandler(st)
 	pluginsH := handlers.NewPluginsHandler()
 	socialH := handlers.NewSocialHandler(st)
+	agentH := handlers.NewAgentHandler(st, deps.AI)
+	onboardingH := handlers.NewOnboardingHandler(st)
+	samlH := handlers.NewSAMLHandler(st, as, handlers.SAMLHandlerConfig{
+		EntityID:    "devdeck-sp",
+		BaseURL:     cfg.FrontendURL, // Best effort base
+		FrontendURL: cfg.FrontendURL,
+	})
+	scimH := handlers.NewSCIMHandler(st)
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/suggestions/commands", suggestionsH.Commands)
@@ -121,8 +130,16 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				r.Get("/providers", authH.Providers)
 				r.Post("/register", authH.Register)
 				r.Post("/login", authH.LoginLocal)
+				r.Post("/login-step1", samlH.LoginStep1)
 				r.Get("/github/login", authH.Login)
 				r.Get("/github/callback", authH.Callback)
+
+				r.Route("/saml", func(r chi.Router) {
+					r.Get("/metadata", samlH.Metadata)
+					r.Get("/login", samlH.Login)
+					r.Post("/acs", samlH.ACS)
+				})
+
 				r.Post("/refresh", authH.Refresh)
 				r.Post("/logout", authH.Logout)
 
@@ -130,6 +147,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 					r.Use(mw.JWTAuth(as))
 					r.Get("/me", authH.Me)
 					r.Patch("/me", authH.UpdateMe)
+					r.Patch("/me/onboarding/complete", authH.CompleteOnboarding)
 				})
 			})
 		}
@@ -188,7 +206,10 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			})
 
 			r.Get("/search", cheatsH.Search)
-			r.Get("/stats", statsH.Get)
+			r.Route("/stats", func(sr chi.Router) {
+				sr.Get("/", statsH.Get)
+				sr.Get("/global", statsH.GetGlobal)
+			})
 			r.Route("/discovery", func(dr chi.Router) {
 				dr.Get("/next", discoveryH.Next)
 				dr.Get("/trending", discoveryH.Trending)
@@ -204,6 +225,22 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				or.Get("/", orgsH.List)
 				or.Get("/{id}/feed", orgsH.GetFeed)
 				or.Post("/{id}/members", orgsH.AddMember)
+
+				or.Route("/{id}/discovery", func(dr chi.Router) {
+					dr.Get("/trending", orgsH.GetDiscoveryTrending)
+					dr.Get("/recommendations", orgsH.GetRecommendations)
+				})
+				
+				or.Group(func(or chi.Router) {
+					or.Use(mw.RequireOrgPermission(st, "org:admin"))
+					or.Get("/{id}/insights", orgsH.GetInsights)
+					or.Post("/{id}/scim/token", orgsH.GenerateSCIMToken)
+				})
+			})
+
+			r.Route("/onboarding", func(onr chi.Router) {
+				onr.Get("/kits", onboardingH.ListKits)
+				onr.Post("/install", onboardingH.InstallKit)
 			})
 
 			r.Route("/items", func(ir chi.Router) {
@@ -273,6 +310,8 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				er.Delete("/{id}", enrichersH.Delete)
 			})
 
+			r.Post("/agent/chat", agentH.Chat)
+
 			r.Route("/me/webhooks", func(wr chi.Router) {
 				wr.Get("/", webhooksH.List)
 				wr.Post("/", webhooksH.Create)
@@ -287,8 +326,8 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Delete("/decks/{id}", deckH.Delete)
 			r.Post("/decks/{id}/items", deckH.AddItems)
 			r.Delete("/decks/{id}/items/{itemId}", deckH.RemoveItem)
-			r.Post("/decks/{id}/star", importH.Star)
-			r.Delete("/decks/{id}/star", importH.Unstar)
+			r.Post("/decks/{id}/star", deckH.Star)
+			r.Delete("/decks/{id}/star", deckH.Unstar)
 
 			// Deck import (auth required)
 			r.Post("/decks/{id}/import", importH.Import)
@@ -315,6 +354,16 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Use(mw.TokenAuth(cfg, as, st))
 			r.Post("/users/{username}/follow", socialH.Follow)
 			r.Delete("/users/{username}/follow", socialH.Unfollow)
+		})
+	})
+
+	// ─── SCIM 2.0 ───
+	r.Route("/scim/v2", func(sr chi.Router) {
+		sr.Use(mw.SCIMAuth(st))
+		sr.Route("/Users", func(ur chi.Router) {
+			ur.Get("/", scimH.ListUsers)
+			ur.Post("/", scimH.CreateUser)
+			ur.Delete("/{id}", scimH.DeleteUser)
 		})
 	})
 

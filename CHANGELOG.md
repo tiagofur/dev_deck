@@ -23,6 +23,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0] - 2026-05-17
+
+### Added
+
+- **Autonomous AI Agents**: Multi-step orchestration with tool-calling capabilities. Agents can search the vault, create items, and propose shell commands (Fases 49-50).
+- **Hybrid Execution**: Secure "Human-in-the-loop" model for executing terminal commands locally from the Desktop App.
+- **Collective Intelligence**: Team insights, adoption analytics, and trending tags detection for organizations (Fases 47-48).
+- **Enterprise Identity**: Full support for SAML 2.0 (SSO) and SCIM 2.0 (Automatic Provisioning) via Okta/Azure AD (Fases 45-46).
+- **Global Scalability**: Multi-region active-active synchronization with read replicas and atomic conflict resolution (Fases 43-44).
+- **Real-time Collaboration**: Conflict-free concurrent editing using Yjs and CRDTs over WebSockets (Fase 35).
+- **Teams & RBAC**: Organization-level multi-tenancy with granular Role-Based Access Control (Owner, Admin, Editor, Viewer).
+- **Plugin SDK**: Language-agnostic extensibility via HTTP-based custom enrichers and outbound webhooks (Fases 36-38).
+- **Onboarding Wizard**: Guided product tour with "Starter Kits" to eliminate the empty vault problem (Fase 51).
+- **Advanced Discovery**: Social feed for followers, team-wide search, and personalized tool recommendations.
+
+### Changed
+
+- **V1.0 Final Release**: Transitioned from a bookmark manager to a comprehensive **Knowledge OS for Developers**.
+- **Brutalist Redesign**: Final polish of the neo-brutalist design system across all platforms.
+- **Unified Search**: Refactored global search to prioritize team-validated knowledge.
+- **Documentation**: Complete technical architecture guide and self-hosting documentation.
+
+### Fixed
+
+- **Stability**: Fixed memory management in Electron renderer and pointer handling in Go backend.
+- **Security**: Hardened SSRF protection for OG scraping and refined PAT auditing.
+- **Performance**: Aggregated analytics queries now run exclusively on read replicas.
+
+### Security
+
+- HMAC SHA-256 signatures for outbound webhooks.
+- Dial-time IP validation for enrichment scraping.
+- Encrypted credential storage in Desktop using OS-native safe storage.
+
+---
+
 ## [0.1.0] - 2026-05-03
 
 ### Added
@@ -67,6 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/tiagofur/dev_deck/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/tiagofur/dev_deck/releases/tag/v0.1.0
+[Unreleased]: https://github.com/tiagofur/dev_deck/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/tiagofur/dev_deck/releases/tag/v1.0.0
+[0.1.0]: https://github.com/tiagofur/dev_deck/compare/v0.0.5...v0.1.0
 [0.0.5]: https://github.com/tiagofur/dev_deck/releases/tag/v0.0.5

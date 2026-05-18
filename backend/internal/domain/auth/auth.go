@@ -16,8 +16,10 @@ type User struct {
 	Plan        string    `json:"plan"`
 	AvatarURL   string    `json:"avatar_url"`
 	DisplayName string    `json:"display_name"`
-	Role        string    `json:"role"`
-	CreatedAt   time.Time `json:"created_at"`
+	Role                string    `json:"role"`
+	Region              string    `json:"region"`
+	OnboardingCompleted bool      `json:"onboarding_completed"`
+	CreatedAt           time.Time `json:"created_at"`
 }
 
 // TokenPair is the response body for login/refresh.

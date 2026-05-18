@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "DevDeck — Quick Capture v2",
-  "description": "Guardá cualquier cosa en tu DevDeck con Cmd/Ctrl+Shift+D. Ahora con React y Sync.",
-  "version": "0.3.0",
+  "name": "DevDeck — Browser Extension",
+  "description": "Capture repositories, documentation, and technical notes with a single click. The browser companion for your Knowledge OS.",
+  "version": "1.0.0",
   "action": {
     "default_popup": "src/popup/index.html"
   },

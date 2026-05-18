@@ -21,6 +21,7 @@ import {
   LandingPage,
   RepoDetailPage,
   SettingsPage,
+  OnboardingPage,
   AdminDashboardPage,
   WaitlistPage,
   PublicDeckPage,
@@ -33,7 +34,7 @@ import {
 } from '@devdeck/features'
 import { CaptureModal, ShortcutsModal } from '@devdeck/features'
 import { ConfirmHost, PageTransition, Toaster } from '@devdeck/ui'
-import { isLoggedIn } from '@devdeck/api-client'
+import { isLoggedIn, useMe } from '@devdeck/api-client'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
@@ -53,9 +54,19 @@ const queryClient = new QueryClient({
 
 // Guard for protected routes. If no token is stored, bounce to /login.
 function AuthGuard({ children }: { children: ReactElement }): ReactElement {
+  const { data: user, isLoading } = useMe()
+  const location = useLocation()
+
   if (!isLoggedIn()) {
     return <Navigate to="/login" replace />
   }
+
+  if (isLoading) return <div className="h-screen bg-bg-primary" />
+
+  if (user && !user.onboarding_completed && location.pathname !== '/onboarding') {
+    return <Navigate to="/onboarding" replace />
+  }
+
   return children
 }
 
@@ -67,18 +78,29 @@ function AnimatedRoutes(): ReactElement {
   const location = useLocation()
   const navigate = useNavigate()
   const [captureOpen, setCaptureOpen] = useState(false)
+  const [initialCaptureData, setInitialCaptureData] = useState<{ url?: string, title?: string } | null>(null)
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
 
   // Global keyboard shortcuts
   useGlobalShortcuts({
     onGlobalSearch: () => setGlobalSearchOpen(true),
-    onCapture: () => setCaptureOpen(true),
+    onCapture: () => {
+      setInitialCaptureData(null)
+      setCaptureOpen(true)
+    },
     onShortcuts: () => setShortcutsOpen(true),
   })
 
   useEffect(() => {
-    const onOpenCapture = () => setCaptureOpen(true)
+    const onOpenCapture = (e: any) => {
+      if (e.detail) {
+        setInitialCaptureData({ url: e.detail.url, title: e.detail.title })
+      } else {
+        setInitialCaptureData(null)
+      }
+      setCaptureOpen(true)
+    }
     window.addEventListener('devdeck:open-capture', onOpenCapture)
     return () => window.removeEventListener('devdeck:open-capture', onOpenCapture)
   }, [])
@@ -120,6 +142,10 @@ function AnimatedRoutes(): ReactElement {
           <Route
             path="/items"
             element={<AuthGuard>{withTransition(<ItemsPage />)}</AuthGuard>}
+          />
+          <Route
+            path="/onboarding"
+            element={<AuthGuard>{withTransition(<OnboardingPage />)}</AuthGuard>}
           />
           <Route
             path="/items/:id"
@@ -181,14 +207,18 @@ function AnimatedRoutes(): ReactElement {
       <UnifiedCommandPalette open={globalSearchOpen} onClose={() => setGlobalSearchOpen(false)} />
       <CaptureModal
         open={captureOpen}
-        onClose={() => setCaptureOpen(false)}
+        onClose={() => {
+          setCaptureOpen(false)
+          setInitialCaptureData(null)
+        }}
         onOpenItem={(id) => {
           setCaptureOpen(false)
+          setInitialCaptureData(null)
           navigate(`/items/${id}`)
         }}
         source="manual"
-        initialUrl={location.state?.url}
-        initialTitle={location.state?.title}
+        initialUrl={initialCaptureData?.url || location.state?.url}
+        initialTitle={initialCaptureData?.title || location.state?.title}
       />
       <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
     </>

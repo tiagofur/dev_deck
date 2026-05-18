@@ -14,9 +14,9 @@ DevDeck uses [Semantic Versioning](https://semver.org/) (SemVer) with the format
 | **MINOR** | New backward-compatible features | `0.1.0` → `0.2.0` |
 | **PATCH** | Backward-compatible bug fixes | `0.1.0` → `0.1.1` |
 
-**Current state:** `0.1.0` (Wave 4.5 - stable features)
+**Current state:** `1.0.0` (Wave 17 - Stable release)
 
-> DevDeck is on `0.x` because feature complete is not yet reached (Wave 7). The jump to `1.0.0` will happen when all waves are complete.
+> DevDeck has reached its stable `1.0.0` version after completing the 17-wave roadmap.
 
 ---
 

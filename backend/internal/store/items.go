@@ -618,13 +618,16 @@ const (
 
 // SearchItemsResult is a single search result with score.
 type SearchItemsResult struct {
-	ID         uuid.UUID  `json:"id"`
-	Type       items.Type `json:"type"`
-	Title      string     `json:"title"`
-	WhySaved   string     `json:"why_saved,omitempty"`
-	URL        string     `json:"url,omitempty"`
-	Similarity float64    `json:"similarity"`
+	ID          uuid.UUID  `json:"id"`
+	Type        items.Type `json:"item_type"`
+	Title       string     `json:"title"`
+	WhySaved    string     `json:"why_saved"`
+	URL         *string    `json:"url,omitempty"`
+	Similarity  float64    `json:"similarity"`
+	OrgID       *uuid.UUID `json:"org_id,omitempty"`
+	CuratorName string     `json:"curator_name,omitempty"`
 }
+
 
 // EmbedItem inserts or updates the embedding for an item.
 func (s *Store) EmbedItem(ctx context.Context, id uuid.UUID, embedding []float32) error {
@@ -639,9 +642,9 @@ func (s *Store) EmbedItem(ctx context.Context, id uuid.UUID, embedding []float32
 	return err
 }
 
-// SearchItems performs search across a user's items.
+// SearchItems performs search across a user's items (or organization items if org is active).
 // For vector mode, queryEmbedding must be provided. For hybrid, both text query and embedding are used.
-func (s *Store) SearchItems(ctx context.Context, userID uuid.UUID, mode SearchMode, query string, queryEmbedding []float32, limit int) ([]SearchItemsResult, error) {
+func (s *Store) SearchItems(ctx context.Context, mode SearchMode, query string, queryEmbedding []float32, limit int) ([]SearchItemsResult, error) {
 	if limit <= 0 || limit > 50 {
 		limit = 20
 	}
@@ -651,28 +654,33 @@ func (s *Store) SearchItems(ctx context.Context, userID uuid.UUID, mode SearchMo
 		if len(queryEmbedding) == 0 {
 			return nil, errors.New("embedding required for semantic search")
 		}
-		return s.searchItemsHybrid(ctx, userID, query, queryEmbedding, limit, mode == SearchModeHybrid)
+		return s.searchItemsHybrid(ctx, query, queryEmbedding, limit, mode == SearchModeHybrid)
 	default:
-		return s.searchItemsText(ctx, userID, query, limit)
+		return s.searchItemsText(ctx, query, limit)
 	}
 }
 
-func (s *Store) searchItemsText(ctx context.Context, userID uuid.UUID, query string, limit int) ([]SearchItemsResult, error) {
-	const q = `
-		SELECT id, item_type, title, why_saved, url,
-		       similarity(title, $3) + similarity(COALESCE(why_saved, ''), $3) as sim
-		FROM items
-		WHERE user_id = $1
-		  AND archived = false
-		  AND (title ILIKE '%' || $3 || '%'
-		       OR why_saved ILIKE '%' || $3 || '%'
+func (s *Store) searchItemsText(ctx context.Context, query string, limit int) ([]SearchItemsResult, error) {
+	scopeSQL, scopeArgs := ownerClause(ctx, "i.user_id", 3)
+	q := fmt.Sprintf(`
+		SELECT i.id, i.item_type, i.title, i.why_saved, i.url,
+		       similarity(i.title, $1) + similarity(COALESCE(i.why_saved, ''), $1) as sim,
+		       i.org_id, u.username
+		FROM items i
+		JOIN users u ON u.id = i.user_id
+		WHERE %s
+		  AND i.archived = false
+		  AND (i.title ILIKE '%%' || $1 || '%%'
+		       OR i.why_saved ILIKE '%%' || $1 || '%%'
 		       OR EXISTS (
-		           SELECT 1 FROM unnest(ai_tags) t WHERE t ILIKE '%' || $3 || '%'
+		           SELECT 1 FROM unnest(i.ai_tags) t WHERE t ILIKE '%%' || $1 || '%%'
 		       ))
 		ORDER BY sim DESC
 		LIMIT $2
-	`
-	rows, err := s.Reader().Query(ctx, q, userID, limit, query)
+	`, scopeSQL)
+
+	args := append([]any{query, limit}, scopeArgs...)
+	rows, err := s.Reader().Query(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -682,7 +690,7 @@ func (s *Store) searchItemsText(ctx context.Context, userID uuid.UUID, query str
 	for rows.Next() {
 		var r SearchItemsResult
 		var sim float64
-		if err := rows.Scan(&r.ID, &r.Type, &r.Title, &r.WhySaved, &r.URL, &sim); err != nil {
+		if err := rows.Scan(&r.ID, &r.Type, &r.Title, &r.WhySaved, &r.URL, &sim, &r.OrgID, &r.CuratorName); err != nil {
 			return nil, err
 		}
 		r.Similarity = normalizeSim(sim)
@@ -694,19 +702,24 @@ func (s *Store) searchItemsText(ctx context.Context, userID uuid.UUID, query str
 	return results, rows.Err()
 }
 
-func (s *Store) searchItemsHybrid(ctx context.Context, userID uuid.UUID, query string, embedding []float32, limit int, useText bool) ([]SearchItemsResult, error) {
+func (s *Store) searchItemsHybrid(ctx context.Context, query string, embedding []float32, limit int, useText bool) ([]SearchItemsResult, error) {
+	scopeSQL, scopeArgs := ownerClause(ctx, "i.user_id", 3)
 	// Get vector results
-	vecQ := `
-		SELECT id, item_type, title, why_saved, url,
-		       1 - (embedding <=> $3) as sim
-		FROM items
-		WHERE user_id = $1
-		  AND archived = false
-		  AND embedding IS NOT NULL
-		ORDER BY embedding <=> $3
+	vecQ := fmt.Sprintf(`
+		SELECT i.id, i.item_type, i.title, i.why_saved, i.url,
+		       1 - (i.embedding <=> $1) as sim,
+		       i.org_id, u.username
+		FROM items i
+		JOIN users u ON u.id = i.user_id
+		WHERE %s
+		  AND i.archived = false
+		  AND i.embedding IS NOT NULL
+		ORDER BY i.embedding <=> $1
 		LIMIT $2
-	`
-	rows, err := s.Reader().Query(ctx, vecQ, userID, limit, embedding)
+	`, scopeSQL)
+
+	args := append([]any{embedding, limit}, scopeArgs...)
+	rows, err := s.Reader().Query(ctx, vecQ, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -715,7 +728,7 @@ func (s *Store) searchItemsHybrid(ctx context.Context, userID uuid.UUID, query s
 	for rows.Next() {
 		var r SearchItemsResult
 		var sim float64
-		if err := rows.Scan(&r.ID, &r.Type, &r.Title, &r.WhySaved, &r.URL, &sim); err != nil {
+		if err := rows.Scan(&r.ID, &r.Type, &r.Title, &r.WhySaved, &r.URL, &sim, &r.OrgID, &r.CuratorName); err != nil {
 			return nil, err
 		}
 		r.Similarity = sim // 1 - cosine_distance = similarity
@@ -734,7 +747,7 @@ func (s *Store) searchItemsHybrid(ctx context.Context, userID uuid.UUID, query s
 	}
 
 	// Get text results and merge
-	textResults, err := s.searchItemsText(ctx, userID, query, limit)
+	textResults, err := s.searchItemsText(ctx, query, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -871,7 +884,7 @@ type AskResult struct {
 }
 
 // AskDevDeck searches the user's vault and returns an answer with sources (RAG).
-func (s *Store) AskDevDeck(ctx context.Context, userID uuid.UUID, question string, embedding []float32, limit int) (*AskResult, error) {
+func (s *Store) AskDevDeck(ctx context.Context, question string, embedding []float32, limit int) (*AskResult, error) {
 	if limit <= 0 || limit > 10 {
 		limit = 5
 	}
@@ -881,10 +894,10 @@ func (s *Store) AskDevDeck(ctx context.Context, userID uuid.UUID, question strin
 
 	if len(embedding) == 0 {
 		// Fallback to text search if no embedding
-		results, err = s.searchItemsText(ctx, userID, question, limit)
+		results, err = s.searchItemsText(ctx, question, limit)
 	} else {
 		// Search by embedding
-		results, err = s.searchItemsHybrid(ctx, userID, question, embedding, limit, false)
+		results, err = s.searchItemsHybrid(ctx, question, embedding, limit, false)
 	}
 
 	if err != nil {
@@ -896,7 +909,7 @@ func (s *Store) AskDevDeck(ctx context.Context, userID uuid.UUID, question strin
 		citations = append(citations, Citation{
 			ID:    r.ID,
 			Title: r.Title,
-			URL:   r.URL,
+			URL:   derefStr(r.URL),
 		})
 	}
 
@@ -949,8 +962,8 @@ func formatSources(results []SearchItemsResult) string {
 	var out string
 	for i, r := range results {
 		out += fmt.Sprintf("%d. %s", i+1, r.Title)
-		if r.URL != "" {
-			out += " (" + r.URL + ")"
+		if derefStr(r.URL) != "" {
+			out += " (" + derefStr(r.URL) + ")"
 		}
 		out += "\n"
 	}

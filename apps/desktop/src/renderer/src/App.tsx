@@ -12,6 +12,7 @@ import {
   ItemsPage,
   RepoDetailPage,
   SettingsPage,
+  OnboardingPage,
   AdminDashboardPage,
   PublicDeckPage,
   PublicProfilePage,
@@ -23,7 +24,7 @@ import {
   useGlobalShortcuts,
 } from '@devdeck/features'
 import { ConfirmHost, PageTransition, Toaster } from '@devdeck/ui'
-import { isLoggedIn } from '@devdeck/api-client'
+import { isLoggedIn, useMe } from '@devdeck/api-client'
 import { PasteInterceptor } from './components/PasteInterceptor'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -42,9 +43,19 @@ const queryClient = new QueryClient({
 })
 
 function AuthGuard({ children }: { children: ReactElement }): ReactElement {
+  const { data: user, isLoading } = useMe()
+  const location = useLocation()
+
   if (!isLoggedIn()) {
     return <Navigate to="/login" replace />
   }
+
+  if (isLoading) return <div className="h-screen bg-bg-primary" />
+
+  if (user && !user.onboarding_completed && location.pathname !== '/onboarding') {
+    return <Navigate to="/onboarding" replace />
+  }
+
   return children
 }
 
@@ -81,17 +92,28 @@ function AnimatedRoutes() {
   const location = useLocation()
   const navigate = useNavigate()
   const [captureOpen, setCaptureOpen] = useState(false)
+  const [initialCaptureData, setInitialCaptureData] = useState<{ url?: string, title?: string } | null>(null)
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
 
   useGlobalShortcuts({
     onGlobalSearch: () => setGlobalSearchOpen(true),
-    onCapture: () => setCaptureOpen(true),
+    onCapture: () => {
+      setInitialCaptureData(null)
+      setCaptureOpen(true)
+    },
     onShortcuts: () => setShortcutsOpen(true),
   })
 
   useEffect(() => {
-    const onOpenCapture = () => setCaptureOpen(true)
+    const onOpenCapture = (e: any) => {
+      if (e.detail) {
+        setInitialCaptureData({ url: e.detail.url, title: e.detail.title })
+      } else {
+        setInitialCaptureData(null)
+      }
+      setCaptureOpen(true)
+    }
     window.addEventListener('devdeck:open-capture', onOpenCapture)
     return () => window.removeEventListener('devdeck:open-capture', onOpenCapture)
   }, [])
@@ -121,6 +143,12 @@ function AnimatedRoutes() {
             path="/items"
             element={
               <AuthGuard>{withTransition(<ItemsPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/onboarding"
+            element={
+              <AuthGuard>{withTransition(<OnboardingPage />)}</AuthGuard>
             }
           />
           <Route
@@ -190,9 +218,18 @@ function AnimatedRoutes() {
       <UnifiedCommandPalette open={globalSearchOpen} onClose={() => setGlobalSearchOpen(false)} />
       <CaptureModal
         open={captureOpen}
-        onClose={() => setCaptureOpen(false)}
-        onOpenItem={(id) => navigate(`/items/${id}`)}
+        onClose={() => {
+          setCaptureOpen(false)
+          setInitialCaptureData(null)
+        }}
+        onOpenItem={(id) => {
+          setCaptureOpen(false)
+          setInitialCaptureData(null)
+          navigate(`/items/${id}`)
+        }}
         source="manual"
+        initialUrl={initialCaptureData?.url}
+        initialTitle={initialCaptureData?.title}
       />
       <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <PasteInterceptor onOpenItem={(id) => navigate(`/items/${id}`)} />

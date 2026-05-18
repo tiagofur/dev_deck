@@ -14,9 +14,9 @@ DevDeck usa [Semantic Versioning](https://semver.org/) (SemVer) con el formato `
 | **MINOR** | Nueva funcionalidad compatibles | `0.1.0` → `0.2.0` |
 | **PATCH** | Bug fixes compatibles | `0.1.0` → `0.1.1` |
 
-**Estado actual:** `0.1.0` (Wave 4.5 - funcionalidades estables)
+**Estado actual:** `1.0.0` (Ola 17 - Lanzamiento estable)
 
-> DevDeck está en versión `0.x` porque aún no reached feature complete (Ola 7).EI cambio a `1.0.0` se dará cuando todas las olas estén completas.
+> DevDeck ha alcanzado su versión `1.0.0` estable tras completar las 17 olas del roadmap.
 
 ---
 

@@ -151,6 +151,7 @@ Contra el binario buildeado + backend dockerizado con seeds.
 
 ```bash
 pnpm test                         # todos los packages (pnpm -r test)
+
 pnpm -F @devdeck/api-client test  # solo api-client
 pnpm -F @devdeck/ui test          # solo ui
 pnpm -F @devdeck/features test    # solo features

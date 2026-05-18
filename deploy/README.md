@@ -43,19 +43,31 @@ Creá `deploy/.env` con este contenido:
 
 ```env
 # Dominio que apunta al VPS
-DOMAIN=devdeck.tudominio.com
+DOMAIN=devdeck.ai
+FRONTEND_URL=https://devdeck.ai
 
 # Postgres
-PG_PASS=<el-base64-de-arriba>
+PG_PASS=<password-segura>
 
-# Backend
-API_TOKEN=<el-hex-de-arriba>
-GITHUB_TOKEN=                # opcional, ghp_... para 5000 req/h en lugar de 60
+# Auth (GitHub OAuth)
+AUTH_MODE=jwt
+GITHUB_CLIENT_ID=...
+GITHUB_CLIENT_SECRET=...
+GITHUB_OAUTH_CALLBACK_URL=https://devdeck.ai/api/auth/callback
+ALLOWED_GITHUB_LOGINS=tu-usuario,otro-colega
+
+# JWT Secrets
+JWT_SECRET=<hex-32-chars>
+REFRESH_SECRET=<hex-32-chars>
+
+# IA (Opcional, pero recomendado para v1.0)
+AI_PROVIDER=openai
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4o
 
 # Opcional tuning
 LOG_LEVEL=info
-CORS_ORIGINS=app://.
-REFRESH_INTERVAL_HOURS=168
+CORS_ORIGINS=https://devdeck.ai,app://.
 ```
 
 > ⚠️ **Nunca** commitees `.env`. Está en `.gitignore`.
@@ -81,36 +93,28 @@ docker compose logs -f api
 docker compose logs -f web
 ```
 
-## 5. Aplicar la migración inicial (solo la primera vez)
+## 5. Aplicar migraciones (v1.0.0)
+
+DevDeck v1.0.0 requiere aplicar todas las migraciones del core:
 
 ```bash
-docker compose exec -T db psql -U devdeck devdeck \
-  < ../backend/migrations/0001_init.sql
-```
-
-Para migraciones adicionales:
-
-```bash
-for f in ../backend/migrations/000*.sql; do
-  docker compose exec -T db psql -U devdeck devdeck -v ON_ERROR_STOP=1 -f "$f"
+for f in ../backend/migrations/*.sql; do
+  echo "Aplicando $f..."
+  docker compose exec -T db psql -U devdeck devdeck -v ON_ERROR_STOP=1 -f - < "$f"
 done
 ```
 
 ## 6. Probar que está vivo
 
 ```bash
-# Frontend SPA
-curl https://devdeck.tudominio.com/
+# Health (público - incluye DB ping en v1.0)
+curl https://devdeck.ai/healthz
 
-# Health (público)
-curl https://devdeck.tudominio.com/healthz
-
-# API
-curl -H "Authorization: Bearer $API_TOKEN" \
-  https://devdeck.tudominio.com/api/items
+# Métricas (Prometheus)
+curl https://devdeck.ai/metrics
 ```
 
-Si todo está bien, vas a ver el HTML del frontend, `{"status":"ok"}`, y `{"total":0,"items":[]}`.
+Si todo está bien, vas a ver `{"status":"ok"}` y una lista de métricas que incluyen `devdeck_agent_tool_calls_total`.
 
 ---
 

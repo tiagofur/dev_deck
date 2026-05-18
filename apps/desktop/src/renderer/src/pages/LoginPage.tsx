@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
-import { Apple, Chrome, Github, Loader2 } from 'lucide-react'
-import { fetchAuthProviders, loginLocal, setTokens, type AuthProviderInfo } from '@devdeck/api-client'
+import { Apple, Chrome, Github, Loader2, ArrowRight } from 'lucide-react'
+import { fetchAuthProviders, loginLocal, loginStep1, setTokens, type AuthProviderInfo } from '@devdeck/api-client'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -11,6 +11,8 @@ export function LoginPage() {
   
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [step, setStep] = useState<1 | 2>(1)
+  const [loginType, setLoginType] = useState<'password' | 'saml'>('password')
   const [loginError, setLoginError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -35,6 +37,25 @@ export function LoginPage() {
         setLoadError(err instanceof Error ? err.message : 'No se pudieron cargar los proveedores.')
       })
   }, [authMode, envToken, navigate])
+
+  async function handleNextStep(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setLoginError(null)
+    try {
+      const res = await loginStep1(email)
+      if (res.type === 'saml' && res.login_url) {
+        window.electronAPI?.auth.openExternal(res.login_url)
+        return
+      }
+      setLoginType(res.type)
+      setStep(2)
+    } catch (err: any) {
+      setLoginError(err.message || 'Error al validar email')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -95,45 +116,67 @@ export function LoginPage() {
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4 mb-8 text-left">
-          <div>
-            <label className="block font-display font-bold uppercase text-xs mb-1 ml-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full border-3 border-ink bg-bg-primary px-4 py-3 font-mono text-sm focus:outline-none focus:bg-white shadow-hard-sm"
-              placeholder="tu@email.com"
-            />
-          </div>
-          <div>
-            <label className="block font-display font-bold uppercase text-xs mb-1 ml-1">Contraseña</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full border-3 border-ink bg-bg-primary px-4 py-3 font-mono text-sm focus:outline-none focus:bg-white shadow-hard-sm"
-              placeholder="••••••••"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full border-3 border-ink bg-accent-cyan text-white font-display font-bold uppercase
-                       text-lg py-4 shadow-hard hover:-translate-x-1 hover:-translate-y-1 hover:shadow-hard-lg
-                       active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
-                       transition-all duration-150 flex items-center justify-center gap-2"
-          >
-            {loading ? <Loader2 className="animate-spin" /> : 'Entrar'}
-          </button>
+        <div className="space-y-4 mb-8 text-left">
+          {step === 1 ? (
+            <form onSubmit={handleNextStep} className="space-y-4">
+              <div>
+                <label className="block font-display font-bold uppercase text-xs mb-1 ml-1">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoFocus
+                  className="w-full border-3 border-ink bg-bg-primary px-4 py-3 font-mono text-sm focus:outline-none focus:bg-white shadow-hard-sm"
+                  placeholder="tu@email.com"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full border-3 border-ink bg-accent-lavender text-ink font-display font-bold uppercase
+                           text-lg py-4 shadow-hard hover:-translate-x-1 hover:-translate-y-1 hover:shadow-hard-lg
+                           active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
+                           transition-all duration-150 flex items-center justify-center gap-2"
+              >
+                {loading ? <Loader2 className="animate-spin" /> : <><ArrowRight size={20} strokeWidth={3} /> Continuar</>}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <p className="font-mono text-[10px] text-ink-soft mb-2 bg-bg-primary p-2 border-2 border-ink inline-block">
+                  {email} <button type="button" onClick={() => setStep(1)} className="ml-2 underline hover:text-accent-pink">cambiar</button>
+                </p>
+                <label className="block font-display font-bold uppercase text-xs mb-1 ml-1">Contraseña</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoFocus
+                  className="w-full border-3 border-ink bg-bg-primary px-4 py-3 font-mono text-sm focus:outline-none focus:bg-white shadow-hard-sm"
+                  placeholder="••••••••"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full border-3 border-ink bg-accent-cyan text-white font-display font-bold uppercase
+                           text-lg py-4 shadow-hard hover:-translate-x-1 hover:-translate-y-1 hover:shadow-hard-lg
+                           active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
+                           transition-all duration-150 flex items-center justify-center gap-2"
+              >
+                {loading ? <Loader2 className="animate-spin" /> : 'Entrar'}
+              </button>
+            </form>
+          )}
           
           <div className="flex justify-between font-mono text-[10px] uppercase font-bold px-1">
             <Link to="/forgot-password" title="recuperar" className="hover:underline">¿Olvidaste tu contraseña?</Link>
             <Link to="/register" title="registro" className="text-accent-pink hover:underline">Crear cuenta</Link>
           </div>
-        </form>
+        </div>
 
         <div className="relative mb-8">
           <div className="absolute inset-0 flex items-center"><span className="w-full border-t-2 border-ink-soft"></span></div>

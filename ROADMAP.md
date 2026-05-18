@@ -1,6 +1,6 @@
-# DevDeck.ai Roadmap
+# DevDeck.ai Roadmap (v1.0)
 
-This document outlines the vision and development stages for **DevDeck.ai**. We work in "Waves" (Olas) to progressively build the core infrastructure, the capture network, and the AI intelligence.
+This document outlines the vision and development stages for **DevDeck.ai**. We worked in "Waves" (Olas) to progressively build the core infrastructure, the capture network, and the collective AI intelligence.
 
 [Leer en español](ROADMAP.es.md)
 
@@ -11,72 +11,57 @@ This document outlines the vision and development stages for **DevDeck.ai**. We 
 - [x] **Wave 1:** Core Go API, Auth (GitHub), and basic Items CRUD.
 - [x] **Wave 2:** Enrichment engine (Open Graph metadata, screenshot capture).
 - [x] **Wave 3:** Frontend redesign (Neo-brutalist / Dark mode).
-- [x] **Wave 4:** Monorepo transition (pnpm workspaces) and shared `@devdeck/features` package.
+- [x] **Wave 4:** Monorepo transition (pnpm workspaces) and shared components.
+
+## ✅ Wave 5: General Items + Real AI (Complete)
+
+- [x] **Phase 18:** Polymorphic Items (CLIs, Snippets, Prompts, Workflows).
+- [x] **Phase 19:** AI Semantic Brain (Embeddings, Semantic Search, RAG).
+
+## ✅ Wave 6: Offline-first + Sync (Complete)
+
+- [x] **Phase 20:** Offline-first Architecture (Local SQLite, OPFS, Atomic Sync).
+- [x] **Phase 21:** Public Decks & Community sharing.
+
+## ✅ Waves 7–12: Advanced Features (Complete)
+
+- [x] **Wave 7:** Versioning and Multi-device management.
+- [x] **Wave 8:** Smart Notifications and Social Following.
+- [x] **Wave 9:** Real-time Collaboration (Yjs, WebSockets, CRDTs).
+- [x] **Wave 10:** Plugin SDK and Outbound Webhooks (HMAC signatures).
+- [x] **Wave 11:** Mobile Bridge (PWA Share Target, Progressive Sync).
+- [x] **Wave 12:** Social Gamification and Reputation System.
+
+## ✅ Waves 13–16: Enterprise & Agents (Complete)
+
+- [x] **Wave 13:** Global Scalability (Read Replicas, Multi-region Sync).
+- [x] **Wave 14:** Enterprise Core (SAML 2.0 SSO, SCIM 2.0 Provisioning).
+- [x] **Wave 15:** Collective Intelligence (Team Insights, Trending Tags).
+- [x] **Wave 16:** AI Agents (Autonomous Tool Calling, Hybrid Local Execution).
+
+## ✅ Wave 17: Public Launch (Complete)
+
+- [x] **Phase 51:** Onboarding Wizard and Starter Kits.
+- [x] **Phase 52:** v1.0 Landing Page and Documentation.
+- [x] **Phase 53:** Production Hardening and Stable v1.0 Release.
 
 ---
 
-## 🚧 Wave 4.5: Hardening & Capture (Current)
-
-> **Goal:** Create a safety net (testing) and open the "capture floodgates" via different channels.
-
-### Phase 16 — Testing & CI
-- [ ] Backend: Integration tests with `testcontainers-go`.
-- [ ] Frontend: Vitest + React Testing Library for shared components.
-- [ ] E2E: Playwright for critical flows (Login -> Capture -> Search).
-- [ ] CI: GitHub Actions for automated linting and testing.
-
-### Phase 17 — The Capture Network
-- [ ] **CLI:** `devdeck add <url>` for terminal-first users.
-- [ ] **Extension:** Browser extension (Chrome/Firefox) for one-click saving.
-- [ ] **Paste Interceptor:** "Smart paste" detection in the desktop app.
-- [ ] **Share Extension:** Basic implementation for future mobile apps.
-
----
-
-## 🌊 Wave 5: General Items + Real AI
-
-> **Goal:** Support non-URL items (CLIs, Snippets, Prompts) and leverage LLMs for deep organization.
-
-### Phase 18 — Polymorphic Items
-- Support for: `Repo`, `CLI`, `Plugin`, `Cheatsheet`, `Shortcut`, `Snippet`, `Agent`, `Prompt`, `Workflow`.
-- Custom schemas per type (e.g., `Shortcut` has a `keys` field, `CLI` has an `install` command).
-
-### Phase 19 — AI Semantic Brain
-- **Embeddings:** Vectorize items using OpenAI or local Ollama.
-- **Semantic Search:** Find items by intent: *"That tool for resizing images I saved last month"* instead of exact tags.
-- **Auto-tagging:** AI suggests categories and tags during capture.
-- **Ask DevDeck:** RAG-based chat to query your own knowledge base.
-
----
-
-## 🌊 Wave 6: Offline-first + Sync + Multi-user
-
-> **Goal:** Make DevDeck work everywhere, even without internet, and enable community sharing.
-
-### Phase 20 — Offline-first Architecture
-- **Desktop:** Local SQLite with sync logic.
-- **Web:** PWA support with OPFS persistence.
-- **Sync Engine:** Conflict resolution (last-write-wins) and background synchronization.
-
-### Phase 21 — Decks & Community
-- **Public Decks:** Curate and share a collection of tools (e.g., *"My 2026 Go Stack"*).
-- **Importing:** One-click import from a public deck to your personal vault.
-- **Social Metadata:** Stars, forks, and trending tools within the DevDeck ecosystem.
-
----
-
-## Tech Stack (Current)
+## Tech Stack (v1.0)
 
 | Layer | Technology |
 |------|-----------|
-| **Monorepo** | pnpm workspaces |
-| **Desktop** | Electron + React 18 + TS |
-| **Web** | Vite + React 18 + TS |
-| **Styling** | Tailwind CSS + Framer Motion |
-| **Backend** | Go (Chi) + pgx |
-| **Database** | Postgres 16 + pgvector |
-| **IA** | OpenAI / Ollama (Roadmap) |
+| **Monorepo** | pnpm workspaces (100% shared domain logic) |
+| **Desktop** | Electron 32 + Native Shell support + safeStorage |
+| **Web** | Vite + React 18 + PWA (Workbox) + OPFS |
+| **Backend** | Go 1.22+ with Multi-Pool architecture (Reader/Writer) |
+| **Database** | Postgres 16 + pgvector + Regional Replicas |
+| **AI** | Autonomous Agents (SSE + Tool Calling) + OpenAI/Ollama |
+| **Identity** | SAML 2.0 (SSO) + SCIM 2.0 + RBAC |
+| **Sync** | Bidirectional Atomic Sync with LWW + CRDTs |
+| **Styling** | Tailwind CSS (Neo-Brutalist design system) |
+| **Real-time** | Yjs + WebSockets |
 
 ---
 
-*Last updated: May 2026*
+*Mission Accomplished: May 2026 (Version 1.0.0 Stable)*

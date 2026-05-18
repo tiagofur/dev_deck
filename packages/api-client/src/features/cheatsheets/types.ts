@@ -63,4 +63,6 @@ export interface SearchResult {
   title: string
   subtitle: string
   extra: string
+  curator_name?: string
+  org_id?: string
 }

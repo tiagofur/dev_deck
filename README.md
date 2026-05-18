@@ -54,8 +54,9 @@ Both apps import pages and components from the `@devdeck/features` package — t
 ---
 
 ## Screenshots
+---
 
-> 📸 _TODO: Add GIFs/screenshots of Home, RepoDetail, Discovery, and Cheatsheets. Part of Phase 16.5._
+> 📸 **Explore screenshots and live demos on [DevDeck.ai](https://devdeck.ai)**
 
 ---
 
@@ -95,7 +96,11 @@ Both apps import pages and components from the `@devdeck/features` package — t
 
 ## Status
 
-✅ **Waves 1–6 complete.** **Wave 7 (Collaboration & Advanced IA) in progress**.
-The project has evolved from a simple directory to an offline-first knowledge OS with semantic search, multi-device synchronization, and public shareable decks.
+✅ **All 17 Waves complete.** DevDeck is now in **Version 1.0 (Stable)**.
+What started as a simple repo directory is now a full Knowledge OS with:
+- **Autonomous AI Agents:** Locally supervised command execution.
+- **Enterprise Ready:** SAML SSO, SCIM 2.0 provisioning, and RBAC.
+- **Collective Intelligence:** Team-wide discovery, trending topics, and analytics.
+- **Global Scalability:** Multi-region active-active synchronization with read replicas.
 
-Full roadmap at [ROADMAP.md](ROADMAP.md).
+Full journey at [ROADMAP.md](ROADMAP.md).

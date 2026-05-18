@@ -83,3 +83,87 @@ func (s *Store) AddOrgMember(ctx context.Context, orgID, userID uuid.UUID, role 
 	`, orgID, userID, role)
 	return err
 }
+
+type OrgInsights struct {
+	TotalItems     int              `json:"total_items"`
+	TopLanguages   []LanguageStat   `json:"top_languages"`
+	TopCurators    []CuratorStat    `json:"top_curators"`
+	RecentActivity int              `json:"recent_activity"`
+}
+
+type LanguageStat struct {
+	Language string  `json:"language"`
+	Count    int     `json:"count"`
+	Share    float64 `json:"share"`
+}
+
+type CuratorStat struct {
+	DisplayName string `json:"display_name"`
+	AvatarURL   string `json:"avatar_url"`
+	ItemCount   int    `json:"item_count"`
+}
+
+func (s *Store) GetOrgInsights(ctx context.Context, orgID uuid.UUID) (*OrgInsights, error) {
+	var insights OrgInsights
+
+	// 1. Total items
+	err := s.Reader().QueryRow(ctx, `
+		SELECT COUNT(*) FROM items WHERE org_id = $1 AND archived = false
+	`, orgID).Scan(&insights.TotalItems)
+	if err != nil {
+		return nil, err
+	}
+
+	// 2. Top Languages
+	rows, err := s.Reader().Query(ctx, `
+		SELECT meta->>'language' as lang, COUNT(*) as c
+		FROM items
+		WHERE org_id = $1 AND archived = false AND meta->>'language' IS NOT NULL
+		GROUP BY lang
+		ORDER BY c DESC
+		LIMIT 5
+	`, orgID)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var ls LanguageStat
+			if err := rows.Scan(&ls.Language, &ls.Count); err == nil {
+				if insights.TotalItems > 0 {
+					ls.Share = float64(ls.Count) / float64(insights.TotalItems)
+				}
+				insights.TopLanguages = append(insights.TopLanguages, ls)
+			}
+		}
+	}
+
+	// 3. Top Curators
+	rows, err = s.Reader().Query(ctx, `
+		SELECT u.display_name, u.avatar_url, COUNT(i.id) as c
+		FROM items i
+		JOIN users u ON u.id = i.user_id
+		WHERE i.org_id = $1 AND i.archived = false
+		GROUP BY u.id, u.display_name, u.avatar_url
+		ORDER BY c DESC
+		LIMIT 5
+	`, orgID)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var cs CuratorStat
+			if err := rows.Scan(&cs.DisplayName, &cs.AvatarURL, &cs.ItemCount); err == nil {
+				insights.TopCurators = append(insights.TopCurators, cs)
+			}
+		}
+	}
+
+	// 4. Recent activity (last 7 days)
+	err = s.Reader().QueryRow(ctx, `
+		SELECT COUNT(*) FROM activity_log
+		WHERE org_id = $1 AND created_at > NOW() - INTERVAL '7 days'
+	`, orgID).Scan(&insights.RecentActivity)
+	if err != nil {
+		return nil, err
+	}
+
+	return &insights, nil
+}

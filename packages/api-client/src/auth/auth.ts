@@ -98,6 +98,15 @@ export async function registerUser(email: string, password: string, inviteCode?:
   return api.post<{ message: string }>('/api/auth/register', { email, password, invite_code: inviteCode })
 }
 
+export interface LoginStep1Response {
+  type: 'password' | 'saml'
+  login_url?: string
+}
+
+export async function loginStep1(email: string): Promise<LoginStep1Response> {
+  return api.post<LoginStep1Response>('/api/auth/login-step1', { email })
+}
+
 export async function loginLocal(email: string, password: string): Promise<{ access_token: string; refresh_token: string; expires_in: number }> {
   const pair = await api.post<{ access_token: string; refresh_token: string; expires_in: number }>('/api/auth/login', { email, password })
   setTokens(pair.access_token, pair.refresh_token)
