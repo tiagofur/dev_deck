@@ -172,6 +172,11 @@ func main() {
 		}
 	}()
 
+	// Trending Topic Alerts (Team Alerts)
+	trendsChecker := cron.NewTrendsChecker(st, wh)
+	trendsChecker.Start(ctx)
+	logger.Info("trends checker (team alerts) initialized")
+
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,
 		Handler:           router,

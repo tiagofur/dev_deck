@@ -116,6 +116,20 @@ curl https://devdeck.ai/metrics
 
 Si todo está bien, vas a ver `{"status":"ok"}` y una lista de métricas que incluyen `devdeck_agent_tool_calls_total`.
 
+## 7. Observabilidad (v1.0.0)
+
+DevDeck incluye un stack de monitoreo integrado:
+
+- **Prometheus**: Recolecta métricas de la API y de los Agentes.
+- **Grafana**: Visualización en `https://monitor.devdeck.ai`.
+  - Usuario por defecto: `admin`
+  - Password: La que definas en `GF_PASS` (.env).
+
+### Dashboards recomendados
+1. **AI Performance**: Monitoreá el éxito de los Tool Calls y la latencia de los agentes.
+2. **API Health**: Tasa de error 5xx, latencia de handlers y volumen de tráfico.
+3. **Hardware**: Uso de CPU y RAM del container de Go.
+
 ---
 
 ## Stack completo

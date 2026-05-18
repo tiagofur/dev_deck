@@ -103,6 +103,26 @@ type CuratorStat struct {
 	ItemCount   int    `json:"item_count"`
 }
 
+func (s *Store) ListAllOrganizations(ctx context.Context) ([]auth.Organization, error) {
+	rows, err := s.Reader().Query(ctx, `
+		SELECT id, name, slug, plan, created_at, updated_at FROM orgs
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var out []auth.Organization
+	for rows.Next() {
+		var o auth.Organization
+		if err := rows.Scan(&o.ID, &o.Name, &o.Slug, &o.Plan, &o.CreatedAt, &o.UpdatedAt); err != nil {
+			return nil, err
+		}
+		out = append(out, o)
+	}
+	return out, rows.Err()
+}
+
 func (s *Store) GetOrgInsights(ctx context.Context, orgID uuid.UUID) (*OrgInsights, error) {
 	var insights OrgInsights
 
