@@ -193,6 +193,7 @@ jobs:
       DB_URL: postgres://devdeck:devdeck@localhost:5432/devdeck?sslmode=disable
       JWT_SECRET: test-jwt-secret
       AUTH_MODE: jwt
+      LOCAL_AUTH_ENABLED: 'true'
       VITE_API_URL: http://localhost:8080
       VITE_AUTH_MODE: jwt
       CORS_ORIGINS: 'app://.,http://localhost:5173,http://localhost:5174'
