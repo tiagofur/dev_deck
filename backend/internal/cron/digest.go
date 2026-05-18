@@ -40,7 +40,7 @@ func (j *DigestJob) Run(ctx context.Context) {
 		userID := uMap["id"].(uuid.UUID)
 		userCtx := authctx.WithUserID(ctx, userID)
 
-		// 2. Get items from last 7 days
+		// 2. Get up to the 10 newest items for the user
 		listRes, err := j.store.ListItems(userCtx, items.ListParams{
 			Limit: 10,
 		})
