@@ -302,7 +302,7 @@ func (h *ReposHandler) ListLinkedCheatsheets(w http.ResponseWriter, r *http.Requ
 	if !ok {
 		return
 	}
-	out, err := h.store.ListCheatsheetsByRepo(r.Context(), id)
+	out, err := h.store.ListCheatsheetsByItem(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, store.ErrNotFound) {
 			writeError(w, http.StatusNotFound, "REPO_NOT_FOUND", "repo not found")

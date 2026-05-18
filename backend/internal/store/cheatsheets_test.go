@@ -91,7 +91,7 @@ func TestStore_LinkUnlinkCheatsheet(t *testing.T) {
 		t.Fatalf("re-link should be idempotent: %v", err)
 	}
 
-	linked, err := st.ListCheatsheetsByRepo(ctx, r.ID)
+	linked, err := st.ListCheatsheetsByItem(ctx, r.ID)
 	if err != nil {
 		t.Fatalf("list linked: %v", err)
 	}

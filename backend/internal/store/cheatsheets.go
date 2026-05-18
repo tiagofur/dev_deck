@@ -512,14 +512,14 @@ func (s *Store) UnlinkCheatsheet(ctx context.Context, itemID, cheatsheetID uuid.
 	return nil
 }
 
-func (s *Store) ListCheatsheetsByRepo(ctx context.Context, repoID uuid.UUID) ([]*cheatsheets.Cheatsheet, error) {
-	scopeSQL, scopeArgs := ownerClause(ctx, "r.user_id", 2)
-	args := append([]any{repoID}, scopeArgs...)
+func (s *Store) ListCheatsheetsByItem(ctx context.Context, itemID uuid.UUID) ([]*cheatsheets.Cheatsheet, error) {
+	scopeSQL, scopeArgs := ownerClause(ctx, "i.user_id", 2)
+	args := append([]any{itemID}, scopeArgs...)
 	rows, err := s.Reader().Query(ctx, `
 		SELECT `+cheatColumnsPrefixed+` FROM cheatsheets c
-		JOIN repo_cheatsheet_links rcl ON rcl.cheatsheet_id = c.id
-		JOIN repos r ON r.id = rcl.repo_id
-		WHERE rcl.repo_id = $1 AND `+scopeSQL+`
+		JOIN item_cheatsheet_links icl ON icl.cheatsheet_id = c.id
+		JOIN items i ON i.id = icl.item_id
+		WHERE icl.item_id = $1 AND `+scopeSQL+`
 		ORDER BY c.title ASC
 	`, args...)
 	if err != nil {
