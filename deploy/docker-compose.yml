@@ -36,7 +36,7 @@ services:
     build:
       context: ../backend
       dockerfile: Dockerfile
-    image: ghcr.io/tiagofur/dev_deck-api:latest
+    image: ghcr.io/tiagofur/devdeck-api:latest
     container_name: devdeck-api
     restart: unless-stopped
     depends_on:
@@ -81,7 +81,7 @@ services:
     build:
       context: ..
       dockerfile: apps/web/Dockerfile
-    image: ghcr.io/tiagofur/dev_deck-web:latest
+    image: ghcr.io/tiagofur/devdeck-web:latest
     container_name: devdeck-web
     restart: unless-stopped
     expose:
