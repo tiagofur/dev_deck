@@ -110,8 +110,8 @@
 - [x] Endpoint `/api/items/capture` en producción con tests.
 - [x] Web client migrado a React y compartiendo código con desktop (§16.13).
 - [x] CLI `devdeck` en release v1.0.0 Stable con distribución global.
-- [ ] Extensión Chrome en Chrome Web Store (o sideload con instructions claras).
-- [ ] README con screenshots (no bloquea CI, agendado para antes del release público).
+- [x] Extensión Chrome en Chrome Web Store (v1.0.0 Stable). ✅
+- [x] README con screenshots (enlace a [devdeck.ai](https://devdeck.ai)). ✅
 - [x] `api.exe` fuera del repo.
 - [x] ADRs 0001, 0002 y 0003 con decisión final ("Aceptadas").
 
@@ -596,10 +596,11 @@
 - Docs: Documentación técnica completa para desarrolladores y administradores
 - Marketing: Preparación de assets para lanzamiento en Product Hunt / GitHub Trending
 
-### Fase 53 — Hardening de Producción y v1.0 Release (FINAL)
+### Fase 53 — Hardening de Producción, Team Alerts y v1.0 Release (FINAL)
 
 - Monitoring: Implementación de observabilidad global con Prometheus para Agentes e IA
 - Security: Mitigación de SSRF en enriquecedores y auditoría final de flujos de identidad
+- Alerts: Sistema de Team Alerts proactivo vía webhooks para Hot Topics internos. ✅
 - Launch: Publicación de la v1.0 estable y finalización del Roadmap de 17 Olas
 
 ---

@@ -1,9 +1,6 @@
 # Caddyfile — DevDeck reverse proxy with automatic HTTPS
-#
-# {$DOMAIN} comes from the environment (set in .env / docker-compose).
-# Caddy provisions a Let's Encrypt cert automatically the first time
-# the domain resolves to this server.
 
+# Main Domain (Web App)
 {$DOMAIN} {
     encode gzip zstd
 
@@ -17,7 +14,7 @@
         reverse_proxy api:8080
     }
 
-    # SPA — serve React app for all other routes (including root)
+    # SPA — serve React app
     handle /* {
         reverse_proxy web:3000
     }
@@ -27,4 +24,12 @@
         format console
         level INFO
     }
+}
+
+# Monitoring Domain (Grafana)
+monitor.{$DOMAIN} {
+    reverse_proxy grafana:3000
+    
+    # Basic auth recommended for monitoring if not using Grafana internal auth
+    # For now, we rely on Grafana's login screen.
 }

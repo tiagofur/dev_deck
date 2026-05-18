@@ -36,7 +36,7 @@ services:
     build:
       context: ../backend
       dockerfile: Dockerfile
-    image: devdeck-api:latest
+    image: ghcr.io/tiagofur/dev_deck-api:latest
     container_name: devdeck-api
     restart: unless-stopped
     depends_on:
@@ -81,7 +81,7 @@ services:
     build:
       context: ..
       dockerfile: apps/web/Dockerfile
-    image: devdeck-web:latest
+    image: ghcr.io/tiagofur/dev_deck-web:latest
     container_name: devdeck-web
     restart: unless-stopped
     expose:
@@ -89,10 +89,44 @@ services:
     networks:
       - web
 
+  # Monitoring (v1.0.0)
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: devdeck-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prom_data:/prometheus
+    expose:
+      - "9090"
+    networks:
+      - internal
+    depends_on:
+      - api
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: devdeck-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_PASS:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+    expose:
+      - "3000"
+    networks:
+      - web
+      - internal
+    depends_on:
+      - prometheus
+
 volumes:
   pgdata:
   caddy_data:
   caddy_config:
+  prom_data:
+  grafana_data:
 
 networks:
   internal:
