@@ -59,30 +59,10 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
       CORS_ORIGINS: ${CORS_ORIGINS:-app://.}
       REFRESH_INTERVAL_HOURS: ${REFRESH_INTERVAL_HOURS:-168}
-    expose:
-      - "8080"
+    ports:
+      - "127.0.0.1:8085:8080"
     networks:
       - internal
-      - web
-
-  caddy:
-    image: caddy:2-alpine
-    container_name: devdeck-caddy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp" # HTTP/3
-    environment:
-      DOMAIN: ${DOMAIN}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - api
-      - web
-    networks:
       - web
 
   web:
@@ -92,8 +72,8 @@ services:
     image: ghcr.io/tiagofur/devdeck-web:latest
     container_name: devdeck-web
     restart: unless-stopped
-    expose:
-      - "3000"
+    ports:
+      - "127.0.0.1:3050:3000"
     networks:
       - web
 
@@ -131,8 +111,6 @@ services:
 
 volumes:
   pgdata:
-  caddy_data:
-  caddy_config:
   prom_data:
   grafana_data:
 
