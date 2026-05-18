@@ -34,6 +34,11 @@ func (h *CaptureHandler) Capture(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusUnprocessableEntity, "MISSING_INPUT", "either url or text is required")
 		return
 	}
+	if in.TypeHint != "" && !items.IsValid(in.TypeHint) {
+		metrics.CaptureItems.WithLabelValues(sourceLabel(in.Source), "unknown", "invalid").Inc()
+		writeError(w, http.StatusUnprocessableEntity, "INVALID_TYPE", "invalid type_hint")
+		return
+	}
 
 	det := items.DetectType(in)
 	var normPtr *string

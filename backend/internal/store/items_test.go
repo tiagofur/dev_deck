@@ -5,7 +5,6 @@ import (
 
 	"devdeck/internal/authctx"
 	"devdeck/internal/domain/items"
-	"devdeck/internal/domain/repos"
 	"devdeck/internal/store"
 )
 
@@ -60,7 +59,7 @@ func TestStore_ListItems_StackFilter(t *testing.T) {
 	tests := []struct {
 		name     string
 		tag      string
-		lang     string
+		stack    []string
 		expected []string
 	}{
 		{
@@ -75,16 +74,16 @@ func TestStore_ListItems_StackFilter(t *testing.T) {
 		},
 		{
 			name:     "Filter by TypeScript language",
-			lang:     "TypeScript",
+			stack:    []string{"typescript"},
 			expected: []string{"React Frontend"},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			res, err := st.ListItems(ctx, repos.ListParams{
-				Tag:  tt.tag,
-				Lang: tt.lang,
+			res, err := st.ListItems(ctx, items.ListParams{
+				Tag:   tt.tag,
+				Stack: tt.stack,
 			})
 			if err != nil {
 				t.Fatalf("ListItems failed: %v", err)
@@ -96,7 +95,7 @@ func TestStore_ListItems_StackFilter(t *testing.T) {
 
 			found := make(map[string]bool)
 			for _, it := range res.Items {
-				found[it.Name] = true
+				found[it.Title] = true
 			}
 
 			for _, exp := range tt.expected {
@@ -144,5 +143,24 @@ func TestStore_AskDevDeck_Citations(t *testing.T) {
 
 	if !found {
 		t.Errorf("expected citation for item %s not found or incorrect", it.ID)
+	}
+}
+
+func TestStore_CreateItem_WithoutOrg_SetsNullOrgID(t *testing.T) {
+	st, ctx := newStore(t)
+
+	userID := mustUUID(t, "00000000-0000-0000-0000-000000000001")
+	ctx = authctx.WithUserID(ctx, userID)
+
+	it, err := st.CreateItem(ctx, store.CreateItemInput{
+		Type:  items.TypeNote,
+		Title: "note without org",
+		Notes: "test",
+	})
+	if err != nil {
+		t.Fatalf("create item: %v", err)
+	}
+	if it.OrgID != nil {
+		t.Fatalf("expected org_id to be nil, got %s", *it.OrgID)
 	}
 }

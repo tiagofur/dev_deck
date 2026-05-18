@@ -54,16 +54,15 @@ func (s *Store) UpsertUser(ctx context.Context, ghUser auth.GitHubUser) (*auth.U
 	row := s.Writer().QueryRow(ctx, `
 		INSERT INTO users (github_id, login, username, avatar_url, display_name, role, region)
 		VALUES ($1, $2, $3, $4, $5, 'user', $6)
-		ON CONFLICT (github_id) DO UPDATE SET
+		ON CONFLICT (github_id) WHERE github_id IS NOT NULL DO UPDATE SET
 			login = EXCLUDED.login,
 			avatar_url = EXCLUDED.avatar_url,
 			display_name = EXCLUDED.display_name,
 			updated_at = NOW()
-		RETURNING `+userColumns, 
+		RETURNING `+userColumns,
 		ghUser.ID, ghUser.Login, ghUser.Login, ghUser.AvatarURL, ghUser.Name, s.appRegion)
 	return scanUser(row)
 }
-
 
 func (s *Store) GetPublicProfile(ctx context.Context, username string) (map[string]any, error) {
 	var profile struct {
@@ -231,7 +230,6 @@ func (s *Store) CreateUserLocalTx(ctx context.Context, tx pgx.Tx, login, passwor
 	} else {
 		row = s.Writer().QueryRow(ctx, q, login, passwordHash, s.appRegion)
 	}
-
 
 	u, err := scanUser(row)
 	if err != nil {

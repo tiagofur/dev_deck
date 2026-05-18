@@ -7,7 +7,7 @@ import (
 
 	"devdeck/internal/ai"
 	"devdeck/internal/authctx"
-	"devdeck/internal/domain/repos"
+	"devdeck/internal/domain/items"
 	"devdeck/internal/store"
 
 	"github.com/google/uuid"
@@ -28,7 +28,7 @@ func NewDigestJob(s *store.Store, aiSvc *ai.Service) *DigestJob {
 // Run executes the digest generation for all active users.
 func (j *DigestJob) Run(ctx context.Context) {
 	slog.Info("starting weekly digest job")
-	
+
 	// 1. Get all users
 	users, err := j.store.ListUsersAdmin(ctx)
 	if err != nil {
@@ -39,9 +39,9 @@ func (j *DigestJob) Run(ctx context.Context) {
 	for _, uMap := range users {
 		userID := uMap["id"].(uuid.UUID)
 		userCtx := authctx.WithUserID(ctx, userID)
-		
-		// 2. Get items from last 7 days
-		listRes, err := j.store.ListItems(userCtx, repos.ListParams{
+
+		// 2. Get up to the 10 newest items for the user
+		listRes, err := j.store.ListItems(userCtx, items.ListParams{
 			Limit: 10,
 		})
 		if err != nil {
@@ -67,11 +67,11 @@ func (j *DigestJob) Run(ctx context.Context) {
 			slog.Error("failed to create digest notification", "user_id", userID, "err", err)
 		}
 	}
-	
+
 	slog.Info("weekly digest job finished")
 }
 
-func (j *DigestJob) generateDigestSummary(ctx context.Context, itemNodes []*repos.Repo) (string, error) {
+func (j *DigestJob) generateDigestSummary(ctx context.Context, itemNodes []*items.Item) (string, error) {
 	if !j.ai.Enabled() || len(itemNodes) == 0 {
 		return "Esta semana guardaste varios items interesantes. ¡No te olvides de revisarlos!", nil
 	}
@@ -83,10 +83,12 @@ func (j *DigestJob) generateDigestSummary(ctx context.Context, itemNodes []*repo
 		if it.Description != nil {
 			desc = *it.Description
 		}
-		list += fmt.Sprintf("- %s: %s\n", it.Name, desc)
-		if i >= 4 { break }
+		list += fmt.Sprintf("- %s: %s\n", it.Title, desc)
+		if i >= 4 {
+			break
+		}
 	}
 
 	// For Wave 8, we'll keep it simple:
-	return "Excelente semana. Guardaste herramientas clave como " + itemNodes[0].Name + ". ¡Seguí explorando!", nil
+	return "Excelente semana. Guardaste herramientas clave como " + itemNodes[0].Title + ". ¡Seguí explorando!", nil
 }

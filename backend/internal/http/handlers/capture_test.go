@@ -189,9 +189,12 @@ func TestCapture_DedupesAgainstLegacyReposTable(t *testing.T) {
 func TestCapture_EnrichableTypeGetsQueuedStatus(t *testing.T) {
 	ts := newTestServer(t)
 
-	_, resp := capture(t, ts, capturePayload{
+	result, resp := capture(t, ts, capturePayload{
 		URL: "https://ripgrep.dev/", // Type=tool → enrichable
 	})
+	if result.code != http.StatusCreated {
+		t.Fatalf("expected 201, got %d, body: %s", result.code, result.raw)
+	}
 	if resp.EnrichmentStatus != items.EnrichmentQueued && resp.EnrichmentStatus != items.EnrichmentSkipped {
 		// Note: when running without a configured queue (testServer does
 		// not pass one), the status may land as skipped. We accept both.
@@ -202,7 +205,10 @@ func TestCapture_EnrichableTypeGetsQueuedStatus(t *testing.T) {
 func TestCapture_NoteTypeGetsSkippedStatus(t *testing.T) {
 	ts := newTestServer(t)
 
-	_, resp := capture(t, ts, capturePayload{Text: "plain note"})
+	result, resp := capture(t, ts, capturePayload{Text: "plain note"})
+	if result.code != http.StatusCreated {
+		t.Fatalf("expected 201, got %d, body: %s", result.code, result.raw)
+	}
 	if resp.EnrichmentStatus != items.EnrichmentSkipped {
 		t.Errorf("expected skipped for note, got %q", resp.EnrichmentStatus)
 	}
