@@ -110,6 +110,50 @@ export type { APIKey, CreateKeyResponse, CustomEnricher, PluginTemplate } from '
 export { useWebhooks, useCreateWebhook, useDeleteWebhook } from './features/webhooks/api'
 export type { Webhook } from './features/webhooks/api'
 
+// Feature hooks — carpentry MVP
+export {
+  useCarpentryDashboard,
+  useMaterials,
+  useCreateMaterial,
+  useUpdateMaterial,
+  useClients,
+  useCreateClient,
+  useUpdateClient,
+  useProjects,
+  useProject,
+  useCreateProject,
+  useUpdateProject,
+  useCreateEnvironment,
+  useCreateFurniture,
+  useCreateCostLine,
+  useCreateQuote,
+  useQuotes,
+  quotePDFURL,
+} from './features/carpentry/api'
+export type {
+  Material,
+  MaterialCategory,
+  Client,
+  Project,
+  ProjectStatus,
+  ProjectDetail,
+  ProjectEnvironment,
+  FurnitureItem,
+  CostLine,
+  CostLineType,
+  Quote,
+  CarpentryDashboard,
+  CreateMaterialInput,
+  UpdateMaterialInput,
+  CreateClientInput,
+  UpdateClientInput,
+  CreateProjectInput,
+  UpdateProjectInput,
+  CreateEnvironmentInput,
+  CreateFurnitureInput,
+  CreateCostLineInput,
+} from './features/carpentry/api'
+
 // Feature hooks — discovery (Ola 12)
 export {
   useTrendingTools,

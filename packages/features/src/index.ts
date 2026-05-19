@@ -26,6 +26,12 @@ export { PublicDeckPage } from './pages/PublicDeckPage'
 export { PublicProfilePage } from './pages/PublicProfilePage'
 export { CheatsheetsListPage } from './pages/CheatsheetsListPage'
 export { CheatsheetDetailPage } from './pages/CheatsheetDetailPage'
+export { CarpentryDashboardPage } from './pages/CarpentryDashboardPage'
+export { CarpentryCatalogPage } from './pages/CarpentryCatalogPage'
+export { CarpentryClientsPage } from './pages/CarpentryClientsPage'
+export { CarpentryProjectsPage } from './pages/CarpentryProjectsPage'
+export { CarpentryProjectDetailPage } from './pages/CarpentryProjectDetailPage'
+export { CarpentryQuotesPage } from './pages/CarpentryQuotesPage'
 
 // Components that apps might need directly (e.g. to embed a modal)
 export { CaptureModal } from './components/CaptureModal'

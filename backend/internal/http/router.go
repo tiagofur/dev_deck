@@ -113,6 +113,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	socialH := handlers.NewSocialHandler(st)
 	agentH := handlers.NewAgentHandler(st, deps.AI)
 	onboardingH := handlers.NewOnboardingHandler(st)
+	carpentryH := handlers.NewCarpentryHandler(st)
 	samlH := handlers.NewSAMLHandler(st, as, handlers.SAMLHandlerConfig{
 		EntityID:    "devdeck-sp",
 		BaseURL:     cfg.FrontendURL, // Best effort base
@@ -230,7 +231,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 					dr.Get("/trending", orgsH.GetDiscoveryTrending)
 					dr.Get("/recommendations", orgsH.GetRecommendations)
 				})
-				
+
 				or.Group(func(or chi.Router) {
 					or.Use(mw.RequireOrgPermission(st, "org:admin"))
 					or.Get("/{id}/insights", orgsH.GetInsights)
@@ -252,7 +253,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				ir.Get("/{id}", itemsH.Get)
 				ir.Patch("/{id}", itemsH.Update)
 				ir.Delete("/{id}", itemsH.Delete)
-				
+
 				ir.Group(func(ir chi.Router) {
 					ir.Use(mw.IARateLimit(100, 10))
 					ir.Post("/{id}/ai-enrich", itemsH.AIEnrich)
@@ -266,6 +267,36 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				ir.Get("/{id}/runbooks", runbooksH.List)
 				ir.Post("/{id}/runbooks", runbooksH.Create)
 			})
+
+			r.Get("/carpentry/dashboard", carpentryH.Dashboard)
+			r.Route("/materials", func(mr chi.Router) {
+				mr.Get("/", carpentryH.ListMaterials)
+				mr.Post("/", carpentryH.CreateMaterial)
+				mr.Patch("/{id}", carpentryH.UpdateMaterial)
+			})
+			r.Route("/clients", func(cr chi.Router) {
+				cr.Get("/", carpentryH.ListClients)
+				cr.Post("/", carpentryH.CreateClient)
+				cr.Patch("/{id}", carpentryH.UpdateClient)
+			})
+			r.Route("/projects", func(pr chi.Router) {
+				pr.Get("/", carpentryH.ListProjects)
+				pr.Post("/", carpentryH.CreateProject)
+				pr.Get("/{id}", carpentryH.GetProject)
+				pr.Patch("/{id}", carpentryH.UpdateProject)
+				pr.Post("/{id}/environments", carpentryH.CreateEnvironment)
+				pr.Post("/{id}/quote", carpentryH.CreateQuote)
+			})
+			r.Patch("/environments/{id}", carpentryH.UpdateEnvironment)
+			r.Delete("/environments/{id}", carpentryH.DeleteEnvironment)
+			r.Post("/environments/{id}/furniture", carpentryH.CreateFurniture)
+			r.Patch("/furniture/{id}", carpentryH.UpdateFurniture)
+			r.Delete("/furniture/{id}", carpentryH.DeleteFurniture)
+			r.Post("/furniture/{id}/cost-lines", carpentryH.CreateCostLine)
+			r.Patch("/cost-lines/{id}", carpentryH.UpdateCostLine)
+			r.Delete("/cost-lines/{id}", carpentryH.DeleteCostLine)
+			r.Get("/quotes", carpentryH.ListQuotes)
+			r.Get("/quotes/{id}/pdf", carpentryH.QuotePDF)
 
 			r.Group(func(r chi.Router) {
 				r.Use(mw.IARateLimit(100, 10))
