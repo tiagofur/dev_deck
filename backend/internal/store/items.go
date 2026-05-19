@@ -27,21 +27,37 @@ func scanItem(row pgx.Row) (*items.Item, error) {
 	var it items.Item
 	var rawMeta []byte
 	var itemType, enrichStatus string
-	var userID *uuid.UUID
+	var userID, orgID *uuid.UUID
+	var url, normURL, desc, lastSeen *string // Using string for date scan is safer sometimes, but let's stick to time.Time
+	var lastSeenAt *time.Time
+	var tags, aiTags []string
+
 	err := row.Scan(
-		&it.ID, &userID, &it.OrgID, &itemType, &it.Title, &it.URL, &it.URLNormalized,
-		&it.Description, &it.Notes, &it.Tags, &it.WhySaved, &it.WhenToUse,
-		&it.SourceChannel, &rawMeta, &it.AISummary, &it.AITags,
-		&enrichStatus, &it.Archived, &it.IsFavorite, &it.CreatedAt, &it.UpdatedAt, &it.LastSeenAt,
+		&it.ID, &userID, &orgID, &itemType, &it.Title, &it.URL, &it.URLNormalized,
+		&it.Description, &it.Notes, &tags, &it.WhySaved, &it.WhenToUse,
+		&it.SourceChannel, &rawMeta, &it.AISummary, &aiTags,
+		&enrichStatus, &it.Archived, &it.IsFavorite, &it.CreatedAt, &it.UpdatedAt, &lastSeenAt,
 	)
 	if err != nil {
 		return nil, err
 	}
+
 	if userID != nil {
 		it.UserID = *userID
 	}
+	it.OrgID = orgID
 	it.Type = items.Type(itemType)
+	it.Tags = tags
+	if it.Tags == nil {
+		it.Tags = []string{}
+	}
+	it.AITags = aiTags
+	if it.AITags == nil {
+		it.AITags = []string{}
+	}
 	it.EnrichmentStatus = items.EnrichmentStatus(enrichStatus)
+	it.LastSeenAt = lastSeenAt
+
 	if len(rawMeta) > 0 {
 		if err := json.Unmarshal(rawMeta, &it.Meta); err != nil {
 			return nil, fmt.Errorf("decode item meta: %w", err)
@@ -49,12 +65,6 @@ func scanItem(row pgx.Row) (*items.Item, error) {
 	}
 	if it.Meta == nil {
 		it.Meta = map[string]any{}
-	}
-	if it.Tags == nil {
-		it.Tags = []string{}
-	}
-	if it.AITags == nil {
-		it.AITags = []string{}
 	}
 	return &it, nil
 }
