@@ -2,6 +2,7 @@ import { api } from '../api-client';
 import { getPreferences, setPreferences } from '../preferences';
 import { getPendingOps, markSynced } from './queue';
 import { execLocal } from '../local-db/client';
+import { isLoggedIn } from '../auth/auth';
 
 let syncInProgress = false;
 let syncTimeout: any = null;
@@ -16,8 +17,8 @@ const BASE_INTERVAL = 10000;
 export async function startSyncEngine() {
     if (syncTimeout) return;
     
-    // 0. Register device if online
-    if (navigator.onLine) {
+    // 0. Register device if online and logged in
+    if (navigator.onLine && isLoggedIn()) {
         registerCurrentDevice().catch(err => console.error('Device registration failed:', err));
     }
     
@@ -51,7 +52,7 @@ function scheduleNextSync(ms: number) {
  */
 export async function syncNow() {
     if (syncInProgress) return;
-    if (!navigator.onLine) {
+    if (!navigator.onLine || !isLoggedIn()) {
         scheduleNextSync(BASE_INTERVAL);
         return;
     }
@@ -114,10 +115,17 @@ export async function syncNow() {
             scheduleNextSync(BASE_INTERVAL);
         }
     } catch (err) {
-        console.error('Sync failed, backing off:', err);
-        // Exponential backoff on error
-        scheduleNextSync(backoffMs);
-        backoffMs = Math.min(backoffMs * 2, MAX_BACKOFF);
+        // Only log and backoff if it's not a 401 (which we already guard against but could happen if token expires)
+        const isAuthError = err && typeof err === 'object' && 'status' in err && err.status === 401;
+
+        if (!isAuthError) {
+            console.error('Sync failed, backing off:', err);
+            scheduleNextSync(backoffMs);
+            backoffMs = Math.min(backoffMs * 2, MAX_BACKOFF);
+        } else {
+            // If it's a 401, wait longer for user to re-auth
+            scheduleNextSync(BASE_INTERVAL);
+        }
     } finally {
         syncInProgress = false;
     }
@@ -193,6 +201,8 @@ async function applyRemoteDeltas(ops: any[]) {
  * Register this client as a device in the backend.
  */
 export async function registerCurrentDevice() {
+    if (!isLoggedIn()) return;
+
     const { clientId } = getPreferences();
     const isElectron = typeof (window as any).electronAPI !== 'undefined';
     
