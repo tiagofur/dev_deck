@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"devdeck/internal/domain/items"
 	"devdeck/internal/domain/repos"
@@ -28,7 +29,6 @@ func scanItem(row pgx.Row) (*items.Item, error) {
 	var rawMeta []byte
 	var itemType, enrichStatus string
 	var userID, orgID *uuid.UUID
-	var url, normURL, desc, lastSeen *string // Using string for date scan is safer sometimes, but let's stick to time.Time
 	var lastSeenAt *time.Time
 	var tags, aiTags []string
 
