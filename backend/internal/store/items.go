@@ -27,14 +27,18 @@ func scanItem(row pgx.Row) (*items.Item, error) {
 	var it items.Item
 	var rawMeta []byte
 	var itemType, enrichStatus string
+	var userID *uuid.UUID
 	err := row.Scan(
-		&it.ID, &it.UserID, &it.OrgID, &itemType, &it.Title, &it.URL, &it.URLNormalized,
+		&it.ID, &userID, &it.OrgID, &itemType, &it.Title, &it.URL, &it.URLNormalized,
 		&it.Description, &it.Notes, &it.Tags, &it.WhySaved, &it.WhenToUse,
 		&it.SourceChannel, &rawMeta, &it.AISummary, &it.AITags,
 		&enrichStatus, &it.Archived, &it.IsFavorite, &it.CreatedAt, &it.UpdatedAt, &it.LastSeenAt,
 	)
 	if err != nil {
 		return nil, err
+	}
+	if userID != nil {
+		it.UserID = *userID
 	}
 	it.Type = items.Type(itemType)
 	it.EnrichmentStatus = items.EnrichmentStatus(enrichStatus)
