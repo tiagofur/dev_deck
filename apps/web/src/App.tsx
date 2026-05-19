@@ -11,12 +11,6 @@ import {
 import type { ReactElement } from 'react'
 import { useState, useEffect } from 'react'
 import {
-  CarpentryCatalogPage,
-  CarpentryClientsPage,
-  CarpentryDashboardPage,
-  CarpentryProjectDetailPage,
-  CarpentryProjectsPage,
-  CarpentryQuotesPage,
   CheatsheetDetailPage,
   CheatsheetsListPage,
   DiscoveryPage,
@@ -135,35 +129,11 @@ function AnimatedRoutes(): ReactElement {
             path="/"
             element={
               isLoggedIn() ? (
-                withTransition(<CarpentryDashboardPage />)
+                <Navigate to="/items" replace />
               ) : (
                 withTransition(<LandingPage />)
               )
             }
-          />
-          <Route
-            path="/catalog"
-            element={<AuthGuard>{withTransition(<CarpentryCatalogPage />)}</AuthGuard>}
-          />
-          <Route
-            path="/clients"
-            element={<AuthGuard>{withTransition(<CarpentryClientsPage />)}</AuthGuard>}
-          />
-          <Route
-            path="/projects"
-            element={<AuthGuard>{withTransition(<CarpentryProjectsPage />)}</AuthGuard>}
-          />
-          <Route
-            path="/projects/new"
-            element={<AuthGuard>{withTransition(<CarpentryProjectsPage />)}</AuthGuard>}
-          />
-          <Route
-            path="/projects/:id"
-            element={<AuthGuard>{withTransition(<CarpentryProjectDetailPage />)}</AuthGuard>}
-          />
-          <Route
-            path="/quotes"
-            element={<AuthGuard>{withTransition(<CarpentryQuotesPage />)}</AuthGuard>}
           />
           <Route
             path="/repos"
