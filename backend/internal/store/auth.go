@@ -210,7 +210,7 @@ func (s *Store) GetRefreshSession(ctx context.Context, tokenHash string) (*uuid.
 }
 
 func (s *Store) GetUserByLogin(ctx context.Context, login string) (*auth.User, string, error) {
-	row := s.Reader().QueryRow(ctx, `SELECT `+userColumns+` FROM users WHERE login = $1`, login)
+	row := s.Reader().QueryRow(ctx, `SELECT `+userColumnsWithHash+` FROM users WHERE login = $1`, login)
 	return scanUserWithHash(row)
 }
 
