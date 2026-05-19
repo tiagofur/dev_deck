@@ -4,9 +4,11 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 type SAMLConfig struct {
@@ -30,6 +32,9 @@ func (s *Store) GetSAMLConfigByDomain(ctx context.Context, domain string) (*SAML
 		&c.OrgID, &c.IDPEntityID, &c.IDPSSOURL, &c.IDPX509Cert, &c.Domain, &c.IsActive, &c.CreatedAt, &c.UpdatedAt,
 	)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
 		return nil, err
 	}
 	return &c, nil
