@@ -397,7 +397,7 @@ function PushPermissionRequest() {
       showToast('Notificaciones activadas')
       new Notification('¡DevDeck Conectado!', {
         body: 'Ahora recibirás alertas importantes en tu dispositivo.',
-        icon: '/pwa-192x192.png'
+        icon: '/favicon.svg'
       })
     }
   }

@@ -233,7 +233,7 @@ func (s *Store) CreateUserLocalTx(ctx context.Context, tx pgx.Tx, login, passwor
 
 	u, err := scanUser(row)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, ErrNotFound) {
 			return nil, ErrAlreadyExists
 		}
 		return nil, err
