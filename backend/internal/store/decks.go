@@ -274,9 +274,7 @@ func (s *Store) GetPublicDeckBySlug(ctx context.Context, slug string) (*Deck, er
 
 func (s *Store) GetPublicDeckItems(ctx context.Context, deckID uuid.UUID) ([]*items.Item, error) {
 	rows, err := s.Reader().Query(ctx,
-		`SELECT i.id, i.item_type, i.title, i.url, i.url_normalized, i.description,
-		        i.notes, i.tags, i.why_saved, i.when_to_use, i.source_channel, i.meta, i.ai_summary,
-		        i.ai_tags, i.enrichment_status, i.archived, i.is_favorite, i.created_at, i.updated_at, i.last_seen_at
+		`SELECT `+itemColumnsPrefixed+`
 		 FROM items i
 		 JOIN deck_items di ON di.item_id = i.id
 		 WHERE di.deck_id = $1

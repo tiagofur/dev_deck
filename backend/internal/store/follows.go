@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"devdeck/internal/domain/items"
 
@@ -52,10 +53,10 @@ func (s *Store) GetFollowingFeed(ctx context.Context, followerID uuid.UUID, limi
 		limit = 50
 	}
 
-	// itemColumns has 22 fields
+	// itemColumnsPrefixed has 22 fields with i. prefix
 	rows, err := s.Reader().Query(ctx, `
 		SELECT 
-			`+itemColumns+`,
+			`+itemColumnsPrefixed+`,
 			u.username, u.avatar_url
 		FROM items i
 		JOIN decks d ON d.id = (i.meta->>'deck_id')::uuid
@@ -78,24 +79,66 @@ func (s *Store) GetFollowingFeed(ctx context.Context, followerID uuid.UUID, limi
 		var fe FeedEvent
 		it := &items.Item{}
 		var rawMeta []byte
-		var itemType, enrichStatus string
+		var itemType string
+		var userID, orgID *uuid.UUID
+		var lastSeenAt *time.Time
+		var tags, aiTags []string
+		var title, notes, whySaved, whenToUse, sourceChannel, aiSummary, enrichStatus *string
 
 		err := rows.Scan(
-			&it.ID, &it.UserID, &it.OrgID, &itemType, &it.Title, &it.URL, &it.URLNormalized,
-			&it.Description, &it.Notes, &it.Tags, &it.WhySaved, &it.WhenToUse,
-			&it.SourceChannel, &rawMeta, &it.AISummary, &it.AITags,
-			&enrichStatus, &it.Archived, &it.IsFavorite, &it.CreatedAt, &it.UpdatedAt, &it.LastSeenAt,
+			&it.ID, &userID, &orgID, &itemType, &title, &it.URL, &it.URLNormalized,
+			&it.Description, &notes, &tags, &whySaved, &whenToUse,
+			&sourceChannel, &rawMeta, &aiSummary, &aiTags,
+			&enrichStatus, &it.Archived, &it.IsFavorite, &it.CreatedAt, &it.UpdatedAt, &lastSeenAt,
 			&fe.CuratorName, &fe.CuratorAvatarURL,
 		)
 		if err != nil {
 			return nil, err
 		}
 
+		if userID != nil {
+			it.UserID = *userID
+		}
+		it.OrgID = orgID
 		it.Type = items.Type(itemType)
-		it.EnrichmentStatus = items.EnrichmentStatus(enrichStatus)
+		it.Tags = tags
+		if it.Tags == nil {
+			it.Tags = []string{}
+		}
+		it.AITags = aiTags
+		if it.AITags == nil {
+			it.AITags = []string{}
+		}
+		if title != nil {
+			it.Title = *title
+		}
+		if notes != nil {
+			it.Notes = *notes
+		}
+		if whySaved != nil {
+			it.WhySaved = *whySaved
+		}
+		if whenToUse != nil {
+			it.WhenToUse = *whenToUse
+		}
+		if sourceChannel != nil {
+			it.SourceChannel = *sourceChannel
+		}
+		if aiSummary != nil {
+			it.AISummary = *aiSummary
+		}
+		if enrichStatus != nil {
+			it.EnrichmentStatus = items.EnrichmentStatus(*enrichStatus)
+		}
+		it.LastSeenAt = lastSeenAt
+
 		if len(rawMeta) > 0 {
 			_ = json.Unmarshal(rawMeta, &it.Meta)
 		}
+		if it.Meta == nil {
+			it.Meta = map[string]any{}
+		}
+
 		fe.Item = it
 		out = append(out, fe)
 	}

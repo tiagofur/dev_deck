@@ -27,15 +27,16 @@ const itemColumnsPrefixed = `i.id, i.user_id, i.org_id, i.item_type, i.title, i.
 func scanItem(row pgx.Row) (*items.Item, error) {
 	var it items.Item
 	var rawMeta []byte
-	var itemType, enrichStatus string
+	var itemType string
 	var userID, orgID *uuid.UUID
 	var lastSeenAt *time.Time
 	var tags, aiTags []string
+	var title, notes, whySaved, whenToUse, sourceChannel, aiSummary, enrichStatus *string
 
 	err := row.Scan(
-		&it.ID, &userID, &orgID, &itemType, &it.Title, &it.URL, &it.URLNormalized,
-		&it.Description, &it.Notes, &tags, &it.WhySaved, &it.WhenToUse,
-		&it.SourceChannel, &rawMeta, &it.AISummary, &aiTags,
+		&it.ID, &userID, &orgID, &itemType, &title, &it.URL, &it.URLNormalized,
+		&it.Description, &notes, &tags, &whySaved, &whenToUse,
+		&sourceChannel, &rawMeta, &aiSummary, &aiTags,
 		&enrichStatus, &it.Archived, &it.IsFavorite, &it.CreatedAt, &it.UpdatedAt, &lastSeenAt,
 	)
 	if err != nil {
@@ -55,7 +56,27 @@ func scanItem(row pgx.Row) (*items.Item, error) {
 	if it.AITags == nil {
 		it.AITags = []string{}
 	}
-	it.EnrichmentStatus = items.EnrichmentStatus(enrichStatus)
+	if title != nil {
+		it.Title = *title
+	}
+	if notes != nil {
+		it.Notes = *notes
+	}
+	if whySaved != nil {
+		it.WhySaved = *whySaved
+	}
+	if whenToUse != nil {
+		it.WhenToUse = *whenToUse
+	}
+	if sourceChannel != nil {
+		it.SourceChannel = *sourceChannel
+	}
+	if aiSummary != nil {
+		it.AISummary = *aiSummary
+	}
+	if enrichStatus != nil {
+		it.EnrichmentStatus = items.EnrichmentStatus(*enrichStatus)
+	}
 	it.LastSeenAt = lastSeenAt
 
 	if len(rawMeta) > 0 {
