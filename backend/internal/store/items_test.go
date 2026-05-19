@@ -105,6 +105,19 @@ func TestStore_ListItems_StackFilter(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("Reproduce user report: sort=added_desc, limit=200", func(t *testing.T) {
+		res, err := st.ListItems(ctx, items.ListParams{
+			Sort:  "added_desc",
+			Limit: 200,
+		})
+		if err != nil {
+			t.Fatalf("ListItems failed with added_desc: %v", err)
+		}
+		if res.Total == 0 {
+			t.Log("No items found, but query succeeded")
+		}
+	})
 }
 
 func TestStore_AskDevDeck_Citations(t *testing.T) {

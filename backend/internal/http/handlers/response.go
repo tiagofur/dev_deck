@@ -33,7 +33,7 @@ func writeInternal(w http.ResponseWriter, err error) {
 	writeJSON(w, http.StatusInternalServerError, map[string]any{
 		"error": map[string]string{
 			"code":    "INTERNAL",
-			"message": "internal server error",
+			"message": "internal server error: " + err.Error(),
 			"detail":  err.Error(),
 		},
 	})

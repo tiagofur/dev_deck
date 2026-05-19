@@ -240,6 +240,7 @@ func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListR
 		"SELECT %s FROM items WHERE %s ORDER BY %s LIMIT $%d OFFSET $%d",
 		itemColumns, whereSQL, orderBy, idx, idx+1,
 	)
+	fmt.Printf("DEBUG SQL: %s\n", listSQL)
 	rows, err := s.Reader().Query(ctx, listSQL, listArgs...)
 	if err != nil {
 		return nil, err
