@@ -1,0 +1,76 @@
+{
+  "slug": "rust-cargo",
+  "title": "Rust & Cargo Essentials",
+  "category": "language",
+  "icon": "🦀",
+  "color": "#DEA584",
+  "description": "Start Rust projects, manage dependencies, test, and build with Cargo.",
+  "entries": [
+    {
+      "label": "Create Binary Project",
+      "command": "cargo new my-project",
+      "description": "Scaffold a new Rust binary project with Cargo.toml and src/main.rs",
+      "tags": ["new", "create", "binary"]
+    },
+    {
+      "label": "Create Library",
+      "command": "cargo new my-lib --lib",
+      "description": "Create a library project with src/lib.rs instead of main.rs",
+      "tags": ["new", "library", "create"]
+    },
+    {
+      "label": "Add Dependency",
+      "command": "cargo add serde --features derive\ncargo add tokio --features full",
+      "description": "Add a dependency with specific features enabled",
+      "tags": ["add", "dependency", "features"]
+    },
+    {
+      "label": "Run Project",
+      "command": "cargo run -- --port 3000",
+      "description": "Compile and run the project, passing arguments after --",
+      "tags": ["run", "execute", "args"]
+    },
+    {
+      "label": "Run Tests",
+      "command": "cargo test",
+      "description": "Run all unit and integration tests in the project",
+      "tags": ["test", "unit", "integration"]
+    },
+    {
+      "label": "Build Release",
+      "command": "cargo build --release",
+      "description": "Build an optimized release binary in target/release/",
+      "tags": ["build", "release", "optimize"]
+    },
+    {
+      "label": "Check Without Building",
+      "command": "cargo check",
+      "description": "Type-check your code without producing a binary — faster than build",
+      "tags": ["check", "fast", "typecheck"]
+    },
+    {
+      "label": "Format Code",
+      "command": "cargo fmt",
+      "description": "Auto-format all Rust code according to the official style guide",
+      "tags": ["format", "style", "lint"]
+    },
+    {
+      "label": "Lint with Clippy",
+      "command": "cargo clippy -- -D warnings",
+      "description": "Run the Clippy linter and treat all warnings as errors",
+      "tags": ["lint", "clippy", "quality"]
+    },
+    {
+      "label": "Generate Docs",
+      "command": "cargo doc --open",
+      "description": "Generate HTML documentation for your project and open in browser",
+      "tags": ["docs", "documentation", "html"]
+    },
+    {
+      "label": "Watch & Auto-Run",
+      "command": "cargo install cargo-watch\ncargo watch -x run",
+      "description": "Auto-recompile and run on file changes — like nodemon for Rust",
+      "tags": ["watch", "dev", "hot-reload"]
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "slug": "nextjs",
+  "title": "Next.js App Router Quick Start",
+  "category": "framework",
+  "icon": "▲",
+  "color": "#000000",
+  "description": "Set up and work with Next.js 14+ App Router — routing, data fetching, server components, and deployment.",
+  "entries": [
+    {
+      "label": "Create Project",
+      "command": "npx -y create-next-app@latest my-app --ts --tailwind --eslint --app --src-dir --import-alias '@/*'",
+      "description": "Scaffold a new Next.js project with TypeScript, Tailwind, App Router, and src directory",
+      "tags": ["create", "init", "scaffold"]
+    },
+    {
+      "label": "Dev Server",
+      "command": "npm run dev",
+      "description": "Start the development server with Fast Refresh on localhost:3000",
+      "tags": ["dev", "server", "start"]
+    },
+    {
+      "label": "Build for Production",
+      "command": "npm run build && npm start",
+      "description": "Create an optimized production build and start the production server",
+      "tags": ["build", "production", "deploy"]
+    },
+    {
+      "label": "Server Component (Default)",
+      "command": "// app/page.tsx — Server Component by default\nexport default async function Page() {\n  const data = await fetch('https://api.example.com/items')\n  const items = await data.json()\n  return <ul>{items.map(i => <li key={i.id}>{i.name}</li>)}</ul>\n}",
+      "description": "Server Components can use async/await directly — no useEffect needed",
+      "tags": ["server", "component", "fetch"]
+    },
+    {
+      "label": "Client Component",
+      "command": "'use client'\nimport { useState } from 'react'\nexport function Counter() {\n  const [count, setCount] = useState(0)\n  return <button onClick={() => setCount(c => c+1)}>{count}</button>\n}",
+      "description": "Add 'use client' directive at top for interactive components using hooks",
+      "tags": ["client", "hooks", "interactive"]
+    },
+    {
+      "label": "Dynamic Route",
+      "command": "// app/blog/[slug]/page.tsx\nexport default async function BlogPost({ params }: { params: { slug: string } }) {\n  return <h1>{params.slug}</h1>\n}",
+      "description": "Create dynamic routes with [brackets] — params are passed as props",
+      "tags": ["route", "dynamic", "params"]
+    },
+    {
+      "label": "Loading State",
+      "command": "// app/dashboard/loading.tsx\nexport default function Loading() {\n  return <div>Loading dashboard...</div>\n}",
+      "description": "Add a loading.tsx file to show automatic loading UI while content fetches",
+      "tags": ["loading", "suspense", "ux"]
+    },
+    {
+      "label": "Error Boundary",
+      "command": "'use client'\nexport default function Error({ error, reset }: { error: Error; reset: () => void }) {\n  return <button onClick={reset}>Try again</button>\n}",
+      "description": "Add error.tsx to catch errors in a route segment",
+      "tags": ["error", "boundary", "recovery"]
+    },
+    {
+      "label": "API Route (Route Handler)",
+      "command": "// app/api/items/route.ts\nimport { NextResponse } from 'next/server'\nexport async function GET() {\n  return NextResponse.json({ items: [] })\n}",
+      "description": "Create API endpoints using Route Handlers — export GET, POST, PUT, DELETE functions",
+      "tags": ["api", "route", "handler"]
+    },
+    {
+      "label": "Metadata (SEO)",
+      "command": "// app/layout.tsx\nimport type { Metadata } from 'next'\nexport const metadata: Metadata = {\n  title: 'My App', description: 'Built with Next.js'\n}",
+      "description": "Set page metadata for SEO — title, description, OpenGraph, etc.",
+      "tags": ["seo", "metadata", "head"]
+    }
+  ]
+}

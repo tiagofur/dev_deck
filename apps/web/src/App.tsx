@@ -26,6 +26,7 @@ import {
   WaitlistPage,
   PublicDeckPage,
   PublicProfilePage,
+  ProfilePage,
   TeamReviewPage,
   TeamFeedPage,
   FollowingFeedPage,
@@ -226,6 +227,10 @@ function AnimatedRoutes(): ReactElement {
           <Route
             path="/discovery"
             element={<AuthGuard>{withTransition(<DiscoveryPage />)}</AuthGuard>}
+          />
+          <Route
+            path="/profile"
+            element={<AuthGuard>{withTransition(<ProfilePage />)}</AuthGuard>}
           />
           <Route
             path="/settings"

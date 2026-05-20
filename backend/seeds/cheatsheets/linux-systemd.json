@@ -1,0 +1,70 @@
+{
+  "slug": "linux-systemd",
+  "title": "Linux systemd & Services",
+  "category": "os",
+  "icon": "🐧",
+  "color": "#FCC624",
+  "description": "Manage Linux services, daemons, and system state with systemctl and journalctl.",
+  "entries": [
+    {
+      "label": "Start a Service",
+      "command": "sudo systemctl start <service>",
+      "description": "Start a stopped service immediately",
+      "tags": ["start", "service", "daemon"]
+    },
+    {
+      "label": "Stop a Service",
+      "command": "sudo systemctl stop <service>",
+      "description": "Stop a running service immediately",
+      "tags": ["stop", "service", "daemon"]
+    },
+    {
+      "label": "Restart a Service",
+      "command": "sudo systemctl restart <service>",
+      "description": "Stop and start a service — picks up config changes",
+      "tags": ["restart", "reload", "service"]
+    },
+    {
+      "label": "Enable on Boot",
+      "command": "sudo systemctl enable <service>",
+      "description": "Configure a service to start automatically at boot",
+      "tags": ["enable", "boot", "autostart"]
+    },
+    {
+      "label": "Check Service Status",
+      "command": "systemctl status <service>",
+      "description": "Show running state, PID, memory usage, and recent logs",
+      "tags": ["status", "health", "check"]
+    },
+    {
+      "label": "List All Active Services",
+      "command": "systemctl list-units --type=service --state=active",
+      "description": "Show all currently running services on the system",
+      "tags": ["list", "active", "services"]
+    },
+    {
+      "label": "List Failed Services",
+      "command": "systemctl --failed",
+      "description": "Show services that failed to start — useful for debugging boot issues",
+      "tags": ["failed", "debug", "boot"]
+    },
+    {
+      "label": "View Service Logs",
+      "command": "journalctl -u <service> -f --no-pager",
+      "description": "Follow live logs for a specific service (like tail -f)",
+      "tags": ["logs", "journal", "follow"]
+    },
+    {
+      "label": "Logs Since Boot",
+      "command": "journalctl -b -p err",
+      "description": "Show error-level and above logs since last boot",
+      "tags": ["logs", "boot", "errors"]
+    },
+    {
+      "label": "Disk Usage of Logs",
+      "command": "journalctl --disk-usage",
+      "description": "Check how much disk space system logs are consuming",
+      "tags": ["disk", "cleanup", "logs"]
+    }
+  ]
+}

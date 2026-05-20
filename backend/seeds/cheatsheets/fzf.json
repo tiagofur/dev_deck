@@ -1,0 +1,70 @@
+{
+  "slug": "fzf",
+  "title": "fzf — Fuzzy Finder",
+  "category": "tool",
+  "icon": "🔎",
+  "color": "#D33682",
+  "description": "Supercharge your terminal with fuzzy finding — files, history, processes, git branches, and more.",
+  "entries": [
+    {
+      "label": "Find Files",
+      "command": "fzf",
+      "description": "Interactively fuzzy-search files in the current directory tree",
+      "tags": ["find", "files", "basic"]
+    },
+    {
+      "label": "Search History",
+      "command": "Ctrl+R",
+      "description": "Fuzzy search your shell command history (replaces default reverse search)",
+      "tags": ["history", "search", "recall"]
+    },
+    {
+      "label": "Change Directory",
+      "command": "Alt+C  (or cd **<Tab>)",
+      "description": "Fuzzy find and cd into a subdirectory",
+      "tags": ["cd", "directory", "navigate"]
+    },
+    {
+      "label": "Open File in Editor",
+      "command": "vim $(fzf)",
+      "description": "Find a file with fzf and open it directly in your editor",
+      "tags": ["open", "editor", "pipe"]
+    },
+    {
+      "label": "Preview Files",
+      "command": "fzf --preview 'bat --color=always {}'",
+      "description": "Show file contents preview while browsing (requires bat)",
+      "tags": ["preview", "bat", "visual"]
+    },
+    {
+      "label": "Search File Contents",
+      "command": "rg --line-number . | fzf --delimiter : --preview 'bat --color=always {1} --highlight-line {2}'",
+      "description": "Search text across all files with live preview of matches",
+      "tags": ["grep", "content", "ripgrep"]
+    },
+    {
+      "label": "Git Branch Switcher",
+      "command": "git branch | fzf | xargs git checkout",
+      "description": "Fuzzy select and checkout a git branch",
+      "tags": ["git", "branch", "checkout"]
+    },
+    {
+      "label": "Kill Process",
+      "command": "ps aux | fzf | awk '{print $2}' | xargs kill -9",
+      "description": "Interactively find and kill a process",
+      "tags": ["kill", "process", "manage"]
+    },
+    {
+      "label": "Docker Container Shell",
+      "command": "docker ps --format '{{.Names}}' | fzf | xargs -I{} docker exec -it {} sh",
+      "description": "Fuzzy select a running container and exec into it",
+      "tags": ["docker", "exec", "container"]
+    },
+    {
+      "label": "Multi-Select",
+      "command": "fzf --multi | xargs rm",
+      "description": "Select multiple items with Tab, then pipe to a command",
+      "tags": ["multi", "select", "batch"]
+    }
+  ]
+}

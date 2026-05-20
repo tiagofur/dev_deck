@@ -1,0 +1,70 @@
+{
+  "slug": "github-actions",
+  "title": "GitHub Actions CI/CD",
+  "category": "devops",
+  "icon": "🤖",
+  "color": "#2088FF",
+  "description": "Automate builds, tests, and deployments with GitHub Actions — workflows, jobs, matrix, secrets, and caching.",
+  "entries": [
+    {
+      "label": "Basic CI Workflow",
+      "command": "name: CI\non: [push, pull_request]\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with: { node-version: 20 }\n      - run: npm ci\n      - run: npm test",
+      "description": "Minimal CI workflow that runs tests on every push and PR",
+      "tags": ["ci", "test", "basic"]
+    },
+    {
+      "label": "Matrix Strategy",
+      "command": "strategy:\n  matrix:\n    node-version: [18, 20, 22]\n    os: [ubuntu-latest, macos-latest]\nsteps:\n  - uses: actions/setup-node@v4\n    with: { node-version: ${{ matrix.node-version }} }",
+      "description": "Test across multiple versions and operating systems in parallel",
+      "tags": ["matrix", "parallel", "cross-platform"]
+    },
+    {
+      "label": "Cache Dependencies",
+      "command": "- uses: actions/cache@v4\n  with:\n    path: ~/.npm\n    key: npm-${{ hashFiles('package-lock.json') }}\n    restore-keys: npm-",
+      "description": "Cache npm/pnpm packages to speed up CI runs",
+      "tags": ["cache", "speed", "dependencies"]
+    },
+    {
+      "label": "Secrets",
+      "command": "env:\n  DATABASE_URL: ${{ secrets.DATABASE_URL }}\n  API_KEY: ${{ secrets.API_KEY }}",
+      "description": "Access encrypted secrets configured in repository settings",
+      "tags": ["secrets", "env", "security"]
+    },
+    {
+      "label": "Deploy on Tag",
+      "command": "on:\n  push:\n    tags: ['v*']\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: ./deploy.sh",
+      "description": "Trigger deployment only when a version tag (v1.0.0) is pushed",
+      "tags": ["deploy", "tag", "release"]
+    },
+    {
+      "label": "Upload Artifact",
+      "command": "- uses: actions/upload-artifact@v4\n  with:\n    name: build-output\n    path: dist/",
+      "description": "Save build output so other jobs or humans can download it",
+      "tags": ["artifact", "upload", "build"]
+    },
+    {
+      "label": "Conditional Step",
+      "command": "- name: Deploy\n  if: github.ref == 'refs/heads/main' && github.event_name == 'push'\n  run: ./deploy.sh",
+      "description": "Run a step only on pushes to main branch (skip PRs)",
+      "tags": ["conditional", "if", "branch"]
+    },
+    {
+      "label": "Docker Build & Push",
+      "command": "- uses: docker/login-action@v3\n  with: { registry: ghcr.io, username: ${{ github.actor }}, password: ${{ secrets.GITHUB_TOKEN }} }\n- uses: docker/build-push-action@v5\n  with: { push: true, tags: ghcr.io/${{ github.repository }}:latest }",
+      "description": "Build Docker image and push to GitHub Container Registry",
+      "tags": ["docker", "push", "ghcr"]
+    },
+    {
+      "label": "Concurrency (Cancel Previous)",
+      "command": "concurrency:\n  group: ${{ github.workflow }}-${{ github.ref }}\n  cancel-in-progress: true",
+      "description": "Cancel previous workflow runs for the same branch — saves CI minutes",
+      "tags": ["concurrency", "cancel", "optimize"]
+    },
+    {
+      "label": "Reusable Workflow",
+      "command": "# .github/workflows/reusable-test.yml\non:\n  workflow_call:\n    inputs:\n      node-version: { type: string, default: '20' }",
+      "description": "Create reusable workflows that other repos or workflows can call",
+      "tags": ["reusable", "modular", "call"]
+    }
+  ]
+}

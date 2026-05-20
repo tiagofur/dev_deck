@@ -1,0 +1,82 @@
+{
+  "slug": "linux-file-ops",
+  "title": "Linux File Operations & Text Processing",
+  "category": "os",
+  "icon": "📁",
+  "color": "#FF6B35",
+  "description": "Power commands for finding, filtering, and transforming files and text — find, xargs, sed, awk, and more.",
+  "entries": [
+    {
+      "label": "Find Files by Name",
+      "command": "find . -name '*.go' -type f",
+      "description": "Recursively search for files matching a pattern in the current directory",
+      "tags": ["find", "search", "name"]
+    },
+    {
+      "label": "Find and Delete",
+      "command": "find . -name '*.log' -type f -delete",
+      "description": "Find and remove all matching files in one command",
+      "tags": ["find", "delete", "cleanup"]
+    },
+    {
+      "label": "Find Recently Modified",
+      "command": "find . -mmin -30 -type f",
+      "description": "Find files modified in the last 30 minutes",
+      "tags": ["find", "recent", "modified"]
+    },
+    {
+      "label": "Find Large Files",
+      "command": "find / -type f -size +100M -exec ls -lh {} + 2>/dev/null",
+      "description": "Find all files larger than 100MB on the system",
+      "tags": ["find", "large", "disk"]
+    },
+    {
+      "label": "xargs Parallel",
+      "command": "find . -name '*.ts' | xargs -P4 -I{} wc -l {}",
+      "description": "Run a command on each found file in parallel (4 processes)",
+      "tags": ["xargs", "parallel", "batch"]
+    },
+    {
+      "label": "sed Replace in File",
+      "command": "sed -i 's/old/new/g' <file>",
+      "description": "Find and replace text in a file in-place (use -i '' on macOS)",
+      "tags": ["sed", "replace", "edit"]
+    },
+    {
+      "label": "awk Extract Column",
+      "command": "awk '{print $2}' <file>",
+      "description": "Print only the second column of each line in a file",
+      "tags": ["awk", "column", "extract"]
+    },
+    {
+      "label": "Sort & Deduplicate",
+      "command": "sort <file> | uniq -c | sort -rn",
+      "description": "Count unique lines and sort by frequency (most common first)",
+      "tags": ["sort", "uniq", "count"]
+    },
+    {
+      "label": "Disk Usage Summary",
+      "command": "du -sh * | sort -rh | head -20",
+      "description": "Show the 20 largest items in current directory, human-readable",
+      "tags": ["disk", "usage", "size"]
+    },
+    {
+      "label": "Watch File Changes",
+      "command": "tail -f <file>",
+      "description": "Follow a file in real-time — essential for watching logs",
+      "tags": ["tail", "watch", "logs"]
+    },
+    {
+      "label": "Count Lines of Code",
+      "command": "find . -name '*.ts' -o -name '*.tsx' | xargs wc -l | tail -1",
+      "description": "Count total lines across all TypeScript files in a project",
+      "tags": ["count", "lines", "code"]
+    },
+    {
+      "label": "Compare Files",
+      "command": "diff <file1> <file2> --color",
+      "description": "Show differences between two files with color highlighting",
+      "tags": ["diff", "compare", "changes"]
+    }
+  ]
+}

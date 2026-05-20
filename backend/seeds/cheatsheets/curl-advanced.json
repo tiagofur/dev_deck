@@ -1,0 +1,70 @@
+{
+  "slug": "curl-advanced",
+  "title": "cURL Advanced Usage",
+  "category": "tool",
+  "icon": "🌀",
+  "color": "#073551",
+  "description": "Master cURL for API testing, authentication, uploads, and debugging HTTP requests.",
+  "entries": [
+    {
+      "label": "GET with Headers",
+      "command": "curl -s -H 'Authorization: Bearer <token>' https://api.example.com/data",
+      "description": "Make an authenticated GET request with custom headers",
+      "tags": ["get", "auth", "headers"]
+    },
+    {
+      "label": "POST JSON",
+      "command": "curl -X POST -H 'Content-Type: application/json' -d '{\"key\": \"value\"}' https://api.example.com/items",
+      "description": "Send a JSON payload via POST request",
+      "tags": ["post", "json", "body"]
+    },
+    {
+      "label": "PUT with File",
+      "command": "curl -X PUT -H 'Content-Type: application/json' -d @payload.json https://api.example.com/items/1",
+      "description": "Send JSON from a file using @ prefix",
+      "tags": ["put", "file", "update"]
+    },
+    {
+      "label": "Follow Redirects",
+      "command": "curl -L https://short.url/abc",
+      "description": "Automatically follow HTTP redirects (301, 302, etc.)",
+      "tags": ["redirect", "follow", "location"]
+    },
+    {
+      "label": "Show Response Headers",
+      "command": "curl -I https://example.com",
+      "description": "Display only the response headers (HEAD request)",
+      "tags": ["headers", "head", "inspect"]
+    },
+    {
+      "label": "Verbose Debug",
+      "command": "curl -v https://api.example.com/health",
+      "description": "Show full request/response including TLS handshake and headers",
+      "tags": ["verbose", "debug", "tls"]
+    },
+    {
+      "label": "Timing Breakdown",
+      "command": "curl -o /dev/null -s -w 'DNS: %{time_namelookup}s\\nConnect: %{time_connect}s\\nTTFB: %{time_starttransfer}s\\nTotal: %{time_total}s\\n' https://example.com",
+      "description": "Measure DNS lookup, TCP connect, time-to-first-byte, and total time",
+      "tags": ["timing", "performance", "latency"]
+    },
+    {
+      "label": "Upload File (Multipart)",
+      "command": "curl -X POST -F 'file=@photo.jpg' -F 'name=avatar' https://api.example.com/upload",
+      "description": "Upload a file as multipart/form-data",
+      "tags": ["upload", "multipart", "file"]
+    },
+    {
+      "label": "Save Response to File",
+      "command": "curl -o output.json https://api.example.com/data",
+      "description": "Download and save the response body to a file",
+      "tags": ["download", "save", "output"]
+    },
+    {
+      "label": "Retry on Failure",
+      "command": "curl --retry 3 --retry-delay 2 https://api.example.com/health",
+      "description": "Automatically retry failed requests with a delay between attempts",
+      "tags": ["retry", "resilience", "timeout"]
+    }
+  ]
+}

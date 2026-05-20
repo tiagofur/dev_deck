@@ -1,0 +1,70 @@
+{
+  "slug": "typescript-patterns",
+  "title": "TypeScript Advanced Patterns",
+  "category": "language",
+  "icon": "🔷",
+  "color": "#3178C6",
+  "description": "Level up your TypeScript — utility types, generics, type guards, mapped types, and common patterns.",
+  "entries": [
+    {
+      "label": "Partial & Required",
+      "command": "type UpdateUser = Partial<User>      // all fields optional\ntype FullUser = Required<User>       // all fields required",
+      "description": "Make all properties optional or required — essential for update DTOs",
+      "tags": ["utility", "partial", "required"]
+    },
+    {
+      "label": "Pick & Omit",
+      "command": "type UserPreview = Pick<User, 'id' | 'name' | 'avatar'>\ntype UserCreate = Omit<User, 'id' | 'createdAt'>",
+      "description": "Create subset types by including or excluding specific properties",
+      "tags": ["pick", "omit", "subset"]
+    },
+    {
+      "label": "Record Type",
+      "command": "type StatusMap = Record<'active' | 'inactive' | 'pending', User[]>",
+      "description": "Create an object type with known keys and a consistent value type",
+      "tags": ["record", "map", "object"]
+    },
+    {
+      "label": "Discriminated Union",
+      "command": "type Result<T> =\n  | { status: 'success'; data: T }\n  | { status: 'error'; message: string }\n\nfunction handle(r: Result<User>) {\n  if (r.status === 'success') r.data  // TS knows it's User\n}",
+      "description": "Pattern matching with tagged unions — TypeScript narrows automatically",
+      "tags": ["union", "discriminated", "pattern"]
+    },
+    {
+      "label": "Type Guard",
+      "command": "function isString(val: unknown): val is string {\n  return typeof val === 'string'\n}",
+      "description": "Custom type guard function — narrows types in if/switch blocks",
+      "tags": ["guard", "narrow", "runtime"]
+    },
+    {
+      "label": "Generic Function",
+      "command": "function first<T>(arr: T[]): T | undefined {\n  return arr[0]\n}\nconst n = first([1, 2, 3])  // type: number",
+      "description": "Write reusable functions that preserve input types",
+      "tags": ["generic", "function", "reusable"]
+    },
+    {
+      "label": "Generic Constraint",
+      "command": "function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {\n  return obj[key]\n}",
+      "description": "Constrain generics to ensure type safety — K must be a key of T",
+      "tags": ["generic", "constraint", "keyof"]
+    },
+    {
+      "label": "Const Assertion",
+      "command": "const ROLES = ['admin', 'editor', 'viewer'] as const\ntype Role = typeof ROLES[number]  // 'admin' | 'editor' | 'viewer'",
+      "description": "Derive literal union types from arrays — no duplication, always in sync",
+      "tags": ["const", "literal", "derive"]
+    },
+    {
+      "label": "Satisfies Operator",
+      "command": "const palette = {\n  red: [255, 0, 0],\n  green: '#00ff00',\n} satisfies Record<string, string | number[]>\n\npalette.red.map(x => x)  // Still knows it's number[]",
+      "description": "Validate a value matches a type without widening it",
+      "tags": ["satisfies", "validate", "infer"]
+    },
+    {
+      "label": "Zod Schema Inference",
+      "command": "import { z } from 'zod'\nconst UserSchema = z.object({ name: z.string(), age: z.number() })\ntype User = z.infer<typeof UserSchema>  // { name: string; age: number }",
+      "description": "Derive TypeScript types from Zod schemas — single source of truth",
+      "tags": ["zod", "schema", "infer"]
+    }
+  ]
+}

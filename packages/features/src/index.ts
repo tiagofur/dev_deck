@@ -24,6 +24,7 @@ export { AdminDashboardPage } from './pages/AdminDashboardPage'
 export { WaitlistPage } from './pages/WaitlistPage'
 export { PublicDeckPage } from './pages/PublicDeckPage'
 export { PublicProfilePage } from './pages/PublicProfilePage'
+export { ProfilePage } from './pages/ProfilePage'
 export { CheatsheetsListPage } from './pages/CheatsheetsListPage'
 export { CheatsheetDetailPage } from './pages/CheatsheetDetailPage'
 

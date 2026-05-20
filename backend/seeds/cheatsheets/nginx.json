@@ -1,0 +1,70 @@
+{
+  "slug": "nginx",
+  "title": "Nginx Configuration",
+  "category": "devops",
+  "icon": "🔀",
+  "color": "#009639",
+  "description": "Configure Nginx as web server and reverse proxy — locations, SSL, headers, and common patterns.",
+  "entries": [
+    {
+      "label": "Reverse Proxy",
+      "command": "location /api/ {\n  proxy_pass http://localhost:8080/;\n  proxy_set_header Host $host;\n  proxy_set_header X-Real-IP $remote_addr;\n  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n  proxy_set_header X-Forwarded-Proto $scheme;\n}",
+      "description": "Forward /api/* requests to a backend service with original client headers",
+      "tags": ["proxy", "reverse", "backend"]
+    },
+    {
+      "label": "SPA Fallback",
+      "command": "location / {\n  root /var/www/html;\n  try_files $uri $uri/ /index.html;\n}",
+      "description": "Serve a Single Page App — fallback to index.html for client-side routing",
+      "tags": ["spa", "react", "fallback"]
+    },
+    {
+      "label": "SSL/TLS Certificate",
+      "command": "server {\n  listen 443 ssl http2;\n  ssl_certificate /etc/ssl/certs/fullchain.pem;\n  ssl_certificate_key /etc/ssl/private/privkey.pem;\n  ssl_protocols TLSv1.2 TLSv1.3;\n}",
+      "description": "Enable HTTPS with TLS 1.2+ and HTTP/2",
+      "tags": ["ssl", "tls", "https"]
+    },
+    {
+      "label": "Gzip Compression",
+      "command": "gzip on;\ngzip_types text/plain text/css application/json application/javascript text/xml;\ngzip_min_length 256;",
+      "description": "Enable gzip compression for text-based responses to reduce bandwidth",
+      "tags": ["gzip", "compression", "performance"]
+    },
+    {
+      "label": "Rate Limiting",
+      "command": "limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;\n\nlocation /api/ {\n  limit_req zone=api burst=20 nodelay;\n}",
+      "description": "Limit requests per IP — 10/sec with burst of 20",
+      "tags": ["rate-limit", "security", "ddos"]
+    },
+    {
+      "label": "Cache Static Assets",
+      "command": "location ~* \\.(js|css|png|jpg|svg|woff2)$ {\n  expires 1y;\n  add_header Cache-Control \"public, immutable\";\n}",
+      "description": "Aggressively cache static assets with long expiry",
+      "tags": ["cache", "static", "performance"]
+    },
+    {
+      "label": "Security Headers",
+      "command": "add_header X-Frame-Options DENY;\nadd_header X-Content-Type-Options nosniff;\nadd_header X-XSS-Protection \"1; mode=block\";\nadd_header Referrer-Policy strict-origin-when-cross-origin;",
+      "description": "Add essential security headers to all responses",
+      "tags": ["security", "headers", "xss"]
+    },
+    {
+      "label": "Test & Reload Config",
+      "command": "sudo nginx -t && sudo systemctl reload nginx",
+      "description": "Validate config syntax before reloading — never restart blindly",
+      "tags": ["test", "reload", "config"]
+    },
+    {
+      "label": "Access Logs",
+      "command": "tail -f /var/log/nginx/access.log | grep 'POST /api'",
+      "description": "Monitor real-time access logs filtered by pattern",
+      "tags": ["logs", "monitor", "access"]
+    },
+    {
+      "label": "WebSocket Proxy",
+      "command": "location /ws/ {\n  proxy_pass http://localhost:8080;\n  proxy_http_version 1.1;\n  proxy_set_header Upgrade $http_upgrade;\n  proxy_set_header Connection \"upgrade\";\n}",
+      "description": "Proxy WebSocket connections through Nginx",
+      "tags": ["websocket", "proxy", "realtime"]
+    }
+  ]
+}

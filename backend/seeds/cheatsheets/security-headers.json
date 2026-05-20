@@ -1,0 +1,64 @@
+{
+  "slug": "security-headers",
+  "title": "HTTP Security Headers",
+  "category": "security",
+  "icon": "🛡️",
+  "color": "#E53E3E",
+  "description": "Essential HTTP security headers every web app should set — CSP, HSTS, CORS, and anti-XSS protections.",
+  "entries": [
+    {
+      "label": "Content-Security-Policy",
+      "command": "Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;",
+      "description": "Control which resources the browser can load — strongest XSS defense",
+      "tags": ["csp", "xss", "essential"]
+    },
+    {
+      "label": "Strict-Transport-Security",
+      "command": "Strict-Transport-Security: max-age=63072000; includeSubDomains; preload",
+      "description": "Force HTTPS for 2 years, include subdomains, and opt-in to browser preload list",
+      "tags": ["hsts", "https", "force"]
+    },
+    {
+      "label": "X-Content-Type-Options",
+      "command": "X-Content-Type-Options: nosniff",
+      "description": "Prevent MIME type sniffing — browser must respect Content-Type header",
+      "tags": ["mime", "sniff", "type"]
+    },
+    {
+      "label": "X-Frame-Options",
+      "command": "X-Frame-Options: DENY",
+      "description": "Prevent your site from being embedded in iframes — blocks clickjacking",
+      "tags": ["frame", "clickjack", "embed"]
+    },
+    {
+      "label": "Referrer-Policy",
+      "command": "Referrer-Policy: strict-origin-when-cross-origin",
+      "description": "Send full referrer for same-origin, only origin for cross-origin requests",
+      "tags": ["referrer", "privacy", "origin"]
+    },
+    {
+      "label": "Permissions-Policy",
+      "command": "Permissions-Policy: camera=(), microphone=(), geolocation=(self), payment=()",
+      "description": "Control which browser features your site can use — disable camera, mic, payment",
+      "tags": ["permissions", "features", "privacy"]
+    },
+    {
+      "label": "CORS Headers",
+      "command": "Access-Control-Allow-Origin: https://app.example.com\nAccess-Control-Allow-Methods: GET, POST, PUT, DELETE\nAccess-Control-Allow-Headers: Authorization, Content-Type\nAccess-Control-Max-Age: 86400",
+      "description": "Configure Cross-Origin Resource Sharing — never use * in production with credentials",
+      "tags": ["cors", "cross-origin", "api"]
+    },
+    {
+      "label": "Cookie Security",
+      "command": "Set-Cookie: session=abc123; Secure; HttpOnly; SameSite=Strict; Path=/; Max-Age=86400",
+      "description": "Secure cookie attributes — HttpOnly prevents JS access, SameSite prevents CSRF",
+      "tags": ["cookie", "session", "csrf"]
+    },
+    {
+      "label": "Check Your Headers",
+      "command": "curl -I https://example.com | grep -iE '(security|policy|strict|x-frame|x-content|referrer)'",
+      "description": "Quick audit of security headers on any website",
+      "tags": ["audit", "check", "curl"]
+    }
+  ]
+}

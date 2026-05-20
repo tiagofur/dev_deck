@@ -1,0 +1,82 @@
+{
+  "slug": "neovim",
+  "title": "Neovim / LazyVim Essentials",
+  "category": "editor",
+  "icon": "📝",
+  "color": "#57A143",
+  "description": "Essential Neovim keybindings, Telescope, LSP, and LazyVim patterns for productive editing.",
+  "entries": [
+    {
+      "label": "Find Files (Telescope)",
+      "command": "<leader>ff",
+      "description": "Fuzzy find files in the project — the most used command",
+      "tags": ["telescope", "find", "files"]
+    },
+    {
+      "label": "Live Grep (Search Text)",
+      "command": "<leader>fg",
+      "description": "Search text across all files using ripgrep — live results",
+      "tags": ["grep", "search", "text"]
+    },
+    {
+      "label": "Find Buffers",
+      "command": "<leader>fb",
+      "description": "Switch between open buffers with fuzzy matching",
+      "tags": ["buffer", "switch", "open"]
+    },
+    {
+      "label": "Go to Definition",
+      "command": "gd",
+      "description": "Jump to where a function/variable is defined (LSP)",
+      "tags": ["lsp", "definition", "navigate"]
+    },
+    {
+      "label": "Go to References",
+      "command": "gr",
+      "description": "Find all usages/references of the symbol under cursor (LSP)",
+      "tags": ["lsp", "references", "usage"]
+    },
+    {
+      "label": "Rename Symbol",
+      "command": "<leader>cr",
+      "description": "Rename a variable/function across all files (LSP refactor)",
+      "tags": ["lsp", "rename", "refactor"]
+    },
+    {
+      "label": "Code Actions",
+      "command": "<leader>ca",
+      "description": "Show available code actions — auto-import, extract, fix lint",
+      "tags": ["lsp", "actions", "fix"]
+    },
+    {
+      "label": "File Explorer (Neo-tree)",
+      "command": "<leader>e",
+      "description": "Toggle the file explorer sidebar",
+      "tags": ["explorer", "tree", "sidebar"]
+    },
+    {
+      "label": "Split Horizontal/Vertical",
+      "command": ":sp <file>    \" horizontal\n:vsp <file>   \" vertical",
+      "description": "Split the editor to view multiple files side by side",
+      "tags": ["split", "window", "layout"]
+    },
+    {
+      "label": "Multi-Cursor (Visual Block)",
+      "command": "Ctrl+v → select lines → Shift+I → type → Esc",
+      "description": "Edit multiple lines at once using visual block mode",
+      "tags": ["multi-cursor", "block", "edit"]
+    },
+    {
+      "label": "Format Document",
+      "command": "<leader>cf",
+      "description": "Format the current file using the configured LSP formatter",
+      "tags": ["format", "lint", "style"]
+    },
+    {
+      "label": "Diagnostics (Errors)",
+      "command": "<leader>xx",
+      "description": "Open Trouble panel showing all diagnostics/errors in the project",
+      "tags": ["diagnostics", "errors", "trouble"]
+    }
+  ]
+}

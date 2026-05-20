@@ -1,0 +1,70 @@
+{
+  "slug": "lazygit",
+  "title": "Lazygit — Terminal Git UI",
+  "category": "tool",
+  "icon": "🦥",
+  "color": "#EF4444",
+  "description": "Visual git operations from the terminal — stage, commit, rebase, resolve conflicts, and cherry-pick with ease.",
+  "entries": [
+    {
+      "label": "Launch",
+      "command": "lazygit",
+      "description": "Open lazygit in the current git repository",
+      "tags": ["launch", "open", "start"]
+    },
+    {
+      "label": "Stage File/Hunk",
+      "command": "Space (on file or hunk)",
+      "description": "Toggle staging for a file or individual hunk — granular control",
+      "tags": ["stage", "hunk", "selective"]
+    },
+    {
+      "label": "Commit",
+      "command": "c → type message → Enter",
+      "description": "Open commit dialog, type message, and confirm",
+      "tags": ["commit", "message", "create"]
+    },
+    {
+      "label": "Amend Commit",
+      "command": "A (Shift+a)",
+      "description": "Amend the last commit with current staged changes",
+      "tags": ["amend", "fix", "last"]
+    },
+    {
+      "label": "Push",
+      "command": "P (Shift+p)",
+      "description": "Push to remote — shows confirmation before pushing",
+      "tags": ["push", "remote", "upload"]
+    },
+    {
+      "label": "Pull",
+      "command": "p",
+      "description": "Pull changes from remote with merge strategy",
+      "tags": ["pull", "remote", "fetch"]
+    },
+    {
+      "label": "Interactive Rebase",
+      "command": "e (on commit in log)",
+      "description": "Start interactive rebase from selected commit — squash, edit, reorder",
+      "tags": ["rebase", "interactive", "history"]
+    },
+    {
+      "label": "Resolve Conflict",
+      "command": "Enter (on conflict) → choose ours/theirs/both",
+      "description": "Visual conflict resolution — pick which side to keep",
+      "tags": ["conflict", "merge", "resolve"]
+    },
+    {
+      "label": "Cherry-Pick",
+      "command": "C (on commit) → V (on target branch)",
+      "description": "Copy a commit and apply it to the current branch",
+      "tags": ["cherry-pick", "copy", "commit"]
+    },
+    {
+      "label": "Switch Branch",
+      "command": "Navigate to Branches panel → Space",
+      "description": "Quickly checkout a different branch",
+      "tags": ["branch", "switch", "checkout"]
+    }
+  ]
+}

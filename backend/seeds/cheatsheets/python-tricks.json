@@ -1,0 +1,70 @@
+{
+  "slug": "python-tricks",
+  "title": "Python Tips & Tricks",
+  "category": "language",
+  "icon": "🐍",
+  "color": "#FFD43B",
+  "description": "Write cleaner Python — comprehensions, decorators, context managers, dataclasses, and one-liners.",
+  "entries": [
+    {
+      "label": "List Comprehension",
+      "command": "squares = [x**2 for x in range(10) if x % 2 == 0]\n# [0, 4, 16, 36, 64]",
+      "description": "Create lists with inline filtering and transformation",
+      "tags": ["comprehension", "list", "filter"]
+    },
+    {
+      "label": "Dict Comprehension",
+      "command": "word_lengths = {word: len(word) for word in ['hello', 'world']}\n# {'hello': 5, 'world': 5}",
+      "description": "Build dictionaries inline from any iterable",
+      "tags": ["comprehension", "dict", "map"]
+    },
+    {
+      "label": "Walrus Operator",
+      "command": "if (n := len(data)) > 10:\n    print(f\"Too many items: {n}\")",
+      "description": "Assign and use a value in the same expression (Python 3.8+)",
+      "tags": ["walrus", "assign", "expression"]
+    },
+    {
+      "label": "Dataclass",
+      "command": "from dataclasses import dataclass\n@dataclass\nclass User:\n    name: str\n    email: str\n    age: int = 0",
+      "description": "Auto-generate __init__, __repr__, __eq__ — cleaner than manual classes",
+      "tags": ["dataclass", "struct", "clean"]
+    },
+    {
+      "label": "Context Manager",
+      "command": "from contextlib import contextmanager\n@contextmanager\ndef timer():\n    start = time.time()\n    yield\n    print(f\"Took {time.time() - start:.2f}s\")\n\nwith timer():\n    expensive_operation()",
+      "description": "Create reusable setup/teardown blocks with the with statement",
+      "tags": ["context", "manager", "with"]
+    },
+    {
+      "label": "Decorator",
+      "command": "import functools\ndef retry(max_attempts=3):\n    def decorator(func):\n        @functools.wraps(func)\n        def wrapper(*args, **kwargs):\n            for i in range(max_attempts):\n                try: return func(*args, **kwargs)\n                except Exception as e:\n                    if i == max_attempts - 1: raise\n        return wrapper\n    return decorator",
+      "description": "Parametrized decorator for retrying failed function calls",
+      "tags": ["decorator", "retry", "pattern"]
+    },
+    {
+      "label": "f-String Formatting",
+      "command": "name = 'DevDeck'\nprint(f'{name:>20}')       # right-align\nprint(f'{3.14159:.2f}')    # 2 decimals\nprint(f'{1000000:,}')      # comma separator",
+      "description": "Format numbers, alignment, and precision inside f-strings",
+      "tags": ["fstring", "format", "display"]
+    },
+    {
+      "label": "Enumerate with Index",
+      "command": "for i, item in enumerate(items, start=1):\n    print(f\"{i}. {item}\")",
+      "description": "Loop with index — start parameter sets the initial count",
+      "tags": ["enumerate", "loop", "index"]
+    },
+    {
+      "label": "Unpacking & Star",
+      "command": "first, *middle, last = [1, 2, 3, 4, 5]\n# first=1, middle=[2,3,4], last=5",
+      "description": "Star unpacking to capture remaining elements in a list",
+      "tags": ["unpack", "star", "destructure"]
+    },
+    {
+      "label": "One-Liner HTTP Server",
+      "command": "python -m http.server 8000",
+      "description": "Serve the current directory over HTTP — instant file sharing",
+      "tags": ["server", "http", "quick"]
+    }
+  ]
+}

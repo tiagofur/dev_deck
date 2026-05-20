@@ -1,7 +1,7 @@
 import { Activity, BookOpen, Boxes, Plus, Search, Settings as SettingsIcon, Sparkles, Users } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@devdeck/ui'
-import { usePreferences } from '@devdeck/api-client'
+import { usePreferences, useMe } from '@devdeck/api-client'
 import { SyncStatusIndicator } from './SyncStatusIndicator'
 import { NotificationCenter } from './NotificationCenter'
 import { WorkspaceSwitcher } from './WorkspaceSwitcher'
@@ -27,6 +27,7 @@ export function Topbar({
 }: Props) {
   const navigate = useNavigate()
   const { activeOrgId } = usePreferences()
+  const { data: user } = useMe()
 
   return (
     <header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex items-center gap-6">
@@ -171,10 +172,29 @@ export function Topbar({
         className="border-3 border-ink p-2 bg-bg-card shadow-hard
                    hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg
                    active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
-                   transition-all duration-150"
+                   transition-all duration-150 shrink-0"
       >
         <SettingsIcon size={16} strokeWidth={3} />
       </button>
+
+      {user && (
+        <button
+          type="button"
+          onClick={() => navigate('/profile')}
+          aria-label="Ver Perfil"
+          title="Ver Perfil"
+          className="border-3 border-ink w-[42px] h-[42px] bg-bg-card shadow-hard flex items-center justify-center overflow-hidden
+                     hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg
+                     active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
+                     transition-all duration-150 shrink-0 cursor-pointer"
+        >
+          <img
+            src={user.avatar_url}
+            alt={user.display_name || user.username || 'Avatar'}
+            className="w-full h-full object-cover"
+          />
+        </button>
+      )}
     </header>
   )
 }

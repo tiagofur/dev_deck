@@ -1,0 +1,82 @@
+{
+  "slug": "macos-terminal",
+  "title": "macOS Terminal Power Tips",
+  "category": "os",
+  "icon": "💻",
+  "color": "#1D1D1F",
+  "description": "macOS-specific terminal commands — pbcopy, open, defaults, diskutil, and hidden tricks.",
+  "entries": [
+    {
+      "label": "Copy to Clipboard",
+      "command": "echo \"text\" | pbcopy",
+      "description": "Pipe any output directly to the system clipboard",
+      "tags": ["clipboard", "pipe", "copy"]
+    },
+    {
+      "label": "Paste from Clipboard",
+      "command": "pbpaste",
+      "description": "Output the current clipboard content to stdout",
+      "tags": ["clipboard", "paste", "pipe"]
+    },
+    {
+      "label": "Open File in Default App",
+      "command": "open <file>",
+      "description": "Open any file with its default application (like double-clicking)",
+      "tags": ["open", "finder", "launch"]
+    },
+    {
+      "label": "Open Current Dir in Finder",
+      "command": "open .",
+      "description": "Open the current terminal directory in Finder",
+      "tags": ["finder", "navigate", "directory"]
+    },
+    {
+      "label": "Open URL in Browser",
+      "command": "open https://example.com",
+      "description": "Open a URL in the default web browser from terminal",
+      "tags": ["browser", "url", "open"]
+    },
+    {
+      "label": "Show/Hide Hidden Files",
+      "command": "defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder",
+      "description": "Toggle visibility of hidden files in Finder (change true to false to hide)",
+      "tags": ["hidden-files", "finder", "defaults"]
+    },
+    {
+      "label": "Flush DNS Cache",
+      "command": "sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder",
+      "description": "Clear the DNS resolver cache when having DNS issues",
+      "tags": ["dns", "network", "cache"]
+    },
+    {
+      "label": "Prevent Sleep",
+      "command": "caffeinate -d -t 3600",
+      "description": "Prevent Mac from sleeping for 1 hour (3600 seconds)",
+      "tags": ["sleep", "caffeinate", "awake"]
+    },
+    {
+      "label": "Say Text Aloud",
+      "command": "say \"Hello developer\"",
+      "description": "Use text-to-speech to read text aloud — great for long build notifications",
+      "tags": ["speech", "notification", "fun"]
+    },
+    {
+      "label": "Quick Look from Terminal",
+      "command": "qlmanage -p <file>",
+      "description": "Preview any file using Quick Look without opening its app",
+      "tags": ["preview", "quicklook", "inspect"]
+    },
+    {
+      "label": "List Listening Ports",
+      "command": "lsof -iTCP -sTCP:LISTEN -n -P",
+      "description": "Show all processes listening on TCP ports (find what's using port 3000)",
+      "tags": ["ports", "network", "debug"]
+    },
+    {
+      "label": "Kill Process on Port",
+      "command": "lsof -ti:3000 | xargs kill -9",
+      "description": "Force kill whatever process is occupying a specific port",
+      "tags": ["kill", "port", "process"]
+    }
+  ]
+}

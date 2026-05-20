@@ -389,15 +389,19 @@ func (h *AuthHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		Bio      *string `json:"bio"`
-		Username *string `json:"username"`
+		Bio       *string  `json:"bio"`
+		Username  *string  `json:"username"`
+		StackTags []string `json:"stack_tags"`
+		Website   *string  `json:"website"`
+		Location  *string  `json:"location"`
+		GitHubURL *string  `json:"github_url"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
 		return
 	}
 
-	user, err := h.store.UpdateUser(r.Context(), userID, req.Bio, req.Username)
+	user, err := h.store.UpdateUser(r.Context(), userID, req.Bio, req.Username, req.StackTags, req.Website, req.Location, req.GitHubURL)
 	if err != nil {
 		if errors.Is(err, store.ErrAlreadyExists) {
 			writeError(w, http.StatusConflict, "USERNAME_TAKEN", "username already taken")

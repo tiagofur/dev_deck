@@ -1,0 +1,70 @@
+{
+  "slug": "sql-recipes",
+  "title": "SQL Power Recipes",
+  "category": "language",
+  "icon": "🗃️",
+  "color": "#336791",
+  "description": "Advanced SQL patterns — CTEs, window functions, UPSERT, JSON, aggregation, and performance tips.",
+  "entries": [
+    {
+      "label": "Common Table Expression",
+      "command": "WITH active_users AS (\n  SELECT * FROM users WHERE last_login > NOW() - INTERVAL '30 days'\n)\nSELECT department, COUNT(*) FROM active_users GROUP BY department;",
+      "description": "Use CTEs for readable multi-step queries — like temporary named subqueries",
+      "tags": ["cte", "with", "readable"]
+    },
+    {
+      "label": "Window: Row Number",
+      "command": "SELECT *, ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS rank\nFROM employees;",
+      "description": "Rank rows within groups without collapsing the result set",
+      "tags": ["window", "rank", "partition"]
+    },
+    {
+      "label": "Window: Running Total",
+      "command": "SELECT date, amount,\n  SUM(amount) OVER (ORDER BY date) AS running_total\nFROM transactions;",
+      "description": "Calculate a cumulative sum ordered by date",
+      "tags": ["window", "running", "sum"]
+    },
+    {
+      "label": "UPSERT (Insert or Update)",
+      "command": "INSERT INTO items (id, name, value)\nVALUES ($1, $2, $3)\nON CONFLICT (id) DO UPDATE SET\n  name = EXCLUDED.name,\n  value = EXCLUDED.value,\n  updated_at = NOW();",
+      "description": "Insert a row or update it if a conflict on the unique key occurs",
+      "tags": ["upsert", "conflict", "merge"]
+    },
+    {
+      "label": "JSON Query (Postgres)",
+      "command": "SELECT id, metadata->>'author' AS author,\n  metadata->'tags' AS tags\nFROM items\nWHERE metadata @> '{\"language\": \"go\"}';",
+      "description": "Query JSONB columns — extract fields and filter by JSON content",
+      "tags": ["json", "jsonb", "postgres"]
+    },
+    {
+      "label": "Lateral Join",
+      "command": "SELECT u.name, latest.title FROM users u\nCROSS JOIN LATERAL (\n  SELECT title FROM posts p\n  WHERE p.user_id = u.id\n  ORDER BY created_at DESC LIMIT 3\n) latest;",
+      "description": "Get the top N related rows per parent row (like a correlated subquery on steroids)",
+      "tags": ["lateral", "join", "top-n"]
+    },
+    {
+      "label": "Conditional Aggregation",
+      "command": "SELECT\n  COUNT(*) FILTER (WHERE status = 'active') AS active,\n  COUNT(*) FILTER (WHERE status = 'inactive') AS inactive\nFROM users;",
+      "description": "Aggregate different conditions in a single query pass (Postgres FILTER)",
+      "tags": ["aggregate", "filter", "conditional"]
+    },
+    {
+      "label": "Generate Date Series",
+      "command": "SELECT date::date, COALESCE(count, 0)\nFROM generate_series('2024-01-01', '2024-12-31', '1 day') AS date\nLEFT JOIN daily_counts ON daily_counts.day = date::date;",
+      "description": "Fill gaps in time-series data — no missing days in charts",
+      "tags": ["series", "dates", "gaps"]
+    },
+    {
+      "label": "Index Usage Check",
+      "command": "EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)\nSELECT * FROM items WHERE url_normalized = 'example.com/repo';",
+      "description": "Check if your query uses indexes — look for 'Index Scan' vs 'Seq Scan'",
+      "tags": ["explain", "index", "performance"]
+    },
+    {
+      "label": "Bulk Delete with Returning",
+      "command": "DELETE FROM items\nWHERE archived_at < NOW() - INTERVAL '1 year'\nRETURNING id, title;",
+      "description": "Delete rows and return what was deleted in one atomic operation",
+      "tags": ["delete", "returning", "bulk"]
+    }
+  ]
+}

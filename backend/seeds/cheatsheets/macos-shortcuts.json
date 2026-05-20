@@ -1,0 +1,82 @@
+{
+  "slug": "macos-shortcuts",
+  "title": "macOS Keyboard Shortcuts",
+  "category": "os",
+  "icon": "🍎",
+  "color": "#000000",
+  "description": "Essential macOS keyboard shortcuts for window management, navigation, screenshots, and productivity.",
+  "entries": [
+    {
+      "label": "Spotlight Search",
+      "command": "Cmd + Space",
+      "description": "Open Spotlight to search files, apps, calculations, and web results instantly",
+      "tags": ["search", "spotlight", "launch"]
+    },
+    {
+      "label": "Force Quit App",
+      "command": "Cmd + Option + Esc",
+      "description": "Open Force Quit dialog to kill unresponsive applications",
+      "tags": ["force-quit", "crash", "rescue"]
+    },
+    {
+      "label": "Screenshot Region",
+      "command": "Cmd + Shift + 4",
+      "description": "Capture a selected area of the screen to clipboard or file",
+      "tags": ["screenshot", "capture", "region"]
+    },
+    {
+      "label": "Screenshot to Clipboard",
+      "command": "Cmd + Shift + 4, then Ctrl",
+      "description": "Hold Ctrl while selecting to copy screenshot directly to clipboard",
+      "tags": ["screenshot", "clipboard", "quick"]
+    },
+    {
+      "label": "Screen Recording",
+      "command": "Cmd + Shift + 5",
+      "description": "Open screenshot/recording toolbar with options for full screen, window, or selection",
+      "tags": ["recording", "screen", "video"]
+    },
+    {
+      "label": "Switch Between Apps",
+      "command": "Cmd + Tab",
+      "description": "Cycle through open applications. Hold Cmd and press Tab repeatedly.",
+      "tags": ["switch", "multitask", "window"]
+    },
+    {
+      "label": "Switch Between Windows",
+      "command": "Cmd + `",
+      "description": "Cycle between windows of the same application",
+      "tags": ["window", "switch", "same-app"]
+    },
+    {
+      "label": "Mission Control",
+      "command": "Ctrl + Up Arrow",
+      "description": "Show all open windows and desktops in bird's-eye view",
+      "tags": ["mission-control", "overview", "spaces"]
+    },
+    {
+      "label": "Lock Screen",
+      "command": "Cmd + Ctrl + Q",
+      "description": "Instantly lock your Mac without putting it to sleep",
+      "tags": ["lock", "security", "privacy"]
+    },
+    {
+      "label": "Show Desktop",
+      "command": "Cmd + F3  (or Fn + F11)",
+      "description": "Temporarily push all windows aside to reveal the desktop",
+      "tags": ["desktop", "hide", "windows"]
+    },
+    {
+      "label": "Emoji Picker",
+      "command": "Cmd + Ctrl + Space",
+      "description": "Open the emoji and special characters picker in any text field",
+      "tags": ["emoji", "text", "symbols"]
+    },
+    {
+      "label": "Delete Word Before Cursor",
+      "command": "Option + Delete",
+      "description": "Delete the entire word before the cursor instead of one character",
+      "tags": ["delete", "word", "text-editing"]
+    }
+  ]
+}

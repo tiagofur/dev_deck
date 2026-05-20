@@ -1,0 +1,82 @@
+{
+  "slug": "bash-scripting",
+  "title": "Bash Scripting Essentials",
+  "category": "shell",
+  "icon": "📜",
+  "color": "#4EAA25",
+  "description": "Write robust bash scripts — variables, loops, conditionals, functions, error handling, and common patterns.",
+  "entries": [
+    {
+      "label": "Strict Mode Header",
+      "command": "#!/usr/bin/env bash\nset -euo pipefail",
+      "description": "Start every script with this: exit on error (-e), undefined vars (-u), pipe failures (-o pipefail)",
+      "tags": ["header", "strict", "best-practice"]
+    },
+    {
+      "label": "Variable Assignment",
+      "command": "NAME=\"DevDeck\"\necho \"Hello, ${NAME}!\"",
+      "description": "Assign and use variables — always quote and use ${} for clarity",
+      "tags": ["variable", "string", "basics"]
+    },
+    {
+      "label": "Command Substitution",
+      "command": "CURRENT_DATE=$(date +%Y-%m-%d)\necho \"Today is ${CURRENT_DATE}\"",
+      "description": "Capture the output of a command into a variable",
+      "tags": ["substitution", "command", "capture"]
+    },
+    {
+      "label": "If/Else Condition",
+      "command": "if [[ -f \"$FILE\" ]]; then\n  echo \"File exists\"\nelse\n  echo \"File not found\"\nfi",
+      "description": "Conditional check — use [[ ]] for safer string/file tests",
+      "tags": ["if", "conditional", "check"]
+    },
+    {
+      "label": "For Loop",
+      "command": "for file in *.json; do\n  echo \"Processing: ${file}\"\ndone",
+      "description": "Iterate over files matching a glob pattern",
+      "tags": ["loop", "for", "iterate"]
+    },
+    {
+      "label": "While Read Loop",
+      "command": "while IFS= read -r line; do\n  echo \"$line\"\ndone < input.txt",
+      "description": "Read a file line by line — preserves whitespace and special chars",
+      "tags": ["while", "read", "file"]
+    },
+    {
+      "label": "Function with Args",
+      "command": "greet() {\n  local name=\"$1\"\n  echo \"Hello, ${name}!\"\n}\ngreet \"World\"",
+      "description": "Define a function with local variables and positional arguments",
+      "tags": ["function", "args", "local"]
+    },
+    {
+      "label": "Trap for Cleanup",
+      "command": "cleanup() { rm -f /tmp/mylock; }\ntrap cleanup EXIT",
+      "description": "Run cleanup code when the script exits (even on error or Ctrl+C)",
+      "tags": ["trap", "cleanup", "exit"]
+    },
+    {
+      "label": "Default Value",
+      "command": "PORT=${1:-3000}\necho \"Using port ${PORT}\"",
+      "description": "Use a default value if a variable or argument is not set",
+      "tags": ["default", "fallback", "parameter"]
+    },
+    {
+      "label": "Check Command Exists",
+      "command": "if ! command -v docker &>/dev/null; then\n  echo \"docker not installed\"\n  exit 1\nfi",
+      "description": "Verify a command is available before using it in a script",
+      "tags": ["check", "exists", "guard"]
+    },
+    {
+      "label": "Array Iteration",
+      "command": "TOOLS=(\"git\" \"docker\" \"node\")\nfor tool in \"${TOOLS[@]}\"; do\n  echo \"Checking ${tool}\"\ndone",
+      "description": "Define and loop through an array of values",
+      "tags": ["array", "loop", "list"]
+    },
+    {
+      "label": "String Contains Check",
+      "command": "if [[ \"$OUTPUT\" == *\"error\"* ]]; then\n  echo \"Error found!\"\nfi",
+      "description": "Check if a string contains a substring using glob patterns",
+      "tags": ["string", "contains", "pattern"]
+    }
+  ]
+}
