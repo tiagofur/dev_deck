@@ -261,7 +261,6 @@ func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListR
 		"SELECT %s FROM items WHERE %s ORDER BY %s LIMIT $%d OFFSET $%d",
 		itemColumns, whereSQL, orderBy, idx, idx+1,
 	)
-	fmt.Printf("DEBUG SQL: %s\n", listSQL)
 	rows, err := s.Reader().Query(ctx, listSQL, listArgs...)
 	if err != nil {
 		return nil, err
@@ -765,11 +764,18 @@ func (s *Store) GetRelatedItems(ctx context.Context, itemID uuid.UUID, limit int
 	if limit <= 0 || limit > 20 {
 		limit = 5
 	}
-	// Get the source item's embedding
+
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
+
+	// Get the source item's embedding. A saved item may exist before async
+	// enrichment has produced an embedding; in that case there simply are no
+	// related items yet.
 	var srcEmbedding []float32
+	args := append([]any{itemID}, scopeArgs...)
 	err := s.Reader().QueryRow(ctx, `
-		SELECT embedding FROM items WHERE id = $1 AND embedding IS NOT NULL
-	`, itemID).Scan(&srcEmbedding)
+		SELECT embedding FROM items WHERE id = $1 AND `+scopeSQL,
+		args...,
+	).Scan(&srcEmbedding)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrNotFound
@@ -777,22 +783,24 @@ func (s *Store) GetRelatedItems(ctx context.Context, itemID uuid.UUID, limit int
 		return nil, err
 	}
 	if srcEmbedding == nil {
-		return nil, errors.New("item has no embedding")
+		return []SearchItemsResult{}, nil
 	}
 
 	// Find similar items by cosine distance
-	const q = `
+	relatedScopeSQL, relatedScopeArgs := ownerClause(ctx, "user_id", 4)
+	q := `
 		SELECT id, item_type, title, why_saved, url,
 		       1 - (embedding <=> $1) as sim
 		FROM items
 		WHERE id != $2
-		  AND user_id = (SELECT user_id FROM items WHERE id = $2)
+		  AND ` + relatedScopeSQL + `
 		  AND archived = false
 		  AND embedding IS NOT NULL
 		ORDER BY embedding <=> $1
 		LIMIT $3
 	`
-	rows, err := s.Reader().Query(ctx, q, srcEmbedding, itemID, limit)
+	relatedArgs := append([]any{srcEmbedding, itemID, limit}, relatedScopeArgs...)
+	rows, err := s.Reader().Query(ctx, q, relatedArgs...)
 	if err != nil {
 		return nil, err
 	}

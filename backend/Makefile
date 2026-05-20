@@ -7,7 +7,7 @@ run:
 	go run ./cmd/api
 
 migrate-up:
-	for file in migrations/*.sql; do psql "$$DB_URL" -f "$$file"; done
+	for file in migrations/*.sql; do awk '/-- [+]goose Down/{exit} {print}' "$$file" | psql "$$DB_URL"; done
 
 psql:
 	psql "$$DB_URL"

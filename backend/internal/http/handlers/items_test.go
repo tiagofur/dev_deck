@@ -161,6 +161,25 @@ func TestItems_List_Pagination(t *testing.T) {
 	}
 }
 
+func TestItems_List_UserReportedQueries(t *testing.T) {
+	ts := newTestServer(t)
+
+	seedCapture(t, ts, capturePayload{Text: "needs review", Tags: []string{"team-review"}})
+	seedCapture(t, ts, capturePayload{Text: "general note"})
+
+	tests := []string{
+		"/api/items?tag=team-review&sort=updated_desc&limit=1",
+		"/api/items?sort=added_desc&limit=200",
+	}
+
+	for _, path := range tests {
+		rec := ts.do(t, http.MethodGet, path, nil)
+		if rec.Code != http.StatusOK {
+			t.Fatalf("%s: expected 200, got %d %s", path, rec.Code, rec.Body.String())
+		}
+	}
+}
+
 // ─── Get ───
 
 func TestItems_Get_ReturnsItem(t *testing.T) {
@@ -317,5 +336,29 @@ func TestItems_ReviewAITags_AppliesSuggestions(t *testing.T) {
 	}
 	if len(got.Tags) != 3 {
 		t.Fatalf("expected merged manual tags, got %#v", got.Tags)
+	}
+}
+
+func TestItems_Related_NoEmbeddingReturnsEmptyList(t *testing.T) {
+	ts := newTestServer(t)
+	seed := seedCapture(t, ts, capturePayload{Text: "fresh item without embedding"})
+
+	rec := ts.do(t, http.MethodGet, "/api/items/"+seed.ID.String()+"/related?limit=5", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d %s", rec.Code, rec.Body.String())
+	}
+
+	got := decodeJSON[struct {
+		ItemID  uuid.UUID `json:"item_id"`
+		Related []any     `json:"related"`
+	}](t, rec)
+	if got.ItemID != seed.ID {
+		t.Fatalf("expected item_id %s, got %s", seed.ID, got.ItemID)
+	}
+	if got.Related == nil {
+		t.Fatal("expected related to be an empty array, got null")
+	}
+	if len(got.Related) != 0 {
+		t.Fatalf("expected no related items, got %d", len(got.Related))
 	}
 }
