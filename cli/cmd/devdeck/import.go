@@ -61,7 +61,11 @@ func init() {
 		"stop after importing N repos (0 = unlimited)")
 	importStarsCmd.Flags().BoolVar(&importStarsFlags.dryRun, "dry-run", false,
 		"list the repos that would be imported without calling the backend")
-	importCmd.AddCommand(importStarsCmd)
+	importCmd.AddCommand(
+		importStarsCmd,
+		importDotfilesCmd,
+		importVSCodeCmd,
+	)
 	rootCmd.AddCommand(importCmd)
 }
 
