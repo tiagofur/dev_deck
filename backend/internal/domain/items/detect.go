@@ -70,9 +70,15 @@ func DetectType(in CaptureInput) DetectionResult {
 		if isCommandText(rawText) {
 			return DetectionResult{Type: TypeCLI, Title: firstLine(rawText)}
 		}
+		if isPromptText(rawText) {
+			return DetectionResult{Type: TypePrompt, Title: firstLine(rawText)}
+		}
 		// Rule 6 — snippet (multi-line code or triple backtick).
 		if isSnippetText(rawText) {
 			return DetectionResult{Type: TypeSnippet, Title: firstLine(rawText)}
+		}
+		if isWorkflowText(rawText) {
+			return DetectionResult{Type: TypeWorkflow, Title: firstLine(rawText)}
 		}
 		// Rule 7 — keyboard shortcut.
 		if isShortcutText(rawText) {
@@ -185,6 +191,46 @@ func isCommandText(text string) bool {
 	return false
 }
 
+func isPromptText(text string) bool {
+	lower := strings.ToLower(strings.TrimSpace(text))
+	return strings.HasPrefix(lower, "prompt:") ||
+		strings.HasPrefix(lower, "act as ") ||
+		strings.HasPrefix(lower, "actúa como ") ||
+		strings.HasPrefix(lower, "you are ") ||
+		strings.Contains(lower, "system prompt") ||
+		strings.Contains(lower, "write a prompt")
+}
+
+func isWorkflowText(text string) bool {
+	lines := strings.Split(text, "\n")
+	stepLines := 0
+	nonEmpty := 0
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" {
+			continue
+		}
+		nonEmpty++
+		if workflowStepRE.MatchString(trimmed) || workflowNamedStepRE.MatchString(trimmed) {
+			stepLines++
+		}
+	}
+	if nonEmpty < 2 {
+		return false
+	}
+	if stepLines >= 2 {
+		return true
+	}
+	lower := strings.ToLower(text)
+	return (strings.Contains(lower, "checklist") ||
+		strings.Contains(lower, "how to") ||
+		strings.Contains(lower, "how-to") ||
+		strings.Contains(lower, "pasos para") ||
+		strings.Contains(lower, "steps to") ||
+		strings.Contains(lower, "debug") ||
+		strings.Contains(lower, "deploy")) && nonEmpty >= 2
+}
+
 // isSnippetText returns true if the text looks like a code block:
 // triple backticks, or ≥ 3 non-empty lines with code-ish indentation
 // or punctuation.
@@ -226,6 +272,8 @@ func isSnippetText(text string) bool {
 // "Ctrl+Alt+T", "Shift+F10". We accept Cmd/Ctrl/Alt/Option/Shift/Meta/Win
 // joined by + or -, terminated by a single key or F-key.
 var shortcutRE = regexp.MustCompile(`(?i)^(cmd|ctrl|alt|opt|option|shift|meta|win)([+\- ](cmd|ctrl|alt|opt|option|shift|meta|win))*[+\- ]([a-z0-9]|f\d{1,2}|esc|tab|enter|space|up|down|left|right)$`)
+var workflowStepRE = regexp.MustCompile(`^(\d+[\).\s-]|[-*]\s+|\[\s?\]\s+)`)
+var workflowNamedStepRE = regexp.MustCompile(`(?i)^(step|paso)\s+\d+`)
 
 func isShortcutText(text string) bool {
 	return shortcutRE.MatchString(strings.TrimSpace(text))

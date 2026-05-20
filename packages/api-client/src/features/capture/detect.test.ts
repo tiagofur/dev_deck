@@ -72,6 +72,11 @@ describe('detectType (9-rule matrix)', () => {
       want: 'cli',
     },
     {
+      name: 'rule5b_prompt_act_as',
+      input: { text: 'Act as a senior code reviewer and list concrete risks.' },
+      want: 'prompt',
+    },
+    {
       name: 'rule6_snippet_triple_backticks',
       input: { text: '```go\nfunc main() {}\n```' },
       want: 'snippet',
@@ -85,6 +90,11 @@ describe('detectType (9-rule matrix)', () => {
 }`,
       },
       want: 'snippet',
+    },
+    {
+      name: 'rule6b_workflow_checklist',
+      input: { text: 'Deploy checklist\n1. Build assets\n2. Run migrations\n3. Restart service' },
+      want: 'workflow',
     },
     {
       name: 'rule7_shortcut_cmd_shift_p',
@@ -206,5 +216,19 @@ describe('capture input helpers', () => {
       url: 'https://github.com/foo/bar',
       text: 'go docker helper',
     })).toEqual(['repo', 'github', 'terminal', 'go', 'docker'])
+  })
+
+  it('suggests language and framework tags for developer text', () => {
+    expect(suggestCaptureTags({
+      type: 'prompt',
+      text: 'TypeScript React Docker Kubernetes AI review prompt',
+    })).toEqual(['prompt', 'ai', 'typescript', 'react', 'docker'])
+  })
+
+  it('suggests how-to for workflows', () => {
+    expect(suggestCaptureTags({
+      type: 'workflow',
+      text: 'Deploy checklist\n1. build\n2. ship',
+    })).toContain('how-to')
   })
 })

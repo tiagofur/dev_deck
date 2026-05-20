@@ -69,6 +69,11 @@ func TestDetectType_AllNineRules(t *testing.T) {
 			in:   CaptureInput{Text: "$ kubectl get pods"},
 			want: TypeCLI,
 		},
+		{
+			name: "rule5b_prompt_act_as",
+			in:   CaptureInput{Text: "Act as a senior code reviewer and list concrete risks."},
+			want: TypePrompt,
+		},
 		// Rule 6 — snippet (triple backticks).
 		{
 			name: "rule6_snippet_triple_backticks",
@@ -83,6 +88,11 @@ func TestDetectType_AllNineRules(t *testing.T) {
   return 42;
 }`},
 			want: TypeSnippet,
+		},
+		{
+			name: "rule6b_workflow_checklist",
+			in:   CaptureInput{Text: "Deploy checklist\n1. Build assets\n2. Run migrations\n3. Restart service"},
+			want: TypeWorkflow,
 		},
 		// Rule 7 — keyboard shortcut.
 		{

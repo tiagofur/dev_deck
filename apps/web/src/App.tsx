@@ -8,7 +8,7 @@ import {
   useLocation,
   useNavigate,
 } from 'react-router-dom'
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import { useState, useEffect } from 'react'
 import {
   CheatsheetDetailPage,
@@ -54,20 +54,65 @@ const queryClient = new QueryClient({
 
 // Guard for protected routes. If no token is stored, bounce to /login.
 function AuthGuard({ children }: { children: ReactElement }): ReactElement {
-  const { data: user, isLoading } = useMe()
+  const { data: user, isLoading, isError, error, refetch } = useMe()
   const location = useLocation()
 
   if (!isLoggedIn()) {
     return <Navigate to="/login" replace />
   }
 
-  if (isLoading) return <div className="h-screen bg-bg-primary" />
+  if (isLoading) {
+    return (
+      <AuthStatusScreen
+        title="Cargando DevDeck"
+        message="Estamos validando tu sesión y preparando tu vault."
+      />
+    )
+  }
+
+  if (isError) {
+    return (
+      <AuthStatusScreen
+        title="No se pudo validar tu sesión"
+        message={(error as Error)?.message || 'El backend no respondió a tiempo.'}
+        action={
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="border-3 border-ink bg-accent-yellow px-4 py-2 font-display font-black uppercase shadow-hard"
+          >
+            Reintentar
+          </button>
+        }
+      />
+    )
+  }
 
   if (user && !user.onboarding_completed && location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />
   }
 
   return children
+}
+
+function AuthStatusScreen({
+  title,
+  message,
+  action,
+}: {
+  title: string
+  message: string
+  action?: ReactNode
+}): ReactElement {
+  return (
+    <div className="h-screen bg-bg-primary flex items-center justify-center p-6">
+      <div className="bg-bg-card border-3 border-ink shadow-hard p-6 max-w-md text-center">
+        <p className="font-display font-black uppercase text-xl">{title}</p>
+        <p className="font-mono text-sm text-ink-soft mt-2">{message}</p>
+        {action && <div className="mt-5 flex justify-center">{action}</div>}
+      </div>
+    </div>
+  )
 }
 
 function withTransition(element: ReactElement): ReactElement {
@@ -101,8 +146,15 @@ function AnimatedRoutes(): ReactElement {
       }
       setCaptureOpen(true)
     }
+    const onOpenSearch = () => {
+      setGlobalSearchOpen(true)
+    }
     window.addEventListener('devdeck:open-capture', onOpenCapture)
-    return () => window.removeEventListener('devdeck:open-capture', onOpenCapture)
+    window.addEventListener('devdeck:open-search', onOpenSearch)
+    return () => {
+      window.removeEventListener('devdeck:open-capture', onOpenCapture)
+      window.removeEventListener('devdeck:open-search', onOpenSearch)
+    }
   }, [])
 
   // Auto-capture from Share Target
@@ -211,10 +263,10 @@ function AnimatedRoutes(): ReactElement {
           setCaptureOpen(false)
           setInitialCaptureData(null)
         }}
-        onOpenItem={(id) => {
+        onOpenItem={(id, item) => {
           setCaptureOpen(false)
           setInitialCaptureData(null)
-          navigate(`/items/${id}`)
+          navigate(item?.item_type === 'repo' ? `/repo/${id}` : `/items/${id}`)
         }}
         source="manual"
         initialUrl={initialCaptureData?.url || location.state?.url}

@@ -120,6 +120,24 @@ func TestStore_ListItems_StackFilter(t *testing.T) {
 	})
 }
 
+func TestStore_ListItems_EmptyVault(t *testing.T) {
+	st, ctx := newStore(t)
+
+	res, err := st.ListItems(ctx, items.ListParams{
+		Sort:  "added_desc",
+		Limit: 200,
+	})
+	if err != nil {
+		t.Fatalf("ListItems empty vault failed: %v", err)
+	}
+	if res.Total != 0 {
+		t.Fatalf("expected zero total for empty vault, got %d", res.Total)
+	}
+	if len(res.Items) != 0 {
+		t.Fatalf("expected zero items for empty vault, got %d", len(res.Items))
+	}
+}
+
 func TestStore_AskDevDeck_Citations(t *testing.T) {
 	st, ctx := newStore(t)
 

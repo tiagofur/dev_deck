@@ -13,6 +13,7 @@ interface Props {
   onDiscovery: () => void
   onSettings: () => void
   onGlobalSearch: () => void
+  reviewCount?: number
 }
 
 export function Topbar({
@@ -22,6 +23,7 @@ export function Topbar({
   onDiscovery,
   onSettings,
   onGlobalSearch,
+  reviewCount,
 }: Props) {
   const navigate = useNavigate()
   const { activeOrgId } = usePreferences()
@@ -45,7 +47,7 @@ export function Topbar({
         <input
           id="topbar-search"
           type="search"
-          placeholder="Buscar repos…  (apretá / )"
+          placeholder="Buscar items, comandos, prompts…  (apretá / )"
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           className="w-full border-3 border-ink pl-10 pr-3 py-2 font-mono text-sm
@@ -89,6 +91,24 @@ export function Topbar({
         <span className="flex items-center gap-2">
           <BookOpen size={16} strokeWidth={3} />
           <span className="hidden sm:inline">Cheats</span>
+        </span>
+      </Button>
+
+      <Button
+        onClick={() => navigate('/review')}
+        size="sm"
+        variant="secondary"
+        className="whitespace-nowrap"
+        title="Revisión de equipo"
+      >
+        <span className="flex items-center gap-2">
+          <Users size={16} strokeWidth={3} />
+          <span className="hidden sm:inline">Review</span>
+          {!!reviewCount && reviewCount > 0 && (
+            <span className="border-2 border-ink bg-accent-yellow px-1.5 py-0.5 text-[10px] leading-none">
+              {reviewCount > 99 ? '99+' : reviewCount}
+            </span>
+          )}
         </span>
       </Button>
 
@@ -136,7 +156,7 @@ export function Topbar({
       <Button onClick={onAdd} size="sm" className="whitespace-nowrap">
         <span className="flex items-center gap-2">
           <Plus size={16} strokeWidth={3} />
-          Add
+          Capturar
         </span>
       </Button>
 

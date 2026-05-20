@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api } from '../../api-client'
+import { APIError, api } from '../../api-client'
+import { ITEMS_KEY } from '../items/api'
 import type {
   CreateRepoInput,
   ListReposParams,
@@ -8,7 +9,19 @@ import type {
   UpdateRepoInput,
 } from './types'
 
-const REPOS_KEY = ['repos'] as const
+export const REPOS_KEY = ['repos'] as const
+
+export const repoKeys = {
+  all: REPOS_KEY,
+  lists: () => [...REPOS_KEY, 'list'] as const,
+  list: (params: ListReposParams) => [...REPOS_KEY, 'list', params] as const,
+  detail: (id: string | undefined) => [...REPOS_KEY, 'detail', id] as const,
+  readme: (id: string | undefined) => [...REPOS_KEY, 'readme', id] as const,
+}
+
+function isNotFound(error: unknown): boolean {
+  return error instanceof APIError && error.status === 404
+}
 
 function buildQuery(params: ListReposParams): string {
   const qs = new URLSearchParams()
@@ -23,16 +36,17 @@ function buildQuery(params: ListReposParams): string {
 
 export function useRepos(params: ListReposParams = {}) {
   return useQuery({
-    queryKey: [...REPOS_KEY, 'list', params],
+    queryKey: repoKeys.list(params),
     queryFn: () => api.get<ListResult>(`/api/repos${buildQuery(params)}`),
   })
 }
 
 export function useRepo(id: string | undefined) {
   return useQuery({
-    queryKey: [...REPOS_KEY, 'detail', id],
+    queryKey: repoKeys.detail(id),
     queryFn: () => api.get<Repo>(`/api/repos/${id}`),
     enabled: !!id,
+    retry: (failureCount, error) => !isNotFound(error) && failureCount < 1,
   })
 }
 
@@ -43,7 +57,7 @@ interface ReadmeResponse {
 
 export function useReadme(id: string | undefined, enabled = true) {
   return useQuery({
-    queryKey: [...REPOS_KEY, 'readme', id],
+    queryKey: repoKeys.readme(id),
     queryFn: () => api.get<ReadmeResponse>(`/api/repos/${id}/readme`),
     enabled: !!id && enabled,
     staleTime: 5 * 60 * 1000,
@@ -72,7 +86,14 @@ export function useDeleteRepo() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => api.del<void>(`/api/repos/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: REPOS_KEY }),
+    onSuccess: (_data, id) => {
+      qc.cancelQueries({ queryKey: repoKeys.detail(id), exact: true })
+      qc.removeQueries({ queryKey: repoKeys.detail(id), exact: true })
+      qc.removeQueries({ queryKey: repoKeys.readme(id), exact: true })
+      qc.invalidateQueries({ queryKey: repoKeys.lists() })
+      qc.invalidateQueries({ queryKey: ITEMS_KEY })
+      qc.invalidateQueries({ queryKey: ['discovery'] })
+    },
   })
 }
 

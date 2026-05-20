@@ -97,7 +97,7 @@ export function SettingsPage() {
 
       <main className="max-w-2xl mx-auto p-6 space-y-6">
         {/* Perfil */}
-        <Section title="Mi Perfil">
+        <Section title="Perfil Público">
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 border-2 border-ink shadow-hard-sm overflow-hidden bg-accent-yellow shrink-0">

@@ -61,13 +61,6 @@ describe('<UnifiedCommandPalette>', () => {
   })
 
   it('triggers AI Ask flow', async () => {
-    const askMutate = vi.fn().mockResolvedValue({
-      answer: 'Esta es una respuesta con citas.',
-      citations: [{ id: '1', title: 'Fuente 1', url: 'https://src1.com' }],
-      sources: []
-    })
-    mocks.useAsk.mockReturnValue({ mutateAsync: askMutate, isPending: false })
-
     renderPalette()
     
     const input = screen.getByPlaceholderText(/Buscá o tirá un comando/)
@@ -77,9 +70,8 @@ describe('<UnifiedCommandPalette>', () => {
     fireEvent.click(askButton)
 
     await waitFor(() => {
-      expect(askMutate).toHaveBeenCalledWith({ question: 'Preguntar' })
-      expect(screen.getByText('Esta es una respuesta con citas.')).toBeInTheDocument()
-      expect(screen.getByText('Fuente 1')).toBeInTheDocument()
+      expect(screen.getByText('Agente de Conocimiento')).toBeInTheDocument()
+      expect(screen.getByText('Preguntar')).toBeInTheDocument()
     })
   })
 

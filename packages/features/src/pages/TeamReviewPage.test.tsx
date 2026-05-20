@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { ReactNode } from 'react'
 import { TeamReviewPage } from './TeamReviewPage'
 
 const mocks = vi.hoisted(() => ({
@@ -14,18 +15,18 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
 }))
 
-vi.mock('@devdeck/api-client', () => ({
-  useItems: mocks.useItems,
-  useUpdateItem: mocks.useUpdateItem,
-  formatCount: (n: number) => String(n),
-  EnrichmentStatus: {
-    Pending: 'pending',
-    Queued: 'queued',
-    Ok: 'ok',
-    Error: 'error',
-    Skipped: 'skipped',
-  },
+vi.mock('../components/AppShell', () => ({
+  AppShell: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }))
+
+vi.mock('@devdeck/api-client', async () => {
+  const actual = await vi.importActual<typeof import('@devdeck/api-client')>('@devdeck/api-client')
+  return {
+    ...actual,
+    useItems: mocks.useItems,
+    useUpdateItem: mocks.useUpdateItem,
+  }
+})
 
 function renderPage() {
   const client = new QueryClient({

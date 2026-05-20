@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	"devdeck/internal/domain/commands"
 	"devdeck/internal/domain/repos"
 	"devdeck/internal/store"
 	"devdeck/internal/testutil"
@@ -200,6 +201,55 @@ func TestStore_DeleteRepo(t *testing.T) {
 	// Idempotency: deleting again should return ErrNotFound.
 	if err := st.DeleteRepo(ctx, r.ID); !errors.Is(err, store.ErrNotFound) {
 		t.Errorf("expected ErrNotFound on second delete, got %v", err)
+	}
+}
+
+func TestStore_DeleteRepo_CascadesUtilityData(t *testing.T) {
+	st, ctx := newStore(t)
+
+	r, err := st.CreateRepo(ctx, repos.CreateInput{URL: "https://github.com/u/utility-belt"})
+	if err != nil {
+		t.Fatalf("create repo: %v", err)
+	}
+	if _, err := st.CreateCommand(ctx, r.ID, commands.CreateInput{
+		Label:       "dev",
+		Command:     "pnpm dev",
+		Description: "start local app",
+	}); err != nil {
+		t.Fatalf("create command: %v", err)
+	}
+	userID := mustUUID(t, "00000000-0000-0000-0000-000000000001")
+	rb, err := st.CreateRunbook(ctx, userID, r.ID, "Setup", nil)
+	if err != nil {
+		t.Fatalf("create runbook: %v", err)
+	}
+	cmd := "pnpm install"
+	if _, err := st.CreateRunbookStep(ctx, rb.ID, "Install deps", &cmd, nil); err != nil {
+		t.Fatalf("create runbook step: %v", err)
+	}
+
+	if err := st.DeleteRepo(ctx, r.ID); err != nil {
+		t.Fatalf("delete repo: %v", err)
+	}
+
+	for table, query := range map[string]string{
+		"item_commands": `SELECT COUNT(*) FROM item_commands WHERE item_id = $1`,
+		"runbooks":      `SELECT COUNT(*) FROM runbooks WHERE item_id = $1`,
+	} {
+		var count int
+		if err := st.Reader().QueryRow(ctx, query, r.ID).Scan(&count); err != nil {
+			t.Fatalf("count %s: %v", table, err)
+		}
+		if count != 0 {
+			t.Fatalf("expected %s to cascade on repo delete, found %d rows", table, count)
+		}
+	}
+	var stepCount int
+	if err := st.Reader().QueryRow(ctx, `SELECT COUNT(*) FROM runbook_steps WHERE runbook_id = $1`, rb.ID).Scan(&stepCount); err != nil {
+		t.Fatalf("count runbook_steps: %v", err)
+	}
+	if stepCount != 0 {
+		t.Fatalf("expected runbook_steps to cascade on repo delete, found %d rows", stepCount)
 	}
 }
 

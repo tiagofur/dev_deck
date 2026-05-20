@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { ReactNode } from 'react'
 import { ItemsPage } from './ItemsPage'
 
 const mocks = vi.hoisted(() => ({
@@ -16,6 +17,23 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
+}))
+
+vi.mock('../components/AppShell', () => ({
+  AppShell: ({
+    children,
+    reviewCount,
+  }: {
+    children: ReactNode
+    reviewCount?: number
+  }) => (
+    <div>
+      <button type="button" onClick={() => mocks.navigate('/review')}>
+        Review {reviewCount ?? 0}
+      </button>
+      {children}
+    </div>
+  ),
 }))
 
 vi.mock('@devdeck/api-client', async () => {
@@ -74,5 +92,14 @@ describe('<ItemsPage>', () => {
     renderPage()
     await user.click(screen.getByRole('button', { name: /review 7/i }))
     expect(mocks.navigate).toHaveBeenCalledWith('/review')
+  })
+
+  it('shows a useful empty state instead of staying on loading forever', () => {
+    renderPage()
+    expect(screen.queryByText('Cargando…')).not.toBeInTheDocument()
+    expect(screen.getByText('Nada por acá todavía')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /guardar comando/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /abrir cheatsheets/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /discover/i })).toBeInTheDocument()
   })
 })
