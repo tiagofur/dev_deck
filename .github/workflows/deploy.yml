@@ -67,6 +67,6 @@ jobs:
             # Apply migrations
             for f in ../backend/migrations/*.sql; do
               echo "Applying $f"
-              docker compose exec -T db psql -U devdeck devdeck -v ON_ERROR_STOP=1 -f - < "$f"
+              awk '/-- [+]goose Down/{exit} {print}' "$f" | docker compose exec -T db psql -U devdeck devdeck -v ON_ERROR_STOP=1
             done
             docker system prune -f
