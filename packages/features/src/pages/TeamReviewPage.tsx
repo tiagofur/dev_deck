@@ -3,6 +3,8 @@ import { ArrowLeft, Box, CheckCircle2, Users } from 'lucide-react'
 import { Button } from '@devdeck/ui'
 import { useItems } from '@devdeck/api-client'
 import { ItemCard } from '../components/ItemCard'
+import { detailPathForItem } from '../utils/itemRoutes'
+import { AppShell } from '../components/AppShell'
 
 export function TeamReviewPage() {
   const navigate = useNavigate()
@@ -14,7 +16,7 @@ export function TeamReviewPage() {
   const items = data?.items ?? []
 
   return (
-    <div className="h-screen flex flex-col bg-bg-primary">
+    <AppShell contentClassName="flex-1 flex flex-col overflow-hidden">
       <header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex items-center gap-4">
         <button
           type="button"
@@ -79,12 +81,12 @@ export function TeamReviewPage() {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {items.map((it) => (
-                <ItemCard key={it.id} item={it} onClick={() => navigate(`/items/${it.id}`)} />
+                <ItemCard key={it.id} item={it} onClick={() => navigate(detailPathForItem(it))} />
               ))}
             </div>
           </>
         )}
       </main>
-    </div>
+    </AppShell>
   )
 }

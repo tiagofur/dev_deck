@@ -1,0 +1,70 @@
+{
+  "slug": "go-patterns",
+  "title": "Go Concurrency & Patterns",
+  "category": "language",
+  "icon": "🐹",
+  "color": "#00ADD8",
+  "description": "Idiomatic Go patterns — interfaces, goroutines, channels, context, error handling, and common idioms.",
+  "entries": [
+    {
+      "label": "Interface Satisfaction",
+      "command": "type Reader interface {\n  Read(p []byte) (n int, err error)\n}\n// Compile-time check:\nvar _ Reader = (*MyReader)(nil)",
+      "description": "Implicit interfaces + compile-time verification pattern",
+      "tags": ["interface", "implicit", "check"]
+    },
+    {
+      "label": "Goroutine + WaitGroup",
+      "command": "var wg sync.WaitGroup\nfor _, url := range urls {\n  wg.Add(1)\n  go func(u string) {\n    defer wg.Done()\n    fetch(u)\n  }(url)\n}\nwg.Wait()",
+      "description": "Launch concurrent goroutines and wait for all to finish",
+      "tags": ["goroutine", "waitgroup", "concurrent"]
+    },
+    {
+      "label": "Channel Pipeline",
+      "command": "ch := make(chan int, 10)\ngo func() {\n  for i := 0; i < 100; i++ { ch <- i }\n  close(ch)\n}()\nfor val := range ch {\n  process(val)\n}",
+      "description": "Producer-consumer pattern with buffered channel",
+      "tags": ["channel", "pipeline", "producer"]
+    },
+    {
+      "label": "Select (Fan-In)",
+      "command": "select {\ncase msg := <-ch1:\n  handle(msg)\ncase msg := <-ch2:\n  handle(msg)\ncase <-ctx.Done():\n  return ctx.Err()\n}",
+      "description": "Multiplex multiple channels — first ready wins",
+      "tags": ["select", "multiplex", "fan-in"]
+    },
+    {
+      "label": "Context with Timeout",
+      "command": "ctx, cancel := context.WithTimeout(ctx, 5*time.Second)\ndefer cancel()\nresult, err := doWork(ctx)",
+      "description": "Set a deadline for an operation — always defer cancel",
+      "tags": ["context", "timeout", "cancel"]
+    },
+    {
+      "label": "Error Wrapping",
+      "command": "if err != nil {\n  return fmt.Errorf(\"fetch user %s: %w\", id, err)\n}\n// Caller: errors.Is(err, sql.ErrNoRows)",
+      "description": "Wrap errors with context using %w — preserves the error chain for Is/As",
+      "tags": ["error", "wrap", "chain"]
+    },
+    {
+      "label": "Custom Error Type",
+      "command": "type NotFoundError struct {\n  Resource string\n  ID       string\n}\nfunc (e *NotFoundError) Error() string {\n  return fmt.Sprintf(\"%s %s not found\", e.Resource, e.ID)\n}",
+      "description": "Implement the error interface for domain-specific errors",
+      "tags": ["error", "custom", "type"]
+    },
+    {
+      "label": "Functional Options",
+      "command": "type Option func(*Server)\nfunc WithPort(p int) Option {\n  return func(s *Server) { s.port = p }\n}\nfunc NewServer(opts ...Option) *Server {\n  s := &Server{port: 8080}\n  for _, o := range opts { o(s) }\n  return s\n}",
+      "description": "Clean API design with optional configuration — the Go way",
+      "tags": ["options", "pattern", "config"]
+    },
+    {
+      "label": "HTTP Handler Pattern",
+      "command": "func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {\n  var input CreateUserInput\n  if err := json.NewDecoder(r.Body).Decode(&input); err != nil {\n    http.Error(w, err.Error(), http.StatusBadRequest)\n    return\n  }\n  // ...\n  w.WriteHeader(http.StatusCreated)\n  json.NewEncoder(w).Encode(user)\n}",
+      "description": "Standard handler: decode input, validate, process, encode response",
+      "tags": ["http", "handler", "rest"]
+    },
+    {
+      "label": "Embed Static Files",
+      "command": "//go:embed static/*\nvar staticFS embed.FS\n\nhttp.Handle(\"/\", http.FileServer(http.FS(staticFS)))",
+      "description": "Embed files into the binary at compile time — no external file dependencies",
+      "tags": ["embed", "static", "binary"]
+    }
+  ]
+}

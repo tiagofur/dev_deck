@@ -12,6 +12,7 @@ import {
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ActionsBar } from '../components/ActionsBar'
+import { AppShell } from '../components/AppShell'
 import { Button } from '@devdeck/ui'
 import { AddCommandModal } from '../components/Commands/AddCommandModal'
 import { CommandsList } from '../components/Commands/CommandsList'
@@ -77,20 +78,27 @@ export function RepoDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center font-mono text-ink-soft">
-        Cargando…
-      </div>
+      <AppShell contentClassName="flex-1 overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center font-mono text-ink-soft">
+          Cargando repo…
+        </div>
+      </AppShell>
     )
   }
 
   if (error || !repo) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8">
-        <p className="font-display font-black text-3xl uppercase">Repo no encontrado</p>
-        <Button variant="primary" onClick={() => navigate('/')}>
-          Volver al inicio
-        </Button>
-      </div>
+      <AppShell contentClassName="flex-1 overflow-y-auto">
+        <div className="min-h-full flex flex-col items-center justify-center gap-4 p-8 text-center">
+          <p className="font-display font-black text-3xl uppercase">Repo no encontrado o borrado</p>
+          <p className="font-mono text-sm text-ink-soft max-w-md">
+            El repo ya no existe en tu vault, o fue eliminado mientras esta pantalla estaba abierta.
+          </p>
+          <Button variant="primary" onClick={() => navigate('/items', { replace: true })}>
+            Volver a items
+          </Button>
+        </div>
+      </AppShell>
     )
   }
 
@@ -139,7 +147,7 @@ export function RepoDetailPage() {
     try {
       await deleteRepo.mutateAsync(repo!.id)
       showToast('Repo borrado')
-      navigate('/')
+      navigate('/items', { replace: true })
     } catch (e) {
       showToast((e as Error).message, 'error')
     }
@@ -218,11 +226,12 @@ export function RepoDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary">
+    <AppShell contentClassName="flex-1 overflow-y-auto">
+      <div className="min-h-full bg-bg-primary">
       {/* Header */}
       <header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex items-center gap-4 sticky top-0 z-10">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/items')}
           className="border-3 border-ink p-2 bg-bg-card shadow-hard
                      hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg
                      active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
@@ -464,7 +473,8 @@ export function RepoDetailPage() {
         onClose={() => setImportModalOpen(false)}
         onImport={handleImportScripts}
       />
-    </div>
+      </div>
+    </AppShell>
   )
 }
 

@@ -1,0 +1,70 @@
+{
+  "slug": "zellij",
+  "title": "Zellij Terminal Multiplexer",
+  "category": "editor",
+  "icon": "🪟",
+  "color": "#7B61FF",
+  "description": "Modern terminal multiplexer — tabs, panes, floating windows, and session management.",
+  "entries": [
+    {
+      "label": "New Pane Right",
+      "command": "Ctrl+p then n  (or Alt+n)",
+      "description": "Split the current pane and open a new terminal to the right",
+      "tags": ["pane", "split", "right"]
+    },
+    {
+      "label": "New Pane Down",
+      "command": "Ctrl+p then d",
+      "description": "Split the current pane and open a new terminal below",
+      "tags": ["pane", "split", "down"]
+    },
+    {
+      "label": "Navigate Panes",
+      "command": "Alt+←/→/↑/↓",
+      "description": "Move focus between panes using arrow keys",
+      "tags": ["navigate", "focus", "pane"]
+    },
+    {
+      "label": "New Tab",
+      "command": "Ctrl+t then n",
+      "description": "Create a new tab (workspace) in the current session",
+      "tags": ["tab", "new", "workspace"]
+    },
+    {
+      "label": "Switch Tab",
+      "command": "Ctrl+t then 1-9",
+      "description": "Jump to a specific tab by number",
+      "tags": ["tab", "switch", "number"]
+    },
+    {
+      "label": "Floating Pane",
+      "command": "Ctrl+p then w",
+      "description": "Toggle a floating pane overlay — great for quick commands",
+      "tags": ["floating", "overlay", "popup"]
+    },
+    {
+      "label": "Close Pane",
+      "command": "Ctrl+p then x",
+      "description": "Close the currently focused pane",
+      "tags": ["close", "pane", "exit"]
+    },
+    {
+      "label": "Detach Session",
+      "command": "Ctrl+o then d",
+      "description": "Detach from the current session (keeps it running in background)",
+      "tags": ["detach", "session", "background"]
+    },
+    {
+      "label": "Reattach Session",
+      "command": "zellij attach <session-name>",
+      "description": "Reconnect to a previously detached session",
+      "tags": ["attach", "resume", "session"]
+    },
+    {
+      "label": "List Sessions",
+      "command": "zellij list-sessions",
+      "description": "Show all active Zellij sessions on this machine",
+      "tags": ["list", "sessions", "status"]
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "slug": "homebrew",
+  "title": "Homebrew Package Manager",
+  "category": "tool",
+  "icon": "🍺",
+  "color": "#FBB040",
+  "description": "Install, update, and manage packages on macOS and Linux with Homebrew.",
+  "entries": [
+    {
+      "label": "Install Package",
+      "command": "brew install <package>",
+      "description": "Install a formula (CLI tool) from the Homebrew repository",
+      "tags": ["install", "package", "formula"]
+    },
+    {
+      "label": "Install GUI App (Cask)",
+      "command": "brew install --cask <app>",
+      "description": "Install a macOS GUI application (e.g., firefox, docker, iterm2)",
+      "tags": ["cask", "gui", "app"]
+    },
+    {
+      "label": "Update Everything",
+      "command": "brew update && brew upgrade && brew cleanup",
+      "description": "Fetch latest versions, upgrade all packages, and remove old versions",
+      "tags": ["update", "upgrade", "cleanup"]
+    },
+    {
+      "label": "Search Packages",
+      "command": "brew search <query>",
+      "description": "Search for available formulae and casks matching a query",
+      "tags": ["search", "find", "discover"]
+    },
+    {
+      "label": "Package Info",
+      "command": "brew info <package>",
+      "description": "Show details about a package — version, dependencies, install size",
+      "tags": ["info", "details", "version"]
+    },
+    {
+      "label": "List Installed",
+      "command": "brew list --formula",
+      "description": "List all installed CLI formulae (use --cask for GUI apps)",
+      "tags": ["list", "installed", "inventory"]
+    },
+    {
+      "label": "Uninstall Package",
+      "command": "brew uninstall <package>",
+      "description": "Remove a package and its cellar files",
+      "tags": ["uninstall", "remove", "cleanup"]
+    },
+    {
+      "label": "Add Third-Party Tap",
+      "command": "brew tap <user/repo>",
+      "description": "Add a third-party repository to access additional formulae",
+      "tags": ["tap", "repo", "third-party"]
+    },
+    {
+      "label": "Manage Services",
+      "command": "brew services list",
+      "description": "Show background services managed by Homebrew (postgres, redis, etc.)",
+      "tags": ["services", "background", "daemon"]
+    },
+    {
+      "label": "Start Background Service",
+      "command": "brew services start <service>",
+      "description": "Start a service and configure it to launch at login",
+      "tags": ["services", "start", "autostart"]
+    },
+    {
+      "label": "Doctor — Diagnose Issues",
+      "command": "brew doctor",
+      "description": "Check your Homebrew installation for common problems",
+      "tags": ["doctor", "debug", "health"]
+    }
+  ]
+}

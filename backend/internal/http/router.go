@@ -100,6 +100,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	publicDeckH := handlers.NewPublicDeckHandler(st)
 	importH := handlers.NewImportHandler(st)
 	profileH := handlers.NewProfileHandler(st, deps.Cache)
+	circlesH := handlers.NewCirclesHandler(st)
 	adminH := handlers.NewAdminHandler(st)
 	runbooksH := handlers.NewRunbooksHandler(st)
 	invitesH := handlers.NewInvitesHandler(st)
@@ -124,6 +125,15 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		r.Get("/suggestions/commands", suggestionsH.Commands)
 		r.Get("/plugins/featured", pluginsH.ListFeatured)
 		r.Post("/waitlist", invitesH.JoinWaitlist)
+
+		r.Route("/cheatsheets", func(cr chi.Router) {
+			cr.Get("/explore", cheatsH.Explore)
+			cr.Get("/{id}", cheatsH.Get)
+			cr.Get("/{id}/entries", cheatsH.ListEntries)
+			cr.Get("/{id}/export", cheatsH.Export)
+			cr.Get("/{id}/badge", cheatsH.Badge)
+			cr.Get("/{id}/card.svg", cheatsH.Card)
+		})
 
 		if authH != nil {
 			r.Route("/auth", func(r chi.Router) {
@@ -193,13 +203,10 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Route("/cheatsheets", func(cr chi.Router) {
 				cr.Get("/", cheatsH.List)
 				cr.Post("/", cheatsH.Create)
-				cr.Get("/explore", cheatsH.Explore)
-				cr.Get("/{id}", cheatsH.Get)
 				cr.Patch("/{id}", cheatsH.Update)
 				cr.Delete("/{id}", cheatsH.Delete)
 				cr.Post("/{id}/fork", cheatsH.Fork)
 				cr.Post("/{id}/star", cheatsH.Star)
-				cr.Get("/{id}/entries", cheatsH.ListEntries)
 				cr.Post("/{id}/entries", cheatsH.CreateEntry)
 				cr.Patch("/{id}/entries/{entryId}", cheatsH.UpdateEntry)
 				cr.Delete("/{id}/entries/{entryId}", cheatsH.DeleteEntry)
@@ -328,6 +335,18 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Delete("/decks/{id}/items/{itemId}", deckH.RemoveItem)
 			r.Post("/decks/{id}/star", deckH.Star)
 			r.Delete("/decks/{id}/star", deckH.Unstar)
+
+			// Circles (auth required)
+			r.Route("/circles", func(cr chi.Router) {
+				cr.Post("/", circlesH.Create)
+				cr.Get("/", circlesH.List)
+				cr.Post("/join", circlesH.Join)
+				cr.Get("/{id}", circlesH.Get)
+				cr.Get("/{id}/items", circlesH.ListItems)
+				cr.Post("/{id}/share", circlesH.ShareItem)
+				cr.Get("/{id}/members", circlesH.ListMembers)
+				cr.Delete("/{id}/members", circlesH.Leave)
+			})
 
 			// Deck import (auth required)
 			r.Post("/decks/{id}/import", importH.Import)

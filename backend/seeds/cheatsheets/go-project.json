@@ -1,0 +1,76 @@
+{
+  "slug": "go-project",
+  "title": "Go Project Setup & Patterns",
+  "category": "language",
+  "icon": "🐹",
+  "color": "#00ADD8",
+  "description": "Initialize, structure, test, and build Go projects — modules, testing, and common patterns.",
+  "entries": [
+    {
+      "label": "Initialize Module",
+      "command": "go mod init github.com/user/project",
+      "description": "Create a new Go module with a specific module path",
+      "tags": ["init", "module", "create"]
+    },
+    {
+      "label": "Add Dependency",
+      "command": "go get github.com/go-chi/chi/v5",
+      "description": "Add a dependency to your module and update go.mod",
+      "tags": ["dependency", "get", "install"]
+    },
+    {
+      "label": "Tidy Dependencies",
+      "command": "go mod tidy",
+      "description": "Remove unused dependencies and add missing ones",
+      "tags": ["tidy", "cleanup", "deps"]
+    },
+    {
+      "label": "Run Tests",
+      "command": "go test ./... -v -race -count=1",
+      "description": "Run all tests with verbose output, race detection, and no caching",
+      "tags": ["test", "race", "verbose"]
+    },
+    {
+      "label": "Test Coverage",
+      "command": "go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out",
+      "description": "Generate test coverage report and open in browser",
+      "tags": ["coverage", "report", "html"]
+    },
+    {
+      "label": "Build Binary",
+      "command": "CGO_ENABLED=0 go build -ldflags='-s -w' -o bin/app ./cmd/api",
+      "description": "Build a static binary with stripped debug info (smallest size)",
+      "tags": ["build", "binary", "static"]
+    },
+    {
+      "label": "Cross-Compile",
+      "command": "GOOS=linux GOARCH=amd64 go build -o bin/app-linux ./cmd/api",
+      "description": "Build for a different OS/architecture (e.g., build Linux binary on macOS)",
+      "tags": ["cross-compile", "linux", "deploy"]
+    },
+    {
+      "label": "Run with Watch",
+      "command": "go install github.com/air-verse/air@latest && air",
+      "description": "Auto-reload Go server on file changes — essential for development",
+      "tags": ["watch", "hot-reload", "dev"]
+    },
+    {
+      "label": "Lint",
+      "command": "go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest\ngolangci-lint run ./...",
+      "description": "Run comprehensive linting with 60+ linters in one tool",
+      "tags": ["lint", "quality", "ci"]
+    },
+    {
+      "label": "Project Layout",
+      "command": "project/\n├── cmd/api/main.go   # entrypoints\n├── internal/         # private packages\n├── pkg/              # public packages\n├── go.mod\n└── Makefile",
+      "description": "Standard Go project layout — cmd for mains, internal for private logic",
+      "tags": ["structure", "layout", "convention"]
+    },
+    {
+      "label": "Table-Driven Tests",
+      "command": "func TestAdd(t *testing.T) {\n  tests := []struct{ a, b, want int }{\n    {1, 2, 3}, {0, 0, 0}, {-1, 1, 0},\n  }\n  for _, tt := range tests {\n    got := Add(tt.a, tt.b)\n    if got != tt.want {\n      t.Errorf(\"Add(%d,%d) = %d, want %d\", tt.a, tt.b, got, tt.want)\n    }\n  }\n}",
+      "description": "Idiomatic Go testing pattern — define cases as struct slice, loop and assert",
+      "tags": ["test", "table-driven", "pattern"]
+    }
+  ]
+}

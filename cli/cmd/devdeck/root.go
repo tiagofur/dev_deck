@@ -42,6 +42,7 @@ func init() {
 		searchCmd,
 		listCmd,
 		statusCmd,
+		tipCmd,
 	)
 }
 

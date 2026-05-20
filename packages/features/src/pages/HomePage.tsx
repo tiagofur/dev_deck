@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CaptureModal } from '../components/CaptureModal'
 import { EmptyState } from '@devdeck/ui'
+import { detailPathForItem } from '../utils/itemRoutes'
 import { GlobalSearchModal } from '../components/GlobalSearchModal'
 import { Mascot } from '../components/Mascot/Mascot'
 import { ItemGrid } from '../components/ItemGrid'
@@ -149,7 +150,7 @@ export function HomePage() {
               </p>
               <ItemGrid
                 items={items}
-                onSelect={(it) => navigate(`/items/${it.id}`)}
+                onSelect={(it) => navigate(detailPathForItem(it))}
               />
             </>
           )}

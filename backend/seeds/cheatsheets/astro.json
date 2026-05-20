@@ -1,0 +1,58 @@
+{
+  "slug": "astro",
+  "title": "Astro — Content-Focused Framework",
+  "category": "framework",
+  "icon": "🚀",
+  "color": "#FF5D01",
+  "description": "Build fast content sites with Astro — islands architecture, content collections, and zero JS by default.",
+  "entries": [
+    {
+      "label": "Create Project",
+      "command": "npm create astro@latest my-site -- --template basics --typescript strict",
+      "description": "Scaffold a new Astro project with TypeScript in strict mode",
+      "tags": ["create", "init", "scaffold"]
+    },
+    {
+      "label": "Add Integration",
+      "command": "npx astro add react tailwind",
+      "description": "Add React and Tailwind integrations automatically — modifies config and installs deps",
+      "tags": ["integration", "react", "tailwind"]
+    },
+    {
+      "label": "Astro Component",
+      "command": "---\nconst title = 'Hello'\n---\n<h1>{title}</h1>\n<style>\n  h1 { color: navy; }\n</style>",
+      "description": "Astro components have a frontmatter fence (---) for server-side JS and scoped styles",
+      "tags": ["component", "frontmatter", "style"]
+    },
+    {
+      "label": "Island (Client Directive)",
+      "command": "<ReactCounter client:load />\n<HeavyWidget client:visible />\n<Carousel client:idle />",
+      "description": "Hydrate interactive components only when needed: load, visible, idle, media, only",
+      "tags": ["island", "hydration", "interactive"]
+    },
+    {
+      "label": "Content Collection",
+      "command": "// src/content/config.ts\nimport { defineCollection, z } from 'astro:content'\nconst blog = defineCollection({\n  schema: z.object({ title: z.string(), date: z.date(), tags: z.array(z.string()) })\n})",
+      "description": "Define typed content collections with Zod schema validation",
+      "tags": ["content", "collection", "schema"]
+    },
+    {
+      "label": "Query Collection",
+      "command": "---\nimport { getCollection } from 'astro:content'\nconst posts = await getCollection('blog')\nconst sorted = posts.sort((a, b) => b.data.date - a.data.date)\n---",
+      "description": "Fetch and sort content collection entries in page frontmatter",
+      "tags": ["query", "sort", "fetch"]
+    },
+    {
+      "label": "Dynamic Routes",
+      "command": "// src/pages/blog/[slug].astro\nexport async function getStaticPaths() {\n  const posts = await getCollection('blog')\n  return posts.map(p => ({ params: { slug: p.slug }, props: { post: p } }))\n}",
+      "description": "Generate static pages for each content entry at build time",
+      "tags": ["dynamic", "route", "ssg"]
+    },
+    {
+      "label": "Build & Deploy",
+      "command": "npm run build\n# Output in dist/ — deploy to any static host\n# Netlify, Vercel, Cloudflare Pages, GitHub Pages",
+      "description": "Astro builds to static HTML by default — deploy anywhere",
+      "tags": ["build", "deploy", "static"]
+    }
+  ]
+}

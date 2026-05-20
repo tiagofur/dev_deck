@@ -1,0 +1,70 @@
+{
+  "slug": "python-uv",
+  "title": "Python with uv Package Manager",
+  "category": "language",
+  "icon": "🐍",
+  "color": "#3776AB",
+  "description": "Modern Python project setup using uv — the blazing fast package and project manager.",
+  "entries": [
+    {
+      "label": "Create Project",
+      "command": "uv init my-project\ncd my-project",
+      "description": "Initialize a new Python project with pyproject.toml",
+      "tags": ["init", "create", "project"]
+    },
+    {
+      "label": "Add Dependency",
+      "command": "uv add requests fastapi",
+      "description": "Add packages to your project — updates pyproject.toml and lockfile",
+      "tags": ["add", "install", "dependency"]
+    },
+    {
+      "label": "Add Dev Dependency",
+      "command": "uv add --dev pytest ruff mypy",
+      "description": "Add development-only dependencies (testing, linting, typing)",
+      "tags": ["dev", "testing", "tools"]
+    },
+    {
+      "label": "Run Script",
+      "command": "uv run python main.py",
+      "description": "Run a Python script within the project's virtual environment",
+      "tags": ["run", "execute", "venv"]
+    },
+    {
+      "label": "Run Tool",
+      "command": "uv run pytest -v\nuv run ruff check .",
+      "description": "Run any installed tool through uv without activating the venv",
+      "tags": ["tool", "pytest", "ruff"]
+    },
+    {
+      "label": "Sync Environment",
+      "command": "uv sync",
+      "description": "Install all dependencies from lockfile into the virtual environment",
+      "tags": ["sync", "install", "lock"]
+    },
+    {
+      "label": "Install Python Version",
+      "command": "uv python install 3.12",
+      "description": "Download and install a specific Python version (managed by uv)",
+      "tags": ["python", "version", "install"]
+    },
+    {
+      "label": "Run One-Off Script",
+      "command": "uvx ruff check .\nuvx black --check .",
+      "description": "Run a tool without installing it permanently (like npx)",
+      "tags": ["uvx", "npx", "ephemeral"]
+    },
+    {
+      "label": "Lock Dependencies",
+      "command": "uv lock",
+      "description": "Generate or update the lockfile without installing anything",
+      "tags": ["lock", "freeze", "reproducible"]
+    },
+    {
+      "label": "Build Package",
+      "command": "uv build",
+      "description": "Build wheel and sdist for distribution",
+      "tags": ["build", "package", "distribute"]
+    }
+  ]
+}

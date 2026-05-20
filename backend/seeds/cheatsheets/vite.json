@@ -1,0 +1,58 @@
+{
+  "slug": "vite",
+  "title": "Vite — Build Tool",
+  "category": "framework",
+  "icon": "⚡",
+  "color": "#646CFF",
+  "description": "Fast frontend tooling with Vite — project setup, plugins, configuration, and optimization.",
+  "entries": [
+    {
+      "label": "Create React + TS Project",
+      "command": "npm create vite@latest my-app -- --template react-ts",
+      "description": "Scaffold a new Vite project with React and TypeScript template",
+      "tags": ["create", "react", "typescript"]
+    },
+    {
+      "label": "Create Vue + TS Project",
+      "command": "npm create vite@latest my-app -- --template vue-ts",
+      "description": "Scaffold a new Vite project with Vue 3 and TypeScript template",
+      "tags": ["create", "vue", "typescript"]
+    },
+    {
+      "label": "Dev Server",
+      "command": "npm run dev -- --host --port 3000",
+      "description": "Start dev server exposed on network (--host) on custom port",
+      "tags": ["dev", "server", "network"]
+    },
+    {
+      "label": "Environment Variables",
+      "command": "# .env.local\nVITE_API_URL=https://api.example.com\n\n# In code:\nconst url = import.meta.env.VITE_API_URL",
+      "description": "Only VITE_ prefixed env vars are exposed to client code for security",
+      "tags": ["env", "config", "security"]
+    },
+    {
+      "label": "Path Aliases",
+      "command": "// vite.config.ts\nimport { resolve } from 'path'\nexport default defineConfig({\n  resolve: { alias: { '@': resolve(__dirname, 'src') } }\n})",
+      "description": "Configure path aliases so you can import with @/components/...",
+      "tags": ["alias", "path", "imports"]
+    },
+    {
+      "label": "Proxy API Requests",
+      "command": "// vite.config.ts\nserver: {\n  proxy: {\n    '/api': { target: 'http://localhost:8080', changeOrigin: true }\n  }\n}",
+      "description": "Proxy /api requests to a backend server during development",
+      "tags": ["proxy", "api", "cors"]
+    },
+    {
+      "label": "Build & Preview",
+      "command": "npm run build && npm run preview",
+      "description": "Build for production and preview the output locally",
+      "tags": ["build", "preview", "production"]
+    },
+    {
+      "label": "Analyze Bundle Size",
+      "command": "npx vite-bundle-analyzer",
+      "description": "Visualize your bundle composition to identify large dependencies",
+      "tags": ["bundle", "analyze", "optimize"]
+    }
+  ]
+}

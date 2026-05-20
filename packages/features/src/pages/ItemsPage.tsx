@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, Plus, Users, Search } from 'lucide-react'
-import { CaptureModal } from '../components/CaptureModal'
+import { BookOpen, Box, Compass, Plus, TerminalSquare, Users } from 'lucide-react'
+import { AppShell } from '../components/AppShell'
 import { ItemCard } from '../components/ItemCard'
 import { OnboardingChecklist } from '../components/OnboardingChecklist'
 import { detailPathForItem } from '../utils/itemRoutes'
@@ -34,7 +34,6 @@ export function ItemsPage() {
   const [stack, setStack] = useState<StackFilter[]>([])
   const [workflow, setWorkflow] = useState<WorkflowFilter | ''>('')
   const [query, setQuery] = useState('')
-  const [captureOpen, setCaptureOpen] = useState(false)
 
   // Build stack query param — comma-separated for OR logic
   const stackParam = stack.length > 0 ? stack.join(',') : undefined
@@ -71,6 +70,10 @@ export function ItemsPage() {
 
   const hasFilters = type !== 'all' || stack.length > 0 || workflow || query.length > 0
 
+  function openCapture() {
+    window.dispatchEvent(new CustomEvent('devdeck:open-capture'))
+  }
+
   // Count by type for the chip badges. The UI doesn't paginate between
   // types so this is a single pass over the current page, not a
   // separate backend call — good enough for vault sizes < 1k.
@@ -83,66 +86,12 @@ export function ItemsPage() {
   }, [items])
 
   return (
-    <div className="h-screen flex flex-col bg-bg-primary">
-      <header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex items-center gap-4">
-        <button
-          type="button"
-          onClick={() => navigate('/')}
-          className="hover:text-accent-orange transition-colors"
-          aria-label="Volver a home"
-        >
-          <h1 className="font-display font-black text-2xl uppercase">DevDeck</h1>
-        </button>
-        <span className="font-mono text-sm text-ink-soft">/ items</span>
-
-        <div className="flex-1" />
-
-        <input
-          type="search"
-          placeholder="Buscar en items…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="border-3 border-ink px-3 py-2 font-mono text-sm
-                     focus:outline-none focus:bg-accent-yellow/20 w-full md:w-64"
-        />
-
-        <button
-          type="button"
-          onClick={() => window.dispatchEvent(new CustomEvent('devdeck:open-search'))}
-          className="border-3 border-ink px-3 py-2 bg-accent-yellow shadow-hard-sm
-                     font-display font-bold uppercase text-sm hover:bg-accent-yellow/80
-                     flex items-center gap-1.5"
-        >
-          <Search size={16} strokeWidth={3} />
-          Search
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setCaptureOpen(true)}
-          className="border-3 border-ink px-3 py-2 bg-accent-lime shadow-hard-sm
-                     font-display font-bold uppercase text-sm hover:bg-accent-lime/80
-                     flex items-center gap-1.5"
-        >
-          <Plus size={16} strokeWidth={3} />
-          Capturar
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate('/review')}
-          className="border-3 border-ink px-3 py-2 bg-bg-card shadow-hard-sm
-                     font-display font-bold uppercase text-sm hover:bg-accent-yellow/40
-                     flex items-center gap-1.5"
-        >
-          <Users size={16} strokeWidth={3} />
-          Review
-          {reviewCount > 0 && (
-            <span className="ml-1 border-2 border-ink bg-accent-yellow px-1.5 py-0.5 text-[10px] leading-none">
-              {reviewCount > 99 ? '99+' : reviewCount}
-            </span>
-          )}
-        </button>
-      </header>
+    <AppShell
+      query={query}
+      onQueryChange={setQuery}
+      reviewCount={reviewCount}
+      contentClassName="flex-1 flex flex-col overflow-hidden"
+    >
 
       <nav className="border-b-3 border-ink px-6 py-3 overflow-x-auto">
         <div className="flex gap-2">
@@ -248,14 +197,39 @@ export function ItemsPage() {
                         </p>
                     </div>
 
-                    {!hasFilters && <OnboardingChecklist />}
+                    {!hasFilters && (
+                      <div className="w-full max-w-4xl space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-left">
+                          <UtilityAction
+                            icon={<TerminalSquare size={18} strokeWidth={3} />}
+                            title="Guardar comando"
+                            desc="CLI, scripts, flags y recetas rápidas."
+                            onClick={openCapture}
+                          />
+                          <UtilityAction
+                            icon={<BookOpen size={18} strokeWidth={3} />}
+                            title="Abrir cheatsheets"
+                            desc="Lenguajes, frameworks, tips y how-to."
+                            onClick={() => navigate('/cheatsheets')}
+                          />
+                          <UtilityAction
+                            icon={<Compass size={18} strokeWidth={3} />}
+                            title="Discover"
+                            desc="Encontrar herramientas y referencias nuevas."
+                            onClick={() => navigate('/discovery')}
+                          />
+                        </div>
+                        <OnboardingChecklist />
+                      </div>
+                    )}
 
                     <button
                       type="button"
-                      onClick={() => setCaptureOpen(true)}
+                      onClick={openCapture}
                       className="border-3 border-ink px-4 py-2 bg-accent-lime shadow-hard
                                  font-display font-bold uppercase"
                     >
+                      <Plus size={16} strokeWidth={3} className="inline-block mr-2" />
                       Capturar algo
                     </button>
                   </div>
@@ -284,13 +258,32 @@ export function ItemsPage() {
           </>
         )}
       </main>
+    </AppShell>
+  )
+}
 
-      <CaptureModal
-        open={captureOpen}
-        onClose={() => setCaptureOpen(false)}
-        onOpenItem={(id, item) => navigate(item ? detailPathForItem(item) : `/items/${id}`)}
-        source="manual"
-      />
-    </div>
+function UtilityAction({
+  icon,
+  title,
+  desc,
+  onClick,
+}: {
+  icon: ReactNode
+  title: string
+  desc: string
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="border-3 border-ink bg-bg-card p-4 text-left shadow-hard-sm hover:bg-accent-yellow/30 transition-colors"
+    >
+      <div className="flex items-center gap-2 font-display font-black uppercase text-sm">
+        {icon}
+        {title}
+      </div>
+      <p className="font-mono text-xs text-ink-soft mt-2 leading-relaxed">{desc}</p>
+    </button>
   )
 }

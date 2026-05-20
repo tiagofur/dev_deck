@@ -34,6 +34,7 @@ import {
 import { NotesEditor } from '../components/NotesEditor'
 import { TagsEditor } from '../components/TagsEditor'
 import { TeamReviewCard } from '../components/TeamReviewCard'
+import { AppShell } from '../components/AppShell'
 
 export function ItemDetailPage() {
 	const { id } = useParams<{ id: string }>()
@@ -163,17 +164,38 @@ export function ItemDetailPage() {
 		try {
 			await deleteItem.mutateAsync(currentItem!.id)
 			showToast('Item borrado')
-			navigate('/items')
+			navigate('/items', { replace: true })
 		} catch (e) {
 			showToast((e as Error).message, 'error')
 		}
 	}
 
-	if (isLoading) return <div className="p-12 text-center animate-pulse">Cargando item…</div>
-	if (error || !currentItem) return <div className="p-12 text-center text-accent-pink">Error al cargar el item.</div>
+	if (isLoading) {
+		return (
+			<AppShell contentClassName="flex-1 overflow-y-auto">
+				<div className="min-h-full p-12 text-center animate-pulse">Cargando item…</div>
+			</AppShell>
+		)
+	}
+	if (error || !currentItem) {
+		return (
+			<AppShell contentClassName="flex-1 overflow-y-auto">
+				<div className="min-h-full flex flex-col items-center justify-center gap-4 p-8 text-center">
+					<p className="font-display font-black text-3xl uppercase">Item no encontrado o borrado</p>
+					<p className="font-mono text-sm text-ink-soft max-w-md">
+						El item ya no existe en tu vault, o fue eliminado mientras esta pantalla estaba abierta.
+					</p>
+					<Button variant="primary" onClick={() => navigate('/items', { replace: true })}>
+						Volver a items
+					</Button>
+				</div>
+			</AppShell>
+		)
+	}
 
 	return (
-		<div className="min-h-screen bg-bg-primary">
+		<AppShell contentClassName="flex-1 overflow-y-auto">
+		<div className="min-h-full bg-bg-primary">
 			<header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex items-center gap-4 sticky top-0 z-10">
 				<button
 					type="button"
@@ -283,6 +305,7 @@ export function ItemDetailPage() {
 				</aside>
 			</div>
 		</div>
+		</AppShell>
 	)
 }
 

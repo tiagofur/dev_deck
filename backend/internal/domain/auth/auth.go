@@ -20,6 +20,10 @@ type User struct {
 	Region              string    `json:"region"`
 	OnboardingCompleted bool      `json:"onboarding_completed"`
 	CreatedAt           time.Time `json:"created_at"`
+	StackTags           []string  `json:"stack_tags,omitempty"`
+	Website             *string   `json:"website,omitempty"`
+	Location            *string   `json:"location,omitempty"`
+	GitHubURL           *string   `json:"github_url,omitempty"`
 }
 
 // TokenPair is the response body for login/refresh.

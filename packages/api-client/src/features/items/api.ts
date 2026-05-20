@@ -3,13 +3,17 @@
 // legacy HomePage grid. New views should import from here.
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api } from '../../api-client'
+import { APIError, api } from '../../api-client'
 import { queryLocal, execLocal } from '../../local-db/client'
 import { enqueueSync } from '../../sync/queue'
 import type { Item, ItemType } from '../capture/types'
 export type { Item, ItemType }
 
 export const ITEMS_KEY = ['items'] as const
+
+function isNotFound(error: unknown): boolean {
+  return error instanceof APIError && error.status === 404
+}
 
 export interface ListItemsParams {
   type?: ItemType
@@ -108,6 +112,7 @@ export function useItems(params: ListItemsParams = {}) {
 				}
 			}
 		},
+    retry: false,
   })
 }
 
@@ -117,6 +122,7 @@ export function useItem(id: string | undefined) {
     queryKey: [...ITEMS_KEY, 'detail', id],
     queryFn: () => api.get<Item>(`/api/items/${id}`),
     enabled: !!id,
+    retry: (failureCount, error) => !isNotFound(error) && failureCount < 1,
   })
 }
 
@@ -172,7 +178,11 @@ export function useDeleteItem() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => api.del<void>(`/api/items/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ITEMS_KEY }),
+    onSuccess: (_data, id) => {
+      qc.cancelQueries({ queryKey: [...ITEMS_KEY, 'detail', id], exact: true })
+      qc.removeQueries({ queryKey: [...ITEMS_KEY, 'detail', id], exact: true })
+      qc.invalidateQueries({ queryKey: [...ITEMS_KEY, 'list'] })
+    },
   })
 }
 

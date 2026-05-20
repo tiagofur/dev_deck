@@ -1,0 +1,76 @@
+{
+  "slug": "zsh-tips",
+  "title": "Zsh & Oh My Zsh Power Tips",
+  "category": "shell",
+  "icon": "⚡",
+  "color": "#89E051",
+  "description": "Level up your terminal with Zsh features, Oh My Zsh plugins, aliases, and globbing tricks.",
+  "entries": [
+    {
+      "label": "Useful Aliases",
+      "command": "alias ll='ls -lah'\nalias gs='git status'\nalias dc='docker compose'",
+      "description": "Add to your .zshrc — short aliases for frequently typed commands",
+      "tags": ["alias", "shortcut", "config"]
+    },
+    {
+      "label": "Global Alias (Pipe)",
+      "command": "alias -g G='| grep'\nalias -g L='| less'\nalias -g C='| wc -l'",
+      "description": "Global aliases expand anywhere in a command: 'ps aux G node'",
+      "tags": ["alias", "global", "pipe"]
+    },
+    {
+      "label": "Auto-Suggest Plugin",
+      "command": "plugins=(zsh-autosuggestions zsh-syntax-highlighting)",
+      "description": "Add to .zshrc plugins array — shows ghost text suggestions as you type",
+      "tags": ["plugin", "autosuggestion", "omz"]
+    },
+    {
+      "label": "Directory Stack (cd History)",
+      "command": "d      # list recent dirs\ncd -2  # jump to 2nd most recent dir",
+      "description": "Zsh tracks your directory history — jump back without typing paths",
+      "tags": ["directory", "navigation", "stack"]
+    },
+    {
+      "label": "Glob: Recursive",
+      "command": "ls **/*.ts",
+      "description": "List all .ts files recursively in subdirectories (Zsh globbing)",
+      "tags": ["glob", "recursive", "pattern"]
+    },
+    {
+      "label": "Glob: Modified Today",
+      "command": "ls *(.m0)",
+      "description": "List files modified today using Zsh glob qualifiers",
+      "tags": ["glob", "qualifier", "recent"]
+    },
+    {
+      "label": "Edit Last Command",
+      "command": "fc",
+      "description": "Open the last command in your $EDITOR for complex edits",
+      "tags": ["edit", "history", "editor"]
+    },
+    {
+      "label": "Repeat Last Argument",
+      "command": "mkdir -p my/deep/path\ncd !$",
+      "description": "!$ expands to the last argument of the previous command",
+      "tags": ["history", "repeat", "shortcut"]
+    },
+    {
+      "label": "Replace in Last Command",
+      "command": "^typo^fix",
+      "description": "Re-run the last command with 'typo' replaced by 'fix'",
+      "tags": ["replace", "history", "quick-fix"]
+    },
+    {
+      "label": "Named Directory",
+      "command": "hash -d proj=~/dev/my-project\ncd ~proj",
+      "description": "Create a short name for a frequently accessed directory",
+      "tags": ["directory", "shortcut", "named"]
+    },
+    {
+      "label": "Keybindings — Word Jump",
+      "command": "bindkey '^[[1;3C' forward-word\nbindkey '^[[1;3D' backward-word",
+      "description": "Opt+Arrow to jump between words in the terminal (macOS)",
+      "tags": ["keybinding", "navigation", "word"]
+    }
+  ]
+}

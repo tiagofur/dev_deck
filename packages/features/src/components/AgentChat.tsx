@@ -41,7 +41,13 @@ export function AgentChat({ initialQuery }: Props) {
   }, [])
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
+    const node = scrollRef.current
+    if (!node) return
+    if (typeof node.scrollTo === 'function') {
+      node.scrollTo({ top: node.scrollHeight, behavior: 'smooth' })
+    } else {
+      node.scrollTop = node.scrollHeight
+    }
   }, [messages])
 
   async function sendMessage(text: string, currentHistory?: Message[]) {

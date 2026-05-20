@@ -1,0 +1,70 @@
+{
+  "slug": "terraform",
+  "title": "Terraform Infrastructure as Code",
+  "category": "devops",
+  "icon": "🏗️",
+  "color": "#844FBA",
+  "description": "Manage cloud infrastructure with Terraform — init, plan, apply, state, modules, and best practices.",
+  "entries": [
+    {
+      "label": "Initialize",
+      "command": "terraform init",
+      "description": "Download providers and modules, initialize backend — run first in any Terraform directory",
+      "tags": ["init", "setup", "providers"]
+    },
+    {
+      "label": "Preview Changes",
+      "command": "terraform plan -out=plan.tfplan",
+      "description": "Show what Terraform will create/modify/destroy without applying changes",
+      "tags": ["plan", "preview", "dry-run"]
+    },
+    {
+      "label": "Apply Changes",
+      "command": "terraform apply plan.tfplan",
+      "description": "Apply a saved plan to provision or update infrastructure",
+      "tags": ["apply", "provision", "deploy"]
+    },
+    {
+      "label": "Destroy All",
+      "command": "terraform destroy",
+      "description": "Tear down all resources managed by this Terraform configuration",
+      "tags": ["destroy", "teardown", "cleanup"]
+    },
+    {
+      "label": "Format Files",
+      "command": "terraform fmt -recursive",
+      "description": "Auto-format all .tf files to canonical style",
+      "tags": ["format", "style", "lint"]
+    },
+    {
+      "label": "Validate Config",
+      "command": "terraform validate",
+      "description": "Check configuration syntax and internal consistency (no API calls)",
+      "tags": ["validate", "check", "syntax"]
+    },
+    {
+      "label": "Show State",
+      "command": "terraform show",
+      "description": "Display the current state or a saved plan in human-readable format",
+      "tags": ["state", "show", "inspect"]
+    },
+    {
+      "label": "Import Existing Resource",
+      "command": "terraform import aws_instance.web i-1234567890abcdef0",
+      "description": "Bring an existing resource under Terraform management",
+      "tags": ["import", "existing", "adopt"]
+    },
+    {
+      "label": "List Resources in State",
+      "command": "terraform state list",
+      "description": "List all resources currently tracked in the Terraform state",
+      "tags": ["state", "list", "inventory"]
+    },
+    {
+      "label": "Target Specific Resource",
+      "command": "terraform apply -target=aws_s3_bucket.uploads",
+      "description": "Apply changes to only one specific resource (use sparingly)",
+      "tags": ["target", "selective", "resource"]
+    }
+  ]
+}

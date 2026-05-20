@@ -35,6 +35,16 @@ export function useCheatsheet(id: string | undefined) {
   })
 }
 
+export function useExploreCheatsheets(category?: string) {
+  return useQuery({
+    queryKey: ['cheatsheets', 'explore', category ?? 'all'],
+    queryFn: () => {
+      const params = category ? `?category=${category}` : ''
+      return api.get<Cheatsheet[]>(`/api/cheatsheets/explore${params}`)
+    },
+  })
+}
+
 export function useCreateCheatsheet() {
   const qc = useQueryClient()
   return useMutation({

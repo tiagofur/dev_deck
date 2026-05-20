@@ -1,0 +1,82 @@
+{
+  "slug": "vscode-shortcuts",
+  "title": "VS Code Keyboard Shortcuts",
+  "category": "editor",
+  "icon": "💎",
+  "color": "#007ACC",
+  "description": "Essential VS Code shortcuts for navigation, editing, refactoring, and terminal — boost your productivity.",
+  "entries": [
+    {
+      "label": "Command Palette",
+      "command": "Cmd+Shift+P (Mac) / Ctrl+Shift+P (Win)",
+      "description": "Open the command palette — the gateway to every VS Code feature",
+      "tags": ["command", "palette", "search"]
+    },
+    {
+      "label": "Quick Open File",
+      "command": "Cmd+P (Mac) / Ctrl+P (Win)",
+      "description": "Fuzzy search and open any file in the project by name",
+      "tags": ["open", "file", "fuzzy"]
+    },
+    {
+      "label": "Go to Symbol",
+      "command": "Cmd+Shift+O (Mac) / Ctrl+Shift+O (Win)",
+      "description": "Jump to a function, class, or variable in the current file",
+      "tags": ["symbol", "navigate", "function"]
+    },
+    {
+      "label": "Go to Definition",
+      "command": "F12 or Cmd+Click",
+      "description": "Jump to where a function or variable is defined",
+      "tags": ["definition", "navigate", "lsp"]
+    },
+    {
+      "label": "Find All References",
+      "command": "Shift+F12",
+      "description": "Show all usages of a symbol across the entire project",
+      "tags": ["references", "usage", "find"]
+    },
+    {
+      "label": "Multi-Cursor (Select Next)",
+      "command": "Cmd+D (Mac) / Ctrl+D (Win)",
+      "description": "Select the next occurrence of the current selection — repeat for more",
+      "tags": ["multi-cursor", "select", "edit"]
+    },
+    {
+      "label": "Multi-Cursor (All Occurrences)",
+      "command": "Cmd+Shift+L (Mac) / Ctrl+Shift+L (Win)",
+      "description": "Select ALL occurrences of the current selection at once",
+      "tags": ["multi-cursor", "all", "replace"]
+    },
+    {
+      "label": "Move Line Up/Down",
+      "command": "Option+↑/↓ (Mac) / Alt+↑/↓ (Win)",
+      "description": "Move the current line (or selection) up or down",
+      "tags": ["move", "line", "reorder"]
+    },
+    {
+      "label": "Duplicate Line",
+      "command": "Shift+Option+↓ (Mac) / Shift+Alt+↓ (Win)",
+      "description": "Duplicate the current line below",
+      "tags": ["duplicate", "copy", "line"]
+    },
+    {
+      "label": "Toggle Terminal",
+      "command": "Ctrl+` (backtick)",
+      "description": "Show/hide the integrated terminal panel",
+      "tags": ["terminal", "toggle", "panel"]
+    },
+    {
+      "label": "Rename Symbol",
+      "command": "F2",
+      "description": "Rename a variable/function across all files (LSP-powered refactor)",
+      "tags": ["rename", "refactor", "lsp"]
+    },
+    {
+      "label": "Fold/Unfold Code",
+      "command": "Cmd+Option+[ or ] (Mac) / Ctrl+Shift+[ or ] (Win)",
+      "description": "Collapse or expand code blocks for better overview",
+      "tags": ["fold", "collapse", "readability"]
+    }
+  ]
+}

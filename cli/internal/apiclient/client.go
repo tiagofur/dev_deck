@@ -201,6 +201,81 @@ func (c *Client) GetItem(ctx context.Context, id string) (*ItemDetail, error) {
 	return &body, nil
 }
 
+// ─── Cheatsheets ───
+
+type Cheatsheet struct {
+	ID          string `json:"id"`
+	Slug        string `json:"slug"`
+	Title       string `json:"title"`
+	Category    string `json:"category"`
+	Description string `json:"description"`
+}
+
+type Entry struct {
+	ID           string   `json:"id"`
+	CheatsheetID string   `json:"cheatsheet_id"`
+	Label        string   `json:"label"`
+	Command      string   `json:"command"`
+	Description  string   `json:"description"`
+	Tags         []string `json:"tags"`
+}
+
+// ListCheatsheets hits GET /api/cheatsheets.
+func (c *Client) ListCheatsheets(ctx context.Context, category string) ([]Cheatsheet, error) {
+	path := "/api/cheatsheets"
+	if category != "" {
+		path += "?category=" + urlQueryEscape(category)
+	}
+	var body []Cheatsheet
+	if err := c.do(ctx, http.MethodGet, path, nil, &body); err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
+// ListCheatsheetEntries hits GET /api/cheatsheets/{id}/entries.
+func (c *Client) ListCheatsheetEntries(ctx context.Context, id string) ([]Entry, error) {
+	var body []Entry
+	path := fmt.Sprintf("/api/cheatsheets/%s/entries", url.PathEscape(id))
+	if err := c.do(ctx, http.MethodGet, path, nil, &body); err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
+// ExportCheatsheet hits GET /api/cheatsheets/{id}/export.
+func (c *Client) ExportCheatsheet(ctx context.Context, id, format string) ([]byte, string, error) {
+	path := fmt.Sprintf("/api/cheatsheets/%s/export?format=%s", url.PathEscape(id), urlQueryEscape(format))
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+path, nil)
+	if err != nil {
+		return nil, "", err
+	}
+	if c.Token != "" {
+		req.Header.Set("Authorization", "Bearer "+c.Token)
+	}
+	resp, err := c.HTTP.Do(req)
+	if err != nil {
+		return nil, "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, "", decodeAPIError(resp)
+	}
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, "", err
+	}
+	
+	filename := ""
+	if cd := resp.Header.Get("Content-Disposition"); cd != "" {
+		if idx := strings.Index(cd, "filename=\""); idx != -1 {
+			filename = cd[idx+10 : len(cd)-1]
+		}
+	}
+	return data, filename, nil
+}
+
 // ─── Agent ───
 
 type Message struct {

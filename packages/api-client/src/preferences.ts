@@ -30,7 +30,7 @@ export function getPreferences(): Preferences {
     // Ensure clientId exists
     if (!prefs.clientId) {
       prefs.clientId = uuidv4()
-      setPreferences({ clientId: prefs.clientId })
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs))
     }
     
     return prefs

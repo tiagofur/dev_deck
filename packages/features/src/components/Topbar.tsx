@@ -1,7 +1,7 @@
-import { Activity, BookOpen, Boxes, Plus, Search, Settings as SettingsIcon, Sparkles, Users } from 'lucide-react'
+import { Activity, BookOpen, Boxes, Plus, Search, Settings as SettingsIcon, Share2, Sparkles, Users } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@devdeck/ui'
-import { usePreferences } from '@devdeck/api-client'
+import { usePreferences, useMe } from '@devdeck/api-client'
 import { SyncStatusIndicator } from './SyncStatusIndicator'
 import { NotificationCenter } from './NotificationCenter'
 import { WorkspaceSwitcher } from './WorkspaceSwitcher'
@@ -13,6 +13,7 @@ interface Props {
   onDiscovery: () => void
   onSettings: () => void
   onGlobalSearch: () => void
+  reviewCount?: number
 }
 
 export function Topbar({
@@ -22,9 +23,11 @@ export function Topbar({
   onDiscovery,
   onSettings,
   onGlobalSearch,
+  reviewCount,
 }: Props) {
   const navigate = useNavigate()
   const { activeOrgId } = usePreferences()
+  const { data: user } = useMe()
 
   return (
     <header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex items-center gap-6">
@@ -45,7 +48,7 @@ export function Topbar({
         <input
           id="topbar-search"
           type="search"
-          placeholder="Buscar repos…  (apretá / )"
+          placeholder="Buscar items, comandos, prompts…  (apretá / )"
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           className="w-full border-3 border-ink pl-10 pr-3 py-2 font-mono text-sm
@@ -92,6 +95,24 @@ export function Topbar({
         </span>
       </Button>
 
+      <Button
+        onClick={() => navigate('/review')}
+        size="sm"
+        variant="secondary"
+        className="whitespace-nowrap"
+        title="Revisión de equipo"
+      >
+        <span className="flex items-center gap-2">
+          <Users size={16} strokeWidth={3} />
+          <span className="hidden sm:inline">Review</span>
+          {!!reviewCount && reviewCount > 0 && (
+            <span className="border-2 border-ink bg-accent-yellow px-1.5 py-0.5 text-[10px] leading-none">
+              {reviewCount > 99 ? '99+' : reviewCount}
+            </span>
+          )}
+        </span>
+      </Button>
+
       {activeOrgId && (
         <Button
           onClick={() => navigate('/feed')}
@@ -121,6 +142,19 @@ export function Topbar({
       </Button>
 
       <Button
+        onClick={() => navigate('/circles')}
+        size="sm"
+        variant="secondary"
+        className="whitespace-nowrap"
+        title="Círculos compartidos"
+      >
+        <span className="flex items-center gap-2">
+          <Share2 size={16} strokeWidth={3} />
+          <span className="hidden sm:inline">Circles</span>
+        </span>
+      </Button>
+
+      <Button
         onClick={onDiscovery}
         size="sm"
         variant="accent"
@@ -136,7 +170,7 @@ export function Topbar({
       <Button onClick={onAdd} size="sm" className="whitespace-nowrap">
         <span className="flex items-center gap-2">
           <Plus size={16} strokeWidth={3} />
-          Add
+          Capturar
         </span>
       </Button>
 
@@ -151,10 +185,29 @@ export function Topbar({
         className="border-3 border-ink p-2 bg-bg-card shadow-hard
                    hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg
                    active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
-                   transition-all duration-150"
+                   transition-all duration-150 shrink-0"
       >
         <SettingsIcon size={16} strokeWidth={3} />
       </button>
+
+      {user && (
+        <button
+          type="button"
+          onClick={() => navigate('/profile')}
+          aria-label="Ver Perfil"
+          title="Ver Perfil"
+          className="border-3 border-ink w-[42px] h-[42px] bg-bg-card shadow-hard flex items-center justify-center overflow-hidden
+                     hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg
+                     active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
+                     transition-all duration-150 shrink-0 cursor-pointer"
+        >
+          <img
+            src={user.avatar_url}
+            alt={user.display_name || user.username || 'Avatar'}
+            className="w-full h-full object-cover"
+          />
+        </button>
+      )}
     </header>
   )
 }

@@ -1,0 +1,58 @@
+{
+  "slug": "gpg",
+  "title": "GPG — Encryption & Signing",
+  "category": "security",
+  "icon": "🔐",
+  "color": "#0093DD",
+  "description": "Encrypt files, sign commits, and manage GPG keys for secure communications.",
+  "entries": [
+    {
+      "label": "Generate Key Pair",
+      "command": "gpg --full-generate-key",
+      "description": "Create a new GPG key pair — choose RSA 4096 and set an expiration",
+      "tags": ["generate", "key", "create"]
+    },
+    {
+      "label": "List Keys",
+      "command": "gpg --list-keys --keyid-format short",
+      "description": "Show all public keys in your keyring with short key IDs",
+      "tags": ["list", "keys", "inventory"]
+    },
+    {
+      "label": "Export Public Key",
+      "command": "gpg --armor --export your@email.com > public.asc",
+      "description": "Export your public key in ASCII format for sharing",
+      "tags": ["export", "public", "share"]
+    },
+    {
+      "label": "Encrypt File",
+      "command": "gpg --encrypt --recipient their@email.com secret.txt",
+      "description": "Encrypt a file so only the recipient can decrypt it",
+      "tags": ["encrypt", "file", "recipient"]
+    },
+    {
+      "label": "Decrypt File",
+      "command": "gpg --decrypt secret.txt.gpg > secret.txt",
+      "description": "Decrypt a file using your private key",
+      "tags": ["decrypt", "file", "private"]
+    },
+    {
+      "label": "Sign a File",
+      "command": "gpg --detach-sign --armor file.tar.gz",
+      "description": "Create a detached signature to verify file authenticity",
+      "tags": ["sign", "detach", "verify"]
+    },
+    {
+      "label": "Git Commit Signing",
+      "command": "git config --global user.signingkey <KEY_ID>\ngit config --global commit.gpgsign true",
+      "description": "Configure git to sign all commits with your GPG key",
+      "tags": ["git", "sign", "commit"]
+    },
+    {
+      "label": "Symmetric Encrypt",
+      "command": "gpg --symmetric --cipher-algo AES256 file.txt",
+      "description": "Encrypt with a passphrase (no key pair needed) — recipient uses same passphrase",
+      "tags": ["symmetric", "password", "simple"]
+    }
+  ]
+}

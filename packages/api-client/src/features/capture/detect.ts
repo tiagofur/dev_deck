@@ -61,9 +61,17 @@ export function detectType(input: CaptureInput): DetectionResult {
     if (isCommandText(rawText)) {
       return { type: 'cli', title: firstLine(rawText) }
     }
+    // Rule 5b — reusable AI prompt.
+    if (isPromptText(rawText)) {
+      return { type: 'prompt', title: firstLine(rawText) }
+    }
     // Rule 6 — snippet (triple backticks or multi-line code).
     if (isSnippetText(rawText)) {
       return { type: 'snippet', title: firstLine(rawText) }
+    }
+    // Rule 6b — short checklist / how-to.
+    if (isWorkflowText(rawText)) {
+      return { type: 'workflow', title: firstLine(rawText) }
     }
     // Rule 7 — keyboard shortcut.
     if (isShortcutText(rawText)) {
@@ -168,9 +176,12 @@ export function suggestCaptureTags(input: {
   if (input.type === 'snippet') tags.add('code')
   if (input.type === 'shortcut') tags.add('shortcut')
   if (input.type === 'prompt' || input.type === 'agent') tags.add('ai')
+  if (input.type === 'workflow') tags.add('how-to')
 
   if (/\b(go|golang)\b/.test(lowerText) || host.includes('go.dev')) tags.add('go')
-  if (/\b(npm|pnpm|yarn|node|typescript|react)\b/.test(lowerText)) tags.add('node')
+  if (/\b(npm|pnpm|yarn|node)\b/.test(lowerText)) tags.add('node')
+  if (/\b(ts|typescript)\b/.test(lowerText)) tags.add('typescript')
+  if (/\b(react|next\.?js|vite)\b/.test(lowerText)) tags.add('react')
   if (/\b(python|pip|pipx)\b/.test(lowerText)) tags.add('python')
   if (/\b(rust|cargo)\b/.test(lowerText)) tags.add('rust')
   if (/\b(docker|compose)\b/.test(lowerText)) tags.add('docker')
@@ -261,6 +272,29 @@ const COMMAND_PREFIXES = [
 function isCommandText(text: string): boolean {
   const lower = text.toLowerCase()
   return COMMAND_PREFIXES.some((p) => lower.startsWith(p))
+}
+
+function isPromptText(text: string): boolean {
+  const lower = text.toLowerCase().trim()
+  return (
+    lower.startsWith('prompt:') ||
+    lower.startsWith('act as ') ||
+    lower.startsWith('actúa como ') ||
+    lower.startsWith('you are ') ||
+    lower.includes('system prompt') ||
+    lower.includes('write a prompt')
+  )
+}
+
+function isWorkflowText(text: string): boolean {
+  const lines = text.split('\n').map((line) => line.trim()).filter(Boolean)
+  if (lines.length < 2) return false
+  const stepLines = lines.filter((line) =>
+    /^(\d+[\).\s-]|[-*]\s+|\[\s?\]\s+)/.test(line) ||
+    /^(step|paso)\s+\d+/i.test(line),
+  )
+  if (stepLines.length >= 2) return true
+  return /\b(checklist|how to|how-to|pasos para|steps to|debug|deploy)\b/i.test(text) && lines.length >= 2
 }
 
 function isTerminalText(text: string): boolean {

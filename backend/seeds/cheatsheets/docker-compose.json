@@ -1,0 +1,76 @@
+{
+  "slug": "docker-compose",
+  "title": "Docker Compose Deep Dive",
+  "category": "devops",
+  "icon": "🐙",
+  "color": "#2496ED",
+  "description": "Multi-container orchestration with Docker Compose — services, volumes, networks, profiles, and health checks.",
+  "entries": [
+    {
+      "label": "Start All Services",
+      "command": "docker compose up -d --build",
+      "description": "Start detached, rebuild images if Dockerfiles changed",
+      "tags": ["start", "build", "detached"]
+    },
+    {
+      "label": "Stop and Remove",
+      "command": "docker compose down -v",
+      "description": "Stop services, remove containers, networks, and named volumes",
+      "tags": ["stop", "remove", "cleanup"]
+    },
+    {
+      "label": "View Logs (All)",
+      "command": "docker compose logs -f --tail 50",
+      "description": "Follow combined logs from all services (last 50 lines)",
+      "tags": ["logs", "follow", "debug"]
+    },
+    {
+      "label": "Logs (Single Service)",
+      "command": "docker compose logs -f api",
+      "description": "Follow logs from only one specific service",
+      "tags": ["logs", "service", "filter"]
+    },
+    {
+      "label": "Restart Single Service",
+      "command": "docker compose restart api",
+      "description": "Restart one service without affecting others",
+      "tags": ["restart", "service", "selective"]
+    },
+    {
+      "label": "Scale Service",
+      "command": "docker compose up -d --scale worker=3",
+      "description": "Run multiple instances of a service (horizontal scaling)",
+      "tags": ["scale", "replicas", "horizontal"]
+    },
+    {
+      "label": "Execute Command",
+      "command": "docker compose exec db psql -U postgres",
+      "description": "Run a command inside a running service container",
+      "tags": ["exec", "shell", "interact"]
+    },
+    {
+      "label": "Environment File",
+      "command": "# docker-compose.yml\nservices:\n  api:\n    env_file: .env\n    environment:\n      - NODE_ENV=production",
+      "description": "Load env vars from file and override specific ones inline",
+      "tags": ["env", "config", "secrets"]
+    },
+    {
+      "label": "Health Check",
+      "command": "# docker-compose.yml\nservices:\n  api:\n    healthcheck:\n      test: ['CMD', 'curl', '-f', 'http://localhost:8080/healthz']\n      interval: 10s\n      timeout: 5s\n      retries: 3",
+      "description": "Add health checks so dependent services wait for readiness",
+      "tags": ["health", "check", "readiness"]
+    },
+    {
+      "label": "Depends On (Healthy)",
+      "command": "services:\n  api:\n    depends_on:\n      db:\n        condition: service_healthy",
+      "description": "Start api only after db passes its health check",
+      "tags": ["depends", "order", "healthy"]
+    },
+    {
+      "label": "Profiles (Optional Services)",
+      "command": "services:\n  debug-ui:\n    profiles: [debug]\n# Start with: docker compose --profile debug up",
+      "description": "Group optional services under profiles — only start when explicitly requested",
+      "tags": ["profile", "optional", "group"]
+    }
+  ]
+}

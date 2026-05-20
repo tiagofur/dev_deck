@@ -179,6 +179,7 @@ export type {
 export {
   useCheatsheets,
   useCheatsheet,
+  useExploreCheatsheets,
   useCreateCheatsheet,
   useUpdateCheatsheet,
   useDeleteCheatsheet,
@@ -231,6 +232,25 @@ export type {
   CaptureSource,
 } from './features/capture/types'
 export { ALL_ITEM_TYPES, EnrichmentStatus } from './features/capture/types'
+
+// Feature hooks — circles
+export {
+  useCircles,
+  useCircleDetail,
+  useCircleItems,
+  useCircleMembers,
+  useCreateCircle,
+  useJoinCircle,
+  useShareToCircle,
+  useLeaveCircle,
+} from './features/circles/api'
+export type {
+  Circle,
+  CircleMemberDetail,
+  CreateCircleInput,
+  JoinCircleInput,
+  ShareToCircleInput,
+} from './features/circles/api'
 
 // Feature hooks — decks
 export {

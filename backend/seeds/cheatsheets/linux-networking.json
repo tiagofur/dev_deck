@@ -1,0 +1,70 @@
+{
+  "slug": "linux-networking",
+  "title": "Linux Networking Commands",
+  "category": "os",
+  "icon": "🌐",
+  "color": "#4CAF50",
+  "description": "Network diagnostics, DNS, firewall, and connectivity troubleshooting on Linux.",
+  "entries": [
+    {
+      "label": "Show IP Addresses",
+      "command": "ip addr show",
+      "description": "Display all network interfaces and their IP addresses",
+      "tags": ["ip", "interface", "address"]
+    },
+    {
+      "label": "Show Active Connections",
+      "command": "ss -tulnp",
+      "description": "Show listening TCP/UDP ports with process names (-t tcp, -u udp, -l listening, -n numeric, -p process)",
+      "tags": ["ports", "listening", "connections"]
+    },
+    {
+      "label": "DNS Lookup",
+      "command": "dig <domain> +short",
+      "description": "Query DNS records for a domain — +short for clean output",
+      "tags": ["dns", "lookup", "resolve"]
+    },
+    {
+      "label": "Reverse DNS",
+      "command": "dig -x <ip> +short",
+      "description": "Find the hostname associated with an IP address",
+      "tags": ["dns", "reverse", "ptr"]
+    },
+    {
+      "label": "Trace Route",
+      "command": "traceroute <host>",
+      "description": "Show the network path (hops) to reach a host",
+      "tags": ["trace", "route", "hops"]
+    },
+    {
+      "label": "Test Port Connectivity",
+      "command": "nc -zv <host> <port>",
+      "description": "Check if a specific port on a host is reachable (netcat)",
+      "tags": ["port", "test", "connectivity"]
+    },
+    {
+      "label": "Download File",
+      "command": "wget -O <output> <url>",
+      "description": "Download a file and save it with a specific name",
+      "tags": ["download", "wget", "fetch"]
+    },
+    {
+      "label": "Monitor Traffic",
+      "command": "sudo tcpdump -i <interface> -n port <port>",
+      "description": "Capture and display network packets on a specific port",
+      "tags": ["tcpdump", "capture", "debug"]
+    },
+    {
+      "label": "Show Routing Table",
+      "command": "ip route show",
+      "description": "Display the kernel routing table — see default gateway and routes",
+      "tags": ["route", "gateway", "table"]
+    },
+    {
+      "label": "Firewall — Allow Port",
+      "command": "sudo ufw allow <port>/tcp",
+      "description": "Open a TCP port in the UFW firewall (Ubuntu/Debian)",
+      "tags": ["firewall", "ufw", "allow"]
+    }
+  ]
+}

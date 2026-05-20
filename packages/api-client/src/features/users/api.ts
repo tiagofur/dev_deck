@@ -15,6 +15,10 @@ export interface User {
   region: string
   onboarding_completed: boolean
   created_at: string
+  stack_tags?: string[]
+  website?: string
+  location?: string
+  github_url?: string
 }
 
 export interface StarterKit {
@@ -35,6 +39,10 @@ export interface PublicProfile {
   following_count: number
   reputation_points: number
   is_following?: boolean
+  stack_tags?: string[]
+  website?: string
+  location?: string
+  github_url?: string
 }
 
 export interface FeedEvent {
@@ -46,6 +54,10 @@ export interface FeedEvent {
 export interface UpdateUserInput {
   bio?: string
   username?: string
+  stack_tags?: string[]
+  website?: string
+  location?: string
+  github_url?: string
 }
 
 const USERS_KEY = ['users'] as const

@@ -1,0 +1,64 @@
+{
+  "slug": "caddy",
+  "title": "Caddy Web Server",
+  "category": "devops",
+  "icon": "🔒",
+  "color": "#22D3EE",
+  "description": "Zero-config HTTPS with Caddy — reverse proxy, file server, and automatic TLS certificates.",
+  "entries": [
+    {
+      "label": "Reverse Proxy (One Line)",
+      "command": "caddy reverse-proxy --from example.com --to localhost:8080",
+      "description": "Instantly reverse proxy with automatic HTTPS — no config file needed",
+      "tags": ["proxy", "quick", "https"]
+    },
+    {
+      "label": "Caddyfile Reverse Proxy",
+      "command": "example.com {\n  reverse_proxy localhost:8080\n}",
+      "description": "Minimal Caddyfile — automatic HTTPS, HTTP/2, and certificate renewal",
+      "tags": ["caddyfile", "proxy", "minimal"]
+    },
+    {
+      "label": "Multiple Services",
+      "command": "app.example.com {\n  reverse_proxy localhost:3000\n}\napi.example.com {\n  reverse_proxy localhost:8080\n}",
+      "description": "Serve multiple subdomains from one Caddyfile",
+      "tags": ["multi-domain", "subdomain", "routing"]
+    },
+    {
+      "label": "File Server",
+      "command": "example.com {\n  root * /var/www/html\n  file_server\n  try_files {path} /index.html\n}",
+      "description": "Serve static files with SPA fallback for client-side routing",
+      "tags": ["static", "spa", "files"]
+    },
+    {
+      "label": "Path-Based Routing",
+      "command": "example.com {\n  handle /api/* {\n    reverse_proxy localhost:8080\n  }\n  handle {\n    root * /var/www/html\n    file_server\n  }\n}",
+      "description": "Route /api/* to backend and everything else to static frontend",
+      "tags": ["routing", "path", "mixed"]
+    },
+    {
+      "label": "Basic Auth",
+      "command": "caddy hash-password\n# Then in Caddyfile:\nbasicauth /admin/* {\n  admin $2a$14$...\n}",
+      "description": "Protect routes with basic authentication using hashed passwords",
+      "tags": ["auth", "basic", "password"]
+    },
+    {
+      "label": "Response Headers",
+      "command": "example.com {\n  header {\n    X-Frame-Options DENY\n    X-Content-Type-Options nosniff\n    -Server\n  }\n  reverse_proxy localhost:8080\n}",
+      "description": "Add security headers and remove the Server header for security",
+      "tags": ["headers", "security", "strip"]
+    },
+    {
+      "label": "Format & Validate",
+      "command": "caddy fmt --overwrite Caddyfile\ncaddy validate --config Caddyfile",
+      "description": "Auto-format and validate your Caddyfile before deploying",
+      "tags": ["format", "validate", "lint"]
+    },
+    {
+      "label": "Reload Config",
+      "command": "caddy reload --config /etc/caddy/Caddyfile",
+      "description": "Hot-reload configuration without downtime",
+      "tags": ["reload", "zero-downtime", "config"]
+    }
+  ]
+}

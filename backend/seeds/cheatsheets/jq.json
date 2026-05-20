@@ -1,0 +1,76 @@
+{
+  "slug": "jq",
+  "title": "jq — JSON Processor",
+  "category": "tool",
+  "icon": "🔧",
+  "color": "#B5BD68",
+  "description": "Process, filter, and transform JSON from the command line with jq.",
+  "entries": [
+    {
+      "label": "Pretty Print",
+      "command": "cat data.json | jq '.'",
+      "description": "Format JSON with colors and indentation",
+      "tags": ["format", "pretty", "display"]
+    },
+    {
+      "label": "Extract Field",
+      "command": "jq '.name' data.json",
+      "description": "Get the value of a top-level field",
+      "tags": ["field", "extract", "basic"]
+    },
+    {
+      "label": "Nested Field",
+      "command": "jq '.user.address.city' data.json",
+      "description": "Drill into nested JSON objects with dot notation",
+      "tags": ["nested", "deep", "navigate"]
+    },
+    {
+      "label": "Array Element",
+      "command": "jq '.[0]' data.json",
+      "description": "Access the first element of a JSON array",
+      "tags": ["array", "index", "access"]
+    },
+    {
+      "label": "Map Array",
+      "command": "jq '[.[] | {name: .name, stars: .stargazers_count}]'",
+      "description": "Transform each array element into a new object shape",
+      "tags": ["map", "transform", "array"]
+    },
+    {
+      "label": "Filter Array",
+      "command": "jq '[.[] | select(.stars > 100)]'",
+      "description": "Keep only array elements matching a condition",
+      "tags": ["filter", "select", "condition"]
+    },
+    {
+      "label": "Count Items",
+      "command": "jq '. | length'",
+      "description": "Count elements in an array or keys in an object",
+      "tags": ["count", "length", "size"]
+    },
+    {
+      "label": "Sort by Field",
+      "command": "jq 'sort_by(.created_at) | reverse'",
+      "description": "Sort an array of objects by a field (newest first)",
+      "tags": ["sort", "order", "reverse"]
+    },
+    {
+      "label": "Unique Values",
+      "command": "jq '[.[].language] | unique'",
+      "description": "Extract a field from all objects and deduplicate",
+      "tags": ["unique", "distinct", "extract"]
+    },
+    {
+      "label": "Raw Output (No Quotes)",
+      "command": "jq -r '.url' data.json",
+      "description": "Output raw strings without JSON quotes — useful for piping to other commands",
+      "tags": ["raw", "output", "pipe"]
+    },
+    {
+      "label": "Combine with curl",
+      "command": "curl -s https://api.github.com/users/octocat | jq '{name, bio, repos: .public_repos}'",
+      "description": "Fetch JSON from an API and reshape it in one command",
+      "tags": ["curl", "api", "combine"]
+    }
+  ]
+}
