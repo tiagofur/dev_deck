@@ -26,25 +26,43 @@ func scanRepoLegacy(row pgx.Row) (*repos.Repo, error) {
 		return nil, fmt.Errorf("item %s is not a repo (type: %s)", it.ID, it.Type)
 	}
 
-	r := &repos.Repo{
-		ID:             it.ID,
-		URL:            derefStr(it.URL),
-		Source:         castStr(it.Meta["source"], "generic"),
-		Owner:          castPtrStr(it.Meta["owner"]),
-		Name:           it.Title,
-		Description:    it.Description,
-		Language:       castPtrStr(it.Meta["language"]),
-		LanguageColor:  castPtrStr(it.Meta["language_color"]),
-		AvatarURL:      castPtrStr(it.Meta["avatar_url"]),
-		OGImageURL:     castPtrStr(it.Meta["og_image_url"]),
-		Homepage:       castPtrStr(it.Meta["homepage"]),
-		Notes:          it.Notes,
-		Tags:           it.Tags,
-		Archived:       it.Archived,
-		AddedAt:        it.CreatedAt,
-		LastSeenAt:     it.LastSeenAt,
+	urlValue := derefStr(it.URL)
+	source := castStr(it.Meta["source"], "")
+	owner := castPtrStr(it.Meta["owner"])
+	if source == "" || owner == nil {
+		derivedSource, derivedOwner, _, err := parseRepoURL(urlValue)
+		if err == nil {
+			if source == "" {
+				source = derivedSource
+			}
+			if owner == nil && derivedOwner != "" {
+				owner = &derivedOwner
+			}
+		}
 	}
-	
+	if source == "" {
+		source = "generic"
+	}
+
+	r := &repos.Repo{
+		ID:            it.ID,
+		URL:           urlValue,
+		Source:        source,
+		Owner:         owner,
+		Name:          it.Title,
+		Description:   it.Description,
+		Language:      castPtrStr(it.Meta["language"]),
+		LanguageColor: castPtrStr(it.Meta["language_color"]),
+		AvatarURL:     castPtrStr(it.Meta["avatar_url"]),
+		OGImageURL:    castPtrStr(it.Meta["og_image_url"]),
+		Homepage:      castPtrStr(it.Meta["homepage"]),
+		Notes:         it.Notes,
+		Tags:          it.Tags,
+		Archived:      it.Archived,
+		AddedAt:       it.CreatedAt,
+		LastSeenAt:    it.LastSeenAt,
+	}
+
 	if v, ok := it.Meta["stars"].(float64); ok {
 		r.Stars = int(v)
 	}
@@ -89,14 +107,14 @@ func (s *Store) CreateRepo(ctx context.Context, in repos.CreateInput) (*repos.Re
 	if err != nil {
 		return nil, err
 	}
-	
+
 	meta := map[string]any{
 		"source": source,
 		"owner":  nilIfEmpty(owner),
 	}
-	
+
 	norm := items.NormalizeURL(in.URL)
-	
+
 	it, err := s.CreateItem(ctx, CreateItemInput{
 		Type:          "repo",
 		Title:         name,
@@ -110,7 +128,7 @@ func (s *Store) CreateRepo(ctx context.Context, in repos.CreateInput) (*repos.Re
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return s.GetRepo(ctx, it.ID)
 }
 

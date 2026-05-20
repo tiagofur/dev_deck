@@ -230,17 +230,17 @@ function AnimatedRoutes() {
           setCaptureOpen(false)
           setInitialCaptureData(null)
         }}
-        onOpenItem={(id) => {
+        onOpenItem={(id, item) => {
           setCaptureOpen(false)
           setInitialCaptureData(null)
-          navigate(`/items/${id}`)
+          navigate(item?.item_type === 'repo' ? `/repo/${id}` : `/items/${id}`)
         }}
         source="manual"
         initialUrl={initialCaptureData?.url}
         initialTitle={initialCaptureData?.title}
       />
       <ShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
-      <PasteInterceptor onOpenItem={(id) => navigate(`/items/${id}`)} />
+      <PasteInterceptor onOpenItem={(id, item) => navigate(item?.item_type === 'repo' ? `/repo/${id}` : `/items/${id}`)} />
     </>
   )
 }

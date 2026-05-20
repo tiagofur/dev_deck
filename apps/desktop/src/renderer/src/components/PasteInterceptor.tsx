@@ -9,6 +9,7 @@ import {
   useCapture,
   quickDetectFromClipboard,
   type CaptureInput,
+  type Item,
   type ItemType,
 } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
@@ -40,10 +41,11 @@ interface SavedPaste {
   title: string
   duplicate: boolean
   type: ItemType
+  item: Item | null
 }
 
 interface PasteInterceptorProps {
-  onOpenItem?: (id: string) => void
+  onOpenItem?: (id: string, item?: Item | null) => void
 }
 
 export function PasteInterceptor({ onOpenItem }: PasteInterceptorProps = {}) {
@@ -143,6 +145,7 @@ export function PasteInterceptor({ onOpenItem }: PasteInterceptorProps = {}) {
             title: res.item?.title || p.title || previewLine(p.raw),
             duplicate: Boolean(res.duplicate_of),
             type: p.type,
+            item: res.item,
           })
         } else {
           setSaved(null)
@@ -243,7 +246,7 @@ export function PasteInterceptor({ onOpenItem }: PasteInterceptorProps = {}) {
                 <button
                   type="button"
                   onClick={() => {
-                    onOpenItem(saved.id)
+                    onOpenItem(saved.id, saved.item)
                     dismiss()
                   }}
                   className="text-xs font-bold uppercase border-2 border-ink px-2 py-1

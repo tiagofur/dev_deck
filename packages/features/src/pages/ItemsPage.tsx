@@ -4,6 +4,7 @@ import { Box, Plus, Users, Search } from 'lucide-react'
 import { CaptureModal } from '../components/CaptureModal'
 import { ItemCard } from '../components/ItemCard'
 import { OnboardingChecklist } from '../components/OnboardingChecklist'
+import { detailPathForItem } from '../utils/itemRoutes'
 import { useItems } from '@devdeck/api-client'
 import { ALL_ITEM_TYPES, type ItemType } from '@devdeck/api-client'
 
@@ -275,7 +276,7 @@ export function ItemsPage() {
                   key={it.id}
                   item={it}
                   onClick={() => {
-                    navigate(`/items/${it.id}`)
+                    navigate(detailPathForItem(it))
                   }}
                 />
               ))}
@@ -287,7 +288,7 @@ export function ItemsPage() {
       <CaptureModal
         open={captureOpen}
         onClose={() => setCaptureOpen(false)}
-        onOpenItem={(id) => navigate(`/items/${id}`)}
+        onOpenItem={(id, item) => navigate(item ? detailPathForItem(item) : `/items/${id}`)}
         source="manual"
       />
     </div>

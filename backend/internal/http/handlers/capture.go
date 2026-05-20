@@ -3,6 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"devdeck/internal/authctx"
 	"devdeck/internal/domain/items"
@@ -77,7 +79,7 @@ func (h *CaptureHandler) Capture(w http.ResponseWriter, r *http.Request) {
 		Tags:          in.Tags,
 		WhySaved:      in.WhySaved,
 		SourceChannel: sourceLabel(in.Source),
-		Meta:          in.MetaHints,
+		Meta:          captureMetaHints(in.MetaHints, in.URL, det.Type),
 	}
 	if in.URL != "" {
 		input.URL = &in.URL
@@ -122,6 +124,31 @@ func (h *CaptureHandler) Capture(w http.ResponseWriter, r *http.Request) {
 		Item:             item,
 		EnrichmentStatus: enrichStatus,
 	})
+}
+
+func captureMetaHints(hints map[string]any, rawURL string, itemType items.Type) map[string]any {
+	meta := map[string]any{}
+	for k, v := range hints {
+		meta[k] = v
+	}
+	if itemType != items.TypeRepo || rawURL == "" {
+		return meta
+	}
+	u, err := url.Parse(rawURL)
+	if err != nil || u.Host == "" {
+		return meta
+	}
+	host := strings.ToLower(strings.TrimPrefix(u.Host, "www."))
+	if host != "github.com" {
+		return meta
+	}
+	parts := strings.Split(strings.Trim(u.Path, "/"), "/")
+	if len(parts) < 2 || parts[0] == "" || parts[1] == "" {
+		return meta
+	}
+	meta["source"] = "github"
+	meta["owner"] = parts[0]
+	return meta
 }
 
 func sourceLabel(s string) string {

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"sort"
 	"strings"
 	"time"
@@ -377,9 +378,11 @@ func (s *Store) UpdateItemMetadata(ctx context.Context, id uuid.UUID, md *repos.
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
-	row := tx.QueryRow(ctx, `SELECT meta FROM items WHERE id = $1 FOR UPDATE`, id)
+	row := tx.QueryRow(ctx, `SELECT item_type, url, meta FROM items WHERE id = $1 FOR UPDATE`, id)
 	var rawMeta []byte
-	if err := row.Scan(&rawMeta); err != nil {
+	var itemType string
+	var itemURL *string
+	if err := row.Scan(&itemType, &itemURL, &rawMeta); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return ErrNotFound
 		}
@@ -392,6 +395,9 @@ func (s *Store) UpdateItemMetadata(ctx context.Context, id uuid.UUID, md *repos.
 	}
 	if meta == nil {
 		meta = map[string]any{}
+	}
+	if itemType == string(items.TypeRepo) && itemURL != nil {
+		mergeRepoSourceMeta(meta, *itemURL)
 	}
 
 	if md.Language != nil {
@@ -431,6 +437,23 @@ func (s *Store) UpdateItemMetadata(ctx context.Context, id uuid.UUID, md *repos.
 		return err
 	}
 	return tx.Commit(ctx)
+}
+
+func mergeRepoSourceMeta(meta map[string]any, rawURL string) {
+	u, err := url.Parse(rawURL)
+	if err != nil || u.Host == "" {
+		return
+	}
+	host := strings.ToLower(strings.TrimPrefix(u.Host, "www."))
+	if host != "github.com" {
+		return
+	}
+	parts := strings.Split(strings.Trim(u.Path, "/"), "/")
+	if len(parts) < 2 || parts[0] == "" || parts[1] == "" {
+		return
+	}
+	meta["source"] = "github"
+	meta["owner"] = parts[0]
 }
 
 func (s *Store) UpdateItemEnrichmentStatus(ctx context.Context, id uuid.UUID, status items.EnrichmentStatus) error {

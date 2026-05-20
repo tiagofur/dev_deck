@@ -12,7 +12,7 @@ import {
   type PreviewResponse,
 } from '@devdeck/api-client'
 import { detectType } from '@devdeck/api-client'
-import { ALL_ITEM_TYPES, getLastUsedDeck, looksLikePotentialURL, looksLikeURL, type CaptureInput, type ItemType } from '@devdeck/api-client'
+import { ALL_ITEM_TYPES, getLastUsedDeck, looksLikePotentialURL, looksLikeURL, type CaptureInput, type Item, type ItemType } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
 import { DeckSelect } from './Deck/DeckSelect'
 
@@ -31,7 +31,7 @@ interface Props {
   /** Source channel reported to the backend for metrics. */
   source?: CaptureInput['source']
   /** Called after a successful capture when the user chooses to open it. */
-  onOpenItem?: (id: string) => void
+  onOpenItem?: (id: string, item?: Item | null) => void
 }
 
 /**
@@ -204,7 +204,7 @@ export function CaptureModal({
   function openCapturedItem() {
     const id = lastCapture?.item?.id || lastCapture?.duplicate_of
     if (!id || !onOpenItem) return
-    onOpenItem(id)
+    onOpenItem(id, lastCapture?.item ?? null)
     onClose()
   }
 
