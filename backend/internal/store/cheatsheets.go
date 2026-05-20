@@ -343,7 +343,7 @@ func (s *Store) ListEntriesByCheatsheet(ctx context.Context, cheatsheetID uuid.U
 	rows, err := s.Reader().Query(ctx, `
 		SELECT `+entryColumnsPrefixed+` FROM cheatsheet_entries ce
 		JOIN cheatsheets c ON c.id = ce.cheatsheet_id
-		WHERE ce.cheatsheet_id = $1 AND `+scopeSQL+`
+		WHERE ce.cheatsheet_id = $1 AND (c.is_official = TRUE OR c.visibility = 'public' OR `+scopeSQL+`)
 		ORDER BY position ASC
 	`, args...)
 	if err != nil {

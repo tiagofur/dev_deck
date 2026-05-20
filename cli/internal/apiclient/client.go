@@ -243,6 +243,39 @@ func (c *Client) ListCheatsheetEntries(ctx context.Context, id string) ([]Entry,
 	return body, nil
 }
 
+// ExportCheatsheet hits GET /api/cheatsheets/{id}/export.
+func (c *Client) ExportCheatsheet(ctx context.Context, id, format string) ([]byte, string, error) {
+	path := fmt.Sprintf("/api/cheatsheets/%s/export?format=%s", url.PathEscape(id), urlQueryEscape(format))
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+path, nil)
+	if err != nil {
+		return nil, "", err
+	}
+	if c.Token != "" {
+		req.Header.Set("Authorization", "Bearer "+c.Token)
+	}
+	resp, err := c.HTTP.Do(req)
+	if err != nil {
+		return nil, "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, "", decodeAPIError(resp)
+	}
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, "", err
+	}
+	
+	filename := ""
+	if cd := resp.Header.Get("Content-Disposition"); cd != "" {
+		if idx := strings.Index(cd, "filename=\""); idx != -1 {
+			filename = cd[idx+10 : len(cd)-1]
+		}
+	}
+	return data, filename, nil
+}
+
 // ─── Agent ───
 
 type Message struct {

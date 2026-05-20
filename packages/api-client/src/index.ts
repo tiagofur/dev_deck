@@ -179,6 +179,7 @@ export type {
 export {
   useCheatsheets,
   useCheatsheet,
+  useExploreCheatsheets,
   useCreateCheatsheet,
   useUpdateCheatsheet,
   useDeleteCheatsheet,

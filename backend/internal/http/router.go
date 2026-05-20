@@ -126,6 +126,15 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		r.Get("/plugins/featured", pluginsH.ListFeatured)
 		r.Post("/waitlist", invitesH.JoinWaitlist)
 
+		r.Route("/cheatsheets", func(cr chi.Router) {
+			cr.Get("/explore", cheatsH.Explore)
+			cr.Get("/{id}", cheatsH.Get)
+			cr.Get("/{id}/entries", cheatsH.ListEntries)
+			cr.Get("/{id}/export", cheatsH.Export)
+			cr.Get("/{id}/badge", cheatsH.Badge)
+			cr.Get("/{id}/card.svg", cheatsH.Card)
+		})
+
 		if authH != nil {
 			r.Route("/auth", func(r chi.Router) {
 				r.Get("/providers", authH.Providers)
@@ -194,13 +203,10 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Route("/cheatsheets", func(cr chi.Router) {
 				cr.Get("/", cheatsH.List)
 				cr.Post("/", cheatsH.Create)
-				cr.Get("/explore", cheatsH.Explore)
-				cr.Get("/{id}", cheatsH.Get)
 				cr.Patch("/{id}", cheatsH.Update)
 				cr.Delete("/{id}", cheatsH.Delete)
 				cr.Post("/{id}/fork", cheatsH.Fork)
 				cr.Post("/{id}/star", cheatsH.Star)
-				cr.Get("/{id}/entries", cheatsH.ListEntries)
 				cr.Post("/{id}/entries", cheatsH.CreateEntry)
 				cr.Patch("/{id}/entries/{entryId}", cheatsH.UpdateEntry)
 				cr.Delete("/{id}/entries/{entryId}", cheatsH.DeleteEntry)

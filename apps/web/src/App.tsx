@@ -231,6 +231,7 @@ function AnimatedRoutes(): ReactElement {
             path="/discovery"
             element={<AuthGuard>{withTransition(<DiscoveryPage />)}</AuthGuard>}
           />
+          <Route path="/explore" element={withTransition(<ExplorePage />)} />
           <Route
             path="/profile"
             element={<AuthGuard>{withTransition(<ProfilePage />)}</AuthGuard>}

@@ -3,8 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 
 	"devdeck/internal/ai"
 	"devdeck/internal/authctx"
@@ -321,6 +324,113 @@ func (h *CheatsheetsHandler) Search(w http.ResponseWriter, r *http.Request) {
 		"mode":    mode,
 		"results": results,
 	})
+}
+
+// GET /api/cheatsheets/{id}/export?format=json|md
+func (h *CheatsheetsHandler) Export(w http.ResponseWriter, r *http.Request) {
+	id, ok := parseCheatsheetID(w, r)
+	if !ok {
+		return
+	}
+	format := r.URL.Query().Get("format")
+	if format == "" {
+		format = "md"
+	}
+
+	detail, err := h.store.GetCheatsheetDetail(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "NOT_FOUND", "cheatsheet not found")
+			return
+		}
+		writeInternal(w, err)
+		return
+	}
+
+	if format == "json" {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.json\"", detail.Slug))
+		json.NewEncoder(w).Encode(detail)
+		return
+	}
+
+	// Default to markdown
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("# %s\n\n", detail.Title))
+	if detail.Description != "" {
+		sb.WriteString(detail.Description + "\n\n")
+	}
+	sb.WriteString("| Label | Command | Description |\n")
+	sb.WriteString("|-------|---------|-------------|\n")
+	for _, e := range detail.Entries {
+		sb.WriteString(fmt.Sprintf("| %s | `%s` | %s |\n", e.Label, e.Command, e.Description))
+	}
+
+	w.Header().Set("Content-Type", "text/markdown")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.md\"", detail.Slug))
+	w.Write([]byte(sb.String()))
+}
+
+// GET /api/cheatsheets/{id}/badge
+func (h *CheatsheetsHandler) Badge(w http.ResponseWriter, r *http.Request) {
+	id, ok := parseCheatsheetID(w, r)
+	if !ok {
+		return
+	}
+	c, err := h.store.GetCheatsheet(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "NOT_FOUND", "cheatsheet not found")
+			return
+		}
+		writeInternal(w, err)
+		return
+	}
+
+	label := url.QueryEscape("DevDeck Cheatsheet")
+	title := url.QueryEscape(c.Title)
+	color := "blue"
+	if c.Color != nil && *c.Color != "" {
+		color = strings.TrimPrefix(*c.Color, "#")
+	}
+
+	badgeURL := fmt.Sprintf("https://img.shields.io/badge/%s-%s-%s?logo=book", label, title, color)
+	http.Redirect(w, r, badgeURL, http.StatusFound)
+}
+
+// GET /api/cheatsheets/{id}/card.svg
+func (h *CheatsheetsHandler) Card(w http.ResponseWriter, r *http.Request) {
+	id, ok := parseCheatsheetID(w, r)
+	if !ok {
+		return
+	}
+	detail, err := h.store.GetCheatsheetDetail(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			writeError(w, http.StatusNotFound, "NOT_FOUND", "cheatsheet not found")
+			return
+		}
+		writeInternal(w, err)
+		return
+	}
+
+	// Generate a simple SVG card
+	svg := fmt.Sprintf(`
+<svg width="600" height="315" viewBox="0 0 600 315" xmlns="http://www.w3.org/2000/svg">
+	<rect width="600" height="315" fill="#F0F0F0" />
+	<rect x="20" y="20" width="560" height="275" fill="white" stroke="#1A1A1A" stroke-width="3" />
+	<rect x="30" y="30" width="560" height="275" fill="#1A1A1A" opacity="0.1" />
+	
+	<text x="50" y="80" font-family="sans-serif" font-size="32" font-weight="bold" fill="#1A1A1A">%s</text>
+	<text x="50" y="120" font-family="monospace" font-size="16" fill="#666666">%s</text>
+	
+	<text x="50" y="250" font-family="sans-serif" font-size="18" fill="#1A1A1A">%d Commands</text>
+	<text x="50" y="280" font-family="sans-serif" font-size="14" font-weight="bold" fill="#FFD700">DEVDECK VAULT</text>
+</svg>
+	`, detail.Title, detail.Category, len(detail.Entries))
+
+	w.Header().Set("Content-Type", "image/svg+xml")
+	w.Write([]byte(svg))
 }
 
 // ───── helpers ─────
