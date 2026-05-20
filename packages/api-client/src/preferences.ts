@@ -29,13 +29,20 @@ export function getPreferences(): Preferences {
     
     // Ensure clientId exists
     if (!prefs.clientId) {
-      prefs.clientId = uuidv4()
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs))
+      const clientId = uuidv4()
+      // We don't call setPreferences directly to avoid potential recursion
+      // but we do the same work: persist + notify.
+      const next = { ...prefs, clientId }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+      emit(next)
+      return next
     }
     
     return prefs
   } catch {
-    return { ...defaults, clientId: uuidv4() }
+    const fallback = { ...defaults, clientId: uuidv4() }
+    emit(fallback)
+    return fallback
   }
 }
 

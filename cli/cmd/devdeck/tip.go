@@ -47,9 +47,9 @@ func runTip(cmd *cobra.Command, args []string) error {
 
 	if query != "" {
 		// Try exact match on slug or category
-		for _, c := range cheatsheets {
-			if strings.EqualFold(c.Slug, query) || strings.EqualFold(c.Category, query) {
-				targetCheatsheet = &c
+		for i := range cheatsheets {
+			if strings.EqualFold(cheatsheets[i].Slug, query) || strings.EqualFold(cheatsheets[i].Category, query) {
+				targetCheatsheet = &cheatsheets[i]
 				break
 			}
 		}

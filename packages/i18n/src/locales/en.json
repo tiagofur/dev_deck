@@ -28,7 +28,11 @@
     "profile_updated": "Profile updated",
     "token_copied": "Token copied",
     "logout_msg": "Session closed",
-    "download": "Download"
+    "download": "Download",
+    "retry": "Retry",
+    "auth_failed_title": "Could not validate your session",
+    "auth_failed_msg": "The backend did not respond in time.",
+    "cheatsheet_not_found": "Cheatsheet not found"
   },
   "settings": {
     "title": "Settings",

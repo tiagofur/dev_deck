@@ -43,11 +43,11 @@ export function OnboardingChecklist() {
         />
       </div>
     </div>
-  )
-}
-...
+    )
+    }
 
-function CheckItem({ done, label, desc, action, icon }: { done: boolean, label: string, desc: string, action?: React.ReactNode, icon?: React.ReactNode }) {
+    function CheckItem({
+ done, label, desc, action, icon }: { done: boolean, label: string, desc: string, action?: React.ReactNode, icon?: React.ReactNode }) {
     return (
         <div className={`flex gap-3 ${done ? 'opacity-40' : ''}`}>
             <div className={`w-6 h-6 border-2 border-ink flex items-center justify-center shrink-0 mt-0.5

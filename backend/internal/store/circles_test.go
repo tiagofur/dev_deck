@@ -2,6 +2,7 @@ package store_test
 
 import (
 	"context"
+	"devdeck/internal/authctx"
 	"errors"
 	"testing"
 
@@ -88,7 +89,7 @@ func TestStore_Circles(t *testing.T) {
 
 	// 4. Share Item to Circle
 	// Create a mock item owned by user1. We'll set auth context to mock user_id context so CreateItem works
-	mockUserCtx := context.WithValue(ctx, "user_id", u1.ID)
+	mockUserCtx := authctx.WithUserID(ctx, u1.ID)
 	it, err := st.CreateItem(mockUserCtx, store.CreateItemInput{
 		Type:  items.TypeNote,
 		Title: "Cool Tip",

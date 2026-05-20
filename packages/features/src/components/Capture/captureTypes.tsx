@@ -137,11 +137,11 @@ export const CAPTURE_LANES: CaptureLane[] = [
 
 export function laneForType(type: ItemType): CaptureLane {
   if (type === 'article') return CAPTURE_LANES.find((lane) => lane.id === 'article-tool')!
-  return CAPTURE_LANES.find((lane) => lane.itemType === type) ?? CAPTURE_LANES[7]
+  return CAPTURE_LANES.find((lane) => lane.itemType === type) ?? laneForId('note')
 }
 
 export function laneForId(id: CaptureLaneId): CaptureLane {
-  return CAPTURE_LANES.find((lane) => lane.id === id) ?? CAPTURE_LANES[7]
+  return CAPTURE_LANES.find((lane) => lane.id === id) ?? CAPTURE_LANES[CAPTURE_LANES.length - 1]
 }
 
 export function iconForPreview(type: ItemType): LucideIcon {

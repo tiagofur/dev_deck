@@ -79,7 +79,7 @@ export function CheatsheetDetailPage() {
   if (error || !detail) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8">
-        <p className="font-display font-black text-3xl uppercase">Cheatsheet not found</p>
+        <p className="font-display font-black text-3xl uppercase">{t('common.cheatsheet_not_found')}</p>
         <Button variant="primary" onClick={() => navigate('/cheatsheets')}>
           {t('common.back')}
         </Button>
