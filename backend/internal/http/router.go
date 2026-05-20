@@ -127,12 +127,27 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		r.Post("/waitlist", invitesH.JoinWaitlist)
 
 		r.Route("/cheatsheets", func(cr chi.Router) {
+			// Public routes
 			cr.Get("/explore", cheatsH.Explore)
 			cr.Get("/{id}", cheatsH.Get)
 			cr.Get("/{id}/entries", cheatsH.ListEntries)
 			cr.Get("/{id}/export", cheatsH.Export)
 			cr.Get("/{id}/badge", cheatsH.Badge)
 			cr.Get("/{id}/card.svg", cheatsH.Card)
+
+			// Authenticated routes
+			cr.Group(func(cr chi.Router) {
+				cr.Use(mw.TokenAuth(cfg, as, st))
+				cr.Get("/", cheatsH.List)
+				cr.Post("/", cheatsH.Create)
+				cr.Patch("/{id}", cheatsH.Update)
+				cr.Delete("/{id}", cheatsH.Delete)
+				cr.Post("/{id}/fork", cheatsH.Fork)
+				cr.Post("/{id}/star", cheatsH.Star)
+				cr.Post("/{id}/entries", cheatsH.CreateEntry)
+				cr.Patch("/{id}/entries/{entryId}", cheatsH.UpdateEntry)
+				cr.Delete("/{id}/entries/{entryId}", cheatsH.DeleteEntry)
+			})
 		})
 
 		if authH != nil {
@@ -198,18 +213,6 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				rr.Get("/{id}/cheatsheets", reposH.ListLinkedCheatsheets)
 				rr.Post("/{id}/cheatsheets/{cheatsheetId}", reposH.LinkCheatsheet)
 				rr.Delete("/{id}/cheatsheets/{cheatsheetId}", reposH.UnlinkCheatsheet)
-			})
-
-			r.Route("/cheatsheets", func(cr chi.Router) {
-				cr.Get("/", cheatsH.List)
-				cr.Post("/", cheatsH.Create)
-				cr.Patch("/{id}", cheatsH.Update)
-				cr.Delete("/{id}", cheatsH.Delete)
-				cr.Post("/{id}/fork", cheatsH.Fork)
-				cr.Post("/{id}/star", cheatsH.Star)
-				cr.Post("/{id}/entries", cheatsH.CreateEntry)
-				cr.Patch("/{id}/entries/{entryId}", cheatsH.UpdateEntry)
-				cr.Delete("/{id}/entries/{entryId}", cheatsH.DeleteEntry)
 			})
 
 			r.Get("/search", cheatsH.Search)
