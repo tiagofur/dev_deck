@@ -100,6 +100,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	publicDeckH := handlers.NewPublicDeckHandler(st)
 	importH := handlers.NewImportHandler(st)
 	profileH := handlers.NewProfileHandler(st, deps.Cache)
+	circlesH := handlers.NewCirclesHandler(st)
 	adminH := handlers.NewAdminHandler(st)
 	runbooksH := handlers.NewRunbooksHandler(st)
 	invitesH := handlers.NewInvitesHandler(st)
@@ -328,6 +329,18 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Delete("/decks/{id}/items/{itemId}", deckH.RemoveItem)
 			r.Post("/decks/{id}/star", deckH.Star)
 			r.Delete("/decks/{id}/star", deckH.Unstar)
+
+			// Circles (auth required)
+			r.Route("/circles", func(cr chi.Router) {
+				cr.Post("/", circlesH.Create)
+				cr.Get("/", circlesH.List)
+				cr.Post("/join", circlesH.Join)
+				cr.Get("/{id}", circlesH.Get)
+				cr.Get("/{id}/items", circlesH.ListItems)
+				cr.Post("/{id}/share", circlesH.ShareItem)
+				cr.Get("/{id}/members", circlesH.ListMembers)
+				cr.Delete("/{id}/members", circlesH.Leave)
+			})
 
 			// Deck import (auth required)
 			r.Post("/decks/{id}/import", importH.Import)

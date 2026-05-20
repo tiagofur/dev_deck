@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   BookOpen,
   Box,
@@ -16,11 +17,21 @@ import {
   Terminal,
   Users,
   Wrench,
+  Share2,
+  Loader2,
   type LucideIcon,
 } from 'lucide-react'
 import type { Item, ItemType } from '@devdeck/api-client'
-import { formatCount, EnrichmentStatus, useUpdateItem, useAIEnrichItem, useReviewItemAITags } from '@devdeck/api-client'
-import { TagChip, hashIndex } from '@devdeck/ui'
+import {
+  formatCount,
+  EnrichmentStatus,
+  useUpdateItem,
+  useAIEnrichItem,
+  useReviewItemAITags,
+  useCircles,
+  useShareToCircle,
+} from '@devdeck/api-client'
+import { TagChip, hashIndex, showToast } from '@devdeck/ui'
 
 interface TypeStyle {
   hue: string
@@ -56,6 +67,21 @@ export function ItemCard({ item, onClick }: Props) {
   const aiEnrich = useAIEnrichItem()
   const reviewAITags = useReviewItemAITags()
   const { hue, icon: Icon, label } = styleFor(item.item_type)
+
+  const [shareMenuOpen, setShareMenuOpen] = useState(false)
+  const { data: circles = [] } = useCircles()
+  const shareToCircle = useShareToCircle()
+
+  async function handleShare(e: React.MouseEvent, circleId: string, circleName: string) {
+    e.stopPropagation()
+    try {
+      await shareToCircle.mutateAsync({ circleId, itemId: item.id })
+      showToast(`¡Item compartido en "${circleName}"! 🎉`)
+      setShareMenuOpen(false)
+    } catch (err) {
+      showToast((err as Error).message || 'No se pudo compartir el item', 'error')
+    }
+  }
 
   async function toggleFavorite(e: React.MouseEvent) {
     e.stopPropagation()
@@ -119,18 +145,74 @@ export function ItemCard({ item, onClick }: Props) {
           <Icon size={14} strokeWidth={3} />
           <span className="text-[10px] font-display font-black tracking-wider">{label}</span>
         </div>
-        <button
-          type="button"
-          onClick={toggleFavorite}
-          className="opacity-0 group-hover:opacity-100 transition-opacity"
-          aria-label={item.is_favorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-        >
-          <Star
-            size={14}
-            strokeWidth={3}
-            className={item.is_favorite ? 'fill-accent-yellow text-accent-yellow' : 'text-ink'}
-          />
-        </button>
+        <div className={`flex items-center gap-2 transition-opacity relative ${shareMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 focus-within:opacity-100'}`}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              setShareMenuOpen(!shareMenuOpen)
+            }}
+            title="Compartir en Círculo"
+            aria-label="Compartir en Círculo"
+          >
+            <Share2
+              size={14}
+              strokeWidth={3}
+              className={shareMenuOpen ? 'text-accent-pink' : 'text-ink'}
+            />
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleFavorite}
+            aria-label={item.is_favorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+          >
+            <Star
+              size={14}
+              strokeWidth={3}
+              className={item.is_favorite ? 'fill-accent-yellow text-accent-yellow' : 'text-ink'}
+            />
+          </button>
+
+          {shareMenuOpen && (
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="absolute right-0 top-6 z-30 w-48 bg-bg-card border-3 border-ink shadow-hard p-2 font-mono text-[11px]"
+            >
+              <div className="flex items-center justify-between border-b-2 border-ink pb-1.5 mb-1.5">
+                <span className="font-display font-black uppercase text-[9px] tracking-wider">
+                  Compartir en:
+                </span>
+                <button
+                  onClick={() => setShareMenuOpen(false)}
+                  className="hover:text-accent-pink"
+                >
+                  <X size={10} strokeWidth={3} />
+                </button>
+              </div>
+
+              {circles.length === 0 ? (
+                <div className="py-1 text-ink-soft text-center text-[10px]">
+                  No estás en ningún círculo.
+                </div>
+              ) : (
+                <div className="max-h-32 overflow-y-auto space-y-1">
+                  {circles.map((c) => (
+                    <button
+                      key={c.id}
+                      disabled={shareToCircle.isPending}
+                      onClick={(e) => handleShare(e, c.id, c.name)}
+                      className="w-full text-left p-1 hover:bg-accent-pink hover:text-white truncate border border-transparent hover:border-ink transition-colors flex items-center justify-between gap-1"
+                    >
+                      <span className="truncate">{c.name}</span>
+                      {shareToCircle.isPending && <Loader2 size={10} className="animate-spin shrink-0" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </header>
 
       <div className="p-4">

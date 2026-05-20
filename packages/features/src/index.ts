@@ -27,6 +27,9 @@ export { PublicProfilePage } from './pages/PublicProfilePage'
 export { ProfilePage } from './pages/ProfilePage'
 export { CheatsheetsListPage } from './pages/CheatsheetsListPage'
 export { CheatsheetDetailPage } from './pages/CheatsheetDetailPage'
+export { CirclesPage } from './pages/CirclesPage'
+export { CircleDetailPage } from './pages/CircleDetailPage'
+export { CircleJoinPage } from './pages/CircleJoinPage'
 
 // Components that apps might need directly (e.g. to embed a modal)
 export { CaptureModal } from './components/CaptureModal'

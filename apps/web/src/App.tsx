@@ -13,6 +13,9 @@ import { useState, useEffect } from 'react'
 import {
   CheatsheetDetailPage,
   CheatsheetsListPage,
+  CirclesPage,
+  CircleDetailPage,
+  CircleJoinPage,
   DiscoveryPage,
   HomePage,
   ItemDetailPage,
@@ -250,6 +253,24 @@ function AnimatedRoutes(): ReactElement {
             path="/cheatsheets/:id"
             element={
               <AuthGuard>{withTransition(<CheatsheetDetailPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/circles"
+            element={
+              <AuthGuard>{withTransition(<CirclesPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/circles/:id"
+            element={
+              <AuthGuard>{withTransition(<CircleDetailPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/circles/join/:inviteCode"
+            element={
+              <AuthGuard>{withTransition(<CircleJoinPage />)}</AuthGuard>
             }
           />
           <Route path="/deck/:slug" element={withTransition(<PublicDeckPage />)} />

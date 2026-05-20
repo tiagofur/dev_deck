@@ -1,4 +1,4 @@
-import { Activity, BookOpen, Boxes, Plus, Search, Settings as SettingsIcon, Sparkles, Users } from 'lucide-react'
+import { Activity, BookOpen, Boxes, Plus, Search, Settings as SettingsIcon, Share2, Sparkles, Users } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@devdeck/ui'
 import { usePreferences, useMe } from '@devdeck/api-client'
@@ -138,6 +138,19 @@ export function Topbar({
         <span className="flex items-center gap-2">
           <Users size={16} strokeWidth={3} />
           <span className="hidden sm:inline">Network</span>
+        </span>
+      </Button>
+
+      <Button
+        onClick={() => navigate('/circles')}
+        size="sm"
+        variant="secondary"
+        className="whitespace-nowrap"
+        title="Círculos compartidos"
+      >
+        <span className="flex items-center gap-2">
+          <Share2 size={16} strokeWidth={3} />
+          <span className="hidden sm:inline">Circles</span>
         </span>
       </Button>
 
