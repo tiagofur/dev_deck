@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { Plus, Users, Copy, Check, ChevronLeft, LogOut } from 'lucide-react'
 import { Button, showToast } from '@devdeck/ui'
 import { useCircles, useCreateCircle, useJoinCircle, useLeaveCircle } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 import clsx from 'clsx'
 
 export function CirclesPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { data: circles = [], isLoading, error } = useCircles()
   const createCircle = useCreateCircle()
@@ -27,11 +29,11 @@ export function CirclesPage() {
     try {
       const code = inviteCode.trim().toUpperCase()
       const joined = await joinCircle.mutateAsync({ invite_code: code })
-      showToast('¡Te uniste al círculo con éxito! 🎉')
+      showToast(t('circles.join_success'))
       setInviteCode('')
       navigate(`/circles/${joined.id}`)
     } catch (err) {
-      showToast((err as Error).message || 'No se pudo unir al círculo', 'error')
+      showToast((err as Error).message || t('circles.join_error'), 'error')
     }
   }
 
@@ -44,25 +46,25 @@ export function CirclesPage() {
         name: name.trim(),
         description: description.trim(),
       })
-      showToast('Círculo creado con éxito 🚀')
+      showToast(t('circles.create_success'))
       setName('')
       setDescription('')
       setShowCreateModal(false)
       navigate(`/circles/${created.id}`)
     } catch (err) {
-      showToast((err as Error).message || 'Error al crear el círculo', 'error')
+      showToast((err as Error).message || t('circles.create_error'), 'error')
     }
   }
 
   async function handleLeave(e: React.MouseEvent, circleId: string, circleName: string) {
     e.stopPropagation()
-    if (!confirm(`¿Estás seguro de que quieres salir del círculo "${circleName}"?`)) return
+    if (!confirm(t('circles.leave_confirm', { name: circleName }))) return
 
     try {
       await leaveCircle.mutateAsync(circleId)
-      showToast(`Saliste de "${circleName}"`)
+      showToast(t('circles.leave_success', { name: circleName }))
     } catch (err) {
-      showToast((err as Error).message || 'Error al salir del círculo', 'error')
+      showToast((err as Error).message || t('circles.join_error'), 'error')
     }
   }
 
@@ -70,14 +72,14 @@ export function CirclesPage() {
     e.stopPropagation()
     navigator.clipboard.writeText(code)
     setCopiedId(id)
-    showToast('Código de invitación copiado')
+    showToast(t('circles.copy_invite_success'))
     setTimeout(() => setCopiedId(null), 2000)
   }
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center font-mono text-ink-soft bg-bg-primary">
-        Cargando tus círculos…
+        {t('common.loading')}
       </div>
     )
   }
@@ -93,19 +95,19 @@ export function CirclesPage() {
                        hover:text-ink mb-6 transition-colors"
           >
             <ChevronLeft size={14} strokeWidth={3} />
-            Volver
+            {t('common.back')}
           </button>
 
           <h2 className="font-display font-black text-xs uppercase tracking-widest mb-3 text-ink">
-            Círculos
+            {t('circles.title')}
           </h2>
           <p className="font-mono text-xs text-ink-soft leading-relaxed mb-6">
-            Espacios compartidos para compartir ideas, repos, comandos y tips con tus amigos o equipos de desarrollo.
+            {t('circles.sidebar_desc')}
           </p>
 
           <Button onClick={() => setShowCreateModal(true)} className="w-full flex items-center justify-center gap-2">
             <Plus size={14} strokeWidth={3} />
-            Crear Círculo
+            {t('circles.create_circle')}
           </Button>
         </div>
 
@@ -122,10 +124,10 @@ export function CirclesPage() {
           <div>
             <h1 className="font-display font-black text-4xl uppercase tracking-tight flex items-center gap-3">
               <Users size={36} strokeWidth={3} />
-              Tus Círculos
+              {t('circles.your_circles')}
             </h1>
             <p className="font-mono text-sm text-ink-soft mt-2">
-              Tenés {circles.length} {circles.length === 1 ? 'círculo activo' : 'círculos activos'}
+              {t('circles.active_count', { count: circles.length })}
             </p>
           </div>
         </header>
@@ -133,7 +135,7 @@ export function CirclesPage() {
         {error && (
           <div className="p-4 bg-danger text-white border-3 border-ink shadow-hard max-w-2xl mb-6">
             <p className="font-display font-bold text-lg mb-1">
-              Error al listar círculos
+              {t('circles.error_listing')}
             </p>
             <p className="text-sm font-mono">{(error as Error).message}</p>
           </div>
@@ -145,12 +147,12 @@ export function CirclesPage() {
             {circles.length === 0 ? (
               <div className="bg-bg-card border-3 border-ink shadow-hard p-10 text-center">
                 <Users size={48} strokeWidth={2} className="mx-auto mb-4 text-ink-soft" />
-                <p className="font-display font-bold text-lg uppercase mb-2">No estás en ningún círculo</p>
+                <p className="font-display font-bold text-lg uppercase mb-2">{t('circles.empty_state_title')}</p>
                 <p className="font-mono text-sm text-ink-soft max-w-md mx-auto mb-6">
-                  Creá uno nuevo para invitar a tus colegas o unite a uno existente usando un código de invitación.
+                  {t('circles.empty_state_desc')}
                 </p>
                 <Button onClick={() => setShowCreateModal(true)}>
-                  Crear primer círculo
+                  {t('circles.create_first')}
                 </Button>
               </div>
             ) : (
@@ -172,7 +174,7 @@ export function CirclesPage() {
                         <button
                           type="button"
                           onClick={(e) => handleLeave(e, c.id, c.name)}
-                          title="Salir del círculo"
+                          title={t('circles.leave_title')}
                           className="border-2 border-ink p-1 bg-bg-card hover:bg-danger hover:text-white
                                      opacity-0 group-hover:opacity-100 active:translate-x-[1px] active:translate-y-[1px] transition-all"
                         >
@@ -185,7 +187,7 @@ export function CirclesPage() {
                         </p>
                       ) : (
                         <p className="font-mono text-xs text-ink-soft/40 italic mb-4">
-                          Sin descripción
+                          {t('common.no_description')}
                         </p>
                       )}
                     </div>
@@ -213,12 +215,12 @@ export function CirclesPage() {
           <div className="space-y-6">
             <div className="bg-bg-card border-3 border-ink shadow-hard p-5">
               <h2 className="font-display font-black text-lg uppercase tracking-tight mb-4 flex items-center gap-2">
-                Unirse a un Círculo
+                {t('circles.join_title')}
               </h2>
               <form onSubmit={handleJoin} className="space-y-4">
                 <div>
                   <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">
-                    Código de Invitación
+                    {t('circles.join_label')}
                   </label>
                   <input
                     value={inviteCode}
@@ -230,20 +232,20 @@ export function CirclesPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full flex items-center justify-center gap-2">
-                  Unirse
+                  {t('circles.join_button')}
                 </Button>
               </form>
             </div>
 
             <div className="bg-accent-lime border-3 border-ink shadow-hard p-5">
               <h3 className="font-display font-black text-lg uppercase tracking-tight mb-2">
-                ¿Qué es un Círculo?
+                {t('circles.what_is_title')}
               </h3>
               <ul className="font-mono text-xs text-ink space-y-2 list-disc list-inside">
-                <li>Compartí rápidamente repos, scripts CLI y tips.</li>
-                <li>Hacé que tu equipo tenga las mismas herramientas.</li>
-                <li>Creación instantánea, invitá con un solo click.</li>
-                <li>100% aislado y seguro para tus datos de equipo.</li>
+                <li>{t('circles.what_is_item1')}</li>
+                <li>{t('circles.what_is_item2')}</li>
+                <li>{t('circles.what_is_item3')}</li>
+                <li>{t('circles.what_is_item4')}</li>
               </ul>
             </div>
           </div>
@@ -262,7 +264,7 @@ export function CirclesPage() {
             className="bg-bg-card border-5 border-ink shadow-hard-xl p-7 w-full max-w-lg"
           >
             <header className="flex items-center justify-between mb-5">
-              <h2 className="font-display font-black text-2xl uppercase">Crear Nuevo Círculo</h2>
+              <h2 className="font-display font-black text-2xl uppercase">{t('circles.new_circle_title')}</h2>
               <button
                 type="button"
                 onClick={() => setShowCreateModal(false)}
@@ -275,25 +277,25 @@ export function CirclesPage() {
             <div className="space-y-4">
               <div>
                 <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">
-                  Nombre *
+                  {t('circles.fields.name')} *
                 </label>
                 <input
                   autoFocus
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="E.g., Devs del Futuro, Sysops Team"
+                  placeholder={t('circles.placeholders.name')}
                   required
                   className="w-full border-3 border-ink p-2 font-mono text-sm focus:outline-none focus:bg-accent-yellow/20"
                 />
               </div>
               <div>
                 <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">
-                  Descripción
+                  {t('circles.fields.description')}
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="E.g., Espacio para compartir los mejores comandos bash, repos recomendados y tips de desarrollo."
+                  placeholder={t('circles.placeholders.description')}
                   rows={3}
                   className="w-full border-3 border-ink p-2 font-mono text-sm focus:outline-none focus:bg-accent-yellow/20 bg-bg-card"
                 />
@@ -302,10 +304,10 @@ export function CirclesPage() {
 
             <div className="mt-6 flex justify-end gap-3">
               <Button type="button" variant="secondary" onClick={() => setShowCreateModal(false)}>
-                Cancelar
+                {t('common.cancel')}
               </Button>
               <Button type="submit" disabled={createCircle.isPending || !name.trim()}>
-                {createCircle.isPending ? 'Creando…' : 'Crear Círculo'}
+                {createCircle.isPending ? t('common.loading') : t('circles.create_circle')}
               </Button>
             </div>
           </form>

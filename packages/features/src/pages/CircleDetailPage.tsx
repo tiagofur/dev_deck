@@ -3,10 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Users, Copy, Check, LogOut, ArrowRight, Share2 } from 'lucide-react'
 import { Button, showToast } from '@devdeck/ui'
 import { useCircleDetail, useCircleItems, useCircleMembers, useLeaveCircle } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 import { ItemGrid } from '../components/ItemGrid'
 import { detailPathForItem } from '../utils/itemRoutes'
 
 export function CircleDetailPage() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
@@ -23,20 +25,20 @@ export function CircleDetailPage() {
     const inviteLink = `${window.location.origin}/circles/join/${circle.invite_code}`
     navigator.clipboard.writeText(inviteLink)
     setCopiedLink(true)
-    showToast('¡Enlace de invitación copiado! 🔗')
+    showToast(t('circles.invite_link_success'))
     setTimeout(() => setCopiedLink(false), 2000)
   }
 
   async function handleLeave() {
     if (!circle) return
-    if (!confirm(`¿Estás seguro de que querés salir del círculo "${circle.name}"?`)) return
+    if (!confirm(t('circles.leave_confirm', { name: circle.name }))) return
 
     try {
       await leaveCircle.mutateAsync(circle.id)
-      showToast(`Saliste de "${circle.name}"`)
+      showToast(t('circles.leave_success', { name: circle.name }))
       navigate('/circles')
     } catch (err) {
-      showToast((err as Error).message || 'Error al salir del círculo', 'error')
+      showToast((err as Error).message || t('circles.join_error'), 'error')
     }
   }
 
@@ -45,7 +47,7 @@ export function CircleDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center font-mono text-ink-soft bg-bg-primary">
-        Cargando detalles del círculo…
+        {t('common.loading')}
       </div>
     )
   }
@@ -54,12 +56,12 @@ export function CircleDetailPage() {
     return (
       <div className="min-h-screen bg-bg-primary p-8">
         <div className="bg-bg-card border-3 border-ink shadow-hard p-6 max-w-xl mx-auto mt-20 text-center">
-          <p className="font-display font-black uppercase text-xl text-danger mb-2">Círculo no encontrado</p>
+          <p className="font-display font-black uppercase text-xl text-danger mb-2">{t('circles.not_found_title')}</p>
           <p className="font-mono text-sm text-ink-soft mb-6">
-            Es posible que no pertenezcas a este círculo o que haya sido eliminado.
+            {t('circles.not_found_desc')}
           </p>
           <Button onClick={() => navigate('/circles')}>
-            Volver a Círculos
+            {t('circles.all_circles')}
           </Button>
         </div>
       </div>
@@ -77,7 +79,7 @@ export function CircleDetailPage() {
                        hover:text-ink mb-6 transition-colors"
           >
             <ChevronLeft size={14} strokeWidth={3} />
-            Todos los Círculos
+            {t('circles.all_circles')}
           </button>
 
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
@@ -91,7 +93,7 @@ export function CircleDetailPage() {
                 </p>
               ) : (
                 <p className="font-mono text-sm text-ink-soft/40 italic mt-3">
-                  Sin descripción establecida.
+                  {t('common.no_description')}
                 </p>
               )}
             </div>
@@ -99,11 +101,11 @@ export function CircleDetailPage() {
             <div className="flex flex-wrap gap-3 shrink-0">
               <Button onClick={handleCopyLink} variant="accent" className="flex items-center gap-2">
                 {copiedLink ? <Check size={14} strokeWidth={3} /> : <Copy size={14} strokeWidth={3} />}
-                <span>Copiar Enlace de Invitación</span>
+                <span>{t('circles.join_label')}</span>
               </Button>
               <Button onClick={handleLeave} variant="secondary" className="flex items-center gap-2">
                 <LogOut size={14} strokeWidth={3} />
-                <span>Salir</span>
+                <span>{t('circles.leave_button')}</span>
               </Button>
             </div>
           </div>
@@ -114,22 +116,22 @@ export function CircleDetailPage() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-display font-black text-2xl uppercase tracking-tight flex items-center gap-2">
               <Share2 size={22} strokeWidth={3} />
-              Vault Compartido
+              {t('circles.shared_vault')}
             </h2>
             <span className="font-mono text-xs text-ink-soft">
-              {items.length} {items.length === 1 ? 'item compartido' : 'items compartidos'}
+              {t('circles.shared_items_count', { count: items.length })}
             </span>
           </div>
 
           {items.length === 0 ? (
             <div className="bg-bg-card border-3 border-ink shadow-hard p-12 text-center max-w-xl mx-auto">
               <Share2 size={36} strokeWidth={2} className="mx-auto mb-4 text-ink-soft" />
-              <p className="font-display font-bold text-lg uppercase mb-2">Vault Vacío</p>
+              <p className="font-display font-bold text-lg uppercase mb-2">{t('circles.empty_shared_vault_title')}</p>
               <p className="font-mono text-sm text-ink-soft mb-6">
-                Compartí cualquier item de tu deck (repos, comandos bash, tips) haciendo click en el botón de compartir en tu Home.
+                {t('circles.empty_shared_vault_desc')}
               </p>
               <Button onClick={() => navigate('/items')}>
-                Ir a mis items
+                {t('circles.go_to_my_items')}
                 <ArrowRight size={14} strokeWidth={3} className="ml-2 inline" />
               </Button>
             </div>
@@ -146,7 +148,7 @@ export function CircleDetailPage() {
       <aside className="w-full lg:w-80 shrink-0 border-t-3 lg:border-t-0 lg:border-l-3 border-ink bg-bg-elevated p-8">
         <h2 className="font-display font-black text-xl uppercase tracking-tight mb-6 flex items-center gap-2">
           <Users size={20} strokeWidth={3} />
-          Miembros ({members.length})
+          {t('circles.members')} ({members.length})
         </h2>
 
         <div className="space-y-4">
@@ -184,8 +186,8 @@ export function CircleDetailPage() {
         </div>
 
         <div className="bg-accent-yellow border-2 border-ink p-4 mt-8 font-mono text-xs leading-relaxed">
-          <p className="font-bold mb-1">💡 ¿Cómo compartir?</p>
-          Encontrá cualquier snippet, bookmark, comando o tip en tu deck y hacé click en el ícono de compartir en la tarjeta del item para enviarlo instantáneamente a este círculo.
+          <p className="font-bold mb-1">{t('circles.how_to_share_title')}</p>
+          {t('circles.how_to_share_desc')}
         </div>
       </aside>
     </div>

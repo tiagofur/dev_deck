@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Keyboard, X } from 'lucide-react'
 import { useEffect } from 'react'
+import { useTranslation } from '@devdeck/i18n'
 
 interface Props {
   open: boolean
@@ -12,17 +13,19 @@ interface Shortcut {
   description: string
 }
 
-const shortcuts: Shortcut[] = [
-  { keys: ['Cmd', 'K'], description: 'Búsqueda global' },
-  { keys: ['Cmd', 'N'], description: 'Nuevo item' },
-  { keys: ['Cmd', 'L'], description: 'Ir a items (buscar)' },
-  { keys: ['Cmd', '/'], description: 'Mostrar atajos' },
-  { keys: ['Cmd', 'D'], description: 'Toggle favorito (detail)' },
-  { keys: ['Esc'], description: 'Cerrar modales' },
-  { keys: ['Enter'], description: 'Confirmar' },
-]
-
 export function ShortcutsModal({ open, onClose }: Props) {
+  const { t } = useTranslation()
+
+  const shortcuts: Shortcut[] = [
+    { keys: ['Cmd', 'K'], description: t('shortcuts.global_search') },
+    { keys: ['Cmd', 'N'], description: t('shortcuts.new_item') },
+    { keys: ['Cmd', 'L'], description: t('shortcuts.go_items') },
+    { keys: ['Cmd', '/'], description: t('shortcuts.show_shortcuts') },
+    { keys: ['Cmd', 'D'], description: t('shortcuts.toggle_favorite') },
+    { keys: ['Esc'], description: t('shortcuts.close_modals') },
+    { keys: ['Enter'], description: t('shortcuts.confirm') },
+  ]
+
   useEffect(() => {
     if (!open) return
     function onKey(e: KeyboardEvent) {
@@ -55,12 +58,12 @@ export function ShortcutsModal({ open, onClose }: Props) {
             <header className="flex items-center justify-between mb-5">
               <h2 className="font-display font-black text-2xl uppercase flex items-center gap-2">
                 <Keyboard size={22} strokeWidth={3} />
-                Atajos
+                {t('shortcuts.title')}
               </h2>
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="Cerrar"
+                aria-label={t('common.close')}
                 className="border-3 border-ink p-1 hover:bg-accent-pink transition-colors"
               >
                 <X size={18} strokeWidth={3} />
@@ -68,9 +71,9 @@ export function ShortcutsModal({ open, onClose }: Props) {
             </header>
 
             <ul className="space-y-3">
-              {shortcuts.map((s) => (
+              {shortcuts.map((s, idx) => (
                 <li
-                  key={s.description}
+                  key={idx}
                   className="flex items-center justify-between gap-4"
                 >
                   <span className="font-mono text-sm">{s.description}</span>
@@ -89,7 +92,7 @@ export function ShortcutsModal({ open, onClose }: Props) {
             </ul>
 
             <p className="mt-6 text-xs font-mono text-ink-soft text-center italic">
-              En Mac: Cmd en lugar de Ctrl
+              {t('shortcuts.mac_hint')}
             </p>
           </motion.div>
         </motion.div>

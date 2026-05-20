@@ -11,8 +11,10 @@ import {
 } from '@devdeck/api-client'
 import type { Entry } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 
 export function CheatsheetDetailPage() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { data: detail, isLoading, error } = useCheatsheet(id)
@@ -29,9 +31,10 @@ export function CheatsheetDetailPage() {
 
   async function handleDeleteCheatsheet() {
     if (!id || !detail) return
+    if (!window.confirm(t('cheatsheets.delete_confirm'))) return
     try {
       await deleteCheatsheet.mutateAsync(id)
-      showToast('Cheatsheet borrada')
+      showToast(t('cheatsheets.delete_success'))
       navigate('/cheatsheets')
     } catch (err) {
       showToast((err as Error).message, 'error')
@@ -68,7 +71,7 @@ export function CheatsheetDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center font-mono text-ink-soft">
-        Cargando…
+        {t('common.loading')}
       </div>
     )
   }
@@ -76,9 +79,9 @@ export function CheatsheetDetailPage() {
   if (error || !detail) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8">
-        <p className="font-display font-black text-3xl uppercase">Cheatsheet no encontrada</p>
+        <p className="font-display font-black text-3xl uppercase">Cheatsheet not found</p>
         <Button variant="primary" onClick={() => navigate('/cheatsheets')}>
-          Volver a cheatsheets
+          {t('common.back')}
         </Button>
       </div>
     )
@@ -89,9 +92,9 @@ export function CheatsheetDetailPage() {
   async function handleCopy(cmd: string) {
     try {
       await navigator.clipboard.writeText(cmd)
-      showToast('Copiado al clipboard')
+      showToast(t('common.copy_success'))
     } catch {
-      showToast('No se pudo copiar', 'error')
+      showToast(t('common.error'), 'error')
     }
   }
 
@@ -173,7 +176,7 @@ export function CheatsheetDetailPage() {
             <Search size={14} strokeWidth={2.5} className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="search"
-              placeholder="Filtrar entries…"
+              placeholder={t('cheatsheets.search_entries')}
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
               className="w-full border-2 border-ink pl-8 pr-3 py-1.5 font-mono text-xs
@@ -187,7 +190,7 @@ export function CheatsheetDetailPage() {
               <Filter size={14} strokeWidth={2.5} className="text-ink-soft" />
               <div className="flex flex-wrap gap-1.5">
                 <TagButton
-                  label="Todas"
+                  label={t('cheatsheets.categories.all')}
                   active={tagFilter === null}
                   onClick={() => setTagFilter(null)}
                 />
@@ -207,7 +210,7 @@ export function CheatsheetDetailPage() {
             <Button size="sm" onClick={() => { setEditingEntry(null); setAddingNew(true) }}>
               <span className="flex items-center gap-2">
                 <Plus size={14} strokeWidth={3} />
-                Nueva entry
+                {t('cheatsheets.add_entry')}
               </span>
             </Button>
           </div>
@@ -216,9 +219,10 @@ export function CheatsheetDetailPage() {
         {/* Entries list */}
         {filteredEntries.length === 0 ? (
           <div className="text-center py-16">
-            <p className="font-mono text-ink-soft">
-              {searchFilter || tagFilter ? 'No hay entries con ese filtro.' : 'Sin entries todavía.'}
+            <p className="font-mono text-xs text-ink-soft italic">
+              {searchFilter || tagFilter ? t('cheatsheets.no_entries_found') : t('cheatsheets.no_entries_yet')}
             </p>
+
           </div>
         ) : (
           <div className="space-y-3">

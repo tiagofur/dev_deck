@@ -27,6 +27,7 @@ import {
   useGenerateSCIMToken,
 } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 import { WebhookManager } from '../components/WebhookManager'
 import { PluginGallery } from '../components/PluginGallery'
 import { OrgInsights } from '../components/OrgInsights'
@@ -34,6 +35,7 @@ import { OrgInsights } from '../components/OrgInsights'
 const APP_VERSION = '1.0.0'
 
 export function SettingsPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const prefs = usePreferences()
   const { data: me } = useMe()
@@ -47,7 +49,7 @@ export function SettingsPage() {
     try {
       await updateMe.mutateAsync({ bio })
       setEditingBio(false)
-      showToast('Perfil actualizado')
+      showToast(t('common.profile_updated'))
     } catch (err) {
       showToast((err as Error).message, 'error')
     }
@@ -59,20 +61,20 @@ export function SettingsPage() {
   const sessionActive = cfg.authMode === 'jwt' ? Boolean(getAccessToken()) : Boolean(apiToken)
   const maskedToken = apiToken
     ? `${apiToken.slice(0, 4)}${'•'.repeat(Math.max(0, apiToken.length - 8))}${apiToken.slice(-4)}`
-    : '— sin configurar —'
+    : t('settings.not_configured')
 
   async function copyToken() {
     try {
       await navigator.clipboard.writeText(apiToken)
-      showToast('Token copiado')
+      showToast(t('common.token_copied'))
     } catch {
-      showToast('No se pudo copiar', 'error')
+      showToast(t('common.error'), 'error')
     }
   }
 
   async function logout() {
     await logoutCurrentSession()
-    showToast('Sesión cerrada')
+    showToast(t('common.logout_msg'))
     navigate('/login')
   }
 
@@ -85,19 +87,19 @@ export function SettingsPage() {
                      hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg
                      active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
                      transition-all duration-150"
-          aria-label="Volver"
+          aria-label={t('common.back')}
         >
           <ArrowLeft size={20} strokeWidth={3} />
         </button>
         <h1 className="font-display font-black text-2xl uppercase tracking-tight flex items-center gap-2">
           <SettingsIcon size={22} strokeWidth={3} />
-          Settings
+          {t('settings.title')}
         </h1>
       </header>
 
       <main className="max-w-2xl mx-auto p-6 space-y-6">
         {/* Perfil */}
-        <Section title="Perfil Público">
+        <Section title={t('settings.public_profile')}>
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 border-2 border-ink shadow-hard-sm overflow-hidden bg-accent-yellow shrink-0">
@@ -106,35 +108,35 @@ export function SettingsPage() {
                 )}
               </div>
               <div>
-                <p className="font-display font-black text-xl uppercase leading-none">{me?.display_name || 'Cargando…'}</p>
+                <p className="font-display font-black text-xl uppercase leading-none">{me?.display_name || t('common.loading')}</p>
                 <p className="font-mono text-[10px] text-ink-soft uppercase font-bold mt-1">
                   Plan: <span className="text-accent-pink">{me?.plan || 'free'}</span>
                 </p>
               </div>
             </div>
 
-            <Field label="Biografía">
+            <Field label={t('settings.bio_label')}>
               {editingBio ? (
                 <div className="space-y-2">
                   <textarea
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     className="w-full border-2 border-ink p-3 font-mono text-sm min-h-[100px] focus:outline-none focus:bg-accent-yellow/5"
-                    placeholder="Contanos un poco sobre vos…"
+                    placeholder={t('settings.bio_placeholder')}
                   />
                   <div className="flex gap-2">
                     <Button size="sm" onClick={handleSaveBio} disabled={updateMe.isPending}>
-                      {updateMe.isPending ? 'Guardando…' : 'Guardar'}
+                      {updateMe.isPending ? t('common.loading') : t('common.save')}
                     </Button>
                     <Button size="sm" variant="secondary" onClick={() => setEditingBio(false)}>
-                      Cancelar
+                      {t('common.cancel')}
                     </Button>
                   </div>
                 </div>
               ) : (
                 <div className="group relative">
                   <p className="text-sm font-medium italic text-ink-soft min-h-[1.5em]">
-                    {me?.bio ? `"${me.bio}"` : 'Sin biografía todavía.'}
+                    {me?.bio ? `"${me.bio}"` : t('settings.no_bio')}
                   </p>
                   <button
                     onClick={() => {
@@ -143,14 +145,14 @@ export function SettingsPage() {
                     }}
                     className="mt-2 text-[10px] font-mono uppercase font-bold underline hover:text-accent-pink"
                   >
-                    Editar biografía
+                    {t('settings.edit_bio')}
                   </button>
                 </div>
               )}
             </Field>
 
             {me?.username && (
-              <Field label="URL Pública">
+              <Field label={t('settings.public_url')}>
                 <p className="text-xs font-mono break-all text-ink-soft">
                   devdeck.ai/u/{me.username}
                 </p>
@@ -162,7 +164,7 @@ export function SettingsPage() {
                 <Button variant="accent" className="w-full" onClick={() => navigate('/admin')}>
                   <span className="flex items-center gap-2">
                     <ShieldCheck size={16} strokeWidth={3} />
-                    Panel de Administración
+                    {t('settings.admin_panel')}
                   </span>
                 </Button>
               </div>
@@ -171,112 +173,112 @@ export function SettingsPage() {
         </Section>
 
         {/* Personalidad */}
-        <Section title="Personalidad">
+        <Section title={t('settings.personality')}>
           <Toggle
-            label="Mostrar mascota"
-            description="Snarkel aparece en la esquina inferior derecha y reacciona a tu uso."
+            label={t('settings.show_mascot')}
+            description={t('settings.mascot_desc')}
             checked={prefs.mascotEnabled}
             onChange={(v) => {
               setPreferences({ mascotEnabled: v })
-              showToast(v ? 'Mascota activada' : 'Mascota oculta')
+              showToast(v ? t('settings.mascot_enabled') : t('settings.mascot_disabled'))
             }}
           />
         </Section>
 
         {/* Notificaciones */}
-        <Section title="Notificaciones">
+        <Section title={t('settings.notifications')}>
           <PushPermissionRequest />
         </Section>
 
         {/* Dispositivos */}
-        <Section title="Mis Dispositivos">
+        <Section title={t('settings.devices')}>
           <DeviceList currentClientId={prefs.clientId} />
         </Section>
 
         {/* Desarrollador */}
-        <Section title="Desarrollador: API Keys">
+        <Section title={`${t('settings.developer')}: ${t('settings.api_keys')}`}>
           <APIKeyManager />
         </Section>
 
-        <Section title="Desarrollador: Plugins de Enriquecimiento">
+        <Section title={`${t('settings.developer')}: ${t('settings.enrichment_plugins')}`}>
           <p className="text-[10px] text-ink-soft mb-4 italic">
-            Configurá webhooks externos para extraer metadata de URLs específicas.
+            {t('settings.enrichment_desc')}
           </p>
           <CustomEnricherManager />
         </Section>
 
-        <Section title="Desarrollador: Webhooks de Salida">
+        <Section title={`${t('settings.developer')}: ${t('settings.output_webhooks')}`}>
           <p className="text-[10px] text-ink-soft mb-4 italic">
-            Suscribite a eventos de DevDeck para notificar a sistemas externos (ej: Slack, Zapier).
+            {t('settings.output_webhooks_desc')}
           </p>
           <WebhookManager />
         </Section>
 
-        <Section title="Desarrollador: Galería de Plugins">
+        <Section title={`${t('settings.developer')}: ${t('settings.plugin_gallery')}`}>
           <PluginGallery />
         </Section>
 
         {/* Enterprise */}
         {prefs.activeOrgId && (
           <>
-            <Section title="Enterprise: Autenticación SSO (SAML)">
+            <Section title={`Enterprise: ${t('settings.saml_title')}`}>
               <p className="text-[10px] text-ink-soft mb-4 italic">
-                Configurá el inicio de sesión único para tu organización.
+                {t('settings.saml_desc')}
               </p>
               <OrgSAMLManager orgId={prefs.activeOrgId} />
             </Section>
 
-            <Section title="Enterprise: Directorio (SCIM)">
+            <Section title={`Enterprise: ${t('settings.scim_title')}`}>
               <p className="text-[10px] text-ink-soft mb-4 italic">
-                Automatizá el aprovisionamiento de usuarios desde Okta o Azure AD.
+                {t('settings.scim_desc')}
               </p>
               <OrgSCIMManager orgId={prefs.activeOrgId} />
             </Section>
 
-            <Section title="Enterprise: Insights del Equipo">
+            <Section title={`Enterprise: ${t('settings.insights_title')}`}>
               <OrgInsights orgId={prefs.activeOrgId} />
             </Section>
           </>
         )}
 
         {/* Conexión */}
-        <Section title="Conexión">
-          <Field label="API URL">
+        <Section title={t('settings.connection')}>
+          <Field label={t('settings.api_url')}>
             <code className="font-mono text-sm break-all">{apiUrl}</code>
           </Field>
-          <Field label="Región Activa">
+          <Field label={t('settings.active_region')}>
              <div className="flex items-center gap-2">
                 <Globe size={14} className="text-accent-cyan" />
                 <span className="font-mono text-xs uppercase font-bold">{me?.region || 'us-east'}</span>
              </div>
           </Field>
           {cfg.authMode === 'jwt' ? (
-            <Field label="Sesión">
+            <Field label={t('settings.session')}>
               <div className="flex items-center gap-3 flex-wrap">
                 <span className="font-mono text-sm">
-                  {sessionActive ? 'OAuth activa' : 'Sin sesión'}
+                  {sessionActive ? t('settings.oauth_active') : t('settings.no_session')}
                 </span>
                 {sessionActive && (
                   <Button size="sm" variant="secondary" onClick={logout}>
-                    Cerrar sesión
+                    {t('settings.logout_button')}
                   </Button>
                 )}
               </div>
               <p className="text-xs text-ink-soft mt-2 font-mono">
-                Login real con proveedores OAuth y tokens JWT/refresh.
+                {t('settings.session_desc')}
               </p>
             </Field>
           ) : (
-            <Field label="API Token">
+            <Field label={t('settings.api_token')}>
               <div className="flex items-center gap-2 flex-wrap">
                 <code className="font-mono text-sm">
-                  {tokenVisible ? apiToken || '— sin configurar —' : maskedToken}
+                  {tokenVisible ? apiToken || t('settings.not_configured') : maskedToken}
                 </code>
                 <button
                   type="button"
                   onClick={() => setTokenVisible((v) => !v)}
                   className="border-2 border-ink p-1 hover:bg-accent-yellow"
-                  aria-label={tokenVisible ? 'Ocultar' : 'Mostrar'}
+                  aria-label={tokenVisible ? t('common.close') : t('common.open')}
                 >
                   {tokenVisible ? (
                     <EyeOff size={14} strokeWidth={3} />
@@ -286,27 +288,26 @@ export function SettingsPage() {
                 </button>
                 {apiToken && (
                   <Button size="sm" variant="secondary" onClick={copyToken}>
-                    Copiar
+                    {t('common.copy_code')}
                   </Button>
                 )}
               </div>
               <p className="text-xs text-ink-soft mt-2 font-mono">
-                Configurado vía <code>VITE_API_URL</code> y <code>VITE_API_TOKEN</code>.
+                {t('settings.env_configured')}
               </p>
             </Field>
           )}
         </Section>
 
         {/* About */}
-        <Section title="Sobre">
+        <Section title={t('settings.about')}>
           <div className="space-y-2">
             <p className="font-display font-black text-3xl uppercase">
               DevDeck
             </p>
             <p className="font-mono text-sm text-ink-soft">v{APP_VERSION}</p>
             <p className="text-sm mt-3">
-              Tu directorio personal de repos y herramientas favoritas. Hermoso, divertido,
-              siempre a mano.
+              {t('settings.about_desc')}
             </p>
           </div>
         </Section>
@@ -316,23 +317,24 @@ export function SettingsPage() {
 }
 
 function DeviceList({ currentClientId }: { currentClientId: string }) {
+  const { t } = useTranslation()
   const { data: devices = [], isLoading } = useDevices()
   const deleteDevice = useDeleteDevice()
 
-  if (isLoading) return <div className="font-mono text-xs text-ink-soft">Cargando dispositivos…</div>
+  if (isLoading) return <div className="font-mono text-xs text-ink-soft">{t('settings.device_loading')}</div>
 
   async function handleDelete(clientId: string, name: string) {
     const ok = await confirm({
-      title: 'Desvincular dispositivo',
-      message: `¿Estás seguro de que querés desvincular "${name}"? El dispositivo tendrá que volver a loguearse para sincronizar.`,
-      confirmLabel: 'Desvincular',
+      title: t('settings.unlink_device'),
+      message: t('settings.unlink_confirm', { name }),
+      confirmLabel: t('settings.unlink_button'),
       variant: 'danger',
     })
     if (!ok) return
 
     try {
       await deleteDevice.mutateAsync(clientId)
-      showToast('Dispositivo desvinculado')
+      showToast(t('settings.unlink_success'))
     } catch (err) {
       showToast((err as Error).message, 'error')
     }
@@ -357,18 +359,18 @@ function DeviceList({ currentClientId }: { currentClientId: string }) {
                 <p className="font-display font-bold text-xs uppercase truncate">{d.name}</p>
                 {isCurrent && (
                   <span className="text-[9px] font-mono bg-accent-lime border border-ink px-1 py-0 uppercase font-black">
-                    Este
+                    {t('settings.this_device')}
                   </span>
                 )}
               </div>
               <p className="font-mono text-[10px] text-ink-soft truncate">
-                Visto: {new Date(d.last_seen_at).toLocaleString()}
+                {t('settings.last_seen', { date: new Date(d.last_seen_at).toLocaleString() })}
               </p>
             </div>
             {!isCurrent && (
               <button
                 onClick={() => handleDelete(d.client_id, d.name)}
-                title="Desvincular"
+                title={t('settings.unlink_button')}
                 className="p-1 hover:bg-accent-pink border-2 border-transparent hover:border-ink transition-all"
               >
                 <Trash2 size={14} />
@@ -382,19 +384,20 @@ function DeviceList({ currentClientId }: { currentClientId: string }) {
 }
 
 function PushPermissionRequest() {
+  const { t } = useTranslation()
   const [status, setStatus] = useState<NotificationPermission>(
     'Notification' in window ? Notification.permission : 'denied'
   )
 
   async function request() {
     if (!('Notification' in window)) {
-      showToast('Tu navegador no soporta notificaciones', 'error')
+      showToast(t('settings.browser_no_support'), 'error')
       return
     }
     const res = await Notification.requestPermission()
     setStatus(res)
     if (res === 'granted') {
-      showToast('Notificaciones activadas')
+      showToast(t('settings.notifications_enabled_desc'))
       new Notification('¡DevDeck Conectado!', {
         body: 'Ahora recibirás alertas importantes en tu dispositivo.',
         icon: '/favicon.svg'
@@ -406,19 +409,19 @@ function PushPermissionRequest() {
     <div className="flex items-start justify-between gap-4">
       <div className="min-w-0">
         <p className="font-display font-bold text-base flex items-center gap-2">
-           Notificaciones del Sistema
+           {t('settings.system_notifications')}
            {status === 'granted' && <Check size={16} className="text-accent-lime" strokeWidth={4} />}
         </p>
         <p className="text-xs text-ink-soft font-mono mt-1">
           {status === 'granted' 
-            ? 'Activadas. Recibirás alertas incluso con la app cerrada.' 
-            : 'Desactivadas. Habilitalas para no perderte nada.'}
+            ? t('settings.notifications_enabled_desc') 
+            : t('settings.notifications_disabled_desc')}
         </p>
       </div>
       
       {status !== 'granted' && (
         <Button size="sm" onClick={request} variant="secondary">
-          Habilitar
+          {t('settings.enable_button')}
         </Button>
       )}
     </div>
@@ -426,6 +429,7 @@ function PushPermissionRequest() {
 }
 
 function APIKeyManager() {
+  const { t } = useTranslation()
   const { data: keysRes, isLoading } = useAPIKeys()
   const createKey = useCreateAPIKey()
   const deleteKey = useDeleteAPIKey()
@@ -434,7 +438,7 @@ function APIKeyManager() {
   const keys = keysRes?.keys || []
 
   async function handleCreate() {
-    const name = window.prompt('Nombre de la API Key (ej: CLI de casa):')
+    const name = window.prompt(t('settings.key_name_prompt'))
     if (!name) return
     try {
       const res = await createKey.mutateAsync(name)
@@ -448,8 +452,8 @@ function APIKeyManager() {
     <div className="space-y-4">
       {newToken && (
         <div className="bg-accent-yellow border-3 border-ink p-4 shadow-hard animate-in zoom-in duration-300">
-           <p className="text-xs font-bold uppercase mb-2">¡Nueva API Key creada!</p>
-           <p className="text-[10px] mb-3 leading-tight">Copiá este token ahora. No se volverá a mostrar por seguridad.</p>
+           <p className="text-xs font-bold uppercase mb-2">{t('settings.new_key_title')}</p>
+           <p className="text-[10px] mb-3 leading-tight">{t('settings.new_key_desc')}</p>
            <div className="flex items-center gap-2">
               <code className="bg-white border-2 border-ink px-3 py-2 text-sm font-mono flex-1 break-all select-all">
                 {newToken}
@@ -458,7 +462,7 @@ function APIKeyManager() {
                 onClick={() => setNewToken(null)}
                 className="font-mono text-[10px] uppercase font-black underline"
               >
-                Cerrar
+                {t('common.close')}
               </button>
            </div>
         </div>
@@ -470,7 +474,7 @@ function APIKeyManager() {
             <div>
               <p className="font-display font-bold text-xs uppercase">{k.name}</p>
               <p className="font-mono text-[9px] text-ink-soft">
-                Usada: {k.last_used_at ? new Date(k.last_used_at).toLocaleDateString() : 'Nunca'}
+                {t('settings.last_used', { date: k.last_used_at ? new Date(k.last_used_at).toLocaleDateString() : t('settings.never_used') })}
               </p>
             </div>
             <button 
@@ -484,13 +488,14 @@ function APIKeyManager() {
       </div>
 
       <Button onClick={handleCreate} disabled={createKey.isPending} className="w-full" size="sm">
-        Generar Nueva Key
+        {t('settings.generate_key')}
       </Button>
     </div>
   )
 }
 
 function CustomEnricherManager() {
+  const { t } = useTranslation()
   const { data: encRes, isLoading } = useCustomEnrichers()
   const createEnc = useCreateCustomEnricher()
   const deleteEnc = useDeleteCustomEnricher()
@@ -498,15 +503,15 @@ function CustomEnricherManager() {
   const enrichers = encRes?.enrichers || []
 
   async function handleCreate() {
-    const name = window.prompt('Nombre del Plugin (ej: Rust Crates):')
-    const pattern = window.prompt('URL Pattern (Regex, ej: ^https://crates\\.io/):')
-    const endpoint = window.prompt('Endpoint URL (Webhook):')
+    const name = window.prompt(t('settings.plugin_name_prompt'))
+    const pattern = window.prompt(t('settings.plugin_pattern_prompt'))
+    const endpoint = window.prompt(t('settings.plugin_webhook_prompt'))
     
     if (!name || !pattern || !endpoint) return
     
     try {
       await createEnc.mutateAsync({ name, url_pattern: pattern, endpoint_url: endpoint })
-      showToast('Plugin registrado')
+      showToast(t('settings.plugin_registered'))
     } catch (err) {
       showToast((err as Error).message, 'error')
     }
@@ -534,13 +539,14 @@ function CustomEnricherManager() {
         ))}
       </div>
       <Button onClick={handleCreate} disabled={createEnc.isPending} className="w-full" size="sm" variant="secondary">
-        + Registrar Plugin HTTP
+        {t('settings.register_http_plugin')}
       </Button>
     </div>
   )
 }
 
 function OrgSAMLManager({ orgId }: { orgId: string }) {
+  const { t } = useTranslation()
   const { data: saml, isLoading } = useOrgSAML(orgId)
   const updateSAML = useUpdateOrgSAML()
   
@@ -564,13 +570,13 @@ function OrgSAMLManager({ orgId }: { orgId: string }) {
         orgId,
         input: { domain, idp_sso_url: ssoUrl, idp_entity_id: entityId, idp_x509_cert: cert }
       })
-      showToast('Configuración SAML guardada')
+      showToast(t('common.save'))
     } catch (err) {
       showToast((err as Error).message, 'error')
     }
   }
 
-  if (isLoading) return <div className="animate-pulse font-mono text-[10px]">Cargando SAML…</div>
+  if (isLoading) return <div className="animate-pulse font-mono text-[10px]">{t('common.loading')}</div>
 
   return (
     <div className="space-y-4">
@@ -606,13 +612,14 @@ function OrgSAMLManager({ orgId }: { orgId: string }) {
         </div>
       </div>
       <Button onClick={handleSave} disabled={updateSAML.isPending} className="w-full" size="sm">
-        Guardar Configuración SSO
+        {t('common.save')}
       </Button>
     </div>
   )
 }
 
 function OrgSCIMManager({ orgId }: { orgId: string }) {
+  const { t } = useTranslation()
   const generate = useGenerateSCIMToken()
   const [token, setToken] = useState<string | null>(null)
   
@@ -649,13 +656,13 @@ function OrgSCIMManager({ orgId }: { orgId: string }) {
                 onClick={() => setToken(null)}
                 className="font-mono text-[10px] uppercase font-black underline"
               >
-                Cerrar
+                {t('common.close')}
               </button>
            </div>
         </div>
       ) : (
         <Button onClick={handleGenerate} disabled={generate.isPending} className="w-full" variant="secondary" size="sm">
-          {generate.isPending ? 'Generando…' : 'Generar Nuevo Token SCIM'}
+          {generate.isPending ? t('common.loading') : t('settings.scim_title')}
         </Button>
       )}
 

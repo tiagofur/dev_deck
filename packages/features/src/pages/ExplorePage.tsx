@@ -4,25 +4,27 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useExploreCheatsheets } from '@devdeck/api-client'
 import type { Cheatsheet } from '@devdeck/api-client'
-
-const categoryLabels: Record<string, string> = {
-  vcs: 'Version Control',
-  os: 'OS / CLI',
-  language: 'Languages',
-  framework: 'Frameworks',
-  tool: 'Tools',
-  'package-manager': 'Package Managers',
-  editor: 'Editors',
-  shell: 'Shell / Terminal',
-  cloud: 'Cloud / DevOps',
-  other: 'Other',
-}
+import { useTranslation } from '@devdeck/i18n'
 
 export function ExplorePage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [searchFilter, setSearchFilter] = useState('')
   const { data: cheatsheets = [], isLoading } = useExploreCheatsheets(selectedCategory ?? undefined)
+
+  const categoryLabels: Record<string, string> = {
+    vcs: t('cheatsheets.categories.vcs'),
+    os: t('cheatsheets.categories.os'),
+    language: t('cheatsheets.categories.language'),
+    framework: t('cheatsheets.categories.framework'),
+    tool: t('cheatsheets.categories.tool'),
+    'package-manager': t('cheatsheets.categories.package-manager'),
+    editor: t('cheatsheets.categories.editor'),
+    shell: t('cheatsheets.categories.shell'),
+    cloud: t('cheatsheets.categories.cloud'),
+    other: t('cheatsheets.categories.other'),
+  }
 
   const filtered = cheatsheets.filter(c => 
     c.title.toLowerCase().includes(searchFilter.toLowerCase()) ||
@@ -32,7 +34,7 @@ export function ExplorePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center font-mono text-ink-soft bg-bg-primary">
-        Explorando el conocimiento colectivo…
+        {t('explore.loading_message')}
       </div>
     )
   }
@@ -47,15 +49,15 @@ export function ExplorePage() {
                      hover:text-ink mb-8 transition-colors"
         >
           <ChevronLeft size={14} strokeWidth={3} />
-          Volver
+          {t('common.back')}
         </button>
 
         <h2 className="font-display font-black text-xs uppercase tracking-widest mb-4 text-ink">
-          Categorías
+          {t('common.categories')}
         </h2>
         <div className="space-y-1">
           <CategoryButton
-            label="Todas"
+            label={t('cheatsheets.categories.all')}
             active={selectedCategory === null}
             onClick={() => setSelectedCategory(null)}
           />
@@ -78,19 +80,18 @@ export function ExplorePage() {
               <Star size={32} strokeWidth={3} className="text-ink" />
             </div>
             <h1 className="font-display font-black text-5xl uppercase tracking-tighter">
-              Explore Vaults
+              {t('explore.title')}
             </h1>
           </div>
           <p className="font-mono text-lg text-ink-soft max-w-2xl">
-            Descubre cheatsheets creadas por la comunidad y el equipo oficial de DevDeck. 
-            Cópialas a tu vault personal con un solo clic.
+            {t('explore.subtitle')}
           </p>
           
           <div className="mt-8 relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft" size={18} />
             <input 
               type="text"
-              placeholder="Buscar cheatsheets públicas..."
+              placeholder={t('explore.search_placeholder')}
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
               className="w-full border-3 border-ink p-3 pl-10 font-mono text-sm focus:outline-none focus:bg-accent-yellow/10"
@@ -102,7 +103,7 @@ export function ExplorePage() {
           <div className="text-center py-20 bg-bg-card border-3 border-ink border-dashed">
             <BookOpen size={48} strokeWidth={1} className="mx-auto mb-4 text-ink-soft opacity-30" />
             <p className="font-mono text-ink-soft">
-              No encontramos lo que buscas. ¡Prueba con otra categoría o término!
+              {t('explore.no_results')}
             </p>
           </div>
         ) : (

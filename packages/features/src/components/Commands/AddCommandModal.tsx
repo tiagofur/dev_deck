@@ -6,6 +6,7 @@ import type {
   CreateCommandInput,
   RepoCommand,
 } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 
 interface Props {
   open: boolean
@@ -36,6 +37,7 @@ export function AddCommandModal({
   onClose,
   onSubmit,
 }: Props) {
+  const { t } = useTranslation()
   const [label, setLabel] = useState('')
   const [command, setCommand] = useState('')
   const [description, setDescription] = useState('')
@@ -87,12 +89,12 @@ export function AddCommandModal({
       >
         <header className="flex items-center justify-between mb-5">
           <h2 className="font-display font-black text-2xl uppercase">
-            {editing ? 'Editar comando' : 'Nuevo comando'}
+            {editing ? t('repos.edit_command') : t('repos.new_command_title')}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t('common.close')}
             className="border-3 border-ink p-1 hover:bg-accent-pink"
           >
             <X size={18} strokeWidth={3} />
@@ -100,7 +102,7 @@ export function AddCommandModal({
         </header>
 
         <div className="space-y-4">
-          <Field label="Label" hint="Cómo lo vas a recordar (ej: Dev server)">
+          <Field label={t('cheatsheets.entry_label')} hint={t('repos.label_hint')}>
             <input
               autoFocus
               value={label}
@@ -111,7 +113,7 @@ export function AddCommandModal({
             />
           </Field>
 
-          <Field label="Command" hint="El string que copiamos al clipboard">
+          <Field label={t('repos.command_label')} hint={t('repos.command_hint')}>
             <input
               value={command}
               onChange={(e) => setCommand(e.target.value)}
@@ -121,17 +123,17 @@ export function AddCommandModal({
             />
           </Field>
 
-          <Field label="Descripción" hint="Opcional">
+          <Field label={t('cheatsheets.entry_description')} hint={t('repos.description_hint')}>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              placeholder="Levanta el server con HMR"
+              placeholder={t('repos.placeholder_desc')}
               className="w-full border-3 border-ink p-2 font-mono text-sm focus:outline-none focus:bg-accent-yellow/20 resize-none"
             />
           </Field>
 
-          <Field label="Categoría" hint="Opcional, ayuda a colorear">
+          <Field label={t('cheatsheets.fields.category')} hint={t('repos.category_hint')}>
             <div className="flex flex-wrap gap-2">
               <CategoryButton
                 active={category === ''}
@@ -158,10 +160,10 @@ export function AddCommandModal({
 
         <div className="mt-6 flex justify-end gap-3">
           <Button type="button" variant="secondary" onClick={onClose}>
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button type="submit" disabled={saving || !label.trim() || !command.trim()}>
-            {saving ? 'Guardando…' : editing ? 'Guardar cambios' : 'Crear'}
+            {saving ? t('common.loading') : editing ? t('common.save') : t('common.create')}
           </Button>
         </div>
       </form>

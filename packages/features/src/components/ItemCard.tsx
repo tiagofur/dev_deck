@@ -32,6 +32,7 @@ import {
   useShareToCircle,
 } from '@devdeck/api-client'
 import { TagChip, hashIndex, showToast } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 
 interface TypeStyle {
   hue: string
@@ -63,6 +64,7 @@ interface Props {
 }
 
 export function ItemCard({ item, onClick }: Props) {
+  const { t } = useTranslation()
   const updateItem = useUpdateItem()
   const aiEnrich = useAIEnrichItem()
   const reviewAITags = useReviewItemAITags()
@@ -76,10 +78,10 @@ export function ItemCard({ item, onClick }: Props) {
     e.stopPropagation()
     try {
       await shareToCircle.mutateAsync({ circleId, itemId: item.id })
-      showToast(`¡Item compartido en "${circleName}"! 🎉`)
+      showToast(t('card.shared_success', { name: circleName }))
       setShareMenuOpen(false)
     } catch (err) {
-      showToast((err as Error).message || 'No se pudo compartir el item', 'error')
+      showToast((err as Error).message || t('card.shared_error'), 'error')
     }
   }
 
@@ -125,9 +127,9 @@ export function ItemCard({ item, onClick }: Props) {
   const visibleTags = (hasManualTags ? item.tags : item.ai_tags)
     .filter((tag) => tag !== 'team-review')
   const statusLabel = item.enrichment_status === EnrichmentStatus.Queued
-    ? 'Analizando…'
+    ? t('card.analyzing')
     : item.enrichment_status === EnrichmentStatus.Error
-      ? 'Análisis pendiente'
+      ? t('card.analysis_pending')
       : null
 
   return (
@@ -152,8 +154,8 @@ export function ItemCard({ item, onClick }: Props) {
               e.stopPropagation()
               setShareMenuOpen(!shareMenuOpen)
             }}
-            title="Compartir en Círculo"
-            aria-label="Compartir en Círculo"
+            title={t('card.share_tooltip')}
+            aria-label={t('card.share_tooltip')}
           >
             <Share2
               size={14}
@@ -165,7 +167,7 @@ export function ItemCard({ item, onClick }: Props) {
           <button
             type="button"
             onClick={toggleFavorite}
-            aria-label={item.is_favorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+            aria-label={item.is_favorite ? t('card.favorite_remove') : t('card.favorite_add')}
           >
             <Star
               size={14}
@@ -181,7 +183,7 @@ export function ItemCard({ item, onClick }: Props) {
             >
               <div className="flex items-center justify-between border-b-2 border-ink pb-1.5 mb-1.5">
                 <span className="font-display font-black uppercase text-[9px] tracking-wider">
-                  Compartir en:
+                  {t('card.share_in')}
                 </span>
                 <button
                   onClick={() => setShareMenuOpen(false)}
@@ -193,7 +195,7 @@ export function ItemCard({ item, onClick }: Props) {
 
               {circles.length === 0 ? (
                 <div className="py-1 text-ink-soft text-center text-[10px]">
-                  No estás en ningún círculo.
+                  {t('card.no_circles')}
                 </div>
               ) : (
                 <div className="max-h-32 overflow-y-auto space-y-1">
@@ -217,7 +219,7 @@ export function ItemCard({ item, onClick }: Props) {
 
       <div className="p-4">
         <h3 className="font-display font-bold text-lg leading-tight line-clamp-2 mb-1">
-          {item.title || '(sin título)'}
+          {item.title || `(${t('common.untitled')})`}
         </h3>
 
         {heroText && (
@@ -246,7 +248,7 @@ export function ItemCard({ item, onClick }: Props) {
                        bg-accent-yellow hover:bg-accent-yellow-dark flex items-center gap-1.5 transition-colors"
           >
             <RefreshCw size={10} strokeWidth={3} className={aiEnrich.isPending ? 'animate-spin' : ''} />
-            Reintentar análisis
+            {t('card.retry_analysis')}
           </button>
         )}
 
@@ -280,19 +282,19 @@ export function ItemCard({ item, onClick }: Props) {
             {showAIReview && (
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-mono uppercase font-bold text-ink-soft flex items-center gap-1.5">
-                  <Sparkles size={10} /> Sugerencias IA
+                  <Sparkles size={10} /> {t('card.ai_suggestions')}
                 </span>
                 <div className="flex gap-1">
                   <button
                     onClick={discardAITags}
-                    title="Descartar sugerencias"
+                    title={t('card.discard_suggestions')}
                     className="p-1 hover:bg-accent-pink border-2 border-transparent hover:border-ink transition-all"
                   >
                     <X size={12} strokeWidth={3} />
                   </button>
                   <button
                     onClick={acceptAITags}
-                    title="Aceptar todas"
+                    title={t('card.accept_all')}
                     className="p-1 hover:bg-accent-lime border-2 border-transparent hover:border-ink transition-all"
                   >
                     <Check size={12} strokeWidth={3} />

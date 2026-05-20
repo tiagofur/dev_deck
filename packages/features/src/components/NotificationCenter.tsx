@@ -9,8 +9,10 @@ import {
 } from '@devdeck/api-client'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 
 export function NotificationCenter() {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const { data: countData } = useUnreadNotificationsCount()
   const { data: notificationsRes, isLoading } = useNotifications()
@@ -68,14 +70,14 @@ export function NotificationCenter() {
           <header className="bg-bg-elevated border-b-3 border-ink p-4 flex items-center justify-between">
             <h3 className="font-display font-black uppercase text-xs tracking-widest flex items-center gap-2">
               <Sparkles size={14} className="text-accent-pink" />
-              Notificaciones
+              {t('notifications.title')}
             </h3>
             {unreadCount > 0 && (
               <button
                 onClick={() => markAllRead.mutate()}
                 className="text-[9px] font-mono uppercase font-black hover:text-accent-pink underline"
               >
-                Marcar todas como leídas
+                {t('notifications.mark_all_read')}
               </button>
             )}
           </header>
@@ -83,7 +85,7 @@ export function NotificationCenter() {
           <div className="max-h-[400px] overflow-y-auto no-scrollbar">
             {isLoading ? (
               <div className="p-8 text-center font-mono text-xs text-ink-soft animate-pulse">
-                Cargando…
+                {t('common.loading')}
               </div>
             ) : notifications.length > 0 ? (
               <div className="divide-y-2 divide-ink/5">
@@ -120,7 +122,7 @@ export function NotificationCenter() {
             ) : (
               <div className="p-12 text-center space-y-4">
                 <Check size={32} className="mx-auto text-accent-lime" strokeWidth={3} />
-                <p className="font-mono text-xs text-ink-soft uppercase font-bold tracking-tight">Todo al día</p>
+                <p className="font-mono text-xs text-ink-soft uppercase font-bold tracking-tight">{t('notifications.all_clear')}</p>
               </div>
             )}
           </div>

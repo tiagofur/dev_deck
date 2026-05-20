@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@devdeck/api-client": "workspace:*",
+    "@devdeck/i18n": "workspace:*",
     "@devdeck/realtime-client": "workspace:*",
     "@devdeck/ui": "workspace:*",
     "@dnd-kit/core": "^6.1.0",

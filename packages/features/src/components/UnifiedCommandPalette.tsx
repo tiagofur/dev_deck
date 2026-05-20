@@ -12,6 +12,7 @@ import {
   type SearchResult,
   type AskResponse,
 } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 import {
   Search,
   Plus,
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export function UnifiedCommandPalette({ open, onClose }: Props) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [query, setQuery] = React.useState('')
   const [mode, setMode] = React.useState<'command' | 'ask'>('command')
@@ -54,15 +56,15 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
   const actions = [
     {
       id: 'ask',
-      title: 'Preguntar a la IA (RAG)',
-      subtitle: 'Busca en tu vault y responde con citas',
+      title: t('palette.ask_ai_title'),
+      subtitle: t('palette.ask_ai_subtitle'),
       icon: <Brain size={16} strokeWidth={3} className="text-accent-orange" />,
       onSelect: handleAsk,
     },
     {
       id: 'capture',
-      title: 'Capturar nuevo item',
-      subtitle: 'URL, comando, nota o snippet',
+      title: t('palette.capture_title'),
+      subtitle: t('palette.capture_subtitle'),
       icon: <Plus size={16} strokeWidth={3} className="text-accent-lime" />,
       onSelect: () => {
         onClose()
@@ -72,8 +74,8 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
     },
     {
       id: 'go-items',
-      title: 'Ir a mis Items',
-      subtitle: 'Ver todo el vault polimórfico',
+      title: t('palette.go_items_title'),
+      subtitle: t('palette.go_items_subtitle'),
       icon: <Box size={16} strokeWidth={3} className="text-accent-lavender" />,
       onSelect: () => {
         onClose()
@@ -82,8 +84,8 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
     },
     {
       id: 'go-cheatsheets',
-      title: 'Ver Cheatsheets',
-      subtitle: 'Tus chuletas y guías rápidas',
+      title: t('palette.go_cheats_title'),
+      subtitle: t('palette.go_cheats_subtitle'),
       icon: <BookOpen size={16} strokeWidth={3} className="text-accent-cyan" />,
       onSelect: () => {
         onClose()
@@ -120,13 +122,13 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
           <div className="flex items-center justify-between p-4 border-b-3 border-ink">
             <h3 className="font-display font-black text-sm uppercase flex items-center gap-2">
               <Brain size={16} strokeWidth={3} className="text-accent-orange" />
-              Agente de Conocimiento
+              {t('palette.knowledge_agent')}
             </h3>
             <button 
               onClick={() => { setMode('command'); }}
               className="text-xs font-mono text-ink-soft hover:text-ink"
             >
-              [volver]
+              [{t('common.back')}]
             </button>
           </div>
           <AgentChat initialQuery={query} />

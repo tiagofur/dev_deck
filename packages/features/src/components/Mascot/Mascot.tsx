@@ -4,7 +4,7 @@ import { useStats } from '@devdeck/api-client'
 import type { MascotMood } from '@devdeck/api-client'
 import { usePreferences } from '@devdeck/api-client'
 import { MascotSVG } from './MascotSVG'
-import { pickMessage } from './messages'
+import { useTranslation } from '@devdeck/i18n'
 
 /**
  * Per-mood Framer Motion animation. Idle and sleeping loop forever;
@@ -41,6 +41,7 @@ const moodAnimations: Record<MascotMood, TargetAndTransition> = {
 }
 
 export function Mascot() {
+  const { t } = useTranslation()
   const prefs = usePreferences()
   const { data: stats } = useStats()
   const mood: MascotMood = stats?.mascot_mood ?? 'idle'
@@ -48,20 +49,27 @@ export function Mascot() {
 
   const [bubble, setBubble] = useState<string | null>(null)
 
+  function pickMessage(m: MascotMood): string {
+    const list = t(`mascot.${m}`, { returnObjects: true, lang: topLang ?? 'that' }) as string[]
+    const raw = list[Math.floor(Math.random() * list.length)]
+    return raw
+  }
+
   // Allow opting out from Settings
   if (!prefs.mascotEnabled) return null
 
   // Auto-show a bubble briefly when mood changes to a "noisy" state.
   useEffect(() => {
     if (mood === 'celebrating' || mood === 'sleeping') {
-      setBubble(pickMessage(mood, topLang))
-      const t = setTimeout(() => setBubble(null), 4000)
-      return () => clearTimeout(t)
+      setBubble(pickMessage(mood))
+      const timer = setTimeout(() => setBubble(null), 4000)
+      return () => clearTimeout(timer)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mood, topLang])
 
   function speak() {
-    setBubble(pickMessage(mood, topLang))
+    setBubble(pickMessage(mood))
     setTimeout(() => setBubble(null), 4000)
   }
 

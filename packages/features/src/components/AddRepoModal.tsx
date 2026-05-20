@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@devdeck/ui'
 import { useAddRepo } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 
 interface Props {
   open: boolean
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function AddRepoModal({ open, onClose }: Props) {
+  const { t } = useTranslation()
   const [url, setUrl] = useState('')
   const addRepo = useAddRepo()
 
@@ -54,12 +56,12 @@ export function AddRepoModal({ open, onClose }: Props) {
       >
         <header className="flex items-center justify-between mb-6">
           <h2 className="font-display font-black text-3xl uppercase">
-            Pegá el link ↓
+            {t('add_repo.title')}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t('common.close')}
             className="border-3 border-ink p-1 hover:bg-accent-pink transition-colors"
           >
             <X size={20} strokeWidth={3} />
@@ -77,7 +79,7 @@ export function AddRepoModal({ open, onClose }: Props) {
         />
 
         <p className="mt-2 text-xs font-mono text-ink-soft">
-          Tip: cualquier URL sirve. Los repos de GitHub traen stars, lenguaje y avatar automágicamente.
+          {t('add_repo.tip')}
         </p>
 
         {addRepo.error && (
@@ -88,10 +90,10 @@ export function AddRepoModal({ open, onClose }: Props) {
 
         <div className="mt-6 flex justify-end gap-3">
           <Button type="button" variant="secondary" onClick={onClose}>
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button type="submit" disabled={addRepo.isPending || !url.trim()}>
-            {addRepo.isPending ? 'Guardando…' : 'Guardar'}
+            {addRepo.isPending ? t('common.loading') : t('common.save')}
           </Button>
         </div>
       </form>

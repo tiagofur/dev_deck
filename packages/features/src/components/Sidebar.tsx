@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import { useMemo, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import type { Item } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 
 interface Props {
   items: Item[]
@@ -18,6 +19,7 @@ export function Sidebar({
   onSelectTag,
   onSelectLang,
 }: Props) {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
 
   const { tags, langs } = useMemo(() => {
@@ -62,7 +64,7 @@ export function Sidebar({
       type="button"
       onClick={() => setIsOpen(!isOpen)}
       className="fixed top-4 left-4 z-50 p-2 bg-bg-card border-3 border-ink shadow-hard lg:hidden"
-      aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
+      aria-label={isOpen ? t('nav.close_menu') : t('nav.open_menu')}
     >
       {isOpen ? <X size={20} strokeWidth={3} /> : <Menu size={20} strokeWidth={3} />}
     </button>
@@ -70,7 +72,7 @@ export function Sidebar({
 
   const sidebarContent = (
     <>
-      <Section title="Tags">
+      <Section title={t('nav.tags')}>
         {tags.length === 0 ? (
           <Empty />
         ) : (
@@ -86,7 +88,7 @@ export function Sidebar({
         )}
       </Section>
 
-      <Section title="Languages">
+      <Section title={t('nav.languages')}>
         {langs.length === 0 ? (
           <Empty />
         ) : (
@@ -185,5 +187,6 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function Empty() {
-  return <p className="text-sm font-mono text-ink-soft italic">— vacío —</p>
+  const { t } = useTranslation()
+  return <p className="text-sm font-mono text-ink-soft italic">— {t('common.empty')} —</p>
 }

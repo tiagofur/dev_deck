@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, Sparkles, Loader2, Play, Terminal, Shield, Check, X } from 'lucide-react'
 import { Button, showToast } from '@devdeck/ui'
 import { getAccessToken, getConfig } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 
 interface Message {
   role: 'user' | 'assistant' | 'system' | 'tool'
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export function AgentChat({ initialQuery }: Props) {
+  const { t } = useTranslation()
   const [messages, setMessages] = useState<Message[]>(
     initialQuery ? [{ role: 'user', content: initialQuery }] : []
   )
@@ -106,7 +108,7 @@ export function AgentChat({ initialQuery }: Props) {
 
   async function handleExecuteTool(tc: ToolCall) {
     if (!isDesktop) {
-        showToast('La ejecución de comandos solo está disponible en la app de escritorio.', 'error')
+        showToast(t('agent.desktop_only_execution'), 'error')
         return
     }
 
@@ -149,7 +151,7 @@ export function AgentChat({ initialQuery }: Props) {
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-center opacity-40 grayscale space-y-3">
              <Bot size={48} strokeWidth={1} />
-             <p className="font-display font-black uppercase text-xs tracking-widest">¿En qué puedo ayudarte hoy?</p>
+             <p className="font-display font-black uppercase text-xs tracking-widest">{t('agent.welcome')}</p>
           </div>
         )}
         
@@ -167,7 +169,7 @@ export function AgentChat({ initialQuery }: Props) {
                 <div className={`max-w-[80%] p-3 border-2 border-ink shadow-hard-sm text-sm font-mono leading-relaxed
                 ${m.role === 'user' ? 'bg-white' : 'bg-bg-card'}
                 `}>
-                {m.content || (m.tool_calls ? 'Estoy procesando una acción…' : '')}
+                {m.content || (m.tool_calls ? t('agent.processing') : '')}
                 </div>
             </div>
 
@@ -175,7 +177,7 @@ export function AgentChat({ initialQuery }: Props) {
                 <div key={tc.id} className="ml-11 mr-4 bg-bg-elevated border-3 border-ink p-4 shadow-hard animate-in fade-in slide-in-from-left-2 duration-300">
                     <div className="flex items-center gap-2 mb-3">
                         <Terminal size={14} className="text-accent-pink" />
-                        <span className="font-display font-black uppercase text-[10px] tracking-widest">Acción requerida: {tc.function.name}</span>
+                        <span className="font-display font-black uppercase text-[10px] tracking-widest">{t('agent.action_required', { name: tc.function.name })}</span>
                     </div>
                     
                     <code className="block bg-ink text-bg-primary p-3 text-xs font-mono mb-4 border-2 border-ink shadow-inner overflow-x-auto whitespace-pre">
@@ -189,20 +191,20 @@ export function AgentChat({ initialQuery }: Props) {
                             onClick={() => handleExecuteTool(tc)}
                             disabled={!!executingToolId || messages.some(msg => msg.role === 'tool' && msg.tool_call_id === tc.id)}
                         >
-                            {executingToolId === tc.id ? <Loader2 className="animate-spin" size={14} /> : <><Play size={14} strokeWidth={3} /> Ejecutar</>}
+                            {executingToolId === tc.id ? <Loader2 className="animate-spin" size={14} /> : <><Play size={14} strokeWidth={3} /> {t('agent.run')}</>}
                         </Button>
                         <Button 
                             size="sm" 
                             variant="secondary"
                             disabled={!!executingToolId}
-                            onClick={() => showToast('Acción cancelada')}
+                            onClick={() => showToast(t('agent.action_cancelled'))}
                         >
-                            <X size={14} strokeWidth={3} /> Ignorar
+                            <X size={14} strokeWidth={3} /> {t('agent.ignore')}
                         </Button>
                     </div>
                     
                     <div className="mt-3 flex items-center gap-2 text-[8px] font-mono text-ink-soft uppercase font-bold opacity-60">
-                        <Shield size={10} /> Solo ejecución local • Requiere aprobación
+                        <Shield size={10} /> {t('agent.local_execution_only')}
                     </div>
                 </div>
             ))}
@@ -215,7 +217,7 @@ export function AgentChat({ initialQuery }: Props) {
                 <Loader2 size={16} className="animate-spin" />
              </div>
              <div className="text-[10px] font-mono font-black uppercase tracking-widest text-ink-soft">
-                El agente está pensando…
+                {t('agent.thinking')}
              </div>
           </div>
         )}
@@ -228,7 +230,7 @@ export function AgentChat({ initialQuery }: Props) {
         <input 
           value={input}
           onChange={e => setInput(e.target.value)}
-          placeholder="Escribí una orden o pregunta…"
+          placeholder={t('agent.placeholder')}
           className="flex-1 border-3 border-ink p-3 font-mono text-xs focus:outline-none focus:bg-accent-yellow/5"
           disabled={loading}
         />
