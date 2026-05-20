@@ -27,6 +27,7 @@ COPY packages/api-client/package.json ./packages/api-client/
 COPY packages/features/package.json ./packages/features/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/realtime-client/package.json ./packages/realtime-client/
+COPY packages/i18n/package.json ./packages/i18n/
 COPY apps/web/package.json ./apps/web/
 COPY apps/desktop/package.json ./apps/desktop/
 
