@@ -36,11 +36,18 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     console.log('Page Content Length:', content.length)
     if (content.includes('Loading')) {
       console.log('App is still loading...')
+      const rootHtml = await page.innerHTML('#root')
+      console.log('Root HTML:', rootHtml)
     }
     
     await expect(page).toHaveTitle(/DevDeck/i, { timeout: 15_000 })
     // DevDeck title heading on ItemsPage is visible.
-    await expect(page.getByLabel('DevDeck')).toBeVisible({ timeout: 20_000 })
+    const logo = page.getByLabel('DevDeck')
+    if (!(await logo.isVisible())) {
+       const rootHtml = await page.innerHTML('#root')
+       console.log('LOGO NOT VISIBLE. Root HTML:', rootHtml)
+    }
+    await expect(logo).toBeVisible({ timeout: 20_000 })
   })
 
   test('2. capture item: opens modal, submits, sees the new card', async ({ page }) => {
