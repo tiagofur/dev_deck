@@ -49,3 +49,13 @@ DevDeck is a **high-signal, low-friction** vault for dev knowledge.
 DevDeck aims to become the **standard repository for developer workflows**. Not just a place to store links, but a place to store *how you work*.
 
 *"DevDeck is to your knowledge what Git is to your code."*
+
+---
+
+## 6. Next Step: Developer Workbench
+
+DevDeck should evolve from passive storage into contextual action, without becoming a generic launcher or a clone of existing tools. The product boundary is:
+
+> Save useful developer knowledge, retrieve it by intent, and turn it into reusable actions.
+
+See [DEV_WORKBENCH.md](DEV_WORKBENCH.md) for the proposed roadmap.

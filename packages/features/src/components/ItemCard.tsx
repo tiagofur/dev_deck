@@ -32,7 +32,10 @@ import {
   useShareToCircle,
 } from '@devdeck/api-client'
 import { TagChip, hashIndex, showToast } from '@devdeck/ui'
+<<<<<<< HEAD
 import { useTranslation } from '@devdeck/i18n'
+=======
+>>>>>>> main
 
 interface TypeStyle {
   hue: string
@@ -78,10 +81,17 @@ export function ItemCard({ item, onClick }: Props) {
     e.stopPropagation()
     try {
       await shareToCircle.mutateAsync({ circleId, itemId: item.id })
+<<<<<<< HEAD
       showToast(t('card.shared_success', { name: circleName }))
       setShareMenuOpen(false)
     } catch (err) {
       showToast((err as Error).message || t('card.shared_error'), 'error')
+=======
+      showToast(`¡Item compartido en "${circleName}"! 🎉`)
+      setShareMenuOpen(false)
+    } catch (err) {
+      showToast((err as Error).message || 'No se pudo compartir el item', 'error')
+>>>>>>> main
     }
   }
 
@@ -154,8 +164,13 @@ export function ItemCard({ item, onClick }: Props) {
               e.stopPropagation()
               setShareMenuOpen(!shareMenuOpen)
             }}
+<<<<<<< HEAD
             title={t('card.share_tooltip')}
             aria-label={t('card.share_tooltip')}
+=======
+            title="Compartir en Círculo"
+            aria-label="Compartir en Círculo"
+>>>>>>> main
           >
             <Share2
               size={14}
@@ -167,7 +182,11 @@ export function ItemCard({ item, onClick }: Props) {
           <button
             type="button"
             onClick={toggleFavorite}
+<<<<<<< HEAD
             aria-label={item.is_favorite ? t('card.favorite_remove') : t('card.favorite_add')}
+=======
+            aria-label={item.is_favorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+>>>>>>> main
           >
             <Star
               size={14}
@@ -183,7 +202,11 @@ export function ItemCard({ item, onClick }: Props) {
             >
               <div className="flex items-center justify-between border-b-2 border-ink pb-1.5 mb-1.5">
                 <span className="font-display font-black uppercase text-[9px] tracking-wider">
+<<<<<<< HEAD
                   {t('card.share_in')}
+=======
+                  Compartir en:
+>>>>>>> main
                 </span>
                 <button
                   onClick={() => setShareMenuOpen(false)}
@@ -195,7 +218,11 @@ export function ItemCard({ item, onClick }: Props) {
 
               {circles.length === 0 ? (
                 <div className="py-1 text-ink-soft text-center text-[10px]">
+<<<<<<< HEAD
                   {t('card.no_circles')}
+=======
+                  No estás en ningún círculo.
+>>>>>>> main
                 </div>
               ) : (
                 <div className="max-h-32 overflow-y-auto space-y-1">

@@ -10,6 +10,7 @@
 |---------|-------------|
 | [PRD.md](PRD.md) | **Product Requirements Document.** Visión, tipos de items, funcionalidades por ola (1–7), user stories, métricas, constraints, decisiones y riesgos. Punto de entrada principal para entender el producto. |
 | [VISION.md](VISION.md) | **Visión y posicionamiento.** Qué es DevDeck (y qué no es), diferenciadores genuinos, taglines por audiencia, roadmap de posicionamiento y preguntas frecuentes de posicionamiento. |
+| [DEV_WORKBENCH.md](DEV_WORKBENCH.md) · [DEV_WORKBENCH.es.md](DEV_WORKBENCH.es.md) | **Developer Workbench.** Evolución de memoria a acción contextual: utilities locales, paleta, requests reutilizables, límites de producto y roadmap recomendado. |
 | [COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md) | **Análisis competitivo.** Comparación detallada con GitHub Stars, Raindrop, Pocket, Notion, Obsidian, Raycast y Pieces.app. Incluye tablas de pros/contras y posicionamiento relativo. |
 
 ---
@@ -28,7 +29,6 @@
 | Archivo | Descripción |
 |---------|-------------|
 | [ARCHITECTURE.es.md](ARCHITECTURE.es.md) | **Arquitectura del sistema.** Diagrama de alto nivel, stack técnico (Go + Chi + Postgres + pgvector, monorepo pnpm workspaces con Electron + React desktop y React web que comparten `@devdeck/ui` / `@devdeck/api-client` / `@devdeck/features`), decisiones de arquitectura y schema de la base de datos. |
-| [VERSIONING.es.md](VERSIONING.es.md) | **Versionado y release.** Sistema de versionado SemVer, estrategia de release, Conventional Commits, changelog (Keep a Changelog), scripts de release, GitHub Actions para auto-release. |
 | [VERSIONING.es.md](VERSIONING.es.md) | **Versionado y release.** Sistema de versionado SemVer, estrategia de release, Conventional Commits, changelog (Keep a Changelog), scripts de release, GitHub Actions para auto-release. |
 | [adr/0001-items-polymorphism.es.md](adr/0001-items-polymorphism.es.md) | **ADR 0001.** Modelo polimórfico de `items` (single-table + JSONB + generated columns). |
 | [adr/0002-sync-strategy.es.md](adr/0002-sync-strategy.es.md) | **ADR 0002.** Estrategia de sync offline-first. |
@@ -55,8 +55,9 @@ Si llegás sin contexto, el orden recomendado es:
 1. **[README.md](../README.md)** — qué es DevDeck en 2 minutos
 2. **[VISION.md](VISION.md)** — por qué existe y para quién
 3. **[PRD.md](PRD.md)** — qué hace, cómo crece, qué se decidió
-4. **[ARCHITECTURE.md](ARCHITECTURE.md)** — cómo está construido
-5. **[ROADMAP.md](../ROADMAP.md)** — qué está hecho y qué viene
+4. **[DEV_WORKBENCH.md](DEV_WORKBENCH.md)** — hacia dónde evoluciona memoria + acción
+5. **[ARCHITECTURE.md](ARCHITECTURE.md)** — cómo está construido
+6. **[ROADMAP.md](../ROADMAP.md)** — qué está hecho y qué viene
 
 Para contribuir o extender el producto:
 - Agregá items al PRD antes de implementar
