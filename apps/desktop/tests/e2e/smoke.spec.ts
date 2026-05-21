@@ -11,15 +11,19 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     await page.goto('/')
   })
 
-  test('0. network check: can reach backend authenticated', async ({ page }) => {
-    const apiUrl = 'http://localhost:8080/api/auth/me'
+  test('0. network check: can reach backend authenticated via proxy', async ({ page }) => {
+    const apiUrl = '/api/auth/me'
     const apiToken = 'test-api-token'
     const response = await page.evaluate(async ({ url, token }) => {
       try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 5000)
         const res = await fetch(url, {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'Authorization': `Bearer ${token}` },
+          signal: controller.signal
         })
         const body = await res.json()
+        clearTimeout(timeoutId)
         return { status: res.status, body }
       } catch (e: any) {
         return { error: e.message }

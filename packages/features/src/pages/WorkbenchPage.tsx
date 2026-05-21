@@ -27,6 +27,7 @@ import {
   formatJson,
   generateUuid,
   hashText,
+  parseCurlCommand,
   parseHeaders,
   requestConfigToCurl,
   serializeRequestConfig,
@@ -449,6 +450,7 @@ function ApiTool() {
   const [url, setUrl] = useState('')
   const [headers, setHeaders] = useState('Accept: application/json')
   const [body, setBody] = useState('')
+  const [curlImport, setCurlImport] = useState('')
   const [requestHistory, setRequestHistory] = useState<SavedApiRequest[]>(() => readApiRequestHistory())
   const [isSending, setIsSending] = useState(false)
   const [result, setResult] = useState<{
@@ -564,6 +566,20 @@ function ApiTool() {
     showToast('Request loaded', 'success')
   }
 
+  function importCurlCommand() {
+    try {
+      const parsed = parseCurlCommand(curlImport)
+      setMethod(parsed.method)
+      setUrl(parsed.url)
+      setHeaders(parsed.headers || 'Accept: application/json')
+      setBody(parsed.body)
+      setError('')
+      showToast('cURL imported', 'success')
+    } catch (nextError) {
+      setError(nextError instanceof Error ? nextError.message : 'Could not import cURL.')
+    }
+  }
+
   return (
     <ToolFrame title="Quick API tester">
       <form onSubmit={sendRequest} className="grid gap-5">
@@ -601,6 +617,19 @@ function ApiTool() {
         {method !== 'GET' && method !== 'HEAD' && (
           <TextArea label="Body" value={body} onChange={setBody} placeholder='{"hello":"devdeck"}' />
         )}
+        <div className="grid gap-3 border-3 border-ink bg-bg-elevated p-4">
+          <TextArea
+            label="Import cURL"
+            value={curlImport}
+            onChange={setCurlImport}
+            placeholder="curl -X POST 'https://api.example.com/widgets' -H 'Content-Type: application/json' --data '{...}'"
+          />
+          <div>
+            <Button type="button" variant="secondary" onClick={importCurlCommand} disabled={!curlImport.trim()}>
+              Import cURL
+            </Button>
+          </div>
+        </div>
         {error && (
           <p className="border-2 border-ink bg-accent-pink px-3 py-2 font-mono text-sm">
             {error}

@@ -81,6 +81,7 @@ Status:
 - Lightweight API tester. **Status:** first Workbench version implemented.
 - Save request as an item. **Status:** implemented through capture.
 - Generate `curl` from a request. **Status:** implemented in Workbench.
+- Import a request from `curl`. **Status:** implemented in Workbench.
 - Local recent request history. **Status:** implemented in Workbench.
 - Associate requests with projects and runbooks.
 - Execute documented commands with human confirmation.
@@ -91,6 +92,7 @@ Implementation notes:
 - Desktop uses a local IPC sender (`electronAPI.apiTester.send`) from the main process, so browser CORS does not apply there.
 - The Desktop sender only allows `http`/`https`, accepts explicit headers/body, and returns status, headers, duration, and text body.
 - Every request produces reusable JSON config and a copyable/savable `curl` command for terminal, CI, issues, or runbooks.
+- Basic `curl` commands can be imported back into method, URL, headers, and body fields.
 - Sent or saved requests are kept in a small local recent-history list so they can be reloaded without rebuilding context.
 
 ### Phase 4 — Project-Aware DevDeck

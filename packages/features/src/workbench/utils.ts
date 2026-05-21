@@ -188,3 +188,117 @@ export function requestConfigToCurl(input: {
 function shellQuote(value: string): string {
   return `'${value.replace(/'/g, `'\\''`)}'`
 }
+
+export interface ParsedCurlRequest {
+  method: string
+  url: string
+  headers: string
+  body: string
+}
+
+export function parseCurlCommand(input: string): ParsedCurlRequest {
+  const tokens = tokenizeShell(input.replace(/\\\r?\n/g, ' '))
+  if (tokens[0] !== 'curl') throw new Error('Command must start with curl.')
+
+  let method = 'GET'
+  let url = ''
+  const headerLines: string[] = []
+  const bodyParts: string[] = []
+
+  for (let index = 1; index < tokens.length; index += 1) {
+    const token = tokens[index]
+    const next = tokens[index + 1]
+
+    if (token === '-X' || token === '--request') {
+      if (!next) throw new Error(`${token} requires a method.`)
+      method = next.toUpperCase()
+      index += 1
+      continue
+    }
+
+    if (token.startsWith('-X') && token.length > 2) {
+      method = token.slice(2).toUpperCase()
+      continue
+    }
+
+    if (token === '-H' || token === '--header') {
+      if (!next) throw new Error(`${token} requires a header.`)
+      headerLines.push(next)
+      index += 1
+      continue
+    }
+
+    if (token.startsWith('-H') && token.length > 2) {
+      headerLines.push(token.slice(2))
+      continue
+    }
+
+    if (token === '-d' || token === '--data' || token === '--data-raw' || token === '--data-binary') {
+      if (!next) throw new Error(`${token} requires a body.`)
+      bodyParts.push(next)
+      if (method === 'GET') method = 'POST'
+      index += 1
+      continue
+    }
+
+    if (token.startsWith('http://') || token.startsWith('https://')) {
+      url = token
+    }
+  }
+
+  if (!url) throw new Error('Could not find an http(s) URL in the curl command.')
+
+  return {
+    method,
+    url,
+    headers: headerLines.join('\n'),
+    body: bodyParts.join('&'),
+  }
+}
+
+function tokenizeShell(input: string): string[] {
+  const tokens: string[] = []
+  let token = ''
+  let quote: '"' | "'" | null = null
+
+  for (let index = 0; index < input.length; index += 1) {
+    const char = input[index]
+
+    if (quote) {
+      if (char === quote) {
+        quote = null
+      } else if (char === '\\' && quote === '"' && index + 1 < input.length) {
+        index += 1
+        token += input[index]
+      } else {
+        token += char
+      }
+      continue
+    }
+
+    if (char === '"' || char === "'") {
+      quote = char
+      continue
+    }
+
+    if (/\s/.test(char)) {
+      if (token) {
+        tokens.push(token)
+        token = ''
+      }
+      continue
+    }
+
+    if (char === '\\' && index + 1 < input.length) {
+      index += 1
+      token += input[index]
+      continue
+    }
+
+    token += char
+  }
+
+  if (quote) throw new Error('Unclosed quote in curl command.')
+  if (token) tokens.push(token)
+  return tokens
+}

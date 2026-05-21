@@ -4,6 +4,7 @@ import {
   decodeJwt,
   formatJson,
   parseHeaders,
+  parseCurlCommand,
   requestConfigToCurl,
   serializeRequestConfig,
   testRegex,
@@ -78,6 +79,25 @@ describe('workbench utils', () => {
         '--data \'{"ok":true}\'',
       ].join(' \\\n  ')
     )
+  })
+
+  it('parses reusable curl commands into request configs', () => {
+    expect(
+      parseCurlCommand(
+        [
+          'curl -X PATCH',
+          "'https://example.test/widgets/1'",
+          "-H 'Content-Type: application/json'",
+          "-H 'X-Test: yes'",
+          '--data \'{"name":"DevDeck"}\'',
+        ].join(' \\\n  ')
+      )
+    ).toEqual({
+      method: 'PATCH',
+      url: 'https://example.test/widgets/1',
+      headers: 'Content-Type: application/json\nX-Test: yes',
+      body: '{"name":"DevDeck"}',
+    })
   })
 
   it('tests regular expressions and captures groups', () => {

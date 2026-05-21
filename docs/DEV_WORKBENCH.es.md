@@ -139,6 +139,7 @@ Estado de implementación:
 - En Desktop usa un sender IPC local (`electronAPI.apiTester.send`) desde el proceso principal para evitar la limitación de CORS del navegador.
 - El sender Desktop solo permite URLs `http`/`https`, acepta headers/body explícitos y devuelve status, headers, duración y body textual.
 - Cada request genera config JSON reutilizable y comando `curl` copiable/guardable para terminal, CI, issues o runbooks.
+- Se puede importar un comando `curl` básico para rellenar método, URL, headers y body.
 - Los requests enviados o guardados quedan en un historial local reciente para poder recargarlos sin reconstruir contexto.
 - La request se puede guardar como item reutilizable mediante el flujo de captura.
 
@@ -267,6 +268,7 @@ Objetivo: conectar ejecución ligera con conocimiento.
 - Quick API Tester. **Estado:** primera versión implementada en Workbench.
 - Guardar request como item. **Estado:** implementado usando capture.
 - Generar `curl` desde request. **Estado:** implementado en Workbench.
+- Importar request desde `curl`. **Estado:** implementado en Workbench.
 - Historial local de requests recientes. **Estado:** implementado en Workbench.
 - Asociar requests a proyectos/runbooks.
 - Ejecutar comandos documentados con confirmación humana.
