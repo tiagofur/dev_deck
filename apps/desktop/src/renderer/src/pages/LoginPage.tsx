@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { Apple, Chrome, Github, Loader2, ArrowRight } from 'lucide-react'
 import { fetchAuthProviders, loginLocal, loginStep1, setTokens, type AuthProviderInfo } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 
 export function LoginPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [providers, setProviders] = useState<AuthProviderInfo[]>([])
@@ -34,9 +36,9 @@ export function LoginPage() {
         setLoadError(null)
       })
       .catch((err: unknown) => {
-        setLoadError(err instanceof Error ? err.message : 'No se pudieron cargar los proveedores.')
+        setLoadError(err instanceof Error ? err.message : t('auth.load_providers_error'))
       })
-  }, [authMode, envToken, navigate])
+  }, [authMode, envToken, navigate, t])
 
   async function handleNextStep(e: React.FormEvent) {
     e.preventDefault()
@@ -51,7 +53,7 @@ export function LoginPage() {
       setLoginType(res.type)
       setStep(2)
     } catch (err: any) {
-      setLoginError(err.message || 'Error al validar email')
+      setLoginError(err.message || t('auth.validate_email_error'))
     } finally {
       setLoading(false)
     }
@@ -65,7 +67,7 @@ export function LoginPage() {
       await loginLocal(email, password)
       navigate('/', { replace: true })
     } catch (err: any) {
-      setLoginError(err.message || 'Error al iniciar sesión')
+      setLoginError(err.message || t('auth.login_error'))
     } finally {
       setLoading(false)
     }
@@ -95,18 +97,18 @@ export function LoginPage() {
           <span className="bg-accent-pink px-2 border-3 border-ink">Deck</span>
         </h1>
         <p className="font-mono text-sm text-ink-soft mb-8">
-          Tu memoria externa para desarrollo.
+          {t('auth.login_subtitle')}
         </p>
 
         {isVerified && (
           <div className="border-3 border-ink bg-accent-lime px-4 py-2 font-mono text-xs mb-6 shadow-hard">
-            Email verificado correctamente. ¡Ya podés entrar!
+            {t('auth.verify_success')}
           </div>
         )}
 
         {isResetSuccess && (
           <div className="border-3 border-ink bg-accent-lime px-4 py-2 font-mono text-xs mb-6 shadow-hard">
-            Contraseña actualizada. ¡Ya podés entrar con la nueva!
+            {t('auth.reset_success')}
           </div>
         )}
 
@@ -120,7 +122,7 @@ export function LoginPage() {
           {step === 1 ? (
             <form onSubmit={handleNextStep} className="space-y-4">
               <div>
-                <label className="block font-display font-bold uppercase text-xs mb-1 ml-1">Email</label>
+                <label className="block font-display font-bold uppercase text-xs mb-1 ml-1">{t('auth.email_label')}</label>
                 <input
                   type="email"
                   value={email}
@@ -128,7 +130,7 @@ export function LoginPage() {
                   required
                   autoFocus
                   className="w-full border-3 border-ink bg-bg-primary px-4 py-3 font-mono text-sm focus:outline-none focus:bg-white shadow-hard-sm"
-                  placeholder="tu@email.com"
+                  placeholder={t('auth.email_placeholder')}
                 />
               </div>
               <button
@@ -139,16 +141,16 @@ export function LoginPage() {
                            active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
                            transition-all duration-150 flex items-center justify-center gap-2"
               >
-                {loading ? <Loader2 className="animate-spin" /> : <><ArrowRight size={20} strokeWidth={3} /> Continuar</>}
+                {loading ? <Loader2 className="animate-spin" /> : <><ArrowRight size={20} strokeWidth={3} /> {t('auth.continue')}</>}
               </button>
             </form>
           ) : (
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <p className="font-mono text-[10px] text-ink-soft mb-2 bg-bg-primary p-2 border-2 border-ink inline-block">
-                  {email} <button type="button" onClick={() => setStep(1)} className="ml-2 underline hover:text-accent-pink">cambiar</button>
+                  {email} <button type="button" onClick={() => setStep(1)} className="ml-2 underline hover:text-accent-pink">{t('auth.change_email')}</button>
                 </p>
-                <label className="block font-display font-bold uppercase text-xs mb-1 ml-1">Contraseña</label>
+                <label className="block font-display font-bold uppercase text-xs mb-1 ml-1">{t('auth.password_label')}</label>
                 <input
                   type="password"
                   value={password}
@@ -156,7 +158,7 @@ export function LoginPage() {
                   required
                   autoFocus
                   className="w-full border-3 border-ink bg-bg-primary px-4 py-3 font-mono text-sm focus:outline-none focus:bg-white shadow-hard-sm"
-                  placeholder="••••••••"
+                  placeholder={t('auth.password_placeholder')}
                 />
               </div>
               <button
@@ -167,24 +169,24 @@ export function LoginPage() {
                            active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
                            transition-all duration-150 flex items-center justify-center gap-2"
               >
-                {loading ? <Loader2 className="animate-spin" /> : 'Entrar'}
+                {loading ? <Loader2 className="animate-spin" /> : t('auth.login_button')}
               </button>
             </form>
           )}
           
           <div className="flex justify-between font-mono text-[10px] uppercase font-bold px-1">
-            <Link to="/forgot-password" title="recuperar" className="hover:underline">¿Olvidaste tu contraseña?</Link>
-            <Link to="/register" title="registro" className="text-accent-pink hover:underline">Crear cuenta</Link>
+            <Link to="/forgot-password" title={t('auth.forgot_password')} className="hover:underline">{t('auth.forgot_password')}</Link>
+            <Link to="/register" title={t('auth.create_account')} className="text-accent-pink hover:underline">{t('auth.create_account')}</Link>
           </div>
         </div>
 
         <div className="relative mb-8">
           <div className="absolute inset-0 flex items-center"><span className="w-full border-t-2 border-ink-soft"></span></div>
-          <div className="relative flex justify-center text-xs uppercase"><span className="bg-bg-card px-3 font-mono font-bold text-ink-soft">o continuar con</span></div>
+          <div className="relative flex justify-center text-xs uppercase"><span className="bg-bg-card px-3 font-mono font-bold text-ink-soft">{t('auth.or_continue_with')}</span></div>
         </div>
 
         {authMode === 'token' ? (
-          <div className="font-mono text-sm text-ink-soft">Cargando…</div>
+          <div className="font-mono text-sm text-ink-soft">{t('common.loading')}</div>
         ) : loadError ? (
           <div className="border-3 border-ink bg-accent-yellow px-4 py-3 font-mono text-sm">
             {loadError}
@@ -200,7 +202,7 @@ export function LoginPage() {
                            hover:-translate-x-1 hover:-translate-y-1 hover:shadow-hard-lg
                            active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
                            transition-all duration-150 flex items-center justify-center"
-                title={`Entrar con ${provider.label}`}
+                title={t('auth.login_with_provider', { provider: provider.label })}
               >
                 {providerIcon(provider.provider)}
               </button>

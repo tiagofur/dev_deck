@@ -64,8 +64,9 @@ export function setPreferences(patch: Partial<Preferences>): void {
 }
 
 export function subscribePreferences(listener: Listener): () => void {
+  const initial = getPreferences()
   listeners = [...listeners, listener]
-  listener(getPreferences())
+  listener(initial)
   return () => {
     listeners = listeners.filter((l) => l !== listener)
   }

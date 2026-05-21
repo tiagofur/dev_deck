@@ -34,6 +34,7 @@ import {
   TeamReviewPage,
   TeamFeedPage,
   FollowingFeedPage,
+  WorkbenchPage,
   UnifiedCommandPalette,
   useGlobalShortcuts,
 } from '@devdeck/features'
@@ -242,6 +243,10 @@ function AnimatedRoutes(): ReactElement {
           <Route
             path="/settings"
             element={<AuthGuard>{withTransition(<SettingsPage />)}</AuthGuard>}
+          />
+          <Route
+            path="/workbench"
+            element={<AuthGuard>{withTransition(<WorkbenchPage />)}</AuthGuard>}
           />
           <Route
             path="/admin"

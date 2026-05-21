@@ -87,7 +87,7 @@ describe('<TeamReviewPage>', () => {
       sort: 'updated_desc',
     })
     expect(screen.getByText('ripgrep')).toBeInTheDocument()
-    expect(screen.getByText('1 items esperando revisión')).toBeInTheDocument()
+    expect(screen.getByText('1 items waiting for review')).toBeInTheDocument()
   })
 
   it('opens an item detail from the review queue', async () => {

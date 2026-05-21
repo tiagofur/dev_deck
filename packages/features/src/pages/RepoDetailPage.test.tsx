@@ -118,8 +118,8 @@ describe('<RepoDetailPage>', () => {
 
     renderPage()
 
-    expect(screen.getByText('Repo no encontrado o borrado')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /volver a items/i }))
+    expect(screen.getByText('Repo not found or deleted')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /back to items/i }))
     expect(mocks.navigate).toHaveBeenCalledWith('/items', { replace: true })
   })
 
@@ -130,7 +130,7 @@ describe('<RepoDetailPage>', () => {
     mocks.useDeleteRepo.mockReturnValue({ mutateAsync, isPending: false })
 
     renderPage()
-    await user.click(screen.getByRole('button', { name: /^borrar$/i }))
+    await user.click(screen.getByRole('button', { name: /^delete$/i }))
 
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith('repo-1'))
     expect(mocks.navigate).toHaveBeenCalledWith('/items', { replace: true })

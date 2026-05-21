@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Keyboard, X } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from '@devdeck/i18n'
 
 interface Props {
@@ -15,6 +15,7 @@ interface Shortcut {
 
 export function ShortcutsModal({ open, onClose }: Props) {
   const { t } = useTranslation()
+  const [desktopStatus, setDesktopStatus] = useState<Record<string, { accelerator: string; registered: boolean }> | null>(null)
 
   const shortcuts: Shortcut[] = [
     { keys: ['Cmd', 'K'], description: t('shortcuts.global_search') },
@@ -34,6 +35,34 @@ export function ShortcutsModal({ open, onClose }: Props) {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
+
+  useEffect(() => {
+    if (!open) return
+    const api = (window as unknown as {
+      electronAPI?: {
+        shortcuts?: {
+          getStatus: () => Promise<Record<string, { accelerator: string; registered: boolean }>>
+          onStatus: (
+            callback: (status: Record<string, { accelerator: string; registered: boolean }>) => void,
+          ) => () => void
+        }
+      }
+    }).electronAPI?.shortcuts
+    if (!api) {
+      setDesktopStatus(null)
+      return
+    }
+
+    let cancelled = false
+    api.getStatus().then((status) => {
+      if (!cancelled) setDesktopStatus(status)
+    })
+    const unsubscribe = api.onStatus((status) => setDesktopStatus(status))
+    return () => {
+      cancelled = true
+      unsubscribe()
+    }
+  }, [open])
 
   return (
     <AnimatePresence>
@@ -94,6 +123,24 @@ export function ShortcutsModal({ open, onClose }: Props) {
             <p className="mt-6 text-xs font-mono text-ink-soft text-center italic">
               {t('shortcuts.mac_hint')}
             </p>
+
+            {desktopStatus && (
+              <div className="mt-5 border-3 border-ink bg-bg-elevated p-3">
+                <p className="mb-2 font-display text-xs font-black uppercase">
+                  Desktop global shortcuts
+                </p>
+                <div className="grid gap-2">
+                  {Object.entries(desktopStatus).map(([name, status]) => (
+                    <div key={name} className="flex items-center justify-between gap-3 font-mono text-xs">
+                      <span>{status.accelerator}</span>
+                      <span className={status.registered ? 'text-accent-lime' : 'text-danger'}>
+                        {status.registered ? 'registered' : 'conflict'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}

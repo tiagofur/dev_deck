@@ -77,22 +77,6 @@ export function HomePage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [navigate])
 
-  // OS-level shortcuts via Electron main process (fire even when app is background).
-  // In web, `window.electronAPI` is undefined — the guard short-circuits.
-  useEffect(() => {
-    const api = (window as unknown as {
-      electronAPI?: {
-        onShortcut: (cb: (name: string) => void) => () => void
-      }
-    }).electronAPI
-    if (!api) return
-    const unsub = api.onShortcut((name: string) => {
-      if (name === 'search') setGlobalSearchOpen(true)
-      if (name === 'add') setModalOpen(true)
-    })
-    return unsub
-  }, [])
-
   const items = data?.items ?? []
   const hasFilters = Boolean(query || tag || lang)
 

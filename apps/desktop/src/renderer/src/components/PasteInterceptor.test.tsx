@@ -54,7 +54,7 @@ describe('<PasteInterceptor>', () => {
       expect(screen.getByRole('dialog')).toBeInTheDocument()
     })
     // Title chip shows "repo" label and the owner/repo derived title.
-    expect(screen.getByText(/pegaste · repo/i)).toBeInTheDocument()
+    expect(screen.getByText(/you pasted · repo/i)).toBeInTheDocument()
     expect(screen.getByText('charmbracelet/bubbletea')).toBeInTheDocument()
   })
 
@@ -101,7 +101,7 @@ describe('<PasteInterceptor>', () => {
     })
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
 
-    await user.click(screen.getByRole('button', { name: /guardar/i }))
+    await user.click(screen.getByRole('button', { name: /save/i }))
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalled())
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit]
@@ -119,7 +119,7 @@ describe('<PasteInterceptor>', () => {
     expect(body.tags).toContain('repo')
     expect(body.tags).toContain('github')
     await waitFor(() => {
-      expect(screen.getByText(/guardado · repo/i)).toBeInTheDocument()
+      expect(screen.getByText(/saved · repo/i)).toBeInTheDocument()
     })
   })
 })

@@ -34,11 +34,20 @@ interface Props {
     type: string
     title: string
     subtitle?: string
+    extra?: string
+    actionLabel?: string
     icon: React.ReactNode
     onSelect: () => void
   }>
   isLoading?: boolean
   renderCustom?: React.ReactNode
+  placeholder?: string
+  emptyMessage?: string
+  startWritingMessage?: string
+  actionsLabel?: string
+  resultsLabel?: string
+  navigateLabel?: string
+  selectLabel?: string
 }
 
 export function CommandPalette({
@@ -50,6 +59,13 @@ export function CommandPalette({
   results = [],
   isLoading,
   renderCustom,
+  placeholder = 'Search or run a command...',
+  emptyMessage = 'No results found',
+  startWritingMessage = 'Start typing...',
+  actionsLabel = 'Actions',
+  resultsLabel = 'Results',
+  navigateLabel = 'Navigate',
+  selectLabel = 'Select',
 }: Props) {
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -92,7 +108,7 @@ export function CommandPalette({
                 <Command.Input
                   value={query}
                   onValueChange={onQueryChange}
-                  placeholder="Buscá o tirá un comando… (Cmd+K)"
+                  placeholder={placeholder}
                   className="flex-1 font-mono text-sm bg-transparent focus:outline-none"
                   autoFocus
                 />
@@ -106,14 +122,14 @@ export function CommandPalette({
 
               <Command.List className="flex-1 overflow-y-auto max-h-[50vh] p-2 scrollbar-thin">
                 <Command.Empty className="p-8 text-center font-mono text-sm text-ink-soft">
-                  {query.length > 0 ? `No hay resultados para "${query}"` : 'Empezá a escribir…'}
+                  {query.length > 0 ? `${emptyMessage} "${query}"` : startWritingMessage}
                 </Command.Empty>
 
                 {renderCustom}
 
                 {!renderCustom && (
                   <>
-                    <Command.Group heading="Acciones" className="p-2">
+                    <Command.Group heading={actionsLabel} className="p-2">
                       <div className="flex flex-col gap-1">
                         {actions.map((action) => (
                           <Item key={action.id} onSelect={action.onSelect}>
@@ -150,7 +166,7 @@ export function CommandPalette({
                     </Command.Group>
 
                     {results.length > 0 && (
-                      <Command.Group heading="Resultados" className="p-2 border-t-2 border-ink/10 mt-2">
+                      <Command.Group heading={resultsLabel} className="p-2 border-t-2 border-ink/10 mt-2">
                         <div className="flex flex-col gap-1">
                           {results.map((result) => (
                             <Item key={result.id} onSelect={result.onSelect}>
@@ -168,6 +184,16 @@ export function CommandPalette({
                                     </p>
                                   )}
                                 </div>
+                                {result.extra && (
+                                  <code className="hidden sm:block max-w-[180px] truncate bg-ink px-2 py-1 font-mono text-[10px] text-bg-primary">
+                                    {result.extra}
+                                  </code>
+                                )}
+                                {result.actionLabel && (
+                                  <span className="hidden sm:inline-flex border-2 border-ink bg-bg-elevated px-2 py-1 font-mono text-[9px] uppercase text-ink-soft">
+                                    {result.actionLabel}
+                                  </span>
+                                )}
                                 <div className="opacity-0 group-aria-selected:opacity-100 transition-opacity">
                                   <ArrowRight size={12} strokeWidth={3} />
                                 </div>
@@ -183,8 +209,8 @@ export function CommandPalette({
 
               <div className="flex items-center justify-between p-3 border-t-3 border-ink bg-bg-elevated shrink-0">
                 <div className="flex gap-4">
-                  <Kbd label="↑↓" desc="Navegar" />
-                  <Kbd label="Enter" desc="Seleccionar" />
+                  <Kbd label="↑↓" desc={navigateLabel} />
+                  <Kbd label="Enter" desc={selectLabel} />
                 </div>
                 <div className="flex items-center gap-2 text-[10px] font-mono text-ink-soft">
                   <Brain size={12} />

@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { Loader2, KeyRound } from 'lucide-react'
 import { resetPassword } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 
 export function ResetPasswordPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
@@ -16,15 +18,15 @@ export function ResetPasswordPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!token) {
-      setError('Token ausente o inválido')
+      setError(t('auth.token_invalid'))
       return
     }
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden')
+      setError(t('auth.passwords_dont_match'))
       return
     }
     if (password.length < 8) {
-      setError('La contraseña debe tener al menos 8 caracteres')
+      setError(t('auth.password_too_short'))
       return
     }
 
@@ -34,7 +36,7 @@ export function ResetPasswordPage() {
       await resetPassword(token, password)
       navigate('/login?reset=success', { replace: true })
     } catch (err: any) {
-      setError(err.message || 'Error al restablecer la contraseña')
+      setError(err.message || t('common.error'))
     } finally {
       setLoading(false)
     }
@@ -45,11 +47,11 @@ export function ResetPasswordPage() {
       <div className="min-h-screen flex items-center justify-center bg-bg-primary p-8">
         <div className="bg-bg-card border-5 border-ink shadow-hard-xl p-10 max-w-md w-full text-center">
           <div className="text-4xl mb-4">❌</div>
-          <h1 className="font-display font-black text-3xl uppercase mb-4">Link Inválido</h1>
+          <h1 className="font-display font-black text-3xl uppercase mb-4">{t('auth.token_invalid')}</h1>
           <p className="font-mono text-sm text-ink-soft mb-8">
-            Este link de recuperación no es válido o ya expiró.
+            {t('auth.token_invalid')}
           </p>
-          <Link to="/forgot-password" className="text-accent-cyan font-bold hover:underline">Solicitar uno nuevo</Link>
+          <Link to="/forgot-password" className="text-accent-cyan font-bold hover:underline">{t('auth.send_link')}</Link>
         </div>
       </div>
     )
@@ -62,10 +64,10 @@ export function ResetPasswordPage() {
           <KeyRound size={32} />
         </div>
         <h1 className="font-display font-black text-3xl uppercase tracking-tight mb-2">
-          Nueva <span className="bg-accent-pink px-2 border-3 border-ink">Pass</span>
+          {t('auth.reset_title')}
         </h1>
         <p className="font-mono text-sm text-ink-soft mb-8">
-          Elegí una contraseña segura para tu cuenta.
+          {t('auth.reset_subtitle')}
         </p>
 
         {error && (
@@ -76,25 +78,25 @@ export function ResetPasswordPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           <div>
-            <label className="block font-display font-bold uppercase text-xs mb-1 ml-1">Nueva Contraseña</label>
+            <label className="block font-display font-bold uppercase text-xs mb-1 ml-1">{t('auth.password_label')}</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               className="w-full border-3 border-ink bg-bg-primary px-4 py-3 font-mono text-sm focus:outline-none focus:bg-white shadow-hard-sm"
-              placeholder="Mínimo 8 caracteres"
+              placeholder={t('auth.password_min_length')}
             />
           </div>
           <div>
-            <label className="block font-display font-bold uppercase text-xs mb-1 ml-1">Confirmar Contraseña</label>
+            <label className="block font-display font-bold uppercase text-xs mb-1 ml-1">{t('auth.confirm_password_placeholder')}</label>
             <input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               className="w-full border-3 border-ink bg-bg-primary px-4 py-3 font-mono text-sm focus:outline-none focus:bg-white shadow-hard-sm"
-              placeholder="Repetí la contraseña"
+              placeholder={t('auth.confirm_password_placeholder')}
             />
           </div>
           <button
@@ -105,7 +107,7 @@ export function ResetPasswordPage() {
                        active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
                        transition-all duration-150 flex items-center justify-center gap-2"
           >
-            {loading ? <Loader2 className="animate-spin" /> : 'Actualizar Contraseña'}
+            {loading ? <Loader2 className="animate-spin" /> : t('auth.reset_button')}
           </button>
         </form>
       </div>

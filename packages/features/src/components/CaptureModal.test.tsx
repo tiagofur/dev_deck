@@ -92,9 +92,9 @@ describe('<CaptureModal>', () => {
     renderCaptureModal()
 
     await user.click(screen.getByRole('button', { name: /cli command/i }))
-    await user.type(screen.getByLabelText(/^nombre$/i), 'ripgrep install')
-    await user.type(screen.getByLabelText(/^comando$/i), 'brew install ripgrep')
-    await user.click(screen.getByRole('button', { name: /guardar/i }))
+    await user.type(screen.getByLabelText(/^Name$/i), 'ripgrep install')
+    await user.type(screen.getByLabelText(/^Command$/i), 'brew install ripgrep')
+    await user.click(screen.getByRole('button', { name: /save/i }))
 
     await waitFor(() => {
       expect(mocks.captureMutateAsync).toHaveBeenCalledWith(
@@ -112,7 +112,7 @@ describe('<CaptureModal>', () => {
     renderCaptureModal()
 
     await user.click(screen.getByRole('button', { name: /cli command/i }))
-    const tags = screen.getByLabelText(/^tags$/i)
+    const tags = screen.getByLabelText(/^Tags$/i)
     await user.clear(tags)
     await user.type(tags, 'cli')
     await user.click(screen.getByRole('button', { name: /^terminal$/i }))
@@ -125,12 +125,12 @@ describe('<CaptureModal>', () => {
     renderCaptureModal()
 
     await user.click(screen.getByRole('button', { name: /cli command/i }))
-    await user.type(screen.getByLabelText(/^comando$/i), 'brew install ripgrep')
-    await user.click(screen.getByRole('button', { name: /guardar/i }))
+    await user.type(screen.getByLabelText(/^Command$/i), 'brew install ripgrep')
+    await user.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(await screen.findByText(/guardado/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /abrir item/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /capturar otro/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /revisar con equipo/i })).toBeInTheDocument()
+    expect(await screen.findByText(/saved/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /open item/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /capture another/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /review with team/i })).toBeInTheDocument()
   })
 })

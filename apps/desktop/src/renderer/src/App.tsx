@@ -20,10 +20,12 @@ import {
   TeamReviewPage,
   TeamFeedPage,
   FollowingFeedPage,
+  WorkbenchPage,
   UnifiedCommandPalette,
   useGlobalShortcuts,
 } from '@devdeck/features'
 import { ConfirmHost, PageTransition, Toaster } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 import { isLoggedIn, useMe } from '@devdeck/api-client'
 import { PasteInterceptor } from './components/PasteInterceptor'
 import { LoginPage } from './pages/LoginPage'
@@ -43,6 +45,7 @@ const queryClient = new QueryClient({
 })
 
 function AuthGuard({ children }: { children: ReactElement }): ReactElement {
+  const { t } = useTranslation()
   const { data: user, isLoading, isError, error, refetch } = useMe()
   const location = useLocation()
 
@@ -53,8 +56,8 @@ function AuthGuard({ children }: { children: ReactElement }): ReactElement {
   if (isLoading) {
     return (
       <AuthStatusScreen
-        title="Cargando DevDeck"
-        message="Estamos validando tu sesión y preparando tu vault."
+        title={t('common.loading')}
+        message={t('profile.edit_loading_msg')}
       />
     )
   }
@@ -62,15 +65,15 @@ function AuthGuard({ children }: { children: ReactElement }): ReactElement {
   if (isError) {
     return (
       <AuthStatusScreen
-        title="No se pudo validar tu sesión"
-        message={(error as Error)?.message || 'El backend no respondió a tiempo.'}
+        title={t('common.auth_failed_title')}
+        message={(error as Error)?.message || t('common.auth_failed_msg')}
         action={
           <button
             type="button"
             onClick={() => refetch()}
             className="border-3 border-ink bg-accent-yellow px-4 py-2 font-display font-black uppercase shadow-hard"
           >
-            Reintentar
+            {t('common.retry')}
           </button>
         }
       />
@@ -170,6 +173,23 @@ function AnimatedRoutes() {
     }
   }, [])
 
+  useEffect(() => {
+    const api = (window as unknown as {
+      electronAPI?: {
+        onShortcut: (callback: (name: string) => void) => () => void
+      }
+    }).electronAPI
+    if (!api) return
+
+    return api.onShortcut((name) => {
+      if (name === 'search') setGlobalSearchOpen(true)
+      if (name === 'add') {
+        setInitialCaptureData(null)
+        setCaptureOpen(true)
+      }
+    })
+  }, [])
+
 
   return (
     <>
@@ -244,6 +264,12 @@ function AnimatedRoutes() {
             path="/settings"
             element={
               <AuthGuard>{withTransition(<SettingsPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/workbench"
+            element={
+              <AuthGuard>{withTransition(<WorkbenchPage />)}</AuthGuard>
             }
           />
           <Route

@@ -1,4 +1,4 @@
-import { Activity, BookOpen, Boxes, Plus, Search, Settings as SettingsIcon, Share2, Sparkles, Users } from 'lucide-react'
+import { Activity, BookOpen, Boxes, Plus, Search, Settings as SettingsIcon, Share2, Sparkles, Users, Wrench } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@devdeck/ui'
 import { usePreferences, useMe } from '@devdeck/api-client'
@@ -94,6 +94,19 @@ export function Topbar({
         <span className="flex items-center gap-2">
           <BookOpen size={16} strokeWidth={3} />
           <span className="hidden sm:inline">Cheats</span>
+        </span>
+      </Button>
+
+      <Button
+        onClick={() => navigate('/workbench')}
+        size="sm"
+        variant="secondary"
+        className="whitespace-nowrap"
+        title="Developer Workbench"
+      >
+        <span className="flex items-center gap-2">
+          <Wrench size={16} strokeWidth={3} />
+          <span className="hidden sm:inline">Workbench</span>
         </span>
       </Button>
 

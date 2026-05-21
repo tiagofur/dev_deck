@@ -592,6 +592,16 @@
       "no_readme": "No README",
       "non_github": "This repo is not from GitHub. README not available via API.",
       "not_found": "This repo has no README, or it could not be downloaded."
+    },
+    "actions": {
+      "open_in_browser": "Open in browser",
+      "copy_url": "Copy URL",
+      "copy_git_clone": "Copy git clone",
+      "share": "Share",
+      "refresh_metadata": "Refresh metadata",
+      "refreshing": "Refreshing...",
+      "archive": "Archive",
+      "unarchive": "Unarchive"
     }
   },
   "card": {
@@ -756,7 +766,14 @@
     "go_items_subtitle": "View all polymorphic vault",
     "go_cheats_title": "View Cheatsheets",
     "go_cheats_subtitle": "Your cheats and quick guides",
-    "knowledge_agent": "Knowledge Agent"
+    "knowledge_agent": "Knowledge Agent",
+    "placeholder": "Search or run a command... (Cmd+K)",
+    "empty_message": "No results found for",
+    "start_writing": "Start typing...",
+    "actions_label": "Actions",
+    "results_label": "Results",
+    "navigate_label": "Navigate",
+    "select_label": "Select"
   },
   "capture": {
     "modal_title": "Capture",
@@ -978,5 +995,61 @@
       "cloud": "Cloud / DevOps",
       "other": "Other"
     }
+  },
+  "paste": {
+    "you_pasted": "You pasted",
+    "empty": "(empty)",
+    "already_saved": "Already saved",
+    "saved": "Saved",
+    "ready_in_vault": "Ready in your vault",
+    "dismiss": "Dismiss",
+    "expand": "Expand",
+    "open": "Open",
+    "saved_as": "Saved as {{type}}",
+    "already_have_it": "You already had it ✓",
+    "save_error": "Error saving"
+  },
+  "auth": {
+    "login_title": "DevDeck",
+    "login_subtitle": "Your external memory for development.",
+    "verify_success": "Email verified successfully. You can log in now!",
+    "reset_success": "Password updated. You can log in with the new one!",
+    "email_label": "Email",
+    "email_placeholder": "you@email.com",
+    "continue": "Continue",
+    "password_label": "Password",
+    "password_placeholder": "••••••••",
+    "login_button": "Log In",
+    "forgot_password": "Forgot your password?",
+    "create_account": "Create account",
+    "or_continue_with": "or continue with",
+    "login_with_provider": "Log in with {{provider}}",
+    "change_email": "change",
+    "password_min_length": "Min 8 characters",
+    "confirm_password_placeholder": "Repeat your password",
+    "login_error": "Error logging in",
+    "validate_email_error": "Error validating email",
+    "load_providers_error": "Could not load providers.",
+    "token_invalid": "Missing or invalid token",
+    "register_title": "Create Account",
+    "register_subtitle": "Start your personal dev vault.",
+    "register_button": "Register",
+    "already_have_account": "Already have an account?",
+    "back_to_login": "Back to login",
+    "forgot_title": "Recover Password",
+    "forgot_subtitle": "Enter your email to receive a reset link.",
+    "send_link": "Send Link",
+    "reset_title": "Reset Password",
+    "reset_subtitle": "Enter your new password.",
+    "reset_button": "Reset Password",
+    "passwords_dont_match": "Passwords do not match",
+    "password_too_short": "Password must be at least 8 characters",
+    "register_error": "Error creating account",
+    "almost_ready": "Almost ready!",
+    "verification_sent": "We have sent a verification email to {{email}}. Please check your inbox to activate your account.",
+    "register_me": "Register",
+    "invite_code_label": "Invitation Code",
+    "invite_code_placeholder": "Ex: DEVDECK-XXXX-XXXX",
+    "waitlist_hint": "If you don't have one, join the waitlist on the web."
   }
 }

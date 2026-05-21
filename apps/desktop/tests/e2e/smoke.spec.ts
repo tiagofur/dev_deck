@@ -15,15 +15,15 @@ test.describe('DevDeck — desktop renderer E2E', () => {
   test('2. capture item: opens modal, submits, sees the new card', async ({ page }) => {
     test.setTimeout(60_000)
     // Open the capture modal using the visible header action.
-    await page.getByRole('button', { name: /capturar/i }).click()
-    const urlInput = page.getByPlaceholder(/https:\/\/…/i)
+    await page.getByRole('button', { name: /capture/i }).click()
+    const urlInput = page.getByPlaceholder(/github\.com\/owner\/repo/i)
     await expect(urlInput).toBeVisible()
     
     const uniqueUrl = `https://github.com/test-${Date.now()}/sample`
     await urlInput.fill(uniqueUrl)
     
-    // We expect the "Guardar" button to be enabled once input is populated.
-    const submitButton = page.getByRole('button', { name: /guardar/i })
+    // We expect the "Save" button to be enabled once input is populated.
+    const submitButton = page.getByRole('button', { name: /save/i })
     await expect(submitButton).toBeEnabled()
     
     const createResponsePromise = page.waitForResponse(
@@ -40,7 +40,7 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     expect(createResponse.status(), createBody).toBe(201)
     
     // Close the success/confirm capture view.
-    await page.getByRole('button', { name: /cerrar/i }).first().click()
+    await page.getByRole('button', { name: /close/i }).first().click()
     
     // Verify the new item card is now rendered in the list.
     await page.reload()
@@ -56,10 +56,10 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     await firstCard.click()
     
     // Wait for the detail view notes editor. Since we click first card,
-    // if there are no notes, click "Sin notas. Click para empezar a escribir." 
-    // or the "Editar" notes button (which is the 3rd edit button on the page).
-    const editNotesBtn = page.getByRole('button', { name: /editar/i }).nth(2)
-    const sinNotasBtn = page.getByRole('button', { name: /sin notas/i })
+    // if there are no notes, click "No notes. Click to start writing." 
+    // or the "Edit" notes button.
+    const editNotesBtn = page.getByRole('button', { name: /edit/i }).nth(2)
+    const sinNotasBtn = page.getByRole('button', { name: /no notes/i })
     
     if (await sinNotasBtn.count() > 0) {
       await sinNotasBtn.click()
@@ -68,20 +68,20 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     }
     
     // Interact with the textarea.
-    const notesTextarea = page.getByPlaceholder(/escribí tus notas en markdown/i)
+    const notesTextarea = page.getByPlaceholder(/write your notes in markdown/i)
     await expect(notesTextarea).toBeVisible()
     const noteText = 'e2e-test-note-' + Date.now()
     await notesTextarea.fill(noteText)
     
     // Save the note.
-    await page.getByRole('button', { name: /guardar/i }).click()
+    await page.getByRole('button', { name: /save/i }).click()
     
     // The note should render under markdown view.
     await expect(page.getByText(noteText)).toBeVisible({ timeout: 10_000 })
   })
 
   test('4. search: inline input filters items', async ({ page }) => {
-    const searchInput = page.getByPlaceholder(/buscar en items…/i)
+    const searchInput = page.getByPlaceholder(/Search items, commands, prompts/i)
     await expect(searchInput).toBeVisible()
     await searchInput.fill('sample')
     await page.waitForTimeout(500)
@@ -93,8 +93,7 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     // Click search button to open the command palette safely.
     await page.getByRole('button', { name: /search/i }).click()
     // Command palette action should be visible.
-    const commandOption = page.getByText(/preguntar a la ia/i)
+    const commandOption = page.getByText(/ask ai/i)
     await expect(commandOption).toBeVisible({ timeout: 5000 })
   })
 })
-

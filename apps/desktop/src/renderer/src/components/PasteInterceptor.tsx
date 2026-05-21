@@ -13,6 +13,7 @@ import {
   type ItemType,
 } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 import { CaptureModal } from '@devdeck/features'
 
 // Wave 4.5 §16.12 — paste inteligente.
@@ -49,6 +50,7 @@ interface PasteInterceptorProps {
 }
 
 export function PasteInterceptor({ onOpenItem }: PasteInterceptorProps = {}) {
+  const { t } = useTranslation()
   const [pending, setPending] = useState<PendingPaste | null>(null)
   const [saved, setSaved] = useState<SavedPaste | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
@@ -135,9 +137,9 @@ export function PasteInterceptor({ onOpenItem }: PasteInterceptorProps = {}) {
         const res = await capture.mutateAsync(input)
         const id = res.item?.id || res.duplicate_of
         if (res.duplicate_of) {
-          showToast('Ya lo tenías ✓', 'info')
+          showToast(t('paste.already_have_it'), 'info')
         } else {
-          showToast(`Guardado como ${p.type}`, 'success')
+          showToast(t('paste.saved_as', { type: p.type }), 'success')
         }
         if (id) {
           setSaved({
@@ -152,7 +154,7 @@ export function PasteInterceptor({ onOpenItem }: PasteInterceptorProps = {}) {
         }
       } catch (err) {
         showToast(
-          err instanceof Error ? err.message : 'Error al guardar',
+          err instanceof Error ? err.message : t('paste.save_error'),
           'error',
         )
         setSaved(null)
@@ -160,7 +162,7 @@ export function PasteInterceptor({ onOpenItem }: PasteInterceptorProps = {}) {
         setPending(null)
       }
     },
-    [capture],
+    [capture, t],
   )
 
   return (
@@ -186,10 +188,10 @@ export function PasteInterceptor({ onOpenItem }: PasteInterceptorProps = {}) {
                 {pending ? (
                   <>
                     <p className="text-xs font-bold uppercase text-ink-soft mb-0.5">
-                      Pegaste · {pending.type}
+                      {t('paste.you_pasted')} · {pending.type}
                     </p>
                     <p className="text-sm font-bold truncate">
-                      {pending.title || '(vacío)'}
+                      {pending.title || t('paste.empty')}
                     </p>
                     <p className="text-xs text-ink-soft truncate mt-0.5">
                       {previewLine(pending.raw)}
@@ -198,13 +200,13 @@ export function PasteInterceptor({ onOpenItem }: PasteInterceptorProps = {}) {
                 ) : saved ? (
                   <>
                     <p className="text-xs font-bold uppercase text-ink-soft mb-0.5">
-                      {saved.duplicate ? 'Ya estaba guardado' : 'Guardado'} · {saved.type}
+                      {saved.duplicate ? t('paste.already_saved') : t('paste.saved')} · {saved.type}
                     </p>
                     <p className="text-sm font-bold truncate">
-                      {saved.title || 'Item guardado'}
+                      {saved.title || t('capture.saved_toast')}
                     </p>
                     <p className="text-xs text-ink-soft truncate mt-0.5">
-                      Listo en tu vault
+                      {t('paste.ready_in_vault')}
                     </p>
                   </>
                 ) : null}
@@ -212,7 +214,7 @@ export function PasteInterceptor({ onOpenItem }: PasteInterceptorProps = {}) {
               <button
                 type="button"
                 onClick={dismiss}
-                aria-label="Descartar"
+                aria-label={t('paste.dismiss')}
                 className="border-2 border-ink p-0.5 hover:bg-accent-pink transition-colors shrink-0"
               >
                 <X size={14} strokeWidth={3} />
@@ -228,7 +230,7 @@ export function PasteInterceptor({ onOpenItem }: PasteInterceptorProps = {}) {
                     className="text-xs font-bold uppercase border-2 border-ink px-2 py-1
                                bg-bg-card hover:bg-accent-yellow/60 transition-colors"
                   >
-                    Expandir
+                    {t('paste.expand')}
                   </button>
                   <button
                     type="button"
@@ -238,7 +240,7 @@ export function PasteInterceptor({ onOpenItem }: PasteInterceptorProps = {}) {
                                bg-accent-lime shadow-hard-sm hover:bg-accent-lime/80
                                disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
                   >
-                    {capture.isPending ? '…' : 'Guardar'}
+                    {capture.isPending ? '…' : t('common.save')}
                   </button>
                 </>
               )}
@@ -254,7 +256,7 @@ export function PasteInterceptor({ onOpenItem }: PasteInterceptorProps = {}) {
                              transition-colors inline-flex items-center gap-1"
                 >
                   <ExternalLink size={12} strokeWidth={3} />
-                  Abrir
+                  {t('paste.open')}
                 </button>
               )}
             </div>

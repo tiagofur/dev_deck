@@ -96,10 +96,10 @@ describe('<ItemsPage>', () => {
 
   it('shows a useful empty state instead of staying on loading forever', () => {
     renderPage()
-    expect(screen.queryByText('Cargando…')).not.toBeInTheDocument()
-    expect(screen.getByText('Nada por acá todavía')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /guardar comando/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /abrir cheatsheets/i })).toBeInTheDocument()
+    expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+    expect(screen.getByText('Nothing here yet')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /save command/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /open cheatsheets/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /discover/i })).toBeInTheDocument()
   })
 })

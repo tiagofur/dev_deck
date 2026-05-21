@@ -1,5 +1,5 @@
 import { app, BrowserWindow, shell, ipcMain, globalShortcut, safeStorage } from 'electron'
-import { join } from 'path'
+import { basename, join } from 'path'
 import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { exec } from 'child_process'
 
@@ -15,8 +15,16 @@ interface TokenData {
   refresh: string | null
 }
 
+interface ProjectContext {
+  name: string
+  path: string
+  gitRemote: string
+  gitSlug: string
+}
+
 let mainWindow: BrowserWindow | null = null
 let pendingAuthCallbackURL: string | null = null
+let shortcutStatus: Record<string, { accelerator: string; registered: boolean }> = {}
 
 function readTokens(): TokenData {
   try {
@@ -86,6 +94,43 @@ function registerIpcHandlers(): void {
       })
     })
   })
+
+  ipcMain.handle('project:detect-current', async () => {
+    const projectPath = process.cwd()
+    const gitRemote = await readGitRemote(projectPath)
+    const gitSlug = gitRemoteToSlug(gitRemote)
+    return {
+      name: gitSlug ? basename(gitSlug) : basename(projectPath),
+      path: projectPath,
+      gitRemote,
+      gitSlug,
+    } satisfies ProjectContext
+  })
+
+  ipcMain.handle('shortcuts:get-status', async () => shortcutStatus)
+}
+
+function readGitRemote(projectPath: string): Promise<string> {
+  return new Promise((resolve) => {
+    exec('git config --get remote.origin.url', { cwd: projectPath }, (_error, stdout) => {
+      resolve(stdout.trim())
+    })
+  })
+}
+
+function gitRemoteToSlug(remote: string): string {
+  const trimmed = remote.trim().replace(/\.git$/, '')
+  if (!trimmed) return ''
+  if (trimmed.startsWith('git@')) {
+    const [, slug = ''] = trimmed.split(':')
+    return slug.replace(/^\/+/, '')
+  }
+  try {
+    const parsed = new URL(trimmed)
+    return parsed.pathname.replace(/^\/+/, '')
+  } catch {
+    return basename(trimmed)
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -98,15 +143,22 @@ function registerGlobalShortcuts(win: BrowserWindow): void {
     'CommandOrControl+N': 'add',
   }
 
+  shortcutStatus = {}
   for (const [accelerator, name] of Object.entries(shortcuts)) {
-    globalShortcut.register(accelerator, () => {
+    const registered = globalShortcut.register(accelerator, () => {
       if (!win.isDestroyed()) {
         win.show()
         win.focus()
         win.webContents.send('global-shortcut', name)
       }
     })
+    shortcutStatus[name] = { accelerator, registered }
+    if (!registered) {
+      console.warn(`[main] global shortcut registration failed: ${accelerator} (${name})`)
+    }
   }
+
+  win.webContents.send('global-shortcut-status', shortcutStatus)
 }
 
 // ---------------------------------------------------------------------------

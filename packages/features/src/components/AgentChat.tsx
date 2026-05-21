@@ -76,7 +76,7 @@ export function AgentChat({ initialQuery }: Props) {
         body: JSON.stringify({ history: nextHistory })
       })
 
-      if (!response.ok) throw new Error('Error al conectar con el agente')
+      if (!response.ok) throw new Error(t('agent.connection_error'))
 
       const reader = response.body?.getReader()
       const decoder = new TextDecoder()
@@ -122,7 +122,7 @@ export function AgentChat({ initialQuery }: Props) {
             role: 'tool',
             tool_call_id: tc.id,
             name: tc.function.name,
-            content: output || 'Comando ejecutado exitosamente (sin salida).'
+            content: output || t('agent.execution_success_empty')
         }
         const nextHistory = [...messages, toolMessage]
         setMessages(nextHistory)
@@ -132,7 +132,7 @@ export function AgentChat({ initialQuery }: Props) {
             role: 'tool',
             tool_call_id: tc.id,
             name: tc.function.name,
-            content: `Error: ${err}`
+            content: `${t('common.error')}: ${err}`
         }
         const nextHistory = [...messages, toolMessage]
         setMessages(nextHistory)
