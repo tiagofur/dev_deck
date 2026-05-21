@@ -77,6 +77,10 @@ export default defineConfig({
         __dirname,
         '../../packages/features/src/index.ts',
       ),
+      '@devdeck/i18n': resolve(
+        __dirname,
+        '../../packages/i18n/src/index.ts',
+      ),
     },
   },
   server: {

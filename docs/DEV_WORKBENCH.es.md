@@ -91,6 +91,16 @@ Reglas:
 - Deben permitir copiar el resultado.
 - Cuando tenga sentido, deben permitir guardar el resultado como item del vault.
 
+Estado de implementación:
+
+- JSON formatter / validator: implementado.
+- JWT decoder local: implementado.
+- Base64 y URL encode/decode: implementado.
+- UUID y timestamp tools: implementado.
+- SHA-1 / SHA-256: implementado.
+- Regex tester simple: implementado.
+- Copiar resultado y guardar output como item: implementado.
+
 ### 4.2 Command Palette
 
 La paleta debe empezar como una superficie de DevDeck, no como una promesa de reemplazar el sistema operativo.
@@ -128,6 +138,8 @@ Estado de implementación:
 - En Web usa `fetch`, por lo que aplica CORS del navegador.
 - En Desktop usa un sender IPC local (`electronAPI.apiTester.send`) desde el proceso principal para evitar la limitación de CORS del navegador.
 - El sender Desktop solo permite URLs `http`/`https`, acepta headers/body explícitos y devuelve status, headers, duración y body textual.
+- Cada request genera config JSON reutilizable y comando `curl` copiable/guardable para terminal, CI, issues o runbooks.
+- Los requests enviados o guardados quedan en un historial local reciente para poder recargarlos sin reconstruir contexto.
 - La request se puede guardar como item reutilizable mediante el flujo de captura.
 
 ### 4.4 Project-Aware Mode
@@ -254,6 +266,8 @@ Objetivo: conectar ejecución ligera con conocimiento.
 
 - Quick API Tester. **Estado:** primera versión implementada en Workbench.
 - Guardar request como item. **Estado:** implementado usando capture.
+- Generar `curl` desde request. **Estado:** implementado en Workbench.
+- Historial local de requests recientes. **Estado:** implementado en Workbench.
 - Asociar requests a proyectos/runbooks.
 - Ejecutar comandos documentados con confirmación humana.
 

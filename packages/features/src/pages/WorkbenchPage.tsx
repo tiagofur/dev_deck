@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Send,
   FolderGit2,
+  ScanSearch,
 } from 'lucide-react'
 import { Button, showToast } from '@devdeck/ui'
 import { useCapture, useGlobalSearch } from '@devdeck/api-client'
@@ -27,11 +28,13 @@ import {
   generateUuid,
   hashText,
   parseHeaders,
+  requestConfigToCurl,
   serializeRequestConfig,
+  testRegex,
   timestampToDate,
 } from '../workbench/utils'
 
-type ToolId = 'json' | 'jwt' | 'base64' | 'url' | 'uuid' | 'timestamp' | 'hash' | 'api' | 'project'
+type ToolId = 'json' | 'jwt' | 'base64' | 'url' | 'uuid' | 'timestamp' | 'hash' | 'regex' | 'api' | 'project'
 
 const tools: {
   id: ToolId
@@ -46,6 +49,7 @@ const tools: {
   { id: 'uuid', label: 'UUID', description: 'Generate UUID v4 values.', icon: Fingerprint },
   { id: 'timestamp', label: 'Time', description: 'Convert UNIX timestamps and dates.', icon: CalendarClock },
   { id: 'hash', label: 'Hash', description: 'Generate SHA digests locally.', icon: Hash },
+  { id: 'regex', label: 'Regex', description: 'Test expressions against sample text.', icon: ScanSearch },
   { id: 'api', label: 'API', description: 'Send quick HTTP requests and save configs.', icon: Send },
   { id: 'project', label: 'Project', description: 'Surface context for a repo or project.', icon: FolderGit2 },
 ]
@@ -113,6 +117,7 @@ export function WorkbenchPage() {
               {activeTool === 'uuid' && <UuidTool />}
               {activeTool === 'timestamp' && <TimestampTool />}
               {activeTool === 'hash' && <HashTool />}
+              {activeTool === 'regex' && <RegexTool />}
               {activeTool === 'api' && <ApiTool />}
               {activeTool === 'project' && <ProjectContextTool />}
             </section>
@@ -395,12 +400,56 @@ function HashTool() {
   )
 }
 
+function RegexTool() {
+  const [pattern, setPattern] = useState('')
+  const [flags, setFlags] = useState('gi')
+  const [sample, setSample] = useState('')
+  const result = useMemo(() => testRegex(pattern, flags, sample), [flags, pattern, sample])
+  const output = result.ok
+    ? JSON.stringify({ count: result.matches.length, matches: result.matches }, null, 2)
+    : ''
+
+  return (
+    <ToolFrame title="Regex tester">
+      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_140px]">
+        <label className="grid gap-2">
+          <span className="font-display text-xs font-black uppercase tracking-widest">Pattern</span>
+          <input
+            value={pattern}
+            onChange={(event) => setPattern(event.target.value)}
+            placeholder="(dev)(deck)"
+            className="h-11 border-3 border-ink bg-bg-primary px-3 font-mono text-sm outline-none focus:bg-accent-yellow/10"
+          />
+        </label>
+        <label className="grid gap-2">
+          <span className="font-display text-xs font-black uppercase tracking-widest">Flags</span>
+          <input
+            value={flags}
+            onChange={(event) => setFlags(event.target.value)}
+            placeholder="gi"
+            className="h-11 border-3 border-ink bg-bg-primary px-3 font-mono text-sm outline-none focus:bg-accent-yellow/10"
+          />
+        </label>
+      </div>
+      <TextArea label="Sample text" value={sample} onChange={setSample} />
+      {result.error && pattern.trim() && (
+        <p className="border-2 border-ink bg-accent-pink px-3 py-2 font-mono text-sm">
+          {result.error}
+        </p>
+      )}
+      <TextArea label="Matches" value={output} readOnly />
+      <ResultActions output={output} title="Regex test matches" itemType="note" />
+    </ToolFrame>
+  )
+}
+
 function ApiTool() {
   const capture = useCapture()
   const [method, setMethod] = useState('GET')
   const [url, setUrl] = useState('')
   const [headers, setHeaders] = useState('Accept: application/json')
   const [body, setBody] = useState('')
+  const [requestHistory, setRequestHistory] = useState<SavedApiRequest[]>(() => readApiRequestHistory())
   const [isSending, setIsSending] = useState(false)
   const [result, setResult] = useState<{
     status: number
@@ -420,6 +469,16 @@ function ApiTool() {
         return serializeRequestConfig({ method, url, headers, body })
       } catch {
         return JSON.stringify({ method, url, headers: headers.split('\n'), body: body || undefined }, null, 2)
+      }
+    },
+    [body, headers, method, url]
+  )
+  const curlCommand = useMemo(
+    () => {
+      try {
+        return requestConfigToCurl({ method, url, headers, body })
+      } catch {
+        return ''
       }
     },
     [body, headers, method, url]
@@ -460,6 +519,7 @@ function ApiTool() {
           body: responseBody,
         })
       }
+      rememberCurrentRequest()
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : 'Request failed.')
     } finally {
@@ -477,10 +537,31 @@ function ApiTool() {
         tags: ['workbench', 'api-request'],
         why_saved: 'Reusable API request saved from DevDeck Workbench.',
       })
+      rememberCurrentRequest()
       showToast('Request saved to your vault', 'success')
     } catch {
       showToast('Could not save request', 'error')
     }
+  }
+
+  function rememberCurrentRequest() {
+    const nextRequest: SavedApiRequest = {
+      id: `${method}:${url}:${headers}:${body}`,
+      method,
+      url,
+      headers,
+      body,
+      updatedAt: new Date().toISOString(),
+    }
+    setRequestHistory((current) => writeApiRequestHistory(nextRequest, current))
+  }
+
+  function loadRequest(request: SavedApiRequest) {
+    setMethod(request.method)
+    setUrl(request.url)
+    setHeaders(request.headers)
+    setBody(request.body)
+    showToast('Request loaded', 'success')
   }
 
   return (
@@ -542,6 +623,32 @@ function ApiTool() {
       </form>
 
       <TextArea label="Saved request config" value={requestConfig} readOnly />
+      {curlCommand && (
+        <div className="grid gap-3">
+          <TextArea label="cURL" value={curlCommand} readOnly />
+          <ResultActions output={curlCommand} title={`${method} ${url} cURL`} itemType="note" />
+        </div>
+      )}
+      {requestHistory.length > 0 && (
+        <div className="grid gap-3 border-3 border-ink bg-bg-elevated p-4">
+          <h3 className="font-display text-sm font-black uppercase tracking-widest">
+            Recent requests
+          </h3>
+          <div className="grid gap-2">
+            {requestHistory.map((request) => (
+              <button
+                key={request.id}
+                type="button"
+                onClick={() => loadRequest(request)}
+                className="flex flex-col gap-1 border-2 border-ink bg-bg-card px-3 py-2 text-left font-mono text-xs transition-colors hover:bg-accent-yellow/20"
+              >
+                <span className="font-bold">{request.method} {request.url}</span>
+                <span className="text-ink-soft">{new Date(request.updatedAt).toLocaleString()}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {result && (
         <div className="grid gap-3 border-3 border-ink bg-bg-elevated p-4">
@@ -564,6 +671,63 @@ function ApiTool() {
         </div>
       )}
     </ToolFrame>
+  )
+}
+
+const API_REQUEST_HISTORY_STORAGE_KEY = 'devdeck.workbench.apiRequests.v1'
+
+interface SavedApiRequest {
+  id: string
+  method: string
+  url: string
+  headers: string
+  body: string
+  updatedAt: string
+}
+
+function readApiRequestHistory(): SavedApiRequest[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const stored = window.localStorage.getItem(API_REQUEST_HISTORY_STORAGE_KEY)
+    if (!stored) return []
+    const parsed = JSON.parse(stored)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(isSavedApiRequest).slice(0, 8)
+  } catch {
+    return []
+  }
+}
+
+function writeApiRequestHistory(
+  request: SavedApiRequest,
+  currentHistory: SavedApiRequest[]
+): SavedApiRequest[] {
+  const nextHistory = [
+    request,
+    ...currentHistory.filter((currentRequest) => currentRequest.id !== request.id),
+  ].slice(0, 8)
+
+  if (typeof window !== 'undefined') {
+    try {
+      window.localStorage.setItem(API_REQUEST_HISTORY_STORAGE_KEY, JSON.stringify(nextHistory))
+    } catch {
+      // The in-memory history still works when localStorage is unavailable.
+    }
+  }
+
+  return nextHistory
+}
+
+function isSavedApiRequest(value: unknown): value is SavedApiRequest {
+  if (!value || typeof value !== 'object') return false
+  const request = value as Record<string, unknown>
+  return (
+    typeof request.id === 'string' &&
+    typeof request.method === 'string' &&
+    typeof request.url === 'string' &&
+    typeof request.headers === 'string' &&
+    typeof request.body === 'string' &&
+    typeof request.updatedAt === 'string'
   )
 }
 

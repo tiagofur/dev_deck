@@ -53,8 +53,19 @@ If not, it probably belongs in another app.
 - Local JWT decoder.
 - Base64 / URL tools.
 - UUID and timestamp tools.
+- Regex tester.
 - Copy result.
 - Save output as snippet or note.
+
+Status:
+
+- JSON formatter / validator: implemented.
+- Local JWT decoder: implemented.
+- Base64 and URL encode/decode: implemented.
+- UUID and timestamp tools: implemented.
+- SHA-1 / SHA-256 hashing: implemented.
+- Regex tester: implemented.
+- Copy result and save output as item: implemented.
 
 ### Phase 2 — Palette MVP
 
@@ -69,6 +80,8 @@ If not, it probably belongs in another app.
 
 - Lightweight API tester. **Status:** first Workbench version implemented.
 - Save request as an item. **Status:** implemented through capture.
+- Generate `curl` from a request. **Status:** implemented in Workbench.
+- Local recent request history. **Status:** implemented in Workbench.
 - Associate requests with projects and runbooks.
 - Execute documented commands with human confirmation.
 
@@ -77,6 +90,8 @@ Implementation notes:
 - Web uses browser `fetch`, so browser CORS still applies.
 - Desktop uses a local IPC sender (`electronAPI.apiTester.send`) from the main process, so browser CORS does not apply there.
 - The Desktop sender only allows `http`/`https`, accepts explicit headers/body, and returns status, headers, duration, and text body.
+- Every request produces reusable JSON config and a copyable/savable `curl` command for terminal, CI, issues, or runbooks.
+- Sent or saved requests are kept in a small local recent-history list so they can be reloaded without rebuilding context.
 
 ### Phase 4 — Project-Aware DevDeck
 

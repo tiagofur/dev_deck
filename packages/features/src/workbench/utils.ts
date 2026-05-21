@@ -102,6 +102,39 @@ export async function hashText(input: string, algorithm: 'SHA-1' | 'SHA-256'): P
     .join('')
 }
 
+export interface RegexMatch {
+  match: string
+  index: number
+  groups: string[]
+}
+
+export interface RegexTestResult {
+  ok: boolean
+  matches: RegexMatch[]
+  error?: string
+}
+
+export function testRegex(pattern: string, flags: string, sample: string): RegexTestResult {
+  if (!pattern.trim()) return { ok: false, matches: [], error: 'Enter a regular expression.' }
+
+  try {
+    const safeFlags = flags.includes('g') ? flags : `${flags}g`
+    const regex = new RegExp(pattern, safeFlags)
+    const matches = Array.from(sample.matchAll(regex)).map((match) => ({
+      match: match[0],
+      index: match.index ?? 0,
+      groups: match.slice(1),
+    }))
+    return { ok: true, matches }
+  } catch (error) {
+    return {
+      ok: false,
+      matches: [],
+      error: error instanceof Error ? error.message : 'Invalid regular expression.',
+    }
+  }
+}
+
 export function parseHeaders(input: string): Record<string, string> {
   const headers: Record<string, string> = {}
   for (const rawLine of input.split('\n')) {
@@ -130,4 +163,28 @@ export function serializeRequestConfig(input: {
     null,
     2
   )
+}
+
+export function requestConfigToCurl(input: {
+  method: string
+  url: string
+  headers: string
+  body: string
+}): string {
+  const parts = [`curl -X ${input.method}`, shellQuote(input.url)]
+  const parsedHeaders = parseHeaders(input.headers)
+
+  for (const [key, value] of Object.entries(parsedHeaders)) {
+    parts.push(`-H ${shellQuote(`${key}: ${value}`)}`)
+  }
+
+  if (input.body && input.method !== 'GET' && input.method !== 'HEAD') {
+    parts.push(`--data ${shellQuote(input.body)}`)
+  }
+
+  return parts.join(' \\\n  ')
+}
+
+function shellQuote(value: string): string {
+  return `'${value.replace(/'/g, `'\\''`)}'`
 }

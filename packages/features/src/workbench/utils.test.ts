@@ -4,7 +4,9 @@ import {
   decodeJwt,
   formatJson,
   parseHeaders,
+  requestConfigToCurl,
   serializeRequestConfig,
+  testRegex,
   timestampToDate,
 } from './utils'
 
@@ -57,5 +59,34 @@ describe('workbench utils', () => {
         body: '{"ok":true}',
       })
     ).toContain('"method": "POST"')
+  })
+
+  it('converts request configs to reusable curl commands', () => {
+    expect(
+      requestConfigToCurl({
+        method: 'POST',
+        url: 'https://example.test/widgets',
+        headers: "Content-Type: application/json\nX-Name: DevDeck's test",
+        body: '{"ok":true}',
+      })
+    ).toBe(
+      [
+        'curl -X POST',
+        "'https://example.test/widgets'",
+        "-H 'Content-Type: application/json'",
+        "-H 'X-Name: DevDeck'\\''s test'",
+        '--data \'{"ok":true}\'',
+      ].join(' \\\n  ')
+    )
+  })
+
+  it('tests regular expressions and captures groups', () => {
+    expect(testRegex('(dev)(deck)', 'i', 'DevDeck devdeck')).toEqual({
+      ok: true,
+      matches: [
+        { match: 'DevDeck', index: 0, groups: ['Dev', 'Deck'] },
+        { match: 'devdeck', index: 8, groups: ['dev', 'deck'] },
+      ],
+    })
   })
 })

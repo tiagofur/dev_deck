@@ -81,7 +81,7 @@ test.describe('DevDeck — desktop renderer E2E', () => {
   })
 
   test('4. search: inline input filters items', async ({ page }) => {
-    const searchInput = page.getByPlaceholder(/Search items, commands, prompts/i)
+    const searchInput = page.getByPlaceholder(/Search items/i)
     await expect(searchInput).toBeVisible()
     await searchInput.fill('sample')
     await page.waitForTimeout(500)
