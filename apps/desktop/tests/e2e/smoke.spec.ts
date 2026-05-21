@@ -11,19 +11,23 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     await page.goto('/')
   })
 
-  test('0. network check: can reach backend', async ({ page }) => {
-    const apiUrl = 'http://localhost:8080/healthz'
-    const response = await page.evaluate(async (url) => {
+  test('0. network check: can reach backend authenticated', async ({ page }) => {
+    const apiUrl = 'http://localhost:8080/api/auth/me'
+    const apiToken = 'test-api-token'
+    const response = await page.evaluate(async ({ url, token }) => {
       try {
-        const res = await fetch(url)
-        return { status: res.status, body: await res.json() }
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        const body = await res.json()
+        return { status: res.status, body }
       } catch (e: any) {
         return { error: e.message }
       }
-    }, apiUrl)
-    console.log('API Check Response:', JSON.stringify(response))
+    }, { url: apiUrl, token: apiToken })
+    console.log('API Auth Check Response:', JSON.stringify(response))
     expect(response.status).toBe(200)
-    expect(response.body).toEqual({ status: 'ok' })
+    expect(response.body.login).toBe('testuser')
   })
 
   test('1. token-mode auth bypass: home loads without OAuth', async ({ page }) => {
