@@ -122,14 +122,15 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	scimH := handlers.NewSCIMHandler(st)
 
 	r.Route("/api", func(r chi.Router) {
+		// Optional auth for all public API routes
+		r.Use(mw.OptionalTokenAuth(cfg, as, st))
+
 		r.Get("/suggestions/commands", suggestionsH.Commands)
 		r.Get("/plugins/featured", pluginsH.ListFeatured)
 		r.Post("/waitlist", invitesH.JoinWaitlist)
 
 		// Cheatsheet management (Consolidated to avoid Chi router panics)
 		r.Route("/cheatsheets", func(cr chi.Router) {
-			// Optional auth for public routes (owner access to private content)
-			cr.Use(mw.OptionalTokenAuth(cfg, as, st))
 			cr.Get("/explore", cheatsH.Explore)
 			cr.Get("/{id}", cheatsH.Get)
 			cr.Get("/{id}/entries", cheatsH.ListEntries)
