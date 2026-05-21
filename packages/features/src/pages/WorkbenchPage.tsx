@@ -410,6 +410,9 @@ function ApiTool() {
     body: string
   } | null>(null)
   const [error, setError] = useState('')
+  const desktopApiTester = typeof window !== 'undefined'
+    ? (window as unknown as { electronAPI?: { apiTester?: DesktopApiTesterAPI } }).electronAPI?.apiTester
+    : undefined
 
   const requestConfig = useMemo(
     () => {
@@ -430,24 +433,33 @@ function ApiTool() {
 
     try {
       const parsedHeaders = parseHeaders(headers)
-      const started = performance.now()
-      const response = await fetch(url, {
-        method,
-        headers: parsedHeaders,
-        body: method === 'GET' || method === 'HEAD' ? undefined : body || undefined,
-      })
-      const responseBody = await response.text()
-      const responseHeaders: Record<string, string> = {}
-      response.headers.forEach((value, key) => {
-        responseHeaders[key] = value
-      })
-      setResult({
-        status: response.status,
-        statusText: response.statusText,
-        durationMs: Math.round(performance.now() - started),
-        headers: responseHeaders,
-        body: responseBody,
-      })
+      if (desktopApiTester) {
+        setResult(await desktopApiTester.send({
+          method,
+          url,
+          headers: parsedHeaders,
+          body: method === 'GET' || method === 'HEAD' ? undefined : body || undefined,
+        }))
+      } else {
+        const started = performance.now()
+        const response = await fetch(url, {
+          method,
+          headers: parsedHeaders,
+          body: method === 'GET' || method === 'HEAD' ? undefined : body || undefined,
+        })
+        const responseBody = await response.text()
+        const responseHeaders: Record<string, string> = {}
+        response.headers.forEach((value, key) => {
+          responseHeaders[key] = value
+        })
+        setResult({
+          status: response.status,
+          statusText: response.statusText,
+          durationMs: Math.round(performance.now() - started),
+          headers: responseHeaders,
+          body: responseBody,
+        })
+      }
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : 'Request failed.')
     } finally {
@@ -474,6 +486,11 @@ function ApiTool() {
   return (
     <ToolFrame title="Quick API tester">
       <form onSubmit={sendRequest} className="grid gap-5">
+        {desktopApiTester && (
+          <p className="border-2 border-ink bg-accent-lime px-3 py-2 font-mono text-xs">
+            Desktop sender enabled. Requests run from the local app process, so browser CORS does not apply.
+          </p>
+        )}
         <div className="grid gap-3 md:grid-cols-[150px_minmax(0,1fr)]">
           <label className="grid gap-2">
             <span className="font-display text-xs font-black uppercase tracking-widest">Method</span>
@@ -558,6 +575,21 @@ interface DesktopProjectAPI {
     path: string
     gitRemote: string
     gitSlug: string
+  }>
+}
+
+interface DesktopApiTesterAPI {
+  send: (request: {
+    method: string
+    url: string
+    headers: Record<string, string>
+    body?: string
+  }) => Promise<{
+    status: number
+    statusText: string
+    durationMs: number
+    headers: Record<string, string>
+    body: string
   }>
 }
 

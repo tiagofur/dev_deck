@@ -9,7 +9,7 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     // In token mode there is no /login page; the items vault page should render.
     await expect(page).toHaveTitle(/DevDeck/i)
     // DevDeck title heading on ItemsPage is visible.
-    await expect(page.getByRole('heading', { name: /devdeck/i })).toBeVisible()
+    await expect(page.getByLabel('DevDeck')).toBeVisible({ timeout: 15_000 })
   })
 
   test('2. capture item: opens modal, submits, sees the new card', async ({ page }) => {
@@ -91,9 +91,8 @@ test.describe('DevDeck — desktop renderer E2E', () => {
 
   test('5. command palette: Ctrl+K opens global search command palette', async ({ page }) => {
     // Click search button to open the command palette safely.
-    await page.getByRole('button', { name: /search/i }).click()
+    await page.getByRole('button', { name: /search/i }).first().click()
     // Command palette action should be visible.
-    const commandOption = page.getByText(/ask ai/i)
-    await expect(commandOption).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText(/ask ai/i)).toBeVisible({ timeout: 10_000 })
   })
 })

@@ -122,6 +122,14 @@ No debe intentar ser Postman. Debe resolver el caso de uso rápido:
 
 La ventaja de DevDeck no es tener más opciones que Postman. Es que un request queda junto al conocimiento que explica por qué existe.
 
+Estado de implementación:
+
+- Existe una primera versión dentro de `Developer Workbench`.
+- En Web usa `fetch`, por lo que aplica CORS del navegador.
+- En Desktop usa un sender IPC local (`electronAPI.apiTester.send`) desde el proceso principal para evitar la limitación de CORS del navegador.
+- El sender Desktop solo permite URLs `http`/`https`, acepta headers/body explícitos y devuelve status, headers, duración y body textual.
+- La request se puede guardar como item reutilizable mediante el flujo de captura.
+
 ### 4.4 Project-Aware Mode
 
 Esta es una de las apuestas más importantes.
@@ -244,8 +252,8 @@ Objetivo: recuperar y accionar más rápido.
 
 Objetivo: conectar ejecución ligera con conocimiento.
 
-- Quick API Tester.
-- Guardar request como item.
+- Quick API Tester. **Estado:** primera versión implementada en Workbench.
+- Guardar request como item. **Estado:** implementado usando capture.
 - Asociar requests a proyectos/runbooks.
 - Ejecutar comandos documentados con confirmación humana.
 

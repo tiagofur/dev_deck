@@ -22,6 +22,21 @@ interface ProjectContext {
   gitSlug: string
 }
 
+interface ApiTesterRequest {
+  method: string
+  url: string
+  headers: Record<string, string>
+  body?: string
+}
+
+interface ApiTesterResponse {
+  status: number
+  statusText: string
+  durationMs: number
+  headers: Record<string, string>
+  body: string
+}
+
 let mainWindow: BrowserWindow | null = null
 let pendingAuthCallbackURL: string | null = null
 let shortcutStatus: Record<string, { accelerator: string; registered: boolean }> = {}
@@ -108,6 +123,38 @@ function registerIpcHandlers(): void {
   })
 
   ipcMain.handle('shortcuts:get-status', async () => shortcutStatus)
+
+  ipcMain.handle('api-tester:send', async (_event, request: ApiTesterRequest) => {
+    return sendApiTesterRequest(request)
+  })
+}
+
+async function sendApiTesterRequest(request: ApiTesterRequest): Promise<ApiTesterResponse> {
+  const method = request.method.toUpperCase()
+  const target = new URL(request.url)
+  if (target.protocol !== 'http:' && target.protocol !== 'https:') {
+    throw new Error('Only http and https URLs are allowed.')
+  }
+
+  const started = Date.now()
+  const response = await fetch(target, {
+    method,
+    headers: request.headers,
+    body: method === 'GET' || method === 'HEAD' ? undefined : request.body || undefined,
+  })
+  const body = await response.text()
+  const headers: Record<string, string> = {}
+  response.headers.forEach((value, key) => {
+    headers[key] = value
+  })
+
+  return {
+    status: response.status,
+    statusText: response.statusText,
+    durationMs: Date.now() - started,
+    headers,
+    body,
+  }
 }
 
 function readGitRemote(projectPath: string): Promise<string> {

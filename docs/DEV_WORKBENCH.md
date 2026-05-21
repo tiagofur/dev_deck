@@ -67,10 +67,16 @@ If not, it probably belongs in another app.
 
 ### Phase 3 — Requests and Runbooks
 
-- Lightweight API tester.
-- Save request as an item.
+- Lightweight API tester. **Status:** first Workbench version implemented.
+- Save request as an item. **Status:** implemented through capture.
 - Associate requests with projects and runbooks.
 - Execute documented commands with human confirmation.
+
+Implementation notes:
+
+- Web uses browser `fetch`, so browser CORS still applies.
+- Desktop uses a local IPC sender (`electronAPI.apiTester.send`) from the main process, so browser CORS does not apply there.
+- The Desktop sender only allows `http`/`https`, accepts explicit headers/body, and returns status, headers, duration, and text body.
 
 ### Phase 4 — Project-Aware DevDeck
 

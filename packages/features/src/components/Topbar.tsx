@@ -35,6 +35,7 @@ export function Topbar({
     <header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex items-center gap-6">
       <WorkspaceSwitcher />
       <h1
+        aria-label="DevDeck"
         className="font-display font-black text-2xl uppercase tracking-tight whitespace-nowrap cursor-pointer"
         onClick={() => navigate('/')}
       >

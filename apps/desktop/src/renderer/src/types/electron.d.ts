@@ -35,6 +35,20 @@ declare global {
           gitSlug: string
         }>
       }
+      apiTester: {
+        send: (request: {
+          method: string
+          url: string
+          headers: Record<string, string>
+          body?: string
+        }) => Promise<{
+          status: number
+          statusText: string
+          durationMs: number
+          headers: Record<string, string>
+          body: string
+        }>
+      }
     }
   }
 }

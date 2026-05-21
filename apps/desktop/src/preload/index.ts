@@ -56,4 +56,19 @@ contextBridge.exposeInMainWorld('electronAPI', {
       gitSlug: string
     }> => ipcRenderer.invoke('project:detect-current'),
   },
+
+  apiTester: {
+    send: (request: {
+      method: string
+      url: string
+      headers: Record<string, string>
+      body?: string
+    }): Promise<{
+      status: number
+      statusText: string
+      durationMs: number
+      headers: Record<string, string>
+      body: string
+    }> => ipcRenderer.invoke('api-tester:send', request),
+  },
 })
