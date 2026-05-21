@@ -417,9 +417,10 @@ func TestHandlers_Cheatsheets_CRUDFlow(t *testing.T) {
 	ts := newTestServer(t)
 
 	createRec := ts.do(t, http.MethodPost, "/api/cheatsheets", map[string]any{
-		"slug":     "git",
-		"title":    "Git",
-		"category": "vcs",
+		"slug":       "git",
+		"title":      "Git",
+		"category":   "vcs",
+		"visibility": "public",
 	})
 	if createRec.Code != http.StatusCreated {
 		t.Fatalf("create: expected 201, got %d, body: %s", createRec.Code, createRec.Body.String())
