@@ -125,17 +125,32 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		r.Get("/suggestions/commands", suggestionsH.Commands)
 		r.Get("/plugins/featured", pluginsH.ListFeatured)
 		r.Post("/waitlist", invitesH.JoinWaitlist)
-// Public cheatsheet routes (optionally authenticated to show private content to owners)
-r.Route("/cheatsheets", func(cr chi.Router) {
-	cr.Use(mw.OptionalTokenAuth(cfg, as, st))
-	cr.Get("/explore", cheatsH.Explore)
-	cr.Get("/{id}", cheatsH.Get)
-	cr.Get("/{id}/entries", cheatsH.ListEntries)
-	cr.Get("/{id}/export", cheatsH.Export)
-	cr.Get("/{id}/badge", cheatsH.Badge)
-	cr.Get("/{id}/card.svg", cheatsH.Card)
-})
 
+		// Cheatsheet management
+		r.Route("/cheatsheets", func(cr chi.Router) {
+			// Optional auth for public routes (owner access to private content)
+			cr.Use(mw.OptionalTokenAuth(cfg, as, st))
+			cr.Get("/explore", cheatsH.Explore)
+			cr.Get("/{id}", cheatsH.Get)
+			cr.Get("/{id}/entries", cheatsH.ListEntries)
+			cr.Get("/{id}/export", cheatsH.Export)
+			cr.Get("/{id}/badge", cheatsH.Badge)
+			cr.Get("/{id}/card.svg", cheatsH.Card)
+
+			// Enforced auth for management operations
+			cr.Group(func(cr chi.Router) {
+				cr.Use(mw.TokenAuth(cfg, as, st))
+				cr.Get("/", cheatsH.List)
+				cr.Post("/", cheatsH.Create)
+				cr.Patch("/{id}", cheatsH.Update)
+				cr.Delete("/{id}", cheatsH.Delete)
+				cr.Post("/{id}/fork", cheatsH.Fork)
+				cr.Post("/{id}/star", cheatsH.Star)
+				cr.Post("/{id}/entries", cheatsH.CreateEntry)
+				cr.Patch("/{id}/entries/{entryId}", cheatsH.UpdateEntry)
+				cr.Delete("/{id}/entries/{entryId}", cheatsH.DeleteEntry)
+			})
+		})
 
 		if authH != nil {
 			r.Route("/auth", func(r chi.Router) {
@@ -200,18 +215,6 @@ r.Route("/cheatsheets", func(cr chi.Router) {
 				rr.Get("/{id}/cheatsheets", reposH.ListLinkedCheatsheets)
 				rr.Post("/{id}/cheatsheets/{cheatsheetId}", reposH.LinkCheatsheet)
 				rr.Delete("/{id}/cheatsheets/{cheatsheetId}", reposH.UnlinkCheatsheet)
-			})
-
-			r.Route("/cheatsheets", func(cr chi.Router) {
-				cr.Get("/", cheatsH.List)
-				cr.Post("/", cheatsH.Create)
-				cr.Patch("/{id}", cheatsH.Update)
-				cr.Delete("/{id}", cheatsH.Delete)
-				cr.Post("/{id}/fork", cheatsH.Fork)
-				cr.Post("/{id}/star", cheatsH.Star)
-				cr.Post("/{id}/entries", cheatsH.CreateEntry)
-				cr.Patch("/{id}/entries/{entryId}", cheatsH.UpdateEntry)
-				cr.Delete("/{id}/entries/{entryId}", cheatsH.DeleteEntry)
 			})
 
 			r.Get("/search", cheatsH.Search)
