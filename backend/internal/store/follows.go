@@ -57,7 +57,7 @@ func (s *Store) GetFollowingFeed(ctx context.Context, followerID uuid.UUID, limi
 	rows, err := s.Reader().Query(ctx, `
 		SELECT 
 			`+itemColumnsPrefixed+`,
-			u.username, u.avatar_url
+			COALESCE(u.username, u.login), COALESCE(u.avatar_url, '')
 		FROM items i
 		JOIN decks d ON d.id = (i.meta->>'deck_id')::uuid
 		JOIN follows f ON f.following_id = i.user_id
