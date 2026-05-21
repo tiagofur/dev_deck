@@ -47,7 +47,6 @@ func TokenAuth(cfg config.Config, authService *authservice.Service, st *store.St
 			}
 
 			// For E2E/Dev convenience, inject a well-known Test User ID
-			// 00000000-0000-0000-0000-000000000001
 			testUserID := uuid.MustParse("00000000-0000-0000-0000-000000000001")
 			ctx := authctx.WithUserID(r.Context(), testUserID)
 			next.ServeHTTP(w, r.WithContext(ctx))
@@ -67,7 +66,7 @@ func OptionalTokenAuth(cfg config.Config, authService *authservice.Service, st *
 
 			if cfg.AuthMode == "jwt" && authService != nil {
 				if strings.HasPrefix(h, prefix) {
-					// Try JWT
+					// Try JWT first
 					if userID, role, plan, ok := validateJWT(authService, nil, r); ok {
 						ctx := authctx.WithUserID(r.Context(), userID)
 						ctx = authctx.WithUserRole(ctx, role)
@@ -75,12 +74,10 @@ func OptionalTokenAuth(cfg config.Config, authService *authservice.Service, st *
 						next.ServeHTTP(w, r.WithContext(ctx))
 						return
 					}
-				}
 
-				// Try API Key
-				if st != nil && strings.HasPrefix(h, prefix) {
+					// Try API Key
 					tokenStr := strings.TrimPrefix(h, prefix)
-					if strings.HasPrefix(tokenStr, "devdeck_") {
+					if st != nil && strings.HasPrefix(tokenStr, "devdeck_") {
 						if userID, err := st.ValidateAPIKey(r.Context(), tokenStr); err == nil {
 							if user, err := st.GetUserByID(r.Context(), userID); err == nil {
 								ctx := authctx.WithUserID(r.Context(), userID)

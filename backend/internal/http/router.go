@@ -126,9 +126,13 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		r.Get("/plugins/featured", pluginsH.ListFeatured)
 		r.Post("/waitlist", invitesH.JoinWaitlist)
 
-		// Cheatsheet management
+		// Cheatsheet management (Consolidated to avoid Chi router panics)
 		r.Route("/cheatsheets", func(cr chi.Router) {
+			// Optional auth for public routes (owner access to private content)
+			cr.Use(mw.OptionalTokenAuth(cfg, as, st))
 			cr.Get("/explore", cheatsH.Explore)
+			cr.Get("/{id}", cheatsH.Get)
+			cr.Get("/{id}/entries", cheatsH.ListEntries)
 			cr.Get("/{id}/export", cheatsH.Export)
 			cr.Get("/{id}/badge", cheatsH.Badge)
 			cr.Get("/{id}/card.svg", cheatsH.Card)
@@ -138,8 +142,6 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				cr.Use(mw.TokenAuth(cfg, as, st))
 				cr.Get("/", cheatsH.List)
 				cr.Post("/", cheatsH.Create)
-				cr.Get("/{id}", cheatsH.Get)
-				cr.Get("/{id}/entries", cheatsH.ListEntries)
 				cr.Patch("/{id}", cheatsH.Update)
 				cr.Delete("/{id}", cheatsH.Delete)
 				cr.Post("/{id}/fork", cheatsH.Fork)
