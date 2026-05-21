@@ -128,8 +128,6 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 
 		// Cheatsheet management
 		r.Route("/cheatsheets", func(cr chi.Router) {
-			// Optional auth for public routes (owner access to private content)
-			cr.Use(mw.OptionalTokenAuth(cfg, as, st))
 			cr.Get("/explore", cheatsH.Explore)
 			cr.Get("/{id}/export", cheatsH.Export)
 			cr.Get("/{id}/badge", cheatsH.Badge)
