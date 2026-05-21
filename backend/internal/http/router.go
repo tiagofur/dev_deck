@@ -125,15 +125,17 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		r.Get("/suggestions/commands", suggestionsH.Commands)
 		r.Get("/plugins/featured", pluginsH.ListFeatured)
 		r.Post("/waitlist", invitesH.JoinWaitlist)
+// Public cheatsheet routes (optionally authenticated to show private content to owners)
+r.Route("/cheatsheets", func(cr chi.Router) {
+	cr.Use(mw.OptionalTokenAuth(cfg, as, st))
+	cr.Get("/explore", cheatsH.Explore)
+	cr.Get("/{id}", cheatsH.Get)
+	cr.Get("/{id}/entries", cheatsH.ListEntries)
+	cr.Get("/{id}/export", cheatsH.Export)
+	cr.Get("/{id}/badge", cheatsH.Badge)
+	cr.Get("/{id}/card.svg", cheatsH.Card)
+})
 
-		r.Route("/cheatsheets", func(cr chi.Router) {
-			cr.Get("/explore", cheatsH.Explore)
-			cr.Get("/{id}", cheatsH.Get)
-			cr.Get("/{id}/entries", cheatsH.ListEntries)
-			cr.Get("/{id}/export", cheatsH.Export)
-			cr.Get("/{id}/badge", cheatsH.Badge)
-			cr.Get("/{id}/card.svg", cheatsH.Card)
-		})
 
 		if authH != nil {
 			r.Route("/auth", func(r chi.Router) {
