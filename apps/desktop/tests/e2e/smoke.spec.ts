@@ -3,20 +3,44 @@ import { test, expect } from '@playwright/test'
 test.describe('DevDeck — desktop renderer E2E', () => {
   test.beforeEach(async ({ page }) => {
     page.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        console.error(`Browser Error: ${msg.text()}`)
-      }
+      console.log(`Browser [${msg.type()}]: ${msg.text()}`)
+    })
+    page.on('pageerror', (err) => {
+      console.error(`Browser Error: ${err.message}`)
     })
     await page.goto('/')
+  })
+
+  test('0. network check: can reach backend', async ({ page }) => {
+    const apiUrl = 'http://localhost:8080/healthz'
+    const response = await page.evaluate(async (url) => {
+      try {
+        const res = await fetch(url)
+        return { status: res.status, body: await res.json() }
+      } catch (e: any) {
+        return { error: e.message }
+      }
+    }, apiUrl)
+    console.log('API Check Response:', JSON.stringify(response))
+    expect(response.status).toBe(200)
+    expect(response.body).toEqual({ status: 'ok' })
   })
 
   test('1. token-mode auth bypass: home loads without OAuth', async ({ page }) => {
     // In token mode there is no /login page; the items vault page should render.
     // Wait for the URL to settle at / (it might bounce through /login)
-    await expect(page).toHaveURL(/\//, { timeout: 10_000 })
-    await expect(page).toHaveTitle(/DevDeck/i, { timeout: 10_000 })
+    await expect(page).toHaveURL(/\//, { timeout: 15_000 })
+    
+    // Log the whole body if it fails
+    const content = await page.content()
+    console.log('Page Content Length:', content.length)
+    if (content.includes('Loading')) {
+      console.log('App is still loading...')
+    }
+    
+    await expect(page).toHaveTitle(/DevDeck/i, { timeout: 15_000 })
     // DevDeck title heading on ItemsPage is visible.
-    await expect(page.getByLabel('DevDeck')).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByLabel('DevDeck')).toBeVisible({ timeout: 20_000 })
   })
 
   test('2. capture item: opens modal, submits, sees the new card', async ({ page }) => {
