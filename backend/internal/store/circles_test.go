@@ -1,7 +1,6 @@
 package store_test
 
 import (
-	"context"
 	"devdeck/internal/authctx"
 	"errors"
 	"testing"
