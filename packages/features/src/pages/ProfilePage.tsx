@@ -373,7 +373,7 @@ export function ProfilePage() {
           <section className="bg-bg-card border-3 border-ink p-6 shadow-hard space-y-4">
             <h3 className="font-display font-black text-xl uppercase tracking-wider flex items-center gap-2">
               <Terminal size={20} strokeWidth={3} className="text-accent-cyan" />
-              Mi Stack Tecnológico
+              {t('profile.tech_stack_title')}
             </h3>
             {user.stack_tags && user.stack_tags.length > 0 ? (
               <div className="flex flex-wrap gap-2 pt-2">
@@ -388,9 +388,9 @@ export function ProfilePage() {
               </div>
             ) : (
               <div className="border-2 border-ink border-dashed p-6 text-center">
-                <p className="font-mono text-xs text-ink-soft">No seleccionaste tecnologías en tu stack todavía.</p>
+                <p className="font-mono text-xs text-ink-soft">{t('profile.no_tech_selected')}</p>
                 <Button onClick={openEditModal} size="sm" variant="secondary" className="mt-3">
-                  Agregar mi Stack
+                  {t('profile.add_my_stack')}
                 </Button>
               </div>
             )}
@@ -437,10 +437,10 @@ export function ProfilePage() {
                     )}
                     <div className="flex items-center justify-between mt-4 pt-2 border-t border-ink/10">
                       <span className="text-[9px] font-mono uppercase bg-accent-yellow border border-ink px-1.5 py-0.5">
-                        {deck.item_count || 0} items
+                        {t('items.items_count', { count: deck.item_count || 0 })}
                       </span>
                       <span className="text-[10px] font-mono font-bold group-hover:underline">
-                        Ver deck →
+                        {t('profile.view_deck_arrow')}
                       </span>
                     </div>
                   </button>
@@ -560,7 +560,7 @@ export function ProfilePage() {
                   {t('settings.bio_label')}
                 </label>
                 <textarea
-                  placeholder="Contanos un poco sobre vos, tu setup de curación, o qué compartís..."
+                  placeholder={t('profile.bio_edit_placeholder')}
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   rows={3}
@@ -582,13 +582,13 @@ export function ProfilePage() {
                         key={tag}
                         onClick={() => handleRemoveTag(tag)}
                         className="border-2 border-ink bg-accent-lavender text-xs font-mono font-bold px-2 py-0.5 flex items-center gap-1.5 cursor-pointer hover:bg-accent-pink hover:text-white transition-colors"
-                        title="Hacé click para eliminar"
+                        title={t('profile.click_to_remove')}
                       >
                         {tag} <X size={10} strokeWidth={4} />
                       </span>
                     ))
                   ) : (
-                    <span className="font-mono text-[10px] text-ink-soft italic">Sin tecnologías agregadas aún. Seleccioná abajo.</span>
+                    <span className="font-mono text-[10px] text-ink-soft italic">{t('profile.no_tech_added')}</span>
                   )}
                 </div>
 
@@ -619,13 +619,13 @@ export function ProfilePage() {
                 <form onSubmit={handleAddCustomTag} className="flex gap-2 mt-2">
                   <input
                     type="text"
-                    placeholder="Otro (ej. Go, Swift, Astro...)"
+                    placeholder={t('profile.other_placeholder')}
                     value={newTag}
                     onChange={(e) => setNewTag(e.target.value)}
                     className="flex-1 border-3 border-ink px-3 py-1.5 font-mono text-xs focus:outline-none"
                   />
                   <Button type="submit" size="sm" variant="secondary">
-                    Agregar
+                    {t('profile.add_button')}
                   </Button>
                 </form>
               </div>

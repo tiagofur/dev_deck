@@ -11,8 +11,10 @@ import {
 } from 'lucide-react'
 import { useOrgFeed, usePreferences, type ActivityEntry } from '@devdeck/api-client'
 import { Button } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 
 export function TeamFeedPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { activeOrgId } = usePreferences()
   const { data, isLoading } = useOrgFeed(activeOrgId)
@@ -21,9 +23,9 @@ export function TeamFeedPage() {
   if (!activeOrgId) {
     return (
       <div className="min-h-screen bg-bg-primary p-12 text-center flex flex-col items-center justify-center gap-4">
-        <h2 className="font-display font-black text-2xl uppercase">Acceso Denegado</h2>
-        <p className="text-ink-soft font-mono text-sm">El Feed de Equipo solo está disponible dentro de una organización.</p>
-        <Button onClick={() => navigate('/')}>Volver al Vault Personal</Button>
+        <h2 className="font-display font-black text-2xl uppercase">{t('feed.access_denied')}</h2>
+        <p className="text-ink-soft font-mono text-sm">{t('feed.only_org_desc')}</p>
+        <Button onClick={() => navigate('/')}>{t('feed.back_to_personal')}</Button>
       </div>
     )
   }
@@ -34,20 +36,20 @@ export function TeamFeedPage() {
         <button
           onClick={() => navigate(-1)}
           className="border-3 border-ink p-2 bg-bg-card shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm transition-all duration-150"
-          aria-label="Volver"
+          aria-label={t('common.back')}
         >
           <ArrowLeft size={20} strokeWidth={3} />
         </button>
         <h1 className="font-display font-black text-2xl uppercase tracking-tight flex items-center gap-2">
           <Activity size={24} strokeWidth={3} className="text-accent-pink" />
-          Team Activity Feed
+          {t('feed.team_title')}
         </h1>
       </header>
 
       <main className="max-w-3xl mx-auto p-6 space-y-8">
         {isLoading ? (
           <div className="p-20 text-center animate-pulse font-mono text-sm text-ink-soft">
-            Conectando con el stream de actividad…
+            {t('feed.connecting')}
           </div>
         ) : events.length > 0 ? (
           <div className="relative">
@@ -77,12 +79,12 @@ export function TeamFeedPage() {
                        
                        <p className="text-sm flex items-center gap-2 flex-wrap">
                           <ActivityIcon action={e.action} />
-                          {formatAction(e.action)}
+                          {formatAction(e.action, t)}
                           <button 
                             onClick={() => navigate(`/items/${e.entity_id}`)}
                             className="font-black uppercase text-accent-pink hover:underline"
                           >
-                            {e.metadata?.title || 'este item'}
+                            {e.metadata?.title || t('feed.this_item')}
                           </button>
                        </p>
                     </div>
@@ -94,8 +96,8 @@ export function TeamFeedPage() {
         ) : (
           <div className="p-20 text-center border-3 border-ink border-dashed rounded-xl space-y-4">
              <Sparkles size={48} className="mx-auto text-accent-yellow" strokeWidth={3} />
-             <p className="font-mono text-sm text-ink-soft uppercase font-bold">Todavía no hay actividad en este equipo.</p>
-             <p className="text-xs text-ink-soft italic">Empezá a guardar herramientas para poblar el feed.</p>
+             <p className="font-mono text-sm text-ink-soft uppercase font-bold">{t('feed.no_team_activity')}</p>
+             <p className="text-xs text-ink-soft italic">{t('feed.start_saving_hint')}</p>
           </div>
         )}
       </main>
@@ -111,13 +113,13 @@ function ActivityIcon({ action }: { action: string }) {
   return <Sparkles size={14} className="text-accent-yellow" strokeWidth={3} />
 }
 
-function formatAction(action: string) {
+function formatAction(action: string, t: any) {
   switch (action) {
-    case 'item.created': return 'agregó el item'
-    case 'item.updated_notes': return 'actualizó las notas de'
-    case 'item.updated_tags': return 'cambió los tags de'
-    case 'runbook.created': return 'creó un runbook para'
-    case 'deck.created': return 'creó el deck'
-    default: return 'actualizó'
+    case 'item.created': return t('feed.actions.item_created')
+    case 'item.updated_notes': return t('feed.actions.item_updated_notes')
+    case 'item.updated_tags': return t('feed.actions.item_updated_tags')
+    case 'runbook.created': return t('feed.actions.runbook_created')
+    case 'deck.created': return t('feed.actions.deck_created')
+    default: return t('feed.actions.updated')
   }
 }

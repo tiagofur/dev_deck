@@ -110,7 +110,7 @@ export function SettingsPage() {
               <div>
                 <p className="font-display font-black text-xl uppercase leading-none">{me?.display_name || t('common.loading')}</p>
                 <p className="font-mono text-[10px] text-ink-soft uppercase font-bold mt-1">
-                  Plan: <span className="text-accent-pink">{me?.plan || 'free'}</span>
+                  {t('settings.plan_label')} <span className="text-accent-pink">{me?.plan || t('settings.plan_free')}</span>
                 </p>
               </div>
             </div>
@@ -241,7 +241,7 @@ export function SettingsPage() {
           </>
         )}
 
-        {/* Conexión */}
+        {/* Connection */}
         <Section title={t('settings.connection')}>
           <Field label={t('settings.api_url')}>
             <code className="font-mono text-sm break-all">{apiUrl}</code>
@@ -398,8 +398,8 @@ function PushPermissionRequest() {
     setStatus(res)
     if (res === 'granted') {
       showToast(t('settings.notifications_enabled_desc'))
-      new Notification('¡DevDeck Conectado!', {
-        body: 'Ahora recibirás alertas importantes en tu dispositivo.',
+      new Notification(t('settings.notifications_toast.title'), {
+        body: t('settings.notifications_toast.body'),
         icon: '/favicon.svg'
       })
     }
@@ -582,28 +582,28 @@ function OrgSAMLManager({ orgId }: { orgId: string }) {
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-3">
         <div>
-          <label className="block text-[9px] font-black uppercase mb-1">Dominio Corporativo (ej: acme.com)</label>
+          <label className="block text-[9px] font-black uppercase mb-1">{t('settings.saml.domain_label')}</label>
           <input 
             value={domain} onChange={e => setDomain(e.target.value)}
             className="w-full border-2 border-ink p-2 font-mono text-xs focus:bg-accent-yellow/5 outline-none"
           />
         </div>
         <div>
-          <label className="block text-[9px] font-black uppercase mb-1">IDP SSO URL</label>
+          <label className="block text-[9px] font-black uppercase mb-1">{t('settings.saml.idp_sso_url')}</label>
           <input 
             value={ssoUrl} onChange={e => setSsoUrl(e.target.value)}
             className="w-full border-2 border-ink p-2 font-mono text-xs focus:bg-accent-yellow/5 outline-none"
           />
         </div>
         <div>
-          <label className="block text-[9px] font-black uppercase mb-1">IDP Entity ID</label>
+          <label className="block text-[9px] font-black uppercase mb-1">{t('settings.saml.idp_entity_id')}</label>
           <input 
             value={entityId} onChange={e => setEntityId(e.target.value)}
             className="w-full border-2 border-ink p-2 font-mono text-xs focus:bg-accent-yellow/5 outline-none"
           />
         </div>
         <div>
-          <label className="block text-[9px] font-black uppercase mb-1">X.509 Certificate (PEM)</label>
+          <label className="block text-[9px] font-black uppercase mb-1">{t('settings.saml.cert_label')}</label>
           <textarea 
             value={cert} onChange={e => setCert(e.target.value)}
             rows={4}
@@ -630,7 +630,7 @@ function OrgSCIMManager({ orgId }: { orgId: string }) {
     try {
       const res = await generate.mutateAsync(orgId)
       setToken(res.token)
-      showToast('Nuevo Token SCIM generado')
+      showToast(t('settings.scim_token_generated'))
     } catch (err) {
       showToast((err as Error).message, 'error')
     }
@@ -646,8 +646,8 @@ function OrgSCIMManager({ orgId }: { orgId: string }) {
 
       {token ? (
         <div className="bg-accent-yellow border-3 border-ink p-4 shadow-hard animate-in zoom-in duration-300">
-           <p className="text-xs font-bold uppercase mb-2">¡Token SCIM generado!</p>
-           <p className="text-[10px] mb-3 leading-tight text-ink/70">Copiá esta clave ahora para tu IdP. No se volverá a mostrar.</p>
+           <p className="text-xs font-bold uppercase mb-2">{t('settings.scim_token_generated')}</p>
+           <p className="text-[10px] mb-3 leading-tight text-ink/70">{t('settings.scim_token_desc')}</p>
            <div className="flex items-center gap-2">
               <code className="bg-white border-2 border-ink px-3 py-2 text-[10px] font-mono flex-1 break-all select-all">
                 {token}
@@ -668,7 +668,7 @@ function OrgSCIMManager({ orgId }: { orgId: string }) {
 
       <div className="bg-bg-primary border-2 border-ink p-3">
          <p className="text-[9px] font-mono leading-tight text-ink-soft italic">
-           Tip: Usá esta URL y el token en Okta o Azure AD para automatizar la gestión de tus usuarios.
+           {t('settings.scim_tip')}
          </p>
       </div>
     </div>

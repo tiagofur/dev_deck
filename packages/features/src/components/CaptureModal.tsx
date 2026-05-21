@@ -324,12 +324,12 @@ export function CaptureModal({
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <div>
                       <p className="font-mono text-[10px] uppercase font-bold text-ink-soft">{t(`${laneKey}.eyebrow`)}</p>
-                      <h3 className="font-display font-black uppercase text-xl">{activeLane.label}</h3>
+                      <h3 className="font-display font-black uppercase text-xl">{t(activeLane.label)}</h3>
                       <p className="text-sm text-ink-soft mt-1">{t(`${laneKey}.microcopy`)}</p>
                     </div>
                     {detected && (
                       <div className="border-2 border-ink bg-accent-lime/40 px-2 py-1 text-[10px] font-mono uppercase font-bold shrink-0">
-                        Auto: {detected.type}
+                        {t('common.auto')}: {detected.type}
                       </div>
                     )}
                   </div>
@@ -341,7 +341,7 @@ export function CaptureModal({
                         id="capture-title"
                         aria-label={t('capture.name_label')}
                         type="text"
-                        placeholder={activeLane.namePlaceholder}
+                        placeholder={t(activeLane.namePlaceholder)}
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         className="w-full border-3 border-ink p-3 font-mono text-sm focus:outline-none focus:bg-accent-yellow/20"
@@ -371,7 +371,7 @@ export function CaptureModal({
                           aria-label={t(`${laneKey}.primary_label`)}
                           autoFocus
                           rows={5}
-                          placeholder={activeLane.primaryPlaceholder}
+                          placeholder={t(activeLane.primaryPlaceholder)}
                           value={primaryValue}
                           onChange={(e) => handlePrimaryChange(e.target.value)}
                           onPaste={handlePrimaryPaste}
@@ -384,7 +384,7 @@ export function CaptureModal({
                           autoFocus
                           type="text"
                           inputMode={activeLane.primaryKind === 'url' ? 'url' : 'text'}
-                          placeholder={activeLane.primaryPlaceholder}
+                          placeholder={t(activeLane.primaryPlaceholder)}
                           value={primaryValue}
                           onChange={(e) => handlePrimaryChange(e.target.value)}
                           onBlur={handlePrimaryBlur}
@@ -517,10 +517,10 @@ function LanePicker({
                 <Icon size={17} strokeWidth={3} className="shrink-0 mt-0.5" />
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-display font-black uppercase text-xs">{lane.label}</span>
+                    <span className="font-display font-black uppercase text-xs">{t(lane.label)}</span>
                     {detected && <Sparkles size={12} className="text-accent-pink" />}
                   </div>
-                  <p className="font-mono text-[10px] text-ink-soft mt-0.5 leading-tight">{lane.example}</p>
+                  <p className="font-mono text-[10px] text-ink-soft mt-0.5 leading-tight">{t(lane.example)}</p>
                 </div>
               </div>
             </button>
@@ -571,7 +571,7 @@ function CapturePreview({
         <img src={preview.image} alt="" className="w-full h-32 object-cover mb-3 border-2 border-ink" />
       )}
       <p className="font-display font-black text-xl uppercase break-words">
-        {title || preview?.title || lane.namePlaceholder}
+        {title || preview?.title || t(lane.namePlaceholder)}
       </p>
       {(preview?.description || mainLine) && (
         <p className="text-sm text-ink-soft mt-1 line-clamp-3 whitespace-pre-wrap">

@@ -261,6 +261,7 @@ function CreateCheatsheetModal({
   onSubmit: (input: CreateCheatsheetInput) => void
   onClose: () => void
 }) {
+  const { t } = useTranslation()
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
   const [category, setCategory] = useState('tool')
@@ -303,7 +304,7 @@ function CreateCheatsheetModal({
         className="bg-bg-card border-5 border-ink shadow-hard-xl p-7 w-full max-w-lg"
       >
         <header className="flex items-center justify-between mb-5">
-          <h2 className="font-display font-black text-2xl uppercase">Nueva cheatsheet</h2>
+          <h2 className="font-display font-black text-2xl uppercase">{t('cheatsheets.new_cheatsheet')}</h2>
           <button type="button" onClick={onClose} className="border-3 border-ink p-1 hover:bg-accent-pink transition-colors">
             <X size={18} strokeWidth={3} />
           </button>
@@ -339,7 +340,7 @@ function CreateCheatsheetModal({
               className="w-full border-3 border-ink p-2 font-mono text-sm focus:outline-none focus:bg-accent-yellow/20 bg-bg-card"
             >
               {CATEGORY_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
+                <option key={o.value} value={o.value}>{t(`cheatsheets.categories.${o.value}`)}</option>
               ))}
             </select>
           </div>

@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Sparkles, Download, Check, Info, User, ExternalLink, Zap } from 'lucide-react'
+import { Sparkles, Download, Check, User } from 'lucide-react'
 import { 
   useFeaturedPlugins, 
   useCreateCustomEnricher, 
@@ -9,8 +8,10 @@ import {
   type PluginTemplate 
 } from '@devdeck/api-client'
 import { Button, showToast } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 
 export function PluginGallery() {
+  const { t } = useTranslation()
   const { data: featuredRes, isLoading } = useFeaturedPlugins()
   const { data: myEnrichersRes } = useCustomEnrichers()
   const { data: myWebhooksRes } = useWebhooks()
@@ -31,7 +32,7 @@ export function PluginGallery() {
           endpoint_url: p.endpoint_url!
         })
       } else {
-        const url = window.prompt(`Ingresá la URL de destino para ${p.name}:`)
+        const url = window.prompt(t('plugins.enter_webhook_url', { name: p.name }))
         if (!url) return
         await createWebhook.mutateAsync({
           name: p.name,
@@ -39,7 +40,7 @@ export function PluginGallery() {
           events: p.events!
         })
       }
-      showToast(`${p.name} instalado correctamente`)
+      showToast(t('plugins.install_success', { name: p.name }))
     } catch (err) {
       showToast((err as Error).message, 'error')
     }
@@ -58,15 +59,15 @@ export function PluginGallery() {
         <div>
            <h3 className="font-display font-black uppercase text-sm tracking-widest flex items-center gap-2">
              <Sparkles size={16} className="text-accent-yellow" />
-             Galería de Plugins
+             {t('plugins.gallery_title')}
            </h3>
-           <p className="text-[10px] text-ink-soft font-mono mt-1 uppercase">Curados por la comunidad de DevDeck</p>
+           <p className="text-[10px] text-ink-soft font-mono mt-1 uppercase">{t('plugins.gallery_subtitle')}</p>
         </div>
       </header>
 
       {isLoading ? (
         <div className="p-20 text-center animate-pulse font-mono text-xs text-ink-soft">
-          Explorando el ecosistema…
+          {t('plugins.exploring')}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -106,9 +107,9 @@ export function PluginGallery() {
                     className="w-full"
                    >
                      {installed ? (
-                       <span className="flex items-center gap-1.5"><Check size={12} strokeWidth={4} /> Instalado</span>
+                       <span className="flex items-center gap-1.5"><Check size={12} strokeWidth={4} /> {t('plugins.installed')}</span>
                      ) : (
-                       <span className="flex items-center gap-1.5"><Download size={12} strokeWidth={3} /> Instalar</span>
+                       <span className="flex items-center gap-1.5"><Download size={12} strokeWidth={3} /> {t('plugins.install')}</span>
                      )}
                    </Button>
                 </div>

@@ -101,7 +101,7 @@ export function CheatsheetDetailPage() {
   async function handleDelete(e: Entry) {
     try {
       await deleteEntry.mutateAsync(e.id)
-      showToast('Entry borrada')
+      showToast(t('item_detail.entry_deleted_toast'))
     } catch (err) {
       showToast((err as Error).message, 'error')
     }
@@ -111,10 +111,10 @@ export function CheatsheetDetailPage() {
     try {
       if (editingEntry) {
         await updateEntry.mutateAsync({ entryId: editingEntry.id, input })
-        showToast('Entry actualizada')
+        showToast(t('item_detail.entry_updated_toast'))
       } else {
         await createEntry.mutateAsync(input)
-        showToast('Entry creada')
+        showToast(t('item_detail.entry_created_toast'))
       }
       setEditingEntry(null)
       setAddingNew(false)
@@ -133,7 +133,7 @@ export function CheatsheetDetailPage() {
                      hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg
                      active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
                      transition-all duration-150"
-          aria-label="Volver"
+          aria-label={t('common.back')}
         >
           <ArrowLeft size={20} strokeWidth={3} />
         </button>
@@ -159,7 +159,7 @@ export function CheatsheetDetailPage() {
             type="button"
             onClick={handleDeleteCheatsheet}
             disabled={deleteCheatsheet.isPending}
-            aria-label="Borrar cheatsheet"
+            aria-label={t('common.delete')}
             className="border-3 border-ink p-2 bg-bg-card shadow-hard hover:bg-danger hover:text-white
                        disabled:opacity-50 transition-colors ml-auto lg:ml-0"
           >
@@ -269,6 +269,7 @@ function EntryCard({
   onEdit: () => void
   onDelete: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <div className="bg-bg-card border-3 border-ink shadow-hard p-4">
       <div className="flex items-start gap-3">
@@ -302,7 +303,7 @@ function EntryCard({
           <button
             type="button"
             onClick={onCopy}
-            aria-label="Copiar"
+            aria-label={t('common.copy_code')}
             className="border-2 border-ink p-1.5 bg-bg-card hover:bg-accent-lime
                        active:translate-x-[1px] active:translate-y-[1px] transition-transform"
           >
@@ -311,7 +312,7 @@ function EntryCard({
           <button
             type="button"
             onClick={onEdit}
-            aria-label="Editar"
+            aria-label={t('item_detail.edit_button')}
             className="border-2 border-ink p-1.5 bg-bg-card hover:bg-accent-yellow
                        active:translate-x-[1px] active:translate-y-[1px] transition-transform"
           >
@@ -320,7 +321,7 @@ function EntryCard({
           <button
             type="button"
             onClick={onDelete}
-            aria-label="Borrar"
+            aria-label={t('common.delete')}
             className="border-2 border-ink p-1.5 bg-bg-card hover:bg-danger hover:text-white
                        active:translate-x-[1px] active:translate-y-[1px] transition-transform"
           >
@@ -362,6 +363,7 @@ function EntryModal({
   onSubmit: (input: { label: string; command: string; description: string; tags: string[] }) => void
   onClose: () => void
 }) {
+  const { t } = useTranslation()
   const [label, setLabel] = useState(entry?.label ?? '')
   const [command, setCommand] = useState(entry?.command ?? '')
   const [description, setDescription] = useState(entry?.description ?? '')
@@ -390,16 +392,16 @@ function EntryModal({
       >
         <header className="flex items-center justify-between mb-5">
           <h2 className="font-display font-black text-2xl uppercase">
-            {entry ? 'Editar entry' : 'Nueva entry'}
+            {entry ? t('cheatsheets.edit_entry') : t('cheatsheets.add_entry')}
           </h2>
-          <button type="button" onClick={onClose} className="border-3 border-ink p-1 hover:bg-accent-pink">
+          <button type="button" onClick={onClose} aria-label={t('common.close')} className="border-3 border-ink p-1 hover:bg-accent-pink">
             <X size={18} strokeWidth={3} />
           </button>
         </header>
 
         <div className="space-y-4">
           <div>
-            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">Label</label>
+            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">{t('cheatsheets.entry_label')}</label>
             <input
               autoFocus
               value={label}
@@ -409,7 +411,7 @@ function EntryModal({
             />
           </div>
           <div>
-            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">Command</label>
+            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">{t('cheatsheets.entry_command')}</label>
             <input
               value={command}
               onChange={(e) => setCommand(e.target.value)}
@@ -418,7 +420,7 @@ function EntryModal({
             />
           </div>
           <div>
-            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">Description</label>
+            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">{t('cheatsheets.entry_description')}</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -428,7 +430,7 @@ function EntryModal({
             />
           </div>
           <div>
-            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">Tags (comma separated)</label>
+            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">{t('cheatsheets.entry_tags')}</label>
             <input
               value={tagsStr}
               onChange={(e) => setTagsStr(e.target.value)}
@@ -443,9 +445,9 @@ function EntryModal({
         )}
 
         <div className="mt-6 flex justify-end gap-3">
-          <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
+          <Button type="button" variant="secondary" onClick={onClose}>{t('common.cancel')}</Button>
           <Button type="submit" disabled={saving || !label.trim() || !command.trim()}>
-            {saving ? 'Guardando…' : entry ? 'Guardar' : 'Crear'}
+            {saving ? t('common.loading') : entry ? t('common.save') : t('common.create')}
           </Button>
         </div>
       </form>

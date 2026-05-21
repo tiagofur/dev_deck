@@ -2,8 +2,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Download, ExternalLink, Library, Sparkles } from 'lucide-react'
 import { usePublicDeck, useImportDeck, isLoggedIn } from '@devdeck/api-client'
 import { Button, TagChip, hashIndex, showToast } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 
 export function PublicDeckPage() {
+	const { t } = useTranslation()
 	const { slug } = useParams<{ slug: string }>()
 	const navigate = useNavigate()
 	const { data, isLoading, error } = usePublicDeck(slug || '')
@@ -14,7 +16,7 @@ export function PublicDeckPage() {
 
 	async function handleImport() {
 		if (!isLoggedIn()) {
-			showToast('Iniciá sesión para importar este deck', 'error')
+			showToast(t('profile.login_to_import'), 'error')
 			navigate('/login')
 			return
 		}
@@ -23,7 +25,7 @@ export function PublicDeckPage() {
 
 		try {
 			const res = await importDeck.mutateAsync(deck.id)
-			showToast(`¡Listo! Se importaron ${res.imported} items a tu vault.`, 'success')
+			showToast(t('profile.import_success', { count: res.imported }), 'success')
 			navigate('/items')
 		} catch (err) {
 			showToast((err as Error).message, 'error')
@@ -33,7 +35,7 @@ export function PublicDeckPage() {
 	if (isLoading) {
 		return (
 			<div className="min-h-screen bg-bg-primary p-8 flex items-center justify-center">
-				<div className="font-mono text-sm animate-pulse">Cargando deck público…</div>
+				<div className="font-mono text-sm animate-pulse">{t('profile.loading_deck')}</div>
 			</div>
 		)
 	}
@@ -41,8 +43,8 @@ export function PublicDeckPage() {
 	if (error || !deck) {
 		return (
 			<div className="min-h-screen bg-bg-primary p-8 flex flex-col items-center justify-center gap-4">
-				<p className="font-display font-black text-2xl uppercase">Deck no encontrado</p>
-				<Button onClick={() => navigate('/')}>Volver al inicio</Button>
+				<p className="font-display font-black text-2xl uppercase">{t('profile.deck_not_found')}</p>
+				<Button onClick={() => navigate('/')}>{t('profile.back_to_home')}</Button>
 			</div>
 		)
 	}
@@ -57,7 +59,7 @@ export function PublicDeckPage() {
 											 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg
 											 active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
 											 transition-all duration-150"
-						aria-label="Volver"
+						aria-label={t('common.back')}
 					>
 						<ArrowLeft size={20} strokeWidth={3} />
 					</button>
@@ -66,7 +68,7 @@ export function PublicDeckPage() {
 							{deck.title}
 						</h1>
 						<p className="text-[10px] font-mono text-ink-soft uppercase font-bold flex items-center gap-1.5">
-							<Library size={10} /> Deck Público
+							<Library size={10} /> {t('profile.public_deck_label')}
 						</p>
 					</div>
 				</div>
@@ -79,7 +81,7 @@ export function PublicDeckPage() {
 				>
 					<span className="flex items-center gap-2">
 						<Download size={18} strokeWidth={3} />
-						{importDeck.isPending ? 'Importando…' : 'Importar a mi vault'}
+						{importDeck.isPending ? t('profile.importing') : t('profile.import_to_vault')}
 					</span>
 				</Button>
 			</header>
@@ -116,7 +118,7 @@ export function PublicDeckPage() {
 									)}
 								</div>
 								<p className="text-sm text-ink-soft mb-4 line-clamp-2">
-									{it.ai_summary || it.description || 'Sin descripción'}
+									{it.ai_summary || it.description || t('common.no_description')}
 								</p>
 							</div>
 							<div className="flex flex-wrap gap-1.5 mt-auto">
@@ -130,7 +132,7 @@ export function PublicDeckPage() {
 
 				{items.length === 0 && (
 					<div className="text-center py-20 border-3 border-ink border-dashed rounded-xl">
-						<p className="font-mono text-ink-soft">Este deck está vacío.</p>
+						<p className="font-mono text-ink-soft">{t('profile.empty_deck')}</p>
 					</div>
 				)}
 
@@ -143,7 +145,7 @@ export function PublicDeckPage() {
 					>
 						<span className="flex items-center justify-center gap-2">
 							<Download size={18} strokeWidth={3} />
-							{importDeck.isPending ? 'Importando…' : 'Importar a mi vault'}
+							{importDeck.isPending ? t('profile.importing') : t('profile.import_to_vault')}
 						</span>
 					</Button>
 				</div>

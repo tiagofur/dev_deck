@@ -132,3 +132,10 @@ R: La IA es opt-in. Podés configurar tu propia OpenAI API key o usar Ollama loc
 
 **P: ¿Es para equipos o individual?**
 R: Hoy es para uso individual o muy pequeño (allowlist de GitHub). El plan es expandir a multi-usuario en Ola 7, con decks compartibles como puente social.
+
+---
+
+## El Futuro: El Cinturón de Utilidades (Batman Utility Belt)
+
+DevDeck está evolucionando más allá del almacenamiento pasivo de conocimiento para convertirse en una herramienta de **acción instantánea** en el día a día. Para más detalles técnicos y de producto sobre esta nueva evolución, revisar:
+👉 **[BATMAN_UTILITY_BELT.es.md](BATMAN_UTILITY_BELT.es.md)**

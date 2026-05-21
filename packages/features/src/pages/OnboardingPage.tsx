@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Rocket, Box, Cpu, Brain, Check, ArrowRight, Loader2, Sparkles } from 'lucide-react'
+import { Rocket, Box, Check, ArrowRight, Loader2, Sparkles } from 'lucide-react'
 import { Button, showToast } from '@devdeck/ui'
 import { 
   useOnboardingKits, 
@@ -9,8 +9,10 @@ import {
   useCompleteOnboarding,
   useMe
 } from '@devdeck/api-client'
+import { useTranslation, Trans } from '@devdeck/i18n'
 
 export function OnboardingPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { data: user } = useMe()
   const { data: kitsRes, isLoading: loadingKits } = useOnboardingKits()
@@ -30,13 +32,21 @@ export function OnboardingPage() {
         await installKit.mutateAsync(selectedKit)
       }
       await completeOnboarding.mutateAsync()
-      showToast('¡Todo listo! Bienvenido a DevDeck.')
+      showToast(t('onboarding.finish_toast'))
       navigate('/items')
     } catch (err) {
       showToast((err as Error).message, 'error')
     } finally {
       setInstalling(false)
     }
+  }
+
+  if (loadingKits) {
+    return (
+      <div className="min-h-screen bg-bg-primary flex items-center justify-center">
+        <Loader2 className="animate-spin text-ink-soft" size={32} />
+      </div>
+    )
   }
 
   return (
@@ -65,15 +75,15 @@ export function OnboardingPage() {
                    <Rocket size={32} strokeWidth={3} />
                 </div>
                 <h1 className="font-display font-black text-4xl uppercase tracking-tighter">
-                  ¡Hola, {user?.display_name || 'Developer'}!
+                  {t('onboarding.welcome_title', { name: user?.display_name || 'Developer' })}
                 </h1>
                 <p className="text-xl font-mono leading-relaxed">
-                  Bienvenido a tu nueva memoria externa. DevDeck te ayuda a organizar el caos de herramientas que descubrís cada día.
+                  {t('onboarding.welcome_desc')}
                 </p>
               </div>
 
               <Button size="lg" onClick={() => setStep(2)} className="w-full sm:w-auto">
-                 Empezar <ArrowRight size={20} strokeWidth={3} className="ml-2" />
+                 {t('onboarding.start_button')} <ArrowRight size={20} strokeWidth={3} className="ml-2" />
               </Button>
             </motion.div>
           )}
@@ -87,9 +97,9 @@ export function OnboardingPage() {
               className="space-y-8 py-4"
             >
               <div className="space-y-2">
-                <h2 className="font-display font-black text-2xl uppercase tracking-tight">Elegí tu Pack Inicial</h2>
+                <h2 className="font-display font-black text-2xl uppercase tracking-tight">{t('onboarding.choose_pack_title')}</h2>
                 <p className="font-mono text-sm text-ink-soft">
-                  Seleccioná un stack para pre-poblar tu vault con herramientas esenciales.
+                  {t('onboarding.choose_pack_desc')}
                 </p>
               </div>
 
@@ -122,14 +132,14 @@ export function OnboardingPage() {
                      <div className="w-10 h-10 border-2 border-ink bg-white flex items-center justify-center mb-3 shadow-hard-sm">
                         <Box size={20} />
                      </div>
-                     <h4 className="font-display font-black text-xs uppercase mb-1">Vault Vacío</h4>
-                     <p className="text-[10px] font-mono text-ink-soft leading-tight">Empezar de cero y agregar mis propios recursos.</p>
+                     <h4 className="font-display font-black text-xs uppercase mb-1">{t('onboarding.empty_vault_title')}</h4>
+                     <p className="text-[10px] font-mono text-ink-soft leading-tight">{t('onboarding.empty_vault_desc')}</p>
                  </button>
               </div>
 
               <div className="flex gap-4">
-                 <Button variant="secondary" onClick={() => setStep(1)}>Atrás</Button>
-                 <Button onClick={() => setStep(3)} className="flex-1">Continuar</Button>
+                 <Button variant="secondary" onClick={() => setStep(1)}>{t('onboarding.back_button')}</Button>
+                 <Button onClick={() => setStep(3)} className="flex-1">{t('onboarding.continue_button')}</Button>
               </div>
             </motion.div>
           )}
@@ -146,35 +156,38 @@ export function OnboardingPage() {
                 <div className="w-20 h-20 bg-accent-lime border-4 border-ink rounded-full flex items-center justify-center shadow-hard mx-auto">
                    <Sparkles size={40} strokeWidth={3} />
                 </div>
-                <h2 className="font-display font-black text-3xl uppercase tracking-tighter">¡Listo para la acción!</h2>
+                <h2 className="font-display font-black text-3xl uppercase tracking-tighter">{t('onboarding.ready_title')}</h2>
                 <p className="text-lg font-mono leading-relaxed max-w-md mx-auto">
-                   Tu vault está configurado. Recordá instalar la <span className="underline decoration-accent-pink decoration-4">Extensión de Chrome</span> para capturar recursos en un click.
+                   <Trans 
+                    i18nKey="onboarding.ready_desc"
+                    components={{ 1: <span className="underline decoration-accent-pink decoration-4" /> }}
+                   />
                 </p>
               </div>
 
               <div className="bg-bg-primary border-3 border-ink p-6 space-y-4 text-left shadow-hard-sm">
                  <div className="flex items-center gap-3">
                     <Check className="text-accent-lime" strokeWidth={4} size={20} />
-                    <span className="font-display font-black uppercase text-xs">Sincronización en la nube activa</span>
+                    <span className="font-display font-black uppercase text-xs">{t('onboarding.sync_active')}</span>
                  </div>
                  <div className="flex items-center gap-3">
                     <Check className="text-accent-lime" strokeWidth={4} size={20} />
-                    <span className="font-display font-black uppercase text-xs">Asistente de IA listo</span>
+                    <span className="font-display font-black uppercase text-xs">{t('onboarding.ai_ready')}</span>
                  </div>
                  <div className="flex items-center gap-3 opacity-40">
                     <div className="w-5 h-5 border-2 border-ink rounded-sm" />
-                    <span className="font-display font-black uppercase text-xs">Primer item capturado</span>
+                    <span className="font-display font-black uppercase text-xs">{t('onboarding.first_item_captured')}</span>
                  </div>
               </div>
 
               <div className="flex gap-4">
-                 <Button variant="secondary" onClick={() => setStep(2)}>Atrás</Button>
+                 <Button variant="secondary" onClick={() => setStep(2)}>{t('onboarding.back_button')}</Button>
                  <Button 
                     onClick={handleFinish} 
                     className="flex-1 bg-accent-pink" 
                     disabled={installing}
                  >
-                    {installing ? <Loader2 className="animate-spin" /> : 'Entrar a DevDeck'}
+                    {installing ? <Loader2 className="animate-spin" /> : t('onboarding.enter_button')}
                  </Button>
               </div>
             </motion.div>

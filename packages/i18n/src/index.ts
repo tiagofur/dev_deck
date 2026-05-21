@@ -18,7 +18,7 @@ i18n
     lng: 'en', // Default language
     fallbackLng: 'en',
     interpolation: {
-      escapeValue: false, // React already safes from xss
+      escapeValue: false, // React already saves from XSS
     },
     react: {
       useSuspense: false,

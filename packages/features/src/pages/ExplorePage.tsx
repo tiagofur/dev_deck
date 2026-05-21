@@ -153,6 +153,7 @@ function ExploreCard({
   cheatsheet: Cheatsheet
   onClick: () => void
 }) {
+  const { t } = useTranslation()
   const color = cheatsheet.color ?? '#888'
   return (
     <div
@@ -165,7 +166,7 @@ function ExploreCard({
       {cheatsheet.is_official && (
         <div className="absolute top-3 right-3 bg-accent-blue border-2 border-ink px-1.5 py-0.5 
                       text-[9px] font-black uppercase tracking-tighter shadow-hard-sm">
-          Official
+          {t('common.official')}
         </div>
       )}
       
@@ -187,7 +188,7 @@ function ExploreCard({
       </div>
       
       <p className="font-mono text-xs text-ink-soft line-clamp-3 mb-6 min-h-[3em]">
-        {cheatsheet.description || 'Una colección de comandos esenciales para potenciar tu flujo de trabajo.'}
+        {cheatsheet.description || t('explore.default_description')}
       </p>
 
       <div className="flex items-center justify-between mt-auto">
@@ -195,10 +196,10 @@ function ExploreCard({
           <span className="flex items-center gap-1">
             <Star size={12} /> {cheatsheet.stars_count || 0}
           </span>
-          <span>{cheatsheet.fork_count || 0} forks</span>
+          <span>{t('explore.forks_count', { count: cheatsheet.fork_count || 0 })}</span>
         </div>
         <div className="text-[10px] font-mono font-bold uppercase underline group-hover:text-ink transition-colors">
-          Ver detalles
+          {t('explore.view_details')}
         </div>
       </div>
     </div>

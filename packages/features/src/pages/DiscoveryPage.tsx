@@ -14,10 +14,12 @@ import {
   usePreferences,
 } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 
 type Tab = 'swipe' | 'trending' | 'leaderboard' | 'team'
 
 export function DiscoveryPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { activeOrgId } = usePreferences()
   const [activeTab, setActiveTab] = useState<Tab>(activeOrgId ? 'team' : 'swipe')
@@ -31,19 +33,19 @@ export function DiscoveryPage() {
       switch (dir) {
         case 'right':
           await markSeen.mutateAsync(repo.id)
-          showToast('Marcado como visto')
+          showToast(t('discovery.marked_seen'))
           break
         case 'left':
           await updateRepo.mutateAsync({
             id: repo.id,
             input: { archived: true },
           })
-          showToast('Archivado')
+          showToast(t('discovery.archived_toast'))
           break
         case 'up':
           window.open(repo.url, '_blank', 'noopener,noreferrer')
           await markSeen.mutateAsync(repo.id)
-          showToast('Abierto en browser')
+          showToast(t('discovery.opened_in_browser'))
           break
       }
       void refetch()
@@ -59,37 +61,37 @@ export function DiscoveryPage() {
           <button
             onClick={() => navigate('/')}
             className="border-3 border-ink p-2 bg-bg-card shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all"
-            aria-label="Volver"
+            aria-label={t('common.back')}
           >
             <ArrowLeft size={20} strokeWidth={3} />
           </button>
           <h1 className="font-display font-black text-2xl uppercase tracking-tight flex items-center gap-2">
             <Sparkles size={22} strokeWidth={3} className="text-accent-yellow" />
-            Comunidad
+            {t('discovery.title')}
           </h1>
         </div>
 
         <div className="flex bg-bg-card border-3 border-ink shadow-hard-sm">
-           <TabButton active={activeTab === 'swipe'} onClick={() => setActiveTab('swipe')} icon={<Layers size={14} />} label="Revisar" />
-           <TabButton active={activeTab === 'trending'} onClick={() => setActiveTab('trending')} icon={<Flame size={14} />} label="Tendencias" />
+           <TabButton active={activeTab === 'swipe'} onClick={() => setActiveTab('swipe')} icon={<Layers size={14} />} label={t('discovery.tabs.review')} />
+           <TabButton active={activeTab === 'trending'} onClick={() => setActiveTab('trending')} icon={<Flame size={14} />} label={t('discovery.tabs.trending')} />
            {activeOrgId && (
-             <TabButton active={activeTab === 'team'} onClick={() => setActiveTab('team')} icon={<Users size={14} />} label="Equipo" />
+             <TabButton active={activeTab === 'team'} onClick={() => setActiveTab('team')} icon={<Users size={14} />} label={t('discovery.tabs.team')} />
            )}
-           <TabButton active={activeTab === 'leaderboard'} onClick={() => setActiveTab('leaderboard')} icon={<Trophy size={14} />} label="Top" />
+           <TabButton active={activeTab === 'leaderboard'} onClick={() => setActiveTab('leaderboard')} icon={<Trophy size={14} />} label={t('discovery.tabs.top')} />
         </div>
       </header>
 
       <main className="flex-1 flex flex-col items-center p-6 sm:p-12 overflow-y-auto">
         {activeTab === 'swipe' && (
           <div className="w-full flex-1 flex items-center justify-center">
-            {isLoading && <p className="font-mono text-ink-soft">Buscando algo para vos…</p>}
+            {isLoading && <p className="font-mono text-ink-soft">{t('discovery.searching_for_you')}</p>}
             
             {!isLoading && !repo && (
               <div className="text-center max-w-md">
                 <div className="text-7xl mb-6">🎉</div>
-                <h2 className="font-display font-black text-4xl uppercase mb-3">¡Listo!</h2>
-                <p className="font-mono text-ink mb-8 text-sm uppercase font-bold opacity-60">Revisaste todo tu vault personal.</p>
-                <Button variant="secondary" onClick={() => setActiveTab('trending')}>Explorar Tendencias Globales</Button>
+                <h2 className="font-display font-black text-4xl uppercase mb-3">{t('discovery.all_done')}</h2>
+                <p className="font-mono text-ink mb-8 text-sm uppercase font-bold opacity-60">{t('discovery.reviewed_all')}</p>
+                <Button variant="secondary" onClick={() => setActiveTab('trending')}>{t('discovery.explore_trending')}</Button>
               </div>
             )}
 

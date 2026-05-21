@@ -7,7 +7,6 @@ import {
   Ticket, 
   ShieldCheck, 
   Plus, 
-  ExternalLink,
   CheckCircle2,
   XCircle,
   Loader2
@@ -19,10 +18,12 @@ import {
   useCreateInvite 
 } from '@devdeck/api-client'
 import { Button, showToast } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 
 type Tab = 'users' | 'waitlist' | 'invites'
 
 export function AdminDashboardPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<Tab>('users')
 
@@ -32,13 +33,13 @@ export function AdminDashboardPage() {
         <button
           onClick={() => navigate('/settings')}
           className="border-3 border-ink p-2 bg-bg-card shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm transition-all duration-150"
-          aria-label="Volver"
+          aria-label={t('common.back')}
         >
           <ArrowLeft size={20} strokeWidth={3} />
         </button>
         <h1 className="font-display font-black text-2xl uppercase tracking-tight flex items-center gap-2">
           <ShieldCheck size={24} strokeWidth={3} className="text-accent-pink" />
-          Admin Dashboard
+          {t('admin.title')}
         </h1>
       </header>
 
@@ -50,19 +51,19 @@ export function AdminDashboardPage() {
               active={activeTab === 'users'} 
               onClick={() => setActiveTab('users')} 
               icon={<Users size={18} />} 
-              label="Usuarios" 
+              label={t('admin.users')} 
             />
             <NavButton 
               active={activeTab === 'waitlist'} 
               onClick={() => setActiveTab('waitlist')} 
               icon={<Mail size={18} />} 
-              label="Waitlist" 
+              label={t('admin.waitlist')} 
             />
             <NavButton 
               active={activeTab === 'invites'} 
               onClick={() => setActiveTab('invites')} 
               icon={<Ticket size={18} />} 
-              label="Invitaciones" 
+              label={t('admin.invites')} 
             />
           </aside>
 
@@ -93,6 +94,7 @@ function NavButton({ active, onClick, icon, label }: { active: boolean; onClick:
 }
 
 function UsersTab() {
+  const { t } = useTranslation()
   const { data, isLoading } = useAdminUsers()
   const users = data?.users || []
 
@@ -103,10 +105,10 @@ function UsersTab() {
       <table className="w-full text-left border-collapse">
         <thead className="bg-bg-elevated border-b-3 border-ink">
           <tr>
-            <th className="p-4 font-mono text-[10px] uppercase font-black">Login / ID</th>
-            <th className="p-4 font-mono text-[10px] uppercase font-black text-center">Plan</th>
-            <th className="p-4 font-mono text-[10px] uppercase font-black text-center">Items</th>
-            <th className="p-4 font-mono text-[10px] uppercase font-black text-right">Creado</th>
+            <th className="p-4 font-mono text-[10px] uppercase font-black">{t('admin.table.login_id')}</th>
+            <th className="p-4 font-mono text-[10px] uppercase font-black text-center">{t('admin.table.plan')}</th>
+            <th className="p-4 font-mono text-[10px] uppercase font-black text-center">{t('admin.table.items')}</th>
+            <th className="p-4 font-mono text-[10px] uppercase font-black text-right">{t('admin.table.created')}</th>
           </tr>
         </thead>
         <tbody className="divide-y-2 divide-ink/10">
@@ -134,6 +136,7 @@ function UsersTab() {
 }
 
 function WaitlistTab() {
+  const { t } = useTranslation()
   const { data, isLoading, refetch } = useAdminWaitlist()
   const createInvite = useCreateInvite()
   const entries = data?.entries || []
@@ -141,7 +144,7 @@ function WaitlistTab() {
   async function handleInvite(email: string) {
     try {
       await createInvite.mutateAsync({ email })
-      showToast(`Invitación generada para ${email}`, 'success')
+      showToast(t('admin.invite_generated_toast', { email }), 'success')
       refetch()
     } catch (err) {
       showToast((err as Error).message, 'error')
@@ -155,9 +158,9 @@ function WaitlistTab() {
       <table className="w-full text-left border-collapse">
         <thead className="bg-bg-elevated border-b-3 border-ink">
           <tr>
-            <th className="p-4 font-mono text-[10px] uppercase font-black">Email</th>
-            <th className="p-4 font-mono text-[10px] uppercase font-black text-center">Estado</th>
-            <th className="p-4 font-mono text-[10px] uppercase font-black text-right">Acciones</th>
+            <th className="p-4 font-mono text-[10px] uppercase font-black">{t('admin.table.email')}</th>
+            <th className="p-4 font-mono text-[10px] uppercase font-black text-center">{t('admin.table.status')}</th>
+            <th className="p-4 font-mono text-[10px] uppercase font-black text-right">{t('admin.table.actions')}</th>
           </tr>
         </thead>
         <tbody className="divide-y-2 divide-ink/10">
@@ -172,7 +175,7 @@ function WaitlistTab() {
               <td className="p-4 text-right">
                 {e.status === 'pending' && (
                   <Button size="sm" onClick={() => handleInvite(e.email)} disabled={createInvite.isPending}>
-                    Generar Invite
+                    {t('admin.generate_invite')}
                   </Button>
                 )}
               </td>
@@ -185,14 +188,15 @@ function WaitlistTab() {
 }
 
 function InvitesTab() {
+  const { t } = useTranslation()
   const { data, isLoading } = useAdminInvites()
   const createInvite = useCreateInvite()
   const invites = data?.invites || []
 
   async function handleNewCode() {
-    const code = window.prompt('Código personalizado (opcional)') || undefined
+    const code = window.prompt(t('admin.custom_code_prompt')) || undefined
     await createInvite.mutateAsync({ code })
-    showToast('Código generado')
+    showToast(t('admin.code_generated_toast'))
   }
 
   if (isLoading) return <LoadingState />
@@ -201,7 +205,7 @@ function InvitesTab() {
     <div className="space-y-6">
       <div className="flex justify-end">
         <Button onClick={handleNewCode} disabled={createInvite.isPending}>
-          <Plus size={16} strokeWidth={3} className="mr-1" /> Nuevo Código
+          <Plus size={16} strokeWidth={3} className="mr-1" /> {t('admin.new_code_button')}
         </Button>
       </div>
 
@@ -209,9 +213,9 @@ function InvitesTab() {
         <table className="w-full text-left border-collapse">
           <thead className="bg-bg-elevated border-b-3 border-ink">
             <tr>
-              <th className="p-4 font-mono text-[10px] uppercase font-black">Código</th>
-              <th className="p-4 font-mono text-[10px] uppercase font-black text-center">Estado</th>
-              <th className="p-4 font-mono text-[10px] uppercase font-black text-right">Creado</th>
+              <th className="p-4 font-mono text-[10px] uppercase font-black">{t('admin.table.code')}</th>
+              <th className="p-4 font-mono text-[10px] uppercase font-black text-center">{t('admin.table.status')}</th>
+              <th className="p-4 font-mono text-[10px] uppercase font-black text-right">{t('admin.table.created')}</th>
             </tr>
           </thead>
           <tbody className="divide-y-2 divide-ink/10">
@@ -222,13 +226,13 @@ function InvitesTab() {
                   {i.used_by_id ? (
                     <div className="flex flex-col items-center">
                       <span className="flex items-center gap-1 text-[9px] font-mono text-accent-pink uppercase font-bold">
-                         <CheckCircle2 size={10} /> Usado
+                         <CheckCircle2 size={10} /> {t('admin.status.used')}
                       </span>
                       <span className="text-[8px] font-mono text-ink-soft">{i.used_by_id}</span>
                     </div>
                   ) : (
                     <span className="text-[9px] font-mono text-ink-soft uppercase font-bold flex items-center justify-center gap-1">
-                      <XCircle size={10} /> Libre
+                      <XCircle size={10} /> {t('admin.status.free')}
                     </span>
                   )}
                 </td>
@@ -245,10 +249,11 @@ function InvitesTab() {
 }
 
 function LoadingState() {
+  const { t } = useTranslation()
   return (
     <div className="p-20 text-center flex flex-col items-center gap-4">
       <Loader2 size={32} className="animate-spin text-accent-pink" />
-      <p className="font-mono text-sm text-ink-soft">Cargando datos del servidor…</p>
+      <p className="font-mono text-sm text-ink-soft">{t('admin.loading_server_data')}</p>
     </div>
   )
 }

@@ -4,6 +4,7 @@ import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import { FileText } from 'lucide-react'
 import { useReadme } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 
 interface Props {
   repoId: string
@@ -25,14 +26,15 @@ function resolveUrl(base: string, url: string): string {
 }
 
 export function ReadmeViewer({ repoId, source, repoUrl }: Props) {
+  const { t } = useTranslation()
   const enabled = source === 'github'
   const { data, isLoading, error } = useReadme(repoId, enabled)
   const rawBase = getRawBase(repoUrl)
 
   if (!enabled) {
     return (
-      <EmptyReadme>
-        Este repo no es de GitHub. README no disponible vía API.
+      <EmptyReadme title={t('repos.readme.no_readme')}>
+        {t('repos.readme.non_github')}
       </EmptyReadme>
     )
   }
@@ -40,13 +42,13 @@ export function ReadmeViewer({ repoId, source, repoUrl }: Props) {
   if (isLoading) {
     return (
       <div className="bg-bg-card border-3 border-ink shadow-hard p-8 text-center font-mono text-ink-soft">
-        Bajando README de GitHub…
+        {t('repos.readme.fetching')}
       </div>
     )
   }
 
   if (error || !data) {
-    return <EmptyReadme>Este repo no tiene README, o no se pudo bajar.</EmptyReadme>
+    return <EmptyReadme title={t('repos.readme.no_readme')}>{t('repos.readme.not_found')}</EmptyReadme>
   }
 
   return (
@@ -64,7 +66,7 @@ export function ReadmeViewer({ repoId, source, repoUrl }: Props) {
   )
 }
 
-function EmptyReadme({ children }: { children: React.ReactNode }) {
+function EmptyReadme({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="bg-bg-card border-3 border-ink shadow-hard p-12 text-center">
       <FileText
@@ -73,7 +75,7 @@ function EmptyReadme({ children }: { children: React.ReactNode }) {
         className="mx-auto mb-4 text-ink-soft"
       />
       <p className="font-display font-bold uppercase text-lg mb-1">
-        Sin README
+        {title}
       </p>
       <p className="text-sm text-ink-soft font-mono">{children}</p>
     </div>

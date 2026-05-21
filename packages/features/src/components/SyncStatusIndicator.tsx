@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Cloud, CloudOff, RefreshCw } from 'lucide-react'
 import { getPendingCount, syncNow } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 
 export function SyncStatusIndicator() {
+  const { t } = useTranslation()
   const [pending, setPending] = useState(0)
   const [online, setOnline] = useState(navigator.onLine)
   const [syncing, setSyncInProgress] = useState(false)
@@ -39,7 +41,7 @@ export function SyncStatusIndicator() {
     return (
       <div className="flex items-center gap-2 px-3 py-1 bg-accent-pink border-2 border-ink shadow-hard-sm text-[10px] font-mono uppercase font-bold">
         <CloudOff size={12} strokeWidth={3} />
-        Sin conexión
+        {t('sync.offline')}
       </div>
     )
   }
@@ -52,7 +54,7 @@ export function SyncStatusIndicator() {
         className="flex items-center gap-2 px-3 py-1 bg-accent-yellow border-2 border-ink shadow-hard-sm text-[10px] font-mono uppercase font-bold hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all active:shadow-none active:translate-x-0 active:translate-y-0"
       >
         <RefreshCw size={12} strokeWidth={3} className={syncing ? 'animate-spin' : ''} />
-        {pending} pendientes
+        {t('sync.pending_count', { count: pending })}
       </button>
     )
   }
@@ -60,7 +62,7 @@ export function SyncStatusIndicator() {
   return (
     <div className="flex items-center gap-2 px-3 py-1 bg-accent-lime border-2 border-ink shadow-hard-sm text-[10px] font-mono uppercase font-bold">
       <Cloud size={12} strokeWidth={3} />
-      Sincronizado
+      {t('sync.synced')}
     </div>
   )
 }

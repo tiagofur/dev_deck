@@ -21,6 +21,7 @@ import {
   ItemDetailPage,
   CaptureSharePage,
   ItemsPage,
+  ExplorePage,
   LandingPage,
   RepoDetailPage,
   SettingsPage,

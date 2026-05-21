@@ -7,6 +7,9 @@ export interface Cheatsheet {
   color: string | null
   description: string
   is_seed: boolean
+  is_official?: boolean
+  stars_count?: number
+  fork_count?: number
   created_at: string
   updated_at: string
 }

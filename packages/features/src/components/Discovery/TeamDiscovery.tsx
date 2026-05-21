@@ -1,9 +1,10 @@
 import { useOrgTrendingTags, useOrgRecommendations } from '@devdeck/api-client'
 import { Sparkles, TrendingUp, Zap, Plus, ExternalLink } from 'lucide-react'
-import { Button, showToast } from '@devdeck/ui'
-import { useNavigate } from 'react-router-dom'
+import { Button } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 
 export function TeamDiscovery({ orgId }: { orgId: string }) {
+  const { t } = useTranslation()
   const { data: trendingRes, isLoading: loadingTags } = useOrgTrendingTags(orgId)
   const { data: recsRes, isLoading: loadingRecs } = useOrgRecommendations(orgId)
 
@@ -16,7 +17,7 @@ export function TeamDiscovery({ orgId }: { orgId: string }) {
       <section className="space-y-4">
         <div className="flex items-center gap-2 border-b-3 border-ink pb-2">
            <TrendingUp size={18} className="text-accent-pink" strokeWidth={3} />
-           <h3 className="font-display font-black uppercase text-sm tracking-widest">Hot Topics del Equipo</h3>
+           <h3 className="font-display font-black uppercase text-sm tracking-widest">{t('discovery.team.hot_topics')}</h3>
         </div>
         
         {loadingTags ? (
@@ -29,7 +30,7 @@ export function TeamDiscovery({ orgId }: { orgId: string }) {
                   <span className="bg-bg-primary border border-ink px-1.5 py-0.5 text-[9px] font-black">{t.count}</span>
                </div>
              ))}
-             {tags.length === 0 && <p className="text-xs text-ink-soft italic font-mono">— sin tendencias recientes —</p>}
+             {tags.length === 0 && <p className="text-xs text-ink-soft italic font-mono">{t('discovery.team.no_trends')}</p>}
           </div>
         )}
       </section>
@@ -38,7 +39,7 @@ export function TeamDiscovery({ orgId }: { orgId: string }) {
       <section className="space-y-4">
         <div className="flex items-center gap-2 border-b-3 border-ink pb-2">
            <Sparkles size={18} className="text-accent-yellow" strokeWidth={3} />
-           <h3 className="font-display font-black uppercase text-sm tracking-widest">Sugerencias del Vault</h3>
+           <h3 className="font-display font-black uppercase text-sm tracking-widest">{t('discovery.team.vault_suggestions')}</h3>
         </div>
 
         {loadingRecs ? (
@@ -56,7 +57,7 @@ export function TeamDiscovery({ orgId }: { orgId: string }) {
                        </span>
                        <div className="flex items-center gap-1 text-ink-soft">
                           <Zap size={10} className="text-accent-lime" fill="currentColor" />
-                          <span className="font-mono text-[9px] font-bold">{r.save_count} saves</span>
+                          <span className="font-mono text-[9px] font-bold">{t('discovery.team.saves_count', { count: r.save_count })}</span>
                        </div>
                     </div>
                     <h4 className="font-display font-black text-xs uppercase truncate mb-1">{r.title}</h4>
@@ -71,7 +72,7 @@ export function TeamDiscovery({ orgId }: { orgId: string }) {
                         window.dispatchEvent(new CustomEvent('devdeck:open-capture', { detail: { url: r.url_normalized, title: r.title } }))
                       }}
                      >
-                        <Plus size={12} strokeWidth={4} /> Capturar
+                        <Plus size={12} strokeWidth={4} /> {t('topbar.capture_button')}
                      </Button>
                      <button 
                       onClick={() => window.open(`https://${r.url_normalized}`, '_blank')}
@@ -84,7 +85,7 @@ export function TeamDiscovery({ orgId }: { orgId: string }) {
              ))}
              {recs.length === 0 && (
                <div className="col-span-full py-12 text-center border-3 border-ink border-dashed rounded-xl opacity-60">
-                  <p className="font-mono text-sm uppercase font-bold text-ink-soft italic">¡Estás al día con tu equipo!</p>
+                  <p className="font-mono text-sm uppercase font-bold text-ink-soft italic">{t('discovery.team.up_to_date')}</p>
                </div>
              )}
           </div>

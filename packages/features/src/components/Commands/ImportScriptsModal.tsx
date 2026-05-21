@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Check, Package, X } from 'lucide-react'
 import { Button } from '@devdeck/ui'
 import type { PackageScript } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 
 interface Props {
   open: boolean
@@ -22,6 +23,7 @@ export function ImportScriptsModal({
   onClose,
   onImport,
 }: Props) {
+  const { t } = useTranslation()
   const [selected, setSelected] = useState<Set<string>>(() => new Set())
 
   // Pre-select all scripts when they load.
@@ -108,17 +110,17 @@ export function ImportScriptsModal({
             </div>
             <div>
               <h2 className="font-display font-black text-2xl uppercase">
-                Importar scripts
+                {t('repos.import_scripts_title')}
               </h2>
               <p className="font-mono text-xs text-ink-soft">
-                {loading ? 'Buscando package.json...' : `${scripts.length} scripts encontrados`}
+                {loading ? t('repos.searching_package') : t('repos.import_scripts_found', { count: scripts.length })}
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={t('common.close')}
             className="border-3 border-ink p-1 hover:bg-accent-pink"
           >
             <X size={18} strokeWidth={3} />
@@ -130,7 +132,7 @@ export function ImportScriptsModal({
             <div className="flex flex-col items-center gap-3">
               <div className="w-8 h-8 border-4 border-ink border-t-accent-yellow animate-spin" />
               <p className="font-mono text-sm text-ink-soft">
-                Descargando package.json de GitHub...
+                {t('repos.downloading_package')}
               </p>
             </div>
           </div>
@@ -141,12 +143,12 @@ export function ImportScriptsModal({
                 <Package size={28} strokeWidth={2.5} className="text-ink-soft" />
               </div>
               <p className="font-display font-bold text-lg uppercase">
-                Sin scripts
+                {t('repos.no_scripts_title')}
               </p>
               <p className="font-mono text-sm text-ink-soft max-w-sm">
                 {errorMessage
                   ? errorMessage
-                  : 'Este repo no tiene un package.json o no contiene scripts.'}
+                  : t('repos.no_scripts_desc')}
               </p>
             </div>
           </div>
@@ -166,10 +168,10 @@ export function ImportScriptsModal({
                 >
                   {selected.size === scripts.length && <Check size={12} strokeWidth={4} />}
                 </span>
-                {selected.size === scripts.length ? 'Deseleccionar todos' : 'Seleccionar todos'}
+                {selected.size === scripts.length ? t('repos.deselect_all') : t('repos.select_all')}
               </button>
               <span className="font-mono text-xs text-ink-soft">
-                {selected.size} de {scripts.length} seleccionados
+                {t('repos.selected_of', { count: selected.size, total: scripts.length })}
               </span>
             </div>
 
@@ -232,12 +234,12 @@ export function ImportScriptsModal({
         <div className="mt-5 flex items-center justify-between shrink-0 pt-4 border-t-3 border-ink">
           <p className="font-mono text-xs text-ink-soft">
             {scripts.length > 0
-              ? 'Cada script se crea como un comando con categoría automática.'
+              ? t('repos.scripts_auto_desc')
               : ''}
           </p>
           <div className="flex gap-3">
             <Button type="button" variant="secondary" onClick={onClose}>
-              {scripts.length === 0 ? 'Cerrar' : 'Cancelar'}
+              {scripts.length === 0 ? t('common.close') : t('common.cancel')}
             </Button>
             {scripts.length > 0 && (
               <Button
@@ -246,8 +248,8 @@ export function ImportScriptsModal({
                 onClick={handleImport}
               >
                 {saving
-                  ? 'Importando...'
-                  : `Importar ${selected.size} ${selected.size === 1 ? 'script' : 'scripts'}`}
+                  ? t('common.loading')
+                  : selected.size === 1 ? t('repos.import_count_button', { count: selected.size }) : t('repos.import_count_button_plural', { count: selected.size })}
               </Button>
             )}
           </div>
