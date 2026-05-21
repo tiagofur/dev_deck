@@ -2,12 +2,19 @@ import { test, expect } from '@playwright/test'
 
 test.describe('DevDeck — desktop renderer E2E', () => {
   test.beforeEach(async ({ page }) => {
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        console.error(`Browser Error: ${msg.text()}`)
+      }
+    })
     await page.goto('/')
   })
 
   test('1. token-mode auth bypass: home loads without OAuth', async ({ page }) => {
     // In token mode there is no /login page; the items vault page should render.
-    await expect(page).toHaveTitle(/DevDeck/i)
+    // Wait for the URL to settle at / (it might bounce through /login)
+    await expect(page).toHaveURL(/\//, { timeout: 10_000 })
+    await expect(page).toHaveTitle(/DevDeck/i, { timeout: 10_000 })
     // DevDeck title heading on ItemsPage is visible.
     await expect(page.getByLabel('DevDeck')).toBeVisible({ timeout: 15_000 })
   })

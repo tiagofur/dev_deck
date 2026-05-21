@@ -172,7 +172,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				r.Post("/logout", authH.Logout)
 
 				r.Group(func(r chi.Router) {
-					r.Use(mw.JWTAuth(as))
+					r.Use(mw.TokenAuth(cfg, as, st))
 					r.Get("/me", authH.Me)
 					r.Patch("/me", authH.UpdateMe)
 					r.Patch("/me/onboarding/complete", authH.CompleteOnboarding)
