@@ -1,8 +1,8 @@
-# DevDeck — Architecture (v1.0)
+# DevDeck — Architecture
 
-> Versión: 1.0 · Última actualización: Mayo 2026
+> Versión: 1.1 · Última actualización: Mayo 2026
 >
-> **Importante:** este doc cubre la arquitectura final de DevDeck tras completar las 17 olas del roadmap. El sistema ha evolucionado de una app personal a un **Knowledge OS** empresarial y colaborativo.
+> Este documento describe la arquitectura actual y la dirección técnica de DevDeck. Debe mantenerse sincronizado con el código real y con el roadmap, evitando presentar propuestas futuras como features ya cerradas.
 
 ---
 
@@ -101,4 +101,4 @@ La tabla central `items` soporta múltiples tipos (repos, snippets, clis, runboo
 
 ---
 
-*Última actualización: Mayo 2026 (Lanzamiento v1.0)*
+*Última actualización: Mayo 2026*

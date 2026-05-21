@@ -63,6 +63,7 @@ Ambas apps importan pages y componentes del package `@devdeck/features` — solo
 |-----|-----------|
 | [docs/VISION.md](docs/VISION.md) | Visión, posicionamiento, diferenciadores |
 | [docs/PRD.md](docs/PRD.md) | Producto, features, user stories, scope por olas |
+| [docs/DEV_WORKBENCH.md](docs/DEV_WORKBENCH.md) | Developer Workbench: utilities locales, paleta y acciones reutilizables |
 | [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) | Análisis competitivo detallado |
 | [docs/LANDING.md](docs/LANDING.md) · [docs/LANDING_COPY.md](docs/LANDING_COPY.md) | Copy de landing (ES / EN) |
 
@@ -92,11 +93,6 @@ Ambas apps importan pages y componentes del package `@devdeck/features` — solo
 
 ## Estado
 
-✅ **Las 17 Olas completadas.** DevDeck se encuentra en su **Versión 1.0 (Estable)**.
-Lo que comenzó como un simple directorio de repos es hoy un Knowledge OS completo con:
-- **Agentes de IA Autónomos:** Ejecución de comandos locales bajo supervisión humana.
-- **Enterprise Ready:** SAML SSO, aprovisionamiento SCIM 2.0 y RBAC granular.
-- **Inteligencia Colectiva:** Descubrimiento de equipo, Hot Topics y analíticas de adopción.
-- **Escalabilidad Global:** Sincronización multi-región activa-activa con réplicas de lectura.
+DevDeck es un producto open-source en evolución. La dirección actual es fortalecer el vault, los flujos de captura, la recuperación semántica y el nuevo **Developer Workbench**: utilities locales, paleta, requests reutilizables, snippets y runbooks conectados al contexto guardado.
 
-Roadmap completo en [ROADMAP.md](ROADMAP.md).
+Ver [ROADMAP.md](ROADMAP.md) y [docs/DEV_WORKBENCH.md](docs/DEV_WORKBENCH.md) para la dirección de producto.

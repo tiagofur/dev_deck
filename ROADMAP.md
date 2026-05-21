@@ -1,4 +1,4 @@
-# DevDeck.ai Roadmap (v1.0)
+# DevDeck.ai Roadmap
 
 This document outlines the vision and development stages for **DevDeck.ai**. We worked in "Waves" (Olas) to progressively build the core infrastructure, the capture network, and the collective AI intelligence.
 
@@ -6,24 +6,32 @@ This document outlines the vision and development stages for **DevDeck.ai**. We 
 
 ---
 
-## ✅ Waves 1–4: Core Foundation (Complete)
+## Product Direction
+
+DevDeck is moving from external memory toward a **Developer Workbench**: saved developer knowledge that can be retrieved by intent and reused as commands, snippets, requests, runbooks, and local utility workflows.
+
+See [docs/DEV_WORKBENCH.md](docs/DEV_WORKBENCH.md) for the current product proposal.
+
+---
+
+## ✅ Waves 1–4: Core Foundation
 
 - [x] **Wave 1:** Core Go API, Auth (GitHub), and basic Items CRUD.
 - [x] **Wave 2:** Enrichment engine (Open Graph metadata, screenshot capture).
 - [x] **Wave 3:** Frontend redesign (Neo-brutalist / Dark mode).
 - [x] **Wave 4:** Monorepo transition (pnpm workspaces) and shared components.
 
-## ✅ Wave 5: General Items + Real AI (Complete)
+## ✅ Wave 5: General Items + Real AI
 
 - [x] **Phase 18:** Polymorphic Items (CLIs, Snippets, Prompts, Workflows).
 - [x] **Phase 19:** AI Semantic Brain (Embeddings, Semantic Search, RAG).
 
-## ✅ Wave 6: Offline-first + Sync (Complete)
+## ✅ Wave 6: Offline-first + Sync
 
 - [x] **Phase 20:** Offline-first Architecture (Local SQLite, OPFS, Atomic Sync).
 - [x] **Phase 21:** Public Decks & Community sharing.
 
-## ✅ Waves 7–12: Advanced Features (Complete)
+## Waves 7–12: Advanced Features
 
 - [x] **Wave 7:** Versioning and Multi-device management.
 - [x] **Wave 8:** Smart Notifications and Social Following.
@@ -32,14 +40,14 @@ This document outlines the vision and development stages for **DevDeck.ai**. We 
 - [x] **Wave 11:** Mobile Bridge (PWA Share Target, Progressive Sync).
 - [x] **Wave 12:** Social Gamification and Reputation System.
 
-## ✅ Waves 13–16: Enterprise & Agents (Complete)
+## Waves 13–16: Enterprise & Agents
 
 - [x] **Wave 13:** Global Scalability (Read Replicas, Multi-region Sync).
 - [x] **Wave 14:** Enterprise Core (SAML 2.0 SSO, SCIM 2.0 Provisioning).
 - [x] **Wave 15:** Collective Intelligence (Team Insights, Trending Tags).
 - [x] **Wave 16:** AI Agents (Autonomous Tool Calling, Hybrid Local Execution).
 
-## ✅ Wave 17: Public Launch (Complete)
+## Wave 17: Public Launch
 
 - [x] **Phase 51:** Onboarding Wizard and Starter Kits.
 - [x] **Phase 52:** v1.0 Landing Page and Documentation.
@@ -64,4 +72,4 @@ This document outlines the vision and development stages for **DevDeck.ai**. We 
 
 ---
 
-*Mission Accomplished: May 2026 (Version 1.0.0 Stable)*
+*Last updated: May 2026*

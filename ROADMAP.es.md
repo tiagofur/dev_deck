@@ -1,10 +1,16 @@
-# DevDeck — Roadmap (v1.0.0 Stable)
+# DevDeck — Roadmap
 
 > 🌐 [devdeck.ai](https://devdeck.ai) — Tu memoria externa para desarrollo, asistida por IA.
 >
-> 📝 **Actualizado Mayo 2026:** Roadmap de 17 Olas **COMPLETADO**. Versión 1.0 estable en producción.
+> 📝 **Actualizado Mayo 2026:** roadmap vivo del producto.
 
-## Estado actual: 100% Completado — v1.0.0 Stable
+## Dirección actual
+
+DevDeck está evolucionando de memoria externa hacia un **Developer Workbench**: conocimiento dev guardado que puede recuperarse por intención y reutilizarse como comandos, snippets, requests, runbooks y utilities locales.
+
+Ver [docs/DEV_WORKBENCH.es.md](docs/DEV_WORKBENCH.es.md) para la propuesta de producto actual.
+
+## Estado actual
 
 ### Ola 4.5 a 17 — Cerradas
 - ✅ §16.5 Higiene de repo (ADRs, docs, licensing)
@@ -15,7 +21,9 @@
 - ✅ Wave 13-16: Enterprise identity y Agentes autónomos
 - ✅ Wave 17: Lanzamiento y Onboarding
 
-### ¡Misión cumplida! DevDeck v1.0.0 es oficial.
+### Siguiente foco
+
+Fortalecer la captura, recuperación y reutilización diaria del conocimiento guardado.
 
 ---
 
