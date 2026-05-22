@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Topbar } from './Topbar'
+import { NavSidebar } from './NavSidebar'
 
 interface AppShellProps {
   children: ReactNode
@@ -17,26 +17,36 @@ export function AppShell({
   query,
   onQueryChange,
   reviewCount,
-  className = 'h-screen flex flex-col bg-bg-primary',
-  contentClassName = 'flex-1 overflow-hidden',
+  className = 'h-screen w-screen flex flex-row bg-bg-primary overflow-hidden',
+  contentClassName = 'flex-1 overflow-y-auto',
 }: AppShellProps) {
-  const navigate = useNavigate()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [internalQuery, setInternalQuery] = useState('')
+  
   const currentQuery = query ?? internalQuery
   const setQuery = onQueryChange ?? setInternalQuery
 
   return (
     <div className={className}>
-      <Topbar
-        query={currentQuery}
-        onQueryChange={setQuery}
-        onAdd={() => window.dispatchEvent(new CustomEvent('devdeck:open-capture'))}
-        onDiscovery={() => navigate('/discovery')}
-        onSettings={() => navigate('/settings')}
-        onGlobalSearch={() => window.dispatchEvent(new CustomEvent('devdeck:open-search'))}
+      {/* Persistent Left Sidebar (Desktop) / Sliding Overlay Drawer (Mobile) */}
+      <NavSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
         reviewCount={reviewCount}
       />
-      <div className={contentClassName}>{children}</div>
+
+      {/* Main Content Pane (Topbar + Dynamic Viewport) */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        <Topbar
+          query={currentQuery}
+          onQueryChange={setQuery}
+          onAdd={() => window.dispatchEvent(new CustomEvent('devdeck:open-capture'))}
+          onGlobalSearch={() => window.dispatchEvent(new CustomEvent('devdeck:open-search'))}
+          onMenuToggle={() => setSidebarOpen(true)}
+          reviewCount={reviewCount}
+        />
+        <div className={contentClassName}>{children}</div>
+      </div>
     </div>
   )
 }

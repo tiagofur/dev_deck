@@ -2,6 +2,7 @@ import { ArrowLeft, Copy, Filter, Plus, Search, Trash2, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@devdeck/ui'
+import { AppShell } from '../components/AppShell'
 import {
   useCheatsheet,
   useCreateEntry,
@@ -70,20 +71,24 @@ export function CheatsheetDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center font-mono text-ink-soft">
-        {t('common.loading')}
-      </div>
+      <AppShell contentClassName="flex-1 overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center font-mono text-ink-soft">
+          {t('common.loading')}
+        </div>
+      </AppShell>
     )
   }
 
   if (error || !detail) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8">
-        <p className="font-display font-black text-3xl uppercase">{t('common.cheatsheet_not_found')}</p>
-        <Button variant="primary" onClick={() => navigate('/cheatsheets')}>
-          {t('common.back')}
-        </Button>
-      </div>
+      <AppShell contentClassName="flex-1 overflow-y-auto">
+        <div className="min-h-full flex flex-col items-center justify-center gap-4 p-8">
+          <p className="font-display font-black text-3xl uppercase">{t('common.cheatsheet_not_found')}</p>
+          <Button variant="primary" onClick={() => navigate('/cheatsheets')}>
+            {t('common.back')}
+          </Button>
+        </div>
+      </AppShell>
     )
   }
 
@@ -124,7 +129,8 @@ export function CheatsheetDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary">
+    <AppShell contentClassName="flex-1 overflow-y-auto">
+      <div className="min-h-full bg-bg-primary">
       {/* Header */}
       <header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex items-center gap-4 sticky top-0 z-10">
         <button
@@ -250,7 +256,8 @@ export function CheatsheetDetailPage() {
           onClose={() => { setEditingEntry(null); setAddingNew(false) }}
         />
       )}
-    </div>
+      </div>
+    </AppShell>
   )
 }
 

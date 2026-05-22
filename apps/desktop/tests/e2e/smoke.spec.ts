@@ -40,7 +40,7 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     await expect(page).toHaveURL(/\//, { timeout: 15_000 })
     await expect(page).toHaveTitle(/DevDeck/i, { timeout: 15_000 })
     // DevDeck title heading on ItemsPage is visible.
-    await expect(page.getByLabel('DevDeck')).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByLabel('DevDeck').first()).toBeVisible({ timeout: 20_000 })
   })
 
   test('2. capture item: opens modal, submits, sees the new card', async ({ page }) => {
@@ -121,8 +121,10 @@ test.describe('DevDeck — desktop renderer E2E', () => {
   })
 
   test('5. command palette: Ctrl+K opens global search command palette', async ({ page }) => {
-    // Click search button to open the command palette safely.
-    await page.getByRole('button', { name: /search/i }).first().click()
+    // Wait for page to be fully loaded and hydrated
+    await expect(page.getByLabel('DevDeck').first()).toBeVisible({ timeout: 15_000 })
+    // Trigger the global shortcut
+    await page.keyboard.press('Control+k')
     // Command palette action should be visible.
     await expect(page.getByText(/ask ai/i)).toBeVisible({ timeout: 10_000 })
   })

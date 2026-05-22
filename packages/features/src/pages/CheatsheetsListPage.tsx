@@ -7,6 +7,7 @@ import { useCheatsheets, useCreateCheatsheet, useDeleteCheatsheet } from '@devde
 import type { Cheatsheet, CreateCheatsheetInput } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
+import { AppShell } from '../components/AppShell'
 
 export function CheatsheetsListPage() {
   const { t } = useTranslation()
@@ -69,18 +70,9 @@ export function CheatsheetsListPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary flex">
+    <AppShell contentClassName="flex-1 flex overflow-hidden">
       {/* Sidebar */}
       <aside className="w-56 shrink-0 border-r-3 border-ink bg-bg-elevated p-5">
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-sm font-mono text-ink-soft
-                     hover:text-ink mb-6 transition-colors"
-        >
-          <ChevronLeft size={14} strokeWidth={3} />
-          {t('common.back')}
-        </button>
-
         <h2 className="font-display font-black text-xs uppercase tracking-widest mb-3 text-ink">
           {t('common.categories')}
         </h2>
@@ -102,7 +94,7 @@ export function CheatsheetsListPage() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 overflow-y-auto">
         <header className="mb-8 flex items-start justify-between gap-4">
           <div>
             <h1 className="font-display font-black text-4xl uppercase tracking-tight flex items-center gap-3">
@@ -150,7 +142,7 @@ export function CheatsheetsListPage() {
           onClose={() => setShowCreate(false)}
         />
       )}
-    </div>
+    </AppShell>
   )
 }
 

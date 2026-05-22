@@ -5,6 +5,7 @@ import { Button, showToast } from '@devdeck/ui'
 import { useCircles, useCreateCircle, useJoinCircle, useLeaveCircle } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'
 import clsx from 'clsx'
+import { AppShell } from '../components/AppShell'
 
 export function CirclesPage() {
   const { t } = useTranslation()
@@ -78,26 +79,17 @@ export function CirclesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center font-mono text-ink-soft bg-bg-primary">
+      <AppShell contentClassName="flex-1 flex items-center justify-center font-mono text-ink-soft bg-bg-primary">
         {t('common.loading')}
-      </div>
+      </AppShell>
     )
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary flex">
+    <AppShell contentClassName="flex-1 flex overflow-hidden">
       {/* Sidebar Navigation */}
       <aside className="w-56 shrink-0 border-r-3 border-ink bg-bg-elevated p-5 flex flex-col justify-between">
         <div>
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-sm font-mono text-ink-soft
-                       hover:text-ink mb-6 transition-colors"
-          >
-            <ChevronLeft size={14} strokeWidth={3} />
-            {t('common.back')}
-          </button>
-
           <h2 className="font-display font-black text-xs uppercase tracking-widest mb-3 text-ink">
             {t('circles.title')}
           </h2>
@@ -313,6 +305,6 @@ export function CirclesPage() {
           </form>
         </div>
       )}
-    </div>
+    </AppShell>
   )
 }
