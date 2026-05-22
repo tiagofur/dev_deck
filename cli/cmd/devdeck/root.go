@@ -40,6 +40,7 @@ func init() {
 		agentCmd,
 		openCmd,
 		searchCmd,
+		projectCmd,
 		listCmd,
 		statusCmd,
 		tipCmd,

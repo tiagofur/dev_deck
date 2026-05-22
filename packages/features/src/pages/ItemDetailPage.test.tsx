@@ -58,8 +58,8 @@ const item = {
 	description: 'Fast search tool',
 	notes: 'some notes',
 	tags: ['search'],
-	why_saved: 'para codebases grandes',
-	when_to_use: 'cuando necesito grep rápido',
+	why_saved: 'for large codebases',
+	when_to_use: 'when I need fast grep',
 	source_channel: 'manual',
 	meta: {},
 	ai_summary: 'Fast recursive search for huge codebases.',
@@ -95,14 +95,14 @@ describe('<ItemDetailPage>', () => {
 		expect(screen.getByText('Fast recursive search for huge codebases.')).toBeInTheDocument()
 		expect(screen.getAllByText('cli').length).toBeGreaterThan(0)
 		expect(screen.getAllByText('search').length).toBeGreaterThan(0)
-		expect(screen.getByText(/cuándo usarlo/i)).toBeInTheDocument()
+		expect(screen.getByText(/when to use it/i)).toBeInTheDocument()
 	})
 
 	it('triggers manual AI rerun', async () => {
 		const mutateAsync = vi.fn().mockResolvedValue(item)
 		mocks.useAIEnrichItem.mockReturnValue({ mutateAsync, isPending: false })
 		render(<ItemDetailPage />)
-		fireEvent.click(screen.getByRole('button', { name: /rerun ai enrichment/i }))
+		fireEvent.click(screen.getByRole('button', { name: /rerun ai analysis/i }))
 		expect(mutateAsync).toHaveBeenCalledWith('item-1')
 	})
 
@@ -110,7 +110,7 @@ describe('<ItemDetailPage>', () => {
 		const mutateAsync = vi.fn().mockResolvedValue(item)
 		mocks.useReviewItemAITags.mockReturnValue({ mutateAsync, isPending: false })
 		render(<ItemDetailPage />)
-		fireEvent.click(screen.getByRole('button', { name: /aceptar y aplicar/i }))
+		fireEvent.click(screen.getByRole('button', { name: /accept and apply/i }))
 		expect(mutateAsync).toHaveBeenCalledWith({
 			id: 'item-1',
 			input: { ai_tags: ['cli', 'search'], apply: true },
@@ -121,7 +121,7 @@ describe('<ItemDetailPage>', () => {
 		const mutateAsync = vi.fn().mockResolvedValue(item)
 		mocks.useUpdateItem.mockReturnValue({ mutateAsync, isPending: false })
 		render(<ItemDetailPage />)
-		fireEvent.click(screen.getByRole('button', { name: /marcar para revisión/i }))
+		fireEvent.click(screen.getByRole('button', { name: /mark for review/i }))
 		expect(mutateAsync).toHaveBeenCalledWith({
 			id: 'item-1',
 			input: { tags: ['search', 'team-review'] },
@@ -137,7 +137,7 @@ describe('<ItemDetailPage>', () => {
 			error: null,
 		})
 		render(<ItemDetailPage />)
-		fireEvent.click(screen.getByRole('button', { name: /aprobar/i }))
+		fireEvent.click(screen.getByRole('button', { name: /approve/i }))
 		expect(mutateAsync).toHaveBeenCalledWith({
 			id: 'item-1',
 			input: { tags: ['search'], is_favorite: true },
@@ -146,8 +146,8 @@ describe('<ItemDetailPage>', () => {
 
 	it('copies a shareable review summary', async () => {
 		render(<ItemDetailPage />)
-		fireEvent.click(screen.getByRole('button', { name: /copiar resumen/i }))
+		fireEvent.click(screen.getByRole('button', { name: /copy summary/i }))
 		expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('# ripgrep'))
-		expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('Por qué importa: para codebases grandes'))
+		expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('Why it matters: for large codebases'))
 	})
 })

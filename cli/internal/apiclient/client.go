@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"net/url"
 	"strings"
@@ -269,8 +270,8 @@ func (c *Client) ExportCheatsheet(ctx context.Context, id, format string) ([]byt
 	
 	filename := ""
 	if cd := resp.Header.Get("Content-Disposition"); cd != "" {
-		if idx := strings.Index(cd, "filename=\""); idx != -1 {
-			filename = cd[idx+10 : len(cd)-1]
+		if _, params, err := mime.ParseMediaType(cd); err == nil {
+			filename = params["filename"]
 		}
 	}
 	return data, filename, nil

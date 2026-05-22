@@ -7,12 +7,23 @@ import { MemoryRouter } from 'react-router-dom'
 const mocks = vi.hoisted(() => ({
   useGlobalSearch: vi.fn(),
   useAsk: vi.fn(),
+  useCapture: vi.fn(),
+  navigate: vi.fn(),
   showToast: vi.fn(),
 }))
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
+  return {
+    ...actual,
+    useNavigate: () => mocks.navigate,
+  }
+})
 
 vi.mock('@devdeck/api-client', () => ({
   useGlobalSearch: mocks.useGlobalSearch,
   useAsk: mocks.useAsk,
+  useCapture: mocks.useCapture,
 }))
 
 vi.mock('@devdeck/ui', async () => {
@@ -41,6 +52,12 @@ describe('<UnifiedCommandPalette>', () => {
     vi.clearAllMocks()
     mocks.useGlobalSearch.mockReturnValue({ data: [], isLoading: false })
     mocks.useAsk.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+    mocks.useCapture.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: vi.fn().mockResolvedValue(undefined),
+      },
+    })
 
     // Mock ResizeObserver for cmdk in JSDOM
     global.ResizeObserver = vi.fn().mockImplementation(() => ({
@@ -55,23 +72,23 @@ describe('<UnifiedCommandPalette>', () => {
 
   it('renders search input and actions when open', () => {
     renderPalette()
-    expect(screen.getByPlaceholderText(/Buscá o tirá un comando/)).toBeInTheDocument()
-    expect(screen.getByText(/Preguntar a la IA/i)).toBeInTheDocument()
-    expect(screen.getByText(/Capturar nuevo item/i)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/Search or run a command/)).toBeInTheDocument()
+    expect(screen.getByText(/Ask AI/i)).toBeInTheDocument()
+    expect(screen.getByText(/Capture new item/i)).toBeInTheDocument()
   })
 
   it('triggers AI Ask flow', async () => {
     renderPalette()
     
-    const input = screen.getByPlaceholderText(/Buscá o tirá un comando/)
-    fireEvent.change(input, { target: { value: 'Preguntar' } })
+    const input = screen.getByPlaceholderText(/Search or run a command/)
+    fireEvent.change(input, { target: { value: 'Ask' } })
     
-    const askButton = screen.getByText(/Preguntar a la IA/i)
+    const askButton = screen.getByText(/Ask AI/i)
     fireEvent.click(askButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Agente de Conocimiento')).toBeInTheDocument()
-      expect(screen.getByText('Preguntar')).toBeInTheDocument()
+      expect(screen.getByText('Knowledge Agent')).toBeInTheDocument()
+      expect(screen.getByText('Ask')).toBeInTheDocument()
     })
   })
 
@@ -82,12 +99,81 @@ describe('<UnifiedCommandPalette>', () => {
     })
 
     renderPalette()
-    fireEvent.change(screen.getByPlaceholderText(/Buscá o tirá un comando/), { target: { value: 'Preguntar' } })
-    fireEvent.click(screen.getByText(/Preguntar a la IA/i))
+    fireEvent.change(screen.getByPlaceholderText(/Search or run a command/), { target: { value: 'Ask' } })
+    fireEvent.click(screen.getByText(/Ask AI/i))
 
-    await waitFor(() => expect(screen.getByText(/\[volver\]/)).toBeInTheDocument())
-    fireEvent.click(screen.getByText(/\[volver\]/))
+    await waitFor(() => expect(screen.getByText(/\[Back\]/)).toBeInTheDocument())
+    fireEvent.click(screen.getByText(/\[Back\]/))
 
-    expect(screen.queryByText('Respuesta de DevDeck')).not.toBeInTheDocument()
+    expect(screen.queryByText('Knowledge Agent')).not.toBeInTheDocument()
+  })
+
+  it('copies command search results directly', async () => {
+    const onClose = vi.fn()
+    mocks.useGlobalSearch.mockReturnValue({
+      data: [
+        {
+          type: 'entry',
+          id: 'cmd-1',
+          title: 'Run tests',
+          subtitle: 'Node',
+          extra: 'pnpm test',
+        },
+      ],
+      isLoading: false,
+    })
+
+    renderPalette(true, onClose)
+
+    fireEvent.click(screen.getByText('Run tests'))
+
+    await waitFor(() => {
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('pnpm test')
+      expect(mocks.showToast).toHaveBeenCalledWith('Copied to clipboard', 'success')
+      expect(onClose).toHaveBeenCalled()
+    })
+  })
+
+  it('opens matching workbench tools directly from the palette', async () => {
+    const onClose = vi.fn()
+    renderPalette(true, onClose)
+
+    fireEvent.change(screen.getByPlaceholderText(/Search or run a command/), { target: { value: 'secret' } })
+    fireEvent.click(screen.getByText('Open secret scanner'))
+
+    expect(onClose).toHaveBeenCalled()
+    expect(mocks.navigate).toHaveBeenCalledWith('/workbench?tool=secrets')
+  })
+
+  it('filters palette search results by result type', async () => {
+    mocks.useGlobalSearch.mockReturnValue({
+      data: [
+        {
+          type: 'item',
+          id: 'item-1',
+          title: 'Saved note',
+          subtitle: 'note',
+          extra: '',
+        },
+        {
+          type: 'entry',
+          id: 'cmd-1',
+          title: 'Run tests',
+          subtitle: 'Node',
+          extra: 'pnpm test',
+        },
+      ],
+      isLoading: false,
+    })
+
+    renderPalette()
+
+    expect(screen.getByText('Saved note')).toBeInTheDocument()
+    expect(screen.getByText('Run tests')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('Filter commands'))
+
+    expect(screen.queryByText('Saved note')).not.toBeInTheDocument()
+    expect(screen.getByText('Run tests')).toBeInTheDocument()
   })
 })

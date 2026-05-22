@@ -1,8 +1,9 @@
-import { TrendingUp, Award, User, Flame } from 'lucide-react'
-import { useTrendingTools, type TrendingItem } from '@devdeck/api-client'
-import { Button } from '@devdeck/ui'
+import { Flame } from 'lucide-react'
+import { useTrendingTools } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 
 export function TrendingFeed() {
+  const { t } = useTranslation()
   const { data, isLoading } = useTrendingTools()
   const items = data?.items || []
 
@@ -11,14 +12,14 @@ export function TrendingFeed() {
       <div className="bg-accent-yellow border-3 border-ink p-4 shadow-hard">
          <p className="font-mono text-xs font-bold uppercase flex items-center gap-2">
             <Flame size={14} fill="currentColor" />
-            Trending esta semana
+            {t('discovery.trending.title')}
          </p>
-         <p className="text-[10px] uppercase font-black opacity-60 mt-1">Las herramientas más guardadas globalmente</p>
+         <p className="text-[10px] uppercase font-black opacity-60 mt-1">{t('discovery.trending.subtitle')}</p>
       </div>
 
       {isLoading ? (
         <div className="p-20 text-center animate-pulse font-mono text-sm text-ink-soft">
-          Calculando tendencias globales…
+          {t('discovery.trending.calculating')}
         </div>
       ) : items.length > 0 ? (
         <div className="space-y-4">
@@ -44,7 +45,7 @@ export function TrendingFeed() {
         </div>
       ) : (
         <div className="p-20 text-center border-3 border-ink border-dashed rounded-xl">
-           <p className="font-mono text-sm text-ink-soft uppercase font-bold">Aún no hay suficientes datos para el ranking.</p>
+           <p className="font-mono text-sm text-ink-soft uppercase font-bold">{t('discovery.trending.not_enough_data')}</p>
         </div>
       )}
     </div>

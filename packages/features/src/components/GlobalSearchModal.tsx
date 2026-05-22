@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGlobalSearch } from '@devdeck/api-client'
 import type { SearchResult } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 
 interface Props {
   open: boolean
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function GlobalSearchModal({ open, onClose }: Props) {
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [mode, setMode] = useState<'text' | 'semantic' | 'hybrid'>('text')
   const { data: results = [], isLoading } = useGlobalSearch(query, mode)
@@ -65,7 +67,7 @@ export function GlobalSearchModal({ open, onClose }: Props) {
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar items, repos, cheatsheets, comandos…"
+            placeholder={t('search.placeholder')}
             className="flex-1 font-mono text-sm bg-transparent focus:outline-none"
           />
           {isLoading && (
@@ -78,24 +80,24 @@ export function GlobalSearchModal({ open, onClose }: Props) {
 
         {/* Mode selector */}
         <div className="flex items-center gap-2 p-3 bg-bg-elevated border-b-3 border-ink overflow-x-auto no-scrollbar shrink-0">
-          <span className="text-[10px] font-mono uppercase font-bold text-ink-soft ml-1 mr-2">Modo:</span>
+          <span className="text-[10px] font-mono uppercase font-bold text-ink-soft ml-1 mr-2">{t('items.type_filter')}:</span>
           <ModeButton 
             active={mode === 'text'} 
             onClick={() => setMode('text')} 
-            label="Texto" 
-            title="Búsqueda clásica por palabras clave"
+            label="Text" 
+            title={t('search.classic_desc')}
           />
           <ModeButton 
             active={mode === 'semantic'} 
             onClick={() => setMode('semantic')} 
-            label="IA (Semántica)" 
-            title="Busca por significado usando embeddings"
+            label={t('search.ai_semantic')} 
+            title="Search by meaning using embeddings"
           />
           <ModeButton 
             active={mode === 'hybrid'} 
             onClick={() => setMode('hybrid')} 
-            label="Híbrida" 
-            title="Combina texto + IA para mejores resultados"
+            label={t('search.hybrid')} 
+            title="Combines text + AI for better results"
           />
         </div>
 
@@ -103,11 +105,11 @@ export function GlobalSearchModal({ open, onClose }: Props) {
         <div className="flex-1 overflow-y-auto min-h-0">
           {query.length < 2 ? (
             <div className="p-8 text-center font-mono text-sm text-ink-soft">
-              Escribí al menos 2 caracteres para buscar…
+              {t('search.min_chars')}
             </div>
           ) : results.length === 0 && !isLoading ? (
             <div className="p-8 text-center font-mono text-sm text-ink-soft">
-              No hay resultados para "{query}"
+              {t('common.no_results_found')} "{query}"
             </div>
           ) : (
             <div className="py-2">

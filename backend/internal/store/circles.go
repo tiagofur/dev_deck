@@ -203,7 +203,7 @@ func (s *Store) ListCircleItems(ctx context.Context, circleID uuid.UUID) ([]*ite
 
 func (s *Store) ListCircleMembers(ctx context.Context, circleID uuid.UUID) ([]circles.CircleMemberDetail, error) {
 	rows, err := s.Reader().Query(ctx, `
-		SELECT cm.user_id, u.username, u.display_name, u.avatar_url, cm.role
+		SELECT cm.user_id, COALESCE(u.username, u.login), u.display_name, u.avatar_url, cm.role
 		FROM circle_members cm
 		JOIN users u ON u.id = cm.user_id
 		WHERE cm.circle_id = $1

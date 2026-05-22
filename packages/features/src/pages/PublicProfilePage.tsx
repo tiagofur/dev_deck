@@ -8,8 +8,10 @@ import {
   useMe
 } from '@devdeck/api-client'
 import { Button, showToast } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 
 export function PublicProfilePage() {
+  const { t } = useTranslation()
   const { username } = useParams<{ username: string }>()
   const navigate = useNavigate()
   const { data: profileRes, isLoading: loadingProfile } = usePublicProfile(username || '')
@@ -27,10 +29,10 @@ export function PublicProfilePage() {
     try {
       if (profile?.is_following) {
         await unfollow.mutateAsync(username)
-        showToast('Dejaste de seguir a este curador')
+        showToast(t('profile.unfollow_toast'))
       } else {
         await follow.mutateAsync(username)
-        showToast('¡Siguiendo!')
+        showToast(t('profile.follow_toast'))
       }
     } catch (err) {
       showToast((err as Error).message, 'error')
@@ -40,7 +42,7 @@ export function PublicProfilePage() {
   if (loadingProfile) {
     return (
       <div className="min-h-screen bg-bg-primary p-8 flex items-center justify-center">
-        <div className="font-mono text-sm animate-pulse text-ink-soft">Buscando perfil…</div>
+        <div className="font-mono text-sm animate-pulse text-ink-soft">{t('profile.searching_profile')}</div>
       </div>
     )
   }
@@ -48,8 +50,8 @@ export function PublicProfilePage() {
   if (!profile) {
     return (
       <div className="min-h-screen bg-bg-primary p-8 flex flex-col items-center justify-center gap-4">
-        <p className="font-display font-black text-2xl uppercase">Usuario no encontrado</p>
-        <Button onClick={() => navigate('/')}>Volver al inicio</Button>
+        <p className="font-display font-black text-2xl uppercase">{t('profile.user_not_found')}</p>
+        <Button onClick={() => navigate('/')}>{t('profile.back_to_home')}</Button>
       </div>
     )
   }
@@ -63,13 +65,13 @@ export function PublicProfilePage() {
                      hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg
                      active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
                      transition-all duration-150"
-          aria-label="Volver"
+          aria-label={t('common.back')}
         >
           <ArrowLeft size={20} strokeWidth={3} />
         </button>
         <h1 className="font-display font-black text-2xl uppercase tracking-tight flex items-center gap-2">
           <UserIcon size={22} strokeWidth={3} />
-          Perfil de {profile.username}
+          {t('profile.profile_of', { username: profile.username })}
         </h1>
       </header>
 
@@ -91,7 +93,7 @@ export function PublicProfilePage() {
                 @{profile.username}
               </h2>
               <p className="font-mono text-xs text-ink-soft mt-1">
-                Miembro desde {new Date(profile.created_at).toLocaleDateString()}
+                {t('profile.member_since', { date: new Date(profile.created_at).toLocaleDateString() })}
               </p>
             </div>
             {profile.bio && (
@@ -101,9 +103,9 @@ export function PublicProfilePage() {
             )}
             <div className="flex flex-wrap gap-4 justify-center md:justify-start">
                <Stat label="Decks" value={profile.public_decks_count} color="bg-accent-lavender" />
-               <Stat label="Seguidores" value={profile.followers_count} color="bg-accent-cyan" />
-               <Stat label="Siguiendo" value={profile.following_count} color="bg-accent-lime" />
-               <Stat label="Reputación" value={profile.reputation_points} color="bg-accent-yellow" icon={<Flame size={12} className="text-ink/40" />} />
+               <Stat label={t('profile.followers')} value={profile.followers_count} color="bg-accent-cyan" />
+               <Stat label={t('profile.following')} value={profile.following_count} color="bg-accent-lime" />
+               <Stat label={t('profile.reputation')} value={profile.reputation_points} color="bg-accent-yellow" icon={<Flame size={12} className="text-ink/40" />} />
             </div>
 
             {!isMe && me && (
@@ -115,9 +117,9 @@ export function PublicProfilePage() {
                 >
                    <span className="flex items-center gap-2">
                      {profile.is_following ? (
-                       <><UserMinus size={18} strokeWidth={3} /> Dejar de seguir</>
+                       <><UserMinus size={18} strokeWidth={3} /> {t('profile.unfollow_curator')}</>
                      ) : (
-                       <><UserPlus size={18} strokeWidth={3} /> Seguir Curador</>
+                       <><UserPlus size={18} strokeWidth={3} /> {t('profile.follow_curator')}</>
                      )}
                    </span>
                 </Button>
@@ -130,11 +132,11 @@ export function PublicProfilePage() {
         <section className="space-y-6">
           <h3 className="font-display font-black text-2xl uppercase tracking-widest flex items-center gap-3">
             <Library size={24} strokeWidth={3} className="text-accent-pink" />
-            Decks Públicos
+            {t('profile.public_decks')}
           </h3>
 
           {loadingDecks ? (
-            <div className="font-mono text-sm text-ink-soft animate-pulse">Cargando decks…</div>
+            <div className="font-mono text-sm text-ink-soft animate-pulse">{t('profile.decks_loading')}</div>
           ) : decks.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {decks.map((deck) => (
@@ -154,10 +156,10 @@ export function PublicProfilePage() {
                   )}
                   <div className="flex items-center justify-between mt-auto">
                     <span className="text-[10px] font-mono uppercase font-bold bg-accent-yellow border-2 border-ink px-2 py-0.5">
-                      {deck.item_count} items
+                      {t('items.items_count', { count: deck.item_count })}
                     </span>
                     <span className="text-xs font-mono font-bold group-hover:underline flex items-center gap-1">
-                      Ver deck →
+                      {t('profile.view_deck')} →
                     </span>
                   </div>
                 </button>
@@ -165,7 +167,7 @@ export function PublicProfilePage() {
             </div>
           ) : (
             <div className="text-center py-20 border-3 border-ink border-dashed rounded-xl">
-              <p className="font-mono text-ink-soft">Este usuario no tiene decks públicos todavía.</p>
+              <p className="font-mono text-ink-soft">{t('profile.no_public_decks')}</p>
             </div>
           )}
         </section>

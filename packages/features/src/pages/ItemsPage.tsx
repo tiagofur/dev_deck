@@ -7,6 +7,7 @@ import { OnboardingChecklist } from '../components/OnboardingChecklist'
 import { detailPathForItem } from '../utils/itemRoutes'
 import { useItems } from '@devdeck/api-client'
 import { ALL_ITEM_TYPES, type ItemType } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 
 // Ola 5 Fase 17 — polymorphic items grid.
 //
@@ -23,17 +24,18 @@ const STACKS = ['go', 'node', 'python', 'rust', 'typescript', 'react', 'vue', 'a
 type StackFilter = typeof STACKS[number]
 type WorkflowFilter = 'team-review'
 
-const TYPE_FILTERS: Array<{ key: TypeFilter; label: string }> = [
-  { key: 'all', label: 'All' },
-  ...ALL_ITEM_TYPES.map((t) => ({ key: t as TypeFilter, label: t })),
-]
-
 export function ItemsPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [type, setType] = useState<TypeFilter>('all')
   const [stack, setStack] = useState<StackFilter[]>([])
   const [workflow, setWorkflow] = useState<WorkflowFilter | ''>('')
   const [query, setQuery] = useState('')
+
+  const TYPE_FILTERS: Array<{ key: TypeFilter; label: string }> = useMemo(() => [
+    { key: 'all', label: t('items.all') },
+    ...ALL_ITEM_TYPES.map((t) => ({ key: t as TypeFilter, label: String(t).toUpperCase() })),
+  ], [t])
 
   // Build stack query param — comma-separated for OR logic
   const stackParam = stack.length > 0 ? stack.join(',') : undefined
@@ -152,14 +154,14 @@ export function ItemsPage() {
               className="ml-2 px-2 py-0.5 text-xs font-mono text-ink-soft
                          hover:text-danger transition-colors"
             >
-              [clear]
+              {t('items.clear_filters')}
             </button>
           )}
         </div>
 
         <div className="flex gap-2 mt-3 pt-3 border-t border-ink/30">
           <span className="text-xs font-mono text-ink-soft uppercase tracking-wide py-1">
-            Flujo:
+            {t('items.workflow_filter')}:
           </span>
           <button
             type="button"
@@ -179,11 +181,11 @@ export function ItemsPage() {
       </nav>
 
       <main className="flex-1 overflow-y-auto p-6">
-        {isLoading && <p className="font-mono text-ink-soft">Cargando…</p>}
+        {isLoading && <p className="font-mono text-ink-soft">{t('common.loading')}</p>}
 
         {error && (
           <div className="p-4 bg-danger text-white border-3 border-ink shadow-hard max-w-2xl">
-            <p className="font-display font-bold text-lg mb-1">No se pudo conectar al backend</p>
+            <p className="font-display font-bold text-lg mb-1">{t('common.error')}</p>
             <p className="text-sm font-mono">{(error as Error).message}</p>
           </div>
         )}
@@ -191,9 +193,9 @@ export function ItemsPage() {
                   <div className="flex flex-col items-center justify-center py-12 text-center gap-8">
                     <div>
                         <Box size={64} strokeWidth={2} className="mb-4 opacity-50 mx-auto" />
-                        <p className="font-display font-bold text-xl mb-2">Nada por acá todavía</p>
+                        <p className="font-display font-bold text-xl mb-2">{t('items.empty_state_title')}</p>
                         <p className="font-mono text-sm text-ink-soft max-w-sm">
-                        Capturá una URL, un comando, un atajo o una nota con el botón de arriba.
+                        {t('items.empty_state_desc')}
                         </p>
                     </div>
 
@@ -202,20 +204,20 @@ export function ItemsPage() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-left">
                           <UtilityAction
                             icon={<TerminalSquare size={18} strokeWidth={3} />}
-                            title="Guardar comando"
-                            desc="CLI, scripts, flags y recetas rápidas."
+                            title={t('items.utility_save_cmd_title')}
+                            desc={t('items.utility_save_cmd_desc')}
                             onClick={openCapture}
                           />
                           <UtilityAction
                             icon={<BookOpen size={18} strokeWidth={3} />}
-                            title="Abrir cheatsheets"
-                            desc="Lenguajes, frameworks, tips y how-to."
+                            title={t('items.utility_cheats_title')}
+                            desc={t('items.utility_cheats_desc')}
                             onClick={() => navigate('/cheatsheets')}
                           />
                           <UtilityAction
                             icon={<Compass size={18} strokeWidth={3} />}
-                            title="Discover"
-                            desc="Encontrar herramientas y referencias nuevas."
+                            title={t('items.utility_discover_title')}
+                            desc={t('items.utility_discover_desc')}
                             onClick={() => navigate('/discovery')}
                           />
                         </div>
@@ -230,7 +232,7 @@ export function ItemsPage() {
                                  font-display font-bold uppercase"
                     >
                       <Plus size={16} strokeWidth={3} className="inline-block mr-2" />
-                      Capturar algo
+                      {t('items.capture_something')}
                     </button>
                   </div>
                 )}
@@ -239,10 +241,10 @@ export function ItemsPage() {
         {items.length > 0 && (
           <>
             <p className="font-mono text-xs text-ink-soft mb-4">
-              {data?.total} items
-              {type !== 'all' && ` · tipo: ${type}`}
-              {stack.length > 0 && ` · stack: ${stack.join(', ')}`}
-              {workflow && ` · flujo: ${workflow}`}
+              {t('items.items_count', { count: data?.total })}
+              {type !== 'all' && ` · ${t('items.type_filter')}: ${type}`}
+              {stack.length > 0 && ` · ${t('items.stack_filter')}: ${stack.join(', ')}`}
+              {workflow && ` · ${t('items.workflow_filter')}: ${workflow}`}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {items.map((it) => (

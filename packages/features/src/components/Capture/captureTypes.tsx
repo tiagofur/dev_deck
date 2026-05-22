@@ -27,13 +27,8 @@ export interface CaptureLane {
   id: CaptureLaneId
   itemType: ItemType
   label: string
-  eyebrow: string
-  microcopy: string
   namePlaceholder: string
-  primaryLabel: string
   primaryPlaceholder: string
-  secondaryLabel?: string
-  secondaryPlaceholder?: string
   example: string
   defaultTags: string[]
   icon: LucideIcon
@@ -45,15 +40,10 @@ export const CAPTURE_LANES: CaptureLane[] = [
   {
     id: 'repo',
     itemType: 'repo',
-    label: 'Repo / URL',
-    eyebrow: 'Proyecto o referencia',
-    microcopy: 'proyecto, librería o referencia técnica',
-    namePlaceholder: 'paperclipai/paperclip',
-    primaryLabel: 'URL del repo o recurso',
-    primaryPlaceholder: 'github.com/owner/repo',
-    secondaryLabel: 'Notas rápidas',
-    secondaryPlaceholder: 'por qué vale la pena revisarlo',
-    example: 'github.com/charmbracelet/bubbletea',
+    label: 'capture.lanes.repo.label',
+    namePlaceholder: 'capture.lanes.repo.name_placeholder',
+    primaryPlaceholder: 'capture.lanes.repo.primary_placeholder',
+    example: 'capture.lanes.repo.example',
     defaultTags: ['repo', 'github'],
     icon: Github,
     primaryKind: 'url',
@@ -62,15 +52,10 @@ export const CAPTURE_LANES: CaptureLane[] = [
   {
     id: 'cli',
     itemType: 'cli',
-    label: 'CLI Command',
-    eyebrow: 'Terminal reusable',
-    microcopy: 'comando que quieres volver a usar',
-    namePlaceholder: 'ripgrep install',
-    primaryLabel: 'Comando',
-    primaryPlaceholder: 'brew install ripgrep',
-    secondaryLabel: 'Notas de uso',
-    secondaryPlaceholder: 'cuándo conviene usarlo, flags importantes, gotchas',
-    example: 'docker run --rm -it node:22',
+    label: 'capture.lanes.cli.label',
+    namePlaceholder: 'capture.lanes.cli.name_placeholder',
+    primaryPlaceholder: 'capture.lanes.cli.primary_placeholder',
+    example: 'capture.lanes.cli.example',
     defaultTags: ['cli', 'terminal'],
     icon: Terminal,
     primaryKind: 'text',
@@ -79,15 +64,10 @@ export const CAPTURE_LANES: CaptureLane[] = [
   {
     id: 'prompt',
     itemType: 'prompt',
-    label: 'Prompt',
-    eyebrow: 'Instrucción IA',
-    microcopy: 'instrucción reusable para IA',
-    namePlaceholder: 'Code review prompt',
-    primaryLabel: 'Prompt',
-    primaryPlaceholder: 'Actúa como reviewer senior y encuentra riesgos...',
-    secondaryLabel: 'Cuándo usarlo',
-    secondaryPlaceholder: 'reviews, debugging, refactors, arquitectura',
-    example: 'SQL explainer para queries lentas',
+    label: 'capture.lanes.prompt.label',
+    namePlaceholder: 'capture.lanes.prompt.name_placeholder',
+    primaryPlaceholder: 'capture.lanes.prompt.primary_placeholder',
+    example: 'capture.lanes.prompt.example',
     defaultTags: ['prompt', 'ai'],
     icon: MessageSquareText,
     primaryKind: 'text',
@@ -96,15 +76,10 @@ export const CAPTURE_LANES: CaptureLane[] = [
   {
     id: 'snippet',
     itemType: 'snippet',
-    label: 'Snippet',
-    eyebrow: 'Código guardable',
-    microcopy: 'bloque de código o patrón para reutilizar',
-    namePlaceholder: 'React query retry helper',
-    primaryLabel: 'Código',
-    primaryPlaceholder: 'function retryDelay(attempt) { ... }',
-    secondaryLabel: 'Contexto',
-    secondaryPlaceholder: 'stack, archivo típico, problema que resuelve',
-    example: 'middleware de auth para Go/Chi',
+    label: 'capture.lanes.snippet.label',
+    namePlaceholder: 'capture.lanes.snippet.name_placeholder',
+    primaryPlaceholder: 'capture.lanes.snippet.primary_placeholder',
+    example: 'capture.lanes.snippet.example',
     defaultTags: ['snippet', 'code'],
     icon: Code2,
     primaryKind: 'text',
@@ -113,15 +88,10 @@ export const CAPTURE_LANES: CaptureLane[] = [
   {
     id: 'shortcut',
     itemType: 'shortcut',
-    label: 'Shortcut',
-    eyebrow: 'Atajo o gesto',
-    microcopy: 'atajo de teclado que no quieres olvidar',
-    namePlaceholder: 'Command palette',
-    primaryLabel: 'Atajo',
-    primaryPlaceholder: 'Cmd+Shift+P',
-    secondaryLabel: 'App / contexto',
-    secondaryPlaceholder: 'VS Code, macOS, terminal...',
-    example: 'Ctrl+R para history search',
+    label: 'capture.lanes.shortcut.label',
+    namePlaceholder: 'capture.lanes.shortcut.name_placeholder',
+    primaryPlaceholder: 'capture.lanes.shortcut.primary_placeholder',
+    example: 'capture.lanes.shortcut.example',
     defaultTags: ['shortcut'],
     icon: Keyboard,
     primaryKind: 'text',
@@ -130,15 +100,10 @@ export const CAPTURE_LANES: CaptureLane[] = [
   {
     id: 'howto',
     itemType: 'workflow',
-    label: 'Tip / How-to',
-    eyebrow: 'Receta corta',
-    microcopy: 'pasos, explicación o receta corta',
-    namePlaceholder: 'Debug CORS',
-    primaryLabel: 'Pasos o explicación',
-    primaryPlaceholder: '1. Revisa headers\n2. Confirma preflight\n3. Verifica credentials',
-    secondaryLabel: 'Cuándo usarlo',
-    secondaryPlaceholder: 'debugging, deploy, onboarding, incidentes',
-    example: 'Deploy checklist para VPS',
+    label: 'capture.lanes.howto.label',
+    namePlaceholder: 'capture.lanes.howto.name_placeholder',
+    primaryPlaceholder: 'capture.lanes.howto.primary_placeholder',
+    example: 'capture.lanes.howto.example',
     defaultTags: ['workflow', 'how-to'],
     icon: Lightbulb,
     primaryKind: 'text',
@@ -147,15 +112,10 @@ export const CAPTURE_LANES: CaptureLane[] = [
   {
     id: 'article-tool',
     itemType: 'tool',
-    label: 'Article / Tool',
-    eyebrow: 'Link útil',
-    microcopy: 'artículo, docs, producto o herramienta',
-    namePlaceholder: 'TypeScript Handbook',
-    primaryLabel: 'URL',
-    primaryPlaceholder: 'https://www.typescriptlang.org/docs/',
-    secondaryLabel: 'Notas rápidas',
-    secondaryPlaceholder: 'qué explica, para qué sirve, qué parte leer',
-    example: 'docs, blog post, playground, SaaS devtool',
+    label: 'capture.lanes.article-tool.label',
+    namePlaceholder: 'capture.lanes.article-tool.name_placeholder',
+    primaryPlaceholder: 'capture.lanes.article-tool.primary_placeholder',
+    example: 'capture.lanes.article-tool.example',
     defaultTags: ['tool'],
     icon: Wrench,
     primaryKind: 'url',
@@ -164,15 +124,10 @@ export const CAPTURE_LANES: CaptureLane[] = [
   {
     id: 'note',
     itemType: 'note',
-    label: 'Note',
-    eyebrow: 'Memoria libre',
-    microcopy: 'idea, recordatorio o contexto suelto',
-    namePlaceholder: 'Idea para auth flow',
-    primaryLabel: 'Nota',
-    primaryPlaceholder: 'Recordar revisar refresh tokens antes del release...',
-    secondaryLabel: 'Contexto',
-    secondaryPlaceholder: 'proyecto, fecha, persona, decisión',
-    example: 'decisión técnica o aprendizaje rápido',
+    label: 'capture.lanes.note.label',
+    namePlaceholder: 'capture.lanes.note.name_placeholder',
+    primaryPlaceholder: 'capture.lanes.note.primary_placeholder',
+    example: 'capture.lanes.note.example',
     defaultTags: ['note'],
     icon: StickyNote,
     primaryKind: 'text',
@@ -182,11 +137,11 @@ export const CAPTURE_LANES: CaptureLane[] = [
 
 export function laneForType(type: ItemType): CaptureLane {
   if (type === 'article') return CAPTURE_LANES.find((lane) => lane.id === 'article-tool')!
-  return CAPTURE_LANES.find((lane) => lane.itemType === type) ?? CAPTURE_LANES[7]
+  return CAPTURE_LANES.find((lane) => lane.itemType === type) ?? laneForId('note')
 }
 
 export function laneForId(id: CaptureLaneId): CaptureLane {
-  return CAPTURE_LANES.find((lane) => lane.id === id) ?? CAPTURE_LANES[7]
+  return CAPTURE_LANES.find((lane) => lane.id === id) ?? CAPTURE_LANES[CAPTURE_LANES.length - 1]
 }
 
 export function iconForPreview(type: ItemType): LucideIcon {

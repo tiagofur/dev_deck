@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Loader2, Mail, ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { useJoinWaitlist } from '@devdeck/api-client'
 import { Button } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 
 export function WaitlistPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const join = useJoinWaitlist()
@@ -27,11 +29,11 @@ export function WaitlistPage() {
           <div className="w-20 h-20 mx-auto mb-6 border-3 border-ink bg-accent-lime flex items-center justify-center">
             <CheckCircle2 size={40} strokeWidth={3} />
           </div>
-          <h2 className="font-display font-black text-3xl uppercase mb-4">¡Anotado!</h2>
+          <h2 className="font-display font-black text-3xl uppercase mb-4">{t('waitlist.success_title')}</h2>
           <p className="font-mono text-sm text-ink-soft mb-8">
-            Ya estás en la lista de espera. Te avisaremos a <strong>{email}</strong> en cuanto tengamos un lugar para vos.
+            {t('waitlist.success_desc', { email })}
           </p>
-          <Button onClick={() => navigate('/')}>Volver al inicio</Button>
+          <Button onClick={() => navigate('/')}>{t('profile.back_to_home')}</Button>
         </div>
       </div>
     )
@@ -44,14 +46,14 @@ export function WaitlistPage() {
           onClick={() => navigate(-1)}
           className="mb-6 flex items-center gap-2 font-mono text-xs uppercase font-bold hover:text-accent-pink transition-colors"
         >
-          <ArrowLeft size={14} strokeWidth={3} /> Volver
+          <ArrowLeft size={14} strokeWidth={3} /> {t('common.back')}
         </button>
         
         <h1 className="font-display font-black text-4xl uppercase tracking-tight mb-2">
-          Unite a la <span className="bg-accent-yellow px-2 border-3 border-ink">Waitlist</span>
+          {t('waitlist.title')}
         </h1>
         <p className="font-mono text-sm text-ink-soft mb-8">
-          DevDeck está creciendo. Dejanos tu email y te mandamos una invitación pronto.
+          {t('waitlist.grow_desc')}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4 mb-8 text-left">
@@ -77,12 +79,12 @@ export function WaitlistPage() {
             variant="accent"
             className="w-full py-4 text-lg"
           >
-            {join.isPending ? <Loader2 className="animate-spin" /> : 'Sumarme a la lista'}
+            {join.isPending ? <Loader2 className="animate-spin" /> : t('waitlist.join_button')}
           </Button>
         </form>
 
         <div className="font-mono text-[10px] text-ink-soft leading-tight">
-          Al sumarte, aceptás que te enviemos un email (y solo uno) cuando tu invitación esté lista.
+          {t('waitlist.terms_desc')}
         </div>
       </div>
     </div>

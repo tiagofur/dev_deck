@@ -6,21 +6,10 @@ import { Button } from '@devdeck/ui'
 import { useCheatsheets, useCreateCheatsheet, useDeleteCheatsheet } from '@devdeck/api-client'
 import type { Cheatsheet, CreateCheatsheetInput } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
-
-const categoryLabels: Record<string, string> = {
-  vcs: 'Version Control',
-  os: 'OS / CLI',
-  language: 'Languages',
-  framework: 'Frameworks',
-  tool: 'Tools',
-  'package-manager': 'Package Managers',
-  editor: 'Editors',
-  shell: 'Shell / Terminal',
-  cloud: 'Cloud / DevOps',
-  other: 'Other',
-}
+import { useTranslation } from '@devdeck/i18n'
 
 export function CheatsheetsListPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [showCreate, setShowCreate] = useState(false)
@@ -28,10 +17,23 @@ export function CheatsheetsListPage() {
   const createCheatsheet = useCreateCheatsheet()
   const deleteCheatsheet = useDeleteCheatsheet()
 
+  const categoryLabels: Record<string, string> = {
+    vcs: t('cheatsheets.categories.vcs'),
+    os: t('cheatsheets.categories.os'),
+    language: t('cheatsheets.categories.language'),
+    framework: t('cheatsheets.categories.framework'),
+    tool: t('cheatsheets.categories.tool'),
+    'package-manager': t('cheatsheets.categories.package-manager'),
+    editor: t('cheatsheets.categories.editor'),
+    shell: t('cheatsheets.categories.shell'),
+    cloud: t('cheatsheets.categories.cloud'),
+    other: t('cheatsheets.categories.other'),
+  }
+
   async function handleCreate(input: CreateCheatsheetInput) {
     try {
       const created = await createCheatsheet.mutateAsync(input)
-      showToast('Cheatsheet creada')
+      showToast(t('cheatsheets.create_success'))
       setShowCreate(false)
       navigate(`/cheatsheets/${created.id}`)
     } catch (err) {
@@ -41,9 +43,10 @@ export function CheatsheetsListPage() {
 
   async function handleDelete(e: React.MouseEvent, id: string) {
     e.stopPropagation()
+    if (!window.confirm(t('cheatsheets.delete_confirm'))) return
     try {
       await deleteCheatsheet.mutateAsync(id)
-      showToast('Cheatsheet borrada')
+      showToast(t('cheatsheets.delete_success'))
     } catch (err) {
       showToast((err as Error).message, 'error')
     }
@@ -60,7 +63,7 @@ export function CheatsheetsListPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center font-mono text-ink-soft">
-        Cargando cheatsheets…
+        {t('common.loading')}
       </div>
     )
   }
@@ -75,15 +78,15 @@ export function CheatsheetsListPage() {
                      hover:text-ink mb-6 transition-colors"
         >
           <ChevronLeft size={14} strokeWidth={3} />
-          Volver
+          {t('common.back')}
         </button>
 
         <h2 className="font-display font-black text-xs uppercase tracking-widest mb-3 text-ink">
-          Categorías
+          {t('common.categories')}
         </h2>
         <div className="space-y-1">
           <CategoryButton
-            label="Todas"
+            label={t('cheatsheets.categories.all')}
             active={selectedCategory === null}
             onClick={() => setSelectedCategory(null)}
           />
@@ -104,17 +107,17 @@ export function CheatsheetsListPage() {
           <div>
             <h1 className="font-display font-black text-4xl uppercase tracking-tight flex items-center gap-3">
               <BookOpen size={36} strokeWidth={3} />
-              Cheatsheets
+              {t('cheatsheets.title')}
             </h1>
             <p className="font-mono text-sm text-ink-soft mt-2">
               {cheatsheets.length} {cheatsheets.length === 1 ? 'cheatsheet' : 'cheatsheets'}
-              {selectedCategory ? ` en ${categoryLabels[selectedCategory] ?? selectedCategory}` : ''}
+              {selectedCategory ? ` in ${categoryLabels[selectedCategory] ?? selectedCategory}` : ''}
             </p>
           </div>
           <Button onClick={() => setShowCreate(true)}>
             <span className="flex items-center gap-2">
               <Plus size={14} strokeWidth={3} />
-              Nueva cheatsheet
+              {t('cheatsheets.new_cheatsheet')}
             </span>
           </Button>
         </header>
@@ -123,7 +126,7 @@ export function CheatsheetsListPage() {
           <div className="text-center py-20">
             <BookOpen size={64} strokeWidth={2} className="mx-auto mb-4 text-ink-soft" />
             <p className="font-mono text-ink-soft">
-              No hay cheatsheets {selectedCategory ? 'en esta categoría' : 'todavía'}.
+              {selectedCategory ? t('cheatsheets.empty_state_category') : t('cheatsheets.empty_state')}
             </p>
           </div>
         ) : (
@@ -258,6 +261,7 @@ function CreateCheatsheetModal({
   onSubmit: (input: CreateCheatsheetInput) => void
   onClose: () => void
 }) {
+  const { t } = useTranslation()
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
   const [category, setCategory] = useState('tool')
@@ -300,7 +304,7 @@ function CreateCheatsheetModal({
         className="bg-bg-card border-5 border-ink shadow-hard-xl p-7 w-full max-w-lg"
       >
         <header className="flex items-center justify-between mb-5">
-          <h2 className="font-display font-black text-2xl uppercase">Nueva cheatsheet</h2>
+          <h2 className="font-display font-black text-2xl uppercase">{t('cheatsheets.new_cheatsheet')}</h2>
           <button type="button" onClick={onClose} className="border-3 border-ink p-1 hover:bg-accent-pink transition-colors">
             <X size={18} strokeWidth={3} />
           </button>
@@ -308,7 +312,7 @@ function CreateCheatsheetModal({
 
         <div className="space-y-4">
           <div>
-            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">Título *</label>
+            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">{t('cheatsheets.fields.title')} *</label>
             <input
               autoFocus
               value={title}
@@ -319,7 +323,7 @@ function CreateCheatsheetModal({
             />
           </div>
           <div>
-            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">Slug *</label>
+            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">{t('cheatsheets.fields.slug')} *</label>
             <input
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
@@ -329,19 +333,19 @@ function CreateCheatsheetModal({
             />
           </div>
           <div>
-            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">Categoría *</label>
+            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">{t('cheatsheets.fields.category')} *</label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="w-full border-3 border-ink p-2 font-mono text-sm focus:outline-none focus:bg-accent-yellow/20 bg-bg-card"
             >
               {CATEGORY_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
+                <option key={o.value} value={o.value}>{t(`cheatsheets.categories.${o.value}`)}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">Descripción</label>
+            <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">{t('cheatsheets.fields.description')}</label>
             <input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -351,7 +355,7 @@ function CreateCheatsheetModal({
           </div>
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">Ícono</label>
+              <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">{t('cheatsheets.fields.icon')}</label>
               <input
                 value={icon}
                 onChange={(e) => setIcon(e.target.value)}
@@ -360,7 +364,7 @@ function CreateCheatsheetModal({
               />
             </div>
             <div className="flex-1">
-              <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">Color (hex)</label>
+              <label className="block font-display font-bold text-xs uppercase tracking-wider mb-1">{t('cheatsheets.fields.color')}</label>
               <input
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
@@ -372,9 +376,9 @@ function CreateCheatsheetModal({
         </div>
 
         <div className="mt-6 flex justify-end gap-3">
-          <Button type="button" variant="secondary" onClick={onClose}>Cancelar</Button>
+          <Button type="button" variant="secondary" onClick={onClose}>{t('common.cancel')}</Button>
           <Button type="submit" disabled={saving || !title.trim() || !slug.trim()}>
-            {saving ? 'Creando…' : 'Crear cheatsheet'}
+            {saving ? t('common.loading') : t('cheatsheets.new_cheatsheet')}
           </Button>
         </div>
       </form>

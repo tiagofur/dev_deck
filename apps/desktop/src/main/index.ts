@@ -1,5 +1,5 @@
 import { app, BrowserWindow, shell, ipcMain, globalShortcut, safeStorage } from 'electron'
-import { join } from 'path'
+import { basename, join } from 'path'
 import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { exec } from 'child_process'
 
@@ -9,14 +9,50 @@ import { exec } from 'child_process'
 // ---------------------------------------------------------------------------
 
 const TOKEN_FILE = () => join(app.getPath('userData'), 'tokens.enc')
+const SHORTCUTS_FILE = () => join(app.getPath('userData'), 'shortcuts.json')
 
 interface TokenData {
   access: string | null
   refresh: string | null
 }
 
+interface ProjectContext {
+  name: string
+  path: string
+  gitRemote: string
+  gitSlug: string
+}
+
+interface ApiTesterRequest {
+  method: string
+  url: string
+  headers: Record<string, string>
+  body?: string
+}
+
+interface ApiTesterResponse {
+  status: number
+  statusText: string
+  durationMs: number
+  headers: Record<string, string>
+  body: string
+}
+
 let mainWindow: BrowserWindow | null = null
 let pendingAuthCallbackURL: string | null = null
+let shortcutStatus: Record<string, { accelerator: string; registered: boolean }> = {}
+
+interface ShortcutConfig {
+  enabled: boolean
+  search: string
+  add: string
+}
+
+const DEFAULT_SHORTCUT_CONFIG: ShortcutConfig = {
+  enabled: true,
+  search: 'CommandOrControl+K',
+  add: 'CommandOrControl+N',
+}
 
 function readTokens(): TokenData {
   try {
@@ -37,6 +73,26 @@ function writeTokens(data: TokenData): void {
   } catch (e) {
     console.error('[main] writeTokens failed:', e)
   }
+}
+
+function readShortcutConfig(): ShortcutConfig {
+  try {
+    const file = SHORTCUTS_FILE()
+    if (!existsSync(file)) return DEFAULT_SHORTCUT_CONFIG
+    return { ...DEFAULT_SHORTCUT_CONFIG, ...JSON.parse(readFileSync(file, 'utf-8')) }
+  } catch {
+    return DEFAULT_SHORTCUT_CONFIG
+  }
+}
+
+function writeShortcutConfig(config: ShortcutConfig): ShortcutConfig {
+  const next = {
+    enabled: config.enabled,
+    search: config.search.trim() || DEFAULT_SHORTCUT_CONFIG.search,
+    add: config.add.trim() || DEFAULT_SHORTCUT_CONFIG.add,
+  }
+  writeFileSync(SHORTCUTS_FILE(), JSON.stringify(next, null, 2), 'utf-8')
+  return next
 }
 
 // ---------------------------------------------------------------------------
@@ -86,6 +142,83 @@ function registerIpcHandlers(): void {
       })
     })
   })
+
+  ipcMain.handle('project:detect-current', async () => {
+    const projectPath = process.cwd()
+    const gitRemote = await readGitRemote(projectPath)
+    const gitSlug = gitRemoteToSlug(gitRemote)
+    return {
+      name: gitSlug ? basename(gitSlug) : basename(projectPath),
+      path: projectPath,
+      gitRemote,
+      gitSlug,
+    } satisfies ProjectContext
+  })
+
+  ipcMain.handle('shortcuts:get-status', async () => shortcutStatus)
+  ipcMain.handle('shortcuts:get-config', async () => readShortcutConfig())
+  ipcMain.handle('shortcuts:set-config', async (_event, config: ShortcutConfig) => {
+    const next = writeShortcutConfig(config)
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      registerGlobalShortcuts(mainWindow)
+    }
+    return next
+  })
+
+  ipcMain.handle('api-tester:send', async (_event, request: ApiTesterRequest) => {
+    return sendApiTesterRequest(request)
+  })
+}
+
+async function sendApiTesterRequest(request: ApiTesterRequest): Promise<ApiTesterResponse> {
+  const method = request.method.toUpperCase()
+  const target = new URL(request.url)
+  if (target.protocol !== 'http:' && target.protocol !== 'https:') {
+    throw new Error('Only http and https URLs are allowed.')
+  }
+
+  const started = Date.now()
+  const response = await fetch(target, {
+    method,
+    headers: request.headers,
+    body: method === 'GET' || method === 'HEAD' ? undefined : request.body || undefined,
+  })
+  const body = await response.text()
+  const headers: Record<string, string> = {}
+  response.headers.forEach((value, key) => {
+    headers[key] = value
+  })
+
+  return {
+    status: response.status,
+    statusText: response.statusText,
+    durationMs: Date.now() - started,
+    headers,
+    body,
+  }
+}
+
+function readGitRemote(projectPath: string): Promise<string> {
+  return new Promise((resolve) => {
+    exec('git config --get remote.origin.url', { cwd: projectPath }, (_error, stdout) => {
+      resolve(stdout.trim())
+    })
+  })
+}
+
+function gitRemoteToSlug(remote: string): string {
+  const trimmed = remote.trim().replace(/\.git$/, '')
+  if (!trimmed) return ''
+  if (trimmed.startsWith('git@')) {
+    const [, slug = ''] = trimmed.split(':')
+    return slug.replace(/^\/+/, '')
+  }
+  try {
+    const parsed = new URL(trimmed)
+    return parsed.pathname.replace(/^\/+/, '')
+  } catch {
+    return basename(trimmed)
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -93,20 +226,37 @@ function registerIpcHandlers(): void {
 // ---------------------------------------------------------------------------
 
 function registerGlobalShortcuts(win: BrowserWindow): void {
+  globalShortcut.unregisterAll()
+  const config = readShortcutConfig()
   const shortcuts: Record<string, string> = {
-    'CommandOrControl+K': 'search',
-    'CommandOrControl+N': 'add',
+    [config.search]: 'search',
+    [config.add]: 'add',
+  }
+
+  shortcutStatus = {}
+  if (!config.enabled) {
+    for (const [accelerator, name] of Object.entries(shortcuts)) {
+      shortcutStatus[name] = { accelerator, registered: false }
+    }
+    win.webContents.send('global-shortcut-status', shortcutStatus)
+    return
   }
 
   for (const [accelerator, name] of Object.entries(shortcuts)) {
-    globalShortcut.register(accelerator, () => {
+    const registered = globalShortcut.register(accelerator, () => {
       if (!win.isDestroyed()) {
         win.show()
         win.focus()
         win.webContents.send('global-shortcut', name)
       }
     })
+    shortcutStatus[name] = { accelerator, registered }
+    if (!registered) {
+      console.warn(`[main] global shortcut registration failed: ${accelerator} (${name})`)
+    }
   }
+
+  win.webContents.send('global-shortcut-status', shortcutStatus)
 }
 
 // ---------------------------------------------------------------------------

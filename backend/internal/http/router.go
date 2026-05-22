@@ -71,17 +71,14 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	as := deps.AuthService
 	embSvc := deps.Embeddings
 
-	var authH *handlers.AuthHandler
-	if cfg.AuthMode == "jwt" && as != nil {
-		authH = handlers.NewAuthHandler(st, as, handlers.AuthConfig{
-			GitHubClientID:          cfg.GitHubClientID,
-			GitHubClientSecret:      cfg.GitHubClientSecret,
-			GitHubOAuthCallbackURL:  cfg.GitHubOAuthCallbackURL,
-			WebOAuthRedirectURL:     cfg.WebOAuthRedirectURL,
-			DesktopOAuthRedirectURL: cfg.DesktopOAuthRedirectURL,
-			RequireInvite:           cfg.RequireInvite,
-		})
-	}
+	authH := handlers.NewAuthHandler(st, as, handlers.AuthConfig{
+		GitHubClientID:          cfg.GitHubClientID,
+		GitHubClientSecret:      cfg.GitHubClientSecret,
+		GitHubOAuthCallbackURL:  cfg.GitHubOAuthCallbackURL,
+		WebOAuthRedirectURL:     cfg.WebOAuthRedirectURL,
+		DesktopOAuthRedirectURL: cfg.DesktopOAuthRedirectURL,
+		RequireInvite:           cfg.RequireInvite,
+	})
 
 	reposH := handlers.NewReposHandler(st, en)
 	statsH := handlers.NewStatsHandler(st)
@@ -122,10 +119,14 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	scimH := handlers.NewSCIMHandler(st)
 
 	r.Route("/api", func(r chi.Router) {
+		// Optional auth for all public API routes
+		r.Use(mw.OptionalTokenAuth(cfg, as, st))
+
 		r.Get("/suggestions/commands", suggestionsH.Commands)
 		r.Get("/plugins/featured", pluginsH.ListFeatured)
 		r.Post("/waitlist", invitesH.JoinWaitlist)
 
+		// Cheatsheet management (Consolidated to avoid Chi router panics)
 		r.Route("/cheatsheets", func(cr chi.Router) {
 			cr.Get("/explore", cheatsH.Explore)
 			cr.Get("/{id}", cheatsH.Get)
@@ -133,10 +134,33 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			cr.Get("/{id}/export", cheatsH.Export)
 			cr.Get("/{id}/badge", cheatsH.Badge)
 			cr.Get("/{id}/card.svg", cheatsH.Card)
+
+			// Enforced auth for management operations
+			cr.Group(func(cr chi.Router) {
+				cr.Use(mw.TokenAuth(cfg, as, st))
+				cr.Get("/", cheatsH.List)
+				cr.Post("/", cheatsH.Create)
+				cr.Patch("/{id}", cheatsH.Update)
+				cr.Delete("/{id}", cheatsH.Delete)
+				cr.Post("/{id}/fork", cheatsH.Fork)
+				cr.Post("/{id}/star", cheatsH.Star)
+				cr.Post("/{id}/entries", cheatsH.CreateEntry)
+				cr.Patch("/{id}/entries/{entryId}", cheatsH.UpdateEntry)
+				cr.Delete("/{id}/entries/{entryId}", cheatsH.DeleteEntry)
+			})
 		})
 
-		if authH != nil {
-			r.Route("/auth", func(r chi.Router) {
+		r.Route("/auth", func(r chi.Router) {
+			// Profile endpoints (available in both token and jwt modes)
+			r.Group(func(r chi.Router) {
+				r.Use(mw.TokenAuth(cfg, as, st))
+				r.Get("/me", authH.Me)
+				r.Patch("/me", authH.UpdateMe)
+				r.Patch("/me/onboarding/complete", authH.CompleteOnboarding)
+			})
+
+			// OAuth/JWT only endpoints
+			if cfg.AuthMode == "jwt" {
 				r.Get("/providers", authH.Providers)
 				r.Post("/register", authH.Register)
 				r.Post("/login", authH.LoginLocal)
@@ -152,15 +176,8 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 
 				r.Post("/refresh", authH.Refresh)
 				r.Post("/logout", authH.Logout)
-
-				r.Group(func(r chi.Router) {
-					r.Use(mw.JWTAuth(as))
-					r.Get("/me", authH.Me)
-					r.Patch("/me", authH.UpdateMe)
-					r.Patch("/me/onboarding/complete", authH.CompleteOnboarding)
-				})
-			})
-		}
+			}
+		})
 
 		r.Group(func(r chi.Router) {
 			r.Use(mw.TokenAuth(cfg, as, st))
@@ -200,18 +217,6 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				rr.Delete("/{id}/cheatsheets/{cheatsheetId}", reposH.UnlinkCheatsheet)
 			})
 
-			r.Route("/cheatsheets", func(cr chi.Router) {
-				cr.Get("/", cheatsH.List)
-				cr.Post("/", cheatsH.Create)
-				cr.Patch("/{id}", cheatsH.Update)
-				cr.Delete("/{id}", cheatsH.Delete)
-				cr.Post("/{id}/fork", cheatsH.Fork)
-				cr.Post("/{id}/star", cheatsH.Star)
-				cr.Post("/{id}/entries", cheatsH.CreateEntry)
-				cr.Patch("/{id}/entries/{entryId}", cheatsH.UpdateEntry)
-				cr.Delete("/{id}/entries/{entryId}", cheatsH.DeleteEntry)
-			})
-
 			r.Get("/search", cheatsH.Search)
 			r.Route("/stats", func(sr chi.Router) {
 				sr.Get("/", statsH.Get)
@@ -237,7 +242,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 					dr.Get("/trending", orgsH.GetDiscoveryTrending)
 					dr.Get("/recommendations", orgsH.GetRecommendations)
 				})
-				
+
 				or.Group(func(or chi.Router) {
 					or.Use(mw.RequireOrgPermission(st, "org:admin"))
 					or.Get("/{id}/insights", orgsH.GetInsights)
@@ -259,7 +264,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				ir.Get("/{id}", itemsH.Get)
 				ir.Patch("/{id}", itemsH.Update)
 				ir.Delete("/{id}", itemsH.Delete)
-				
+
 				ir.Group(func(ir chi.Router) {
 					ir.Use(mw.IARateLimit(100, 10))
 					ir.Post("/{id}/ai-enrich", itemsH.AIEnrich)
@@ -274,9 +279,9 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				ir.Post("/{id}/runbooks", runbooksH.Create)
 			})
 
-			r.Group(func(r chi.Router) {
-				r.Use(mw.IARateLimit(100, 10))
-				r.Post("/ask", askH.Ask)
+			r.Group(func(ir chi.Router) {
+				ir.Use(mw.IARateLimit(100, 10))
+				ir.Post("/ask", askH.Ask)
 			})
 
 			r.Route("/runbooks/{id}", func(r chi.Router) {

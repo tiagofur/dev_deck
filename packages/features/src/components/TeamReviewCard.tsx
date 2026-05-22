@@ -1,6 +1,7 @@
 import { CheckCircle2, Clipboard, Users, X } from 'lucide-react'
 import { Button } from '@devdeck/ui'
 import type { Item } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 
 interface Props {
 	item: Item
@@ -19,6 +20,7 @@ export function TeamReviewCard({
 	onRemove,
 	onCopy,
 }: Props) {
+	const { t } = useTranslation()
 	const isInReview = item.tags.includes('team-review')
 
 	return (
@@ -26,7 +28,7 @@ export function TeamReviewCard({
 			<div className="flex items-center gap-2 mb-4">
 				<Users size={18} strokeWidth={3} className="text-accent-cyan" />
 				<h3 className="font-display font-black uppercase text-sm tracking-widest">
-					Equipo
+					{t('item_detail.team.title')}
 				</h3>
 			</div>
 
@@ -34,10 +36,10 @@ export function TeamReviewCard({
 				<div className="space-y-4">
 					<div className="bg-accent-yellow/20 border-2 border-ink border-dashed p-3">
 						<p className="text-[10px] font-mono uppercase font-bold text-ink-soft">
-							Estado: En revisión
+							{t('item_detail.team.status_in_review')}
 						</p>
 						<p className="text-xs mt-1">
-							Este item está en la cola de curación del equipo.
+							{t('item_detail.team.in_review_desc')}
 						</p>
 					</div>
 
@@ -45,13 +47,13 @@ export function TeamReviewCard({
 						<Button variant="primary" onClick={onApprove} disabled={saving}>
 							<span className="flex items-center justify-center gap-2">
 								<CheckCircle2 size={16} strokeWidth={3} />
-								Aprobar y destacar
+								{t('item_detail.team.approve_highlight')}
 							</span>
 						</Button>
 						<Button variant="secondary" onClick={onRemove} disabled={saving}>
 							<span className="flex items-center justify-center gap-2">
 								<X size={16} strokeWidth={3} />
-								Quitar de revisión
+								{t('item_detail.team.remove_review')}
 							</span>
 						</Button>
 					</div>
@@ -59,12 +61,12 @@ export function TeamReviewCard({
 			) : (
 				<div className="space-y-4">
 					<p className="text-xs text-ink-soft">
-						¿Este item es útil para todo el equipo? Marcalo para que otros lo revisen y cataloguen.
+						{t('item_detail.team.useful_prompt')}
 					</p>
 					<Button variant="secondary" onClick={onMark} disabled={saving}>
 						<span className="flex items-center justify-center gap-2">
 							<Users size={16} strokeWidth={3} />
-							Marcar para revisión
+							{t('item_detail.team.mark_review')}
 						</span>
 					</Button>
 				</div>
@@ -76,7 +78,7 @@ export function TeamReviewCard({
 					className="w-full flex items-center justify-center gap-2 py-2 border-2 border-ink border-dashed text-[10px] font-mono uppercase font-bold text-ink-soft hover:text-ink hover:bg-bg-elevated transition-all"
 				>
 					<Clipboard size={12} strokeWidth={3} />
-					Copiar resumen para Slack/Discord
+					{t('item_detail.team.copy_share_summary')}
 				</button>
 			</div>
 		</div>

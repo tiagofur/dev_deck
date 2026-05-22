@@ -3,8 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Sparkles, Loader2, ChevronLeft } from 'lucide-react'
 import { Button, showToast } from '@devdeck/ui'
 import { useJoinCircle } from '@devdeck/api-client'
+import { useTranslation, Trans } from '@devdeck/i18n'
 
 export function CircleJoinPage() {
+  const { t } = useTranslation()
   const { inviteCode } = useParams<{ inviteCode: string }>()
   const navigate = useNavigate()
   const joinCircle = useJoinCircle()
@@ -18,15 +20,15 @@ export function CircleJoinPage() {
       try {
         const code = inviteCode!.trim().toUpperCase()
         const joined = await joinCircle.mutateAsync({ invite_code: code })
-        showToast('¡Te uniste al círculo con éxito! 🎉')
+        showToast(t('circles.join_success_toast'))
         navigate(`/circles/${joined.id}`, { replace: true })
       } catch (err) {
-        showToast((err as Error).message || 'No se pudo unir al círculo', 'error')
+        showToast((err as Error).message || t('circles.join_error_toast'), 'error')
       }
     }
 
     executeJoin()
-  }, [inviteCode, joinCircle, navigate])
+  }, [inviteCode, joinCircle, navigate, t])
 
   return (
     <div className="min-h-screen bg-bg-primary flex items-center justify-center p-6">
@@ -40,10 +42,14 @@ export function CircleJoinPage() {
           <div className="py-6 flex flex-col items-center">
             <Loader2 className="w-12 h-12 text-accent-pink animate-spin mb-4" strokeWidth={3} />
             <h2 className="font-display font-black text-2xl uppercase tracking-tight mb-2">
-              Uniéndose al Círculo
+              {t('circles.joining_title')}
             </h2>
             <p className="font-mono text-xs text-ink-soft">
-              Validando código de invitación <span className="font-bold text-ink">"{inviteCode?.toUpperCase()}"</span> y preparando tu vault...
+              <Trans 
+                i18nKey="circles.joining_desc"
+                values={{ code: inviteCode?.toUpperCase() }}
+                components={{ 1: <span className="font-bold text-ink" /> }}
+              />
             </p>
           </div>
         )}
@@ -54,18 +60,18 @@ export function CircleJoinPage() {
               <span className="font-display font-black text-xl">!</span>
             </div>
             <h2 className="font-display font-black text-2xl uppercase tracking-tight text-danger mb-2">
-              No se pudo unir
+              {t('circles.join_failed')}
             </h2>
             <p className="font-mono text-xs text-ink-soft mb-6 bg-danger/10 border-2 border-dashed border-danger/40 p-3">
-              {(joinCircle.error as Error).message || 'El código de invitación no es válido o ya venció.'}
+              {(joinCircle.error as Error).message || t('circles.invalid_invite')}
             </p>
             <div className="flex flex-col gap-3">
               <Button onClick={() => navigate('/circles')} className="w-full flex items-center justify-center gap-2">
                 <ChevronLeft size={14} strokeWidth={3} />
-                Ir a Círculos
+                {t('circles.go_to_circles')}
               </Button>
               <Button variant="secondary" onClick={() => navigate('/')} className="w-full">
-                Ir al Home
+                {t('circles.go_to_home')}
               </Button>
             </div>
           </div>

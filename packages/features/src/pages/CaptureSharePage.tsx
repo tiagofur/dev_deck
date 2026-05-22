@@ -2,12 +2,14 @@ import { useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { showToast } from '@devdeck/ui'
 import { Loader2 } from 'lucide-react'
+import { useTranslation } from '@devdeck/i18n'
 
 /**
  * Handle incoming links from the Web Share Target API.
  * Route: /capture-share
  */
 export function CaptureSharePage() {
+  const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
 
@@ -16,7 +18,7 @@ export function CaptureSharePage() {
     const title = searchParams.get('title')
 
     if (!url) {
-      showToast('No se encontró un link para capturar', 'error')
+      showToast(t('capture.no_link_found'), 'error')
       navigate('/', { replace: true })
       return
     }
@@ -31,7 +33,7 @@ export function CaptureSharePage() {
         title 
       } 
     })
-  }, [searchParams, navigate])
+  }, [searchParams, navigate, t])
 
   return (
     <div className="min-h-screen bg-bg-primary flex flex-col items-center justify-center gap-6 p-12 text-center">
@@ -39,8 +41,8 @@ export function CaptureSharePage() {
         <Loader2 size={40} strokeWidth={3} className="animate-spin" />
       </div>
       <div>
-        <h2 className="font-display font-black text-2xl uppercase tracking-tight">Capturando Link…</h2>
-        <p className="text-ink-soft font-mono text-sm mt-2">Preparando tu vault para el nuevo descubrimiento.</p>
+        <h2 className="font-display font-black text-2xl uppercase tracking-tight">{t('capture.capturing_link')}</h2>
+        <p className="text-ink-soft font-mono text-sm mt-2">{t('capture.preparing_vault')}</p>
       </div>
     </div>
   )

@@ -3,15 +3,15 @@ import {
   ArrowLeft, 
   Users, 
   Sparkles, 
-  Library, 
-  LayoutGrid, 
   User as UserIcon,
   Search
 } from 'lucide-react'
 import { useFollowingFeed, type FeedEvent } from '@devdeck/api-client'
 import { Button } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 
 export function FollowingFeedPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { data, isLoading } = useFollowingFeed()
   const events = data?.events || []
@@ -22,13 +22,13 @@ export function FollowingFeedPage() {
         <button
           onClick={() => navigate('/')}
           className="border-3 border-ink p-2 bg-bg-card shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm transition-all duration-150"
-          aria-label="Volver"
+          aria-label={t('common.back')}
         >
           <ArrowLeft size={20} strokeWidth={3} />
         </button>
         <h1 className="font-display font-black text-2xl uppercase tracking-tight flex items-center gap-2">
           <Users size={24} strokeWidth={3} className="text-accent-lavender" />
-          Network Feed
+          {t('feed.title')}
         </h1>
       </header>
 
@@ -36,13 +36,13 @@ export function FollowingFeedPage() {
         <div className="bg-accent-yellow/10 border-3 border-ink p-4 mb-8">
            <p className="font-mono text-xs font-bold uppercase flex items-center gap-2">
               <Sparkles size={14} className="text-accent-yellow" />
-              Estás viendo capturas de los curadores que seguís
+              {t('feed.seeing_captures')}
            </p>
         </div>
 
         {isLoading ? (
           <div className="p-20 text-center animate-pulse font-mono text-sm text-ink-soft">
-            Explorando actualizaciones de tu red…
+            {t('feed.exploring')}
           </div>
         ) : events.length > 0 ? (
           <div className="space-y-6">
@@ -77,7 +77,7 @@ export function FollowingFeedPage() {
                      {e.item.title}
                    </h3>
                    <p className="text-xs text-ink-soft line-clamp-2 leading-relaxed">
-                     {e.item.description || 'Sin descripción.'}
+                     {e.item.description || t('common.no_description')}
                    </p>
 
                    <div className="mt-4 flex items-center justify-between pt-3 border-t-2 border-ink/5">
@@ -89,7 +89,7 @@ export function FollowingFeedPage() {
                          ))}
                       </div>
                       <Button size="sm" onClick={() => navigate(`/repo/${e.item.id}`)}>
-                        Ver más
+                        {t('feed.view_more')}
                       </Button>
                    </div>
                 </div>
@@ -99,9 +99,9 @@ export function FollowingFeedPage() {
         ) : (
           <div className="p-20 text-center border-3 border-ink border-dashed rounded-xl space-y-4">
              <Search size={48} className="mx-auto text-accent-pink" strokeWidth={3} />
-             <p className="font-mono text-sm text-ink-soft uppercase font-bold">Aún no hay actividad social.</p>
-             <p className="text-xs text-ink-soft italic">Seguí a otros curadores para ver qué herramientas están guardando.</p>
-             <Button variant="secondary" onClick={() => navigate('/discovery')}>Explorar Curadores</Button>
+             <p className="font-mono text-sm text-ink-soft uppercase font-bold">{t('feed.no_activity')}</p>
+             <p className="text-xs text-ink-soft italic">{t('feed.follow_hint')}</p>
+             <Button variant="secondary" onClick={() => navigate('/discovery')}>{t('feed.explore_curators')}</Button>
           </div>
         )}
       </main>

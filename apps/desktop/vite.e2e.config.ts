@@ -21,9 +21,19 @@ export default defineConfig({
         __dirname,
         '../../packages/features/src/index.ts',
       ),
+      '@devdeck/i18n': resolve(
+        __dirname,
+        '../../packages/i18n/src/index.ts',
+      ),
     },
   },
   server: {
     port: 5174,
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8080',
+        changeOrigin: true,
+      },
+    },
   },
 })

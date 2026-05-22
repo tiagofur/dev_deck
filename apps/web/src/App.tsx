@@ -21,6 +21,7 @@ import {
   ItemDetailPage,
   CaptureSharePage,
   ItemsPage,
+  ExplorePage,
   LandingPage,
   RepoDetailPage,
   SettingsPage,
@@ -33,11 +34,13 @@ import {
   TeamReviewPage,
   TeamFeedPage,
   FollowingFeedPage,
+  WorkbenchPage,
   UnifiedCommandPalette,
   useGlobalShortcuts,
 } from '@devdeck/features'
 import { CaptureModal, ShortcutsModal } from '@devdeck/features'
 import { ConfirmHost, PageTransition, Toaster } from '@devdeck/ui'
+import { useTranslation } from '@devdeck/i18n'
 import { isLoggedIn, useMe } from '@devdeck/api-client'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -58,6 +61,7 @@ const queryClient = new QueryClient({
 
 // Guard for protected routes. If no token is stored, bounce to /login.
 function AuthGuard({ children }: { children: ReactElement }): ReactElement {
+  const { t } = useTranslation()
   const { data: user, isLoading, isError, error, refetch } = useMe()
   const location = useLocation()
 
@@ -68,8 +72,8 @@ function AuthGuard({ children }: { children: ReactElement }): ReactElement {
   if (isLoading) {
     return (
       <AuthStatusScreen
-        title="Cargando DevDeck"
-        message="Estamos validando tu sesión y preparando tu vault."
+        title={t('common.loading')}
+        message={t('profile.edit_loading_msg')}
       />
     )
   }
@@ -77,15 +81,15 @@ function AuthGuard({ children }: { children: ReactElement }): ReactElement {
   if (isError) {
     return (
       <AuthStatusScreen
-        title="No se pudo validar tu sesión"
-        message={(error as Error)?.message || 'El backend no respondió a tiempo.'}
+        title={t('common.auth_failed_title')}
+        message={(error as Error)?.message || t('common.auth_failed_msg')}
         action={
           <button
             type="button"
             onClick={() => refetch()}
             className="border-3 border-ink bg-accent-yellow px-4 py-2 font-display font-black uppercase shadow-hard"
           >
-            Reintentar
+            {t('common.retry')}
           </button>
         }
       />
@@ -239,6 +243,10 @@ function AnimatedRoutes(): ReactElement {
           <Route
             path="/settings"
             element={<AuthGuard>{withTransition(<SettingsPage />)}</AuthGuard>}
+          />
+          <Route
+            path="/workbench"
+            element={<AuthGuard>{withTransition(<WorkbenchPage />)}</AuthGuard>}
           />
           <Route
             path="/admin"

@@ -19,6 +19,25 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => ipcRenderer.removeListener('global-shortcut', handler)
   },
 
+  shortcuts: {
+    getStatus: (): Promise<Record<string, { accelerator: string; registered: boolean }>> =>
+      ipcRenderer.invoke('shortcuts:get-status'),
+    getConfig: (): Promise<{ enabled: boolean; search: string; add: string }> =>
+      ipcRenderer.invoke('shortcuts:get-config'),
+    setConfig: (config: { enabled: boolean; search: string; add: string }): Promise<{ enabled: boolean; search: string; add: string }> =>
+      ipcRenderer.invoke('shortcuts:set-config', config),
+    onStatus: (
+      callback: (status: Record<string, { accelerator: string; registered: boolean }>) => void,
+    ): (() => void) => {
+      const handler = (
+        _event: Electron.IpcRendererEvent,
+        status: Record<string, { accelerator: string; registered: boolean }>,
+      ) => callback(status)
+      ipcRenderer.on('global-shortcut-status', handler)
+      return () => ipcRenderer.removeListener('global-shortcut-status', handler)
+    },
+  },
+
   auth: {
     openExternal: (url: string): void => ipcRenderer.send('auth:open-external', url),
     getPendingCallbackURL: (): string | null => ipcRenderer.sendSync('auth:get-pending-url'),
@@ -31,5 +50,29 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   shell: {
     runCommand: (cmd: string): Promise<string> => ipcRenderer.invoke('shell:run', cmd),
+  },
+
+  project: {
+    detectCurrent: (): Promise<{
+      name: string
+      path: string
+      gitRemote: string
+      gitSlug: string
+    }> => ipcRenderer.invoke('project:detect-current'),
+  },
+
+  apiTester: {
+    send: (request: {
+      method: string
+      url: string
+      headers: Record<string, string>
+      body?: string
+    }): Promise<{
+      status: number
+      statusText: string
+      durationMs: number
+      headers: Record<string, string>
+      body: string
+    }> => ipcRenderer.invoke('api-tester:send', request),
   },
 })

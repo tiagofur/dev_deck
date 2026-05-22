@@ -67,6 +67,7 @@ Both apps import pages and components from the `@devdeck/features` package — t
 |-----|-----------|
 | [docs/VISION.md](docs/VISION.md) | Vision, positioning, differentiators |
 | [docs/PRD.md](docs/PRD.md) | Product, features, user stories, scope by waves |
+| [docs/DEV_WORKBENCH.md](docs/DEV_WORKBENCH.md) | Developer Workbench: local utilities, palette, reusable actions |
 | [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) | Detailed competitive analysis |
 | [docs/LANDING.md](docs/LANDING.md) · [docs/LANDING_COPY.md](docs/LANDING_COPY.md) | Landing copy (ES / EN) |
 
@@ -96,11 +97,6 @@ Both apps import pages and components from the `@devdeck/features` package — t
 
 ## Status
 
-✅ **All 17 Waves complete.** DevDeck is now in **Version 1.0 (Stable)**.
-What started as a simple repo directory is now a full Knowledge OS with:
-- **Autonomous AI Agents:** Locally supervised command execution.
-- **Enterprise Ready:** SAML SSO, SCIM 2.0 provisioning, and RBAC.
-- **Collective Intelligence:** Team-wide discovery, trending topics, and analytics.
-- **Global Scalability:** Multi-region active-active synchronization with read replicas.
+DevDeck is an evolving open-source product. The current direction is to strengthen the core vault, capture flows, semantic retrieval, and the new **Developer Workbench**: local utilities, command palette, reusable requests, snippets, and runbooks connected to your saved context.
 
-Full journey at [ROADMAP.md](ROADMAP.md).
+See [ROADMAP.md](ROADMAP.md) and [docs/DEV_WORKBENCH.md](docs/DEV_WORKBENCH.md) for the product direction.

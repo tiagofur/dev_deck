@@ -41,6 +41,7 @@ import {
   useRepo,
   useUpdateRepo,
 } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 import { confirm } from '@devdeck/ui'
 import { formatCount } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
@@ -48,6 +49,7 @@ import { showToast } from '@devdeck/ui'
 type Tab = 'overview' | 'readme' | 'commands'
 
 export function RepoDetailPage() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [tab, setTab] = useState<Tab>('overview')
@@ -80,7 +82,7 @@ export function RepoDetailPage() {
     return (
       <AppShell contentClassName="flex-1 overflow-y-auto">
         <div className="min-h-full flex items-center justify-center font-mono text-ink-soft">
-          Cargando repo…
+          {t('common.loading')}
         </div>
       </AppShell>
     )
@@ -90,12 +92,12 @@ export function RepoDetailPage() {
     return (
       <AppShell contentClassName="flex-1 overflow-y-auto">
         <div className="min-h-full flex flex-col items-center justify-center gap-4 p-8 text-center">
-          <p className="font-display font-black text-3xl uppercase">Repo no encontrado o borrado</p>
+          <p className="font-display font-black text-3xl uppercase">{t('repos.not_found_title')}</p>
           <p className="font-mono text-sm text-ink-soft max-w-md">
-            El repo ya no existe en tu vault, o fue eliminado mientras esta pantalla estaba abierta.
+            {t('repos.not_found_desc')}
           </p>
           <Button variant="primary" onClick={() => navigate('/items', { replace: true })}>
-            Volver a items
+            {t('repos.back_to_items')}
           </Button>
         </div>
       </AppShell>
@@ -109,7 +111,7 @@ export function RepoDetailPage() {
   async function saveNotes(next: string) {
     try {
       await updateRepo.mutateAsync({ id: repo!.id, input: { notes: next } })
-      showToast('Notas guardadas')
+      showToast(t('repos.notes_saved'))
     } catch (e) {
       showToast((e as Error).message, 'error')
     }
@@ -129,7 +131,7 @@ export function RepoDetailPage() {
         id: repo!.id,
         input: { archived: !repo!.archived },
       })
-      showToast(repo!.archived ? 'Desarchivado' : 'Archivado')
+      showToast(repo!.archived ? t('repos.unarchived_msg') : t('repos.archived_msg'))
     } catch (e) {
       showToast((e as Error).message, 'error')
     }
@@ -137,16 +139,16 @@ export function RepoDetailPage() {
 
   async function onDelete() {
     const ok = await confirm({
-      title: 'Borrar repo',
-      message: `Esto va a eliminar "${title}" para siempre. No se puede deshacer.`,
-      confirmLabel: 'Borrar',
-      cancelLabel: 'Cancelar',
+      title: t('repos.delete_title'),
+      message: t('repos.delete_confirm', { title }),
+      confirmLabel: t('common.delete'),
+      cancelLabel: t('common.cancel'),
       variant: 'danger',
     })
     if (!ok) return
     try {
       await deleteRepo.mutateAsync(repo!.id)
-      showToast('Repo borrado')
+      showToast(t('repos.delete_success'))
       navigate('/items', { replace: true })
     } catch (e) {
       showToast((e as Error).message, 'error')
@@ -156,7 +158,7 @@ export function RepoDetailPage() {
   async function onRefresh() {
     try {
       await refreshRepo.mutateAsync(repo!.id)
-      showToast('Metadata actualizada')
+      showToast(t('repos.metadata_updated'))
     } catch (e) {
       showToast((e as Error).message, 'error')
     }
@@ -167,10 +169,10 @@ export function RepoDetailPage() {
     try {
       if (editingCmd) {
         await updateCommand.mutateAsync({ cmdId: editingCmd.id, input })
-        showToast('Comando actualizado')
+        showToast(t('repos.command_updated'))
       } else {
         await addCommand.mutateAsync(input)
-        showToast('Comando agregado')
+        showToast(t('repos.command_added'))
       }
       setCmdModalOpen(false)
       setEditingCmd(null)
@@ -181,15 +183,15 @@ export function RepoDetailPage() {
 
   async function handleDeleteCommand(cmd: RepoCommand) {
     const ok = await confirm({
-      title: 'Borrar comando',
-      message: `Esto va a borrar "${cmd.label}". No se puede deshacer.`,
-      confirmLabel: 'Borrar',
+      title: t('repos.delete_title'),
+      message: t('repos.delete_confirm', { title: cmd.label }),
+      confirmLabel: t('common.delete'),
       variant: 'danger',
     })
     if (!ok) return
     try {
       await deleteCommand.mutateAsync(cmd.id)
-      showToast('Comando borrado')
+      showToast(t('repos.command_deleted'))
     } catch (e) {
       showToast((e as Error).message, 'error')
     }
@@ -236,7 +238,7 @@ export function RepoDetailPage() {
                      hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg
                      active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
                      transition-all duration-150"
-          aria-label="Volver"
+          aria-label={t('common.back')}
         >
           <ArrowLeft size={20} strokeWidth={3} />
         </button>
@@ -245,7 +247,7 @@ export function RepoDetailPage() {
         </h1>
         {repo.archived && (
           <span className="px-2 py-0.5 text-xs font-mono font-bold border-2 border-ink bg-accent-orange">
-            ARCHIVADO
+            {t('common.archived')}
           </span>
         )}
       </header>
@@ -301,14 +303,14 @@ export function RepoDetailPage() {
                 </span>
               )}
               <span className="text-ink-soft">
-                añadido {new Date(repo.added_at).toLocaleDateString()}
+                {t('common.added_at', { date: new Date(repo.added_at).toLocaleDateString() })}
               </span>
             </div>
 
             {repo.topics.length > 0 && (
               <div className="mt-4 pt-4 border-t-2 border-ink/10">
                 <p className="text-xs font-display font-black uppercase tracking-widest mb-2 text-ink-soft">
-                  Topics de GitHub
+                  {t('repos.github_topics')}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {repo.topics.map((t) => (
@@ -328,15 +330,15 @@ export function RepoDetailPage() {
           <div className="flex gap-0 border-b-3 border-ink">
             <TabButton active={tab === 'overview'} onClick={() => setTab('overview')}>
               <LayoutGrid size={14} strokeWidth={3} />
-              Overview
+              {t('repos.tabs.overview')}
             </TabButton>
             <TabButton active={tab === 'readme'} onClick={() => setTab('readme')}>
               <FileText size={14} strokeWidth={3} />
-              README
+              {t('repos.tabs.readme')}
             </TabButton>
             <TabButton active={tab === 'commands'} onClick={() => setTab('commands')}>
               <Terminal size={14} strokeWidth={3} />
-              Commands
+              {t('repos.tabs.commands')}
               {commands.length > 0 && (
                 <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-ink text-bg-primary font-mono">
                   {commands.length}
@@ -368,8 +370,8 @@ export function RepoDetailPage() {
               <div className="flex items-center justify-between mb-4 gap-3">
                 <p className="font-mono text-sm text-ink-soft">
                   {commands.length === 0
-                    ? 'Sin comandos. Agregá los `pnpm dev`, `make migrate`, etc. de este repo.'
-                    : `${commands.length} ${commands.length === 1 ? 'comando' : 'comandos'} — arrastrá para reordenar.`}
+                    ? t('repos.commands_empty')
+                    : t('repos.commands_count', { count: commands.length })}
                 </p>
                 <div className="flex gap-2 shrink-0">
                   {repo.source === 'github' && (
@@ -380,7 +382,7 @@ export function RepoDetailPage() {
                     >
                       <span className="flex items-center gap-2">
                         <Package size={14} strokeWidth={3} />
-                        Importar scripts
+                        {t('repos.import_scripts')}
                       </span>
                     </Button>
                   )}
@@ -393,7 +395,7 @@ export function RepoDetailPage() {
                   >
                     <span className="flex items-center gap-2">
                       <Plus size={14} strokeWidth={3} />
-                      Nuevo
+                      {t('repos.new_command')}
                     </span>
                   </Button>
                 </div>
@@ -407,7 +409,7 @@ export function RepoDetailPage() {
                     className="mx-auto mb-4 text-ink-soft"
                   />
                   <p className="font-mono text-sm text-ink-soft mb-4">
-                    Empty. Pegá tu primer comando.
+                    {t('repos.commands_empty_hint')}
                   </p>
                   <Button
                     onClick={() => {
@@ -415,7 +417,7 @@ export function RepoDetailPage() {
                       setCmdModalOpen(true)
                     }}
                   >
-                    Crear comando
+                    {t('repos.create_command')}
                   </Button>
                 </div>
               ) : (

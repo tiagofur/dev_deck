@@ -10,8 +10,10 @@ import { ShortcutsModal } from '../components/ShortcutsModal'
 import { Sidebar } from '../components/Sidebar'
 import { Topbar } from '../components/Topbar'
 import { useItems } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 
 export function HomePage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [tag, setTag] = useState<string | null>(null)
@@ -75,22 +77,6 @@ export function HomePage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [navigate])
 
-  // OS-level shortcuts via Electron main process (fire even when app is background).
-  // In web, `window.electronAPI` is undefined — the guard short-circuits.
-  useEffect(() => {
-    const api = (window as unknown as {
-      electronAPI?: {
-        onShortcut: (cb: (name: string) => void) => () => void
-      }
-    }).electronAPI
-    if (!api) return
-    const unsub = api.onShortcut((name: string) => {
-      if (name === 'search') setGlobalSearchOpen(true)
-      if (name === 'add') setModalOpen(true)
-    })
-    return unsub
-  }, [])
-
   const items = data?.items ?? []
   const hasFilters = Boolean(query || tag || lang)
 
@@ -116,19 +102,19 @@ export function HomePage() {
 
         <main className="flex-1 overflow-y-auto p-6">
           {isLoading && (
-            <p className="font-mono text-ink-soft">Cargando…</p>
+            <p className="font-mono text-ink-soft">{t('common.loading')}</p>
           )}
 
           {error && (
             <div className="p-4 bg-danger text-white border-3 border-ink shadow-hard max-w-2xl">
               <p className="font-display font-bold text-lg mb-1">
-                No se pudo conectar al backend
+                {t('items.backend_connection_error')}
               </p>
               <p className="text-sm font-mono">
                 {(error as Error).message}
               </p>
               <p className="text-xs font-mono mt-2 opacity-90">
-                ¿Está corriendo `make run` en /backend?
+                {t('items.make_run_hint')}
               </p>
             </div>
           )}
@@ -139,14 +125,14 @@ export function HomePage() {
 
           {!isLoading && !error && items.length === 0 && hasFilters && (
             <p className="font-mono text-ink-soft">
-              Sin resultados para los filtros actuales.
+              {t('items.no_results_filters')}
             </p>
           )}
 
           {items.length > 0 && (
             <>
               <p className="font-mono text-xs text-ink-soft mb-4">
-                {data?.total} items
+                {t('items.items_count', { count: data?.total })}
               </p>
               <ItemGrid
                 items={items}

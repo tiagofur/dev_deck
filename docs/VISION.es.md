@@ -41,7 +41,7 @@ DevDeck rompe ese ciclo con **captura rápida, contexto automático y recuperaci
 - Un **bookmark manager genérico** (como Raindrop o Pocket)
 - Un **gestor de notas** (como Notion u Obsidian)
 - Un **directorio solo de repos** (como GitHub Stars)
-- Un **launcher del sistema** (como Raycast o Alfred)
+- Un **launcher genérico del sistema** (como Raycast o Alfred)
 - Un **chatbot** que responde preguntas generales
 
 ---
@@ -57,7 +57,7 @@ El análisis competitivo completo (con tablas de pros/contras y diferenciación 
 | **GitHub Stars** | Solo repos de GitHub; sin contexto; sin búsqueda útil | DevDeck lo reemplaza y expande |
 | **Raindrop / Pocket** | Genéricos; sin foco dev; sin commands ni runbooks | DevDeck es el Raindrop especializado para devs |
 | **Notion / Obsidian** | Trabajo manual total; sin metadata automática; captura lenta | DevDeck complementa (captura rápida + IA) |
-| **Raycast / Alfred** | Launchers; no persisten contexto largo plazo | DevDeck es la knowledge base; Raycast la ejecuta |
+| **Raycast / Alfred** | Launchers; no persisten contexto largo plazo | DevDeck puede alimentar acciones con contexto propio |
 | **Pieces.app** | Solo snippets de código; sin repos, CLIs, shortcuts, workflows | DevDeck es más amplio en tipos de items |
 
 ---
@@ -113,6 +113,7 @@ El análisis competitivo completo (con tablas de pros/contras y diferenciación 
 | **Ola 5** | "Knowledge OS para devs" | Multi-tipo items, runbooks, quick capture |
 | **Ola 6** | "Tu memoria dev asistida por IA" | Auto-summary, semantic search, Ask DevDeck |
 | **Ola 7** | "Tu knowledge base dev, en todos tus dispositivos" | Offline-first, multi-device, decks compartibles |
+| **Siguiente** | "Tu workbench dev: memoria + acción" | Developer Workbench, paleta, utilities locales, requests reutilizables |
 
 ---
 
@@ -132,3 +133,12 @@ R: La IA es opt-in. Podés configurar tu propia OpenAI API key o usar Ollama loc
 
 **P: ¿Es para equipos o individual?**
 R: Hoy es para uso individual o muy pequeño (allowlist de GitHub). El plan es expandir a multi-usuario en Ola 7, con decks compartibles como puente social.
+
+---
+
+## El Futuro: Developer Workbench
+
+DevDeck está evolucionando más allá del almacenamiento pasivo de conocimiento para convertirse en una herramienta de **acción contextual** en el día a día. La frontera es clara: no buscamos reemplazar cada app que un developer ya usa, sino conectar memoria, búsqueda y acciones reutilizables.
+
+Para más detalles técnicos y de producto sobre esta evolución, revisar:
+👉 **[DEV_WORKBENCH.es.md](DEV_WORKBENCH.es.md)**

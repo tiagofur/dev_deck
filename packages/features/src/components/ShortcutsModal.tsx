@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Keyboard, X } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { useTranslation } from '@devdeck/i18n'
 
 interface Props {
   open: boolean
@@ -12,17 +13,22 @@ interface Shortcut {
   description: string
 }
 
-const shortcuts: Shortcut[] = [
-  { keys: ['Cmd', 'K'], description: 'Búsqueda global' },
-  { keys: ['Cmd', 'N'], description: 'Nuevo item' },
-  { keys: ['Cmd', 'L'], description: 'Ir a items (buscar)' },
-  { keys: ['Cmd', '/'], description: 'Mostrar atajos' },
-  { keys: ['Cmd', 'D'], description: 'Toggle favorito (detail)' },
-  { keys: ['Esc'], description: 'Cerrar modales' },
-  { keys: ['Enter'], description: 'Confirmar' },
-]
-
 export function ShortcutsModal({ open, onClose }: Props) {
+  const { t } = useTranslation()
+  const [desktopStatus, setDesktopStatus] = useState<Record<string, { accelerator: string; registered: boolean }> | null>(null)
+  const [desktopConfig, setDesktopConfig] = useState<{ enabled: boolean; search: string; add: string } | null>(null)
+  const [savingDesktopConfig, setSavingDesktopConfig] = useState(false)
+
+  const shortcuts: Shortcut[] = [
+    { keys: ['Cmd', 'K'], description: t('shortcuts.global_search') },
+    { keys: ['Cmd', 'N'], description: t('shortcuts.new_item') },
+    { keys: ['Cmd', 'L'], description: t('shortcuts.go_items') },
+    { keys: ['Cmd', '/'], description: t('shortcuts.show_shortcuts') },
+    { keys: ['Cmd', 'D'], description: t('shortcuts.toggle_favorite') },
+    { keys: ['Esc'], description: t('shortcuts.close_modals') },
+    { keys: ['Enter'], description: t('shortcuts.confirm') },
+  ]
+
   useEffect(() => {
     if (!open) return
     function onKey(e: KeyboardEvent) {
@@ -31,6 +37,57 @@ export function ShortcutsModal({ open, onClose }: Props) {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
+
+  useEffect(() => {
+    if (!open) return
+    const api = (window as unknown as {
+      electronAPI?: {
+        shortcuts?: {
+          getStatus: () => Promise<Record<string, { accelerator: string; registered: boolean }>>
+          getConfig: () => Promise<{ enabled: boolean; search: string; add: string }>
+          setConfig: (config: { enabled: boolean; search: string; add: string }) => Promise<{ enabled: boolean; search: string; add: string }>
+          onStatus: (
+            callback: (status: Record<string, { accelerator: string; registered: boolean }>) => void,
+          ) => () => void
+        }
+      }
+    }).electronAPI?.shortcuts
+    if (!api) {
+      setDesktopStatus(null)
+      return
+    }
+
+    let cancelled = false
+    api.getStatus().then((status) => {
+      if (!cancelled) setDesktopStatus(status)
+    })
+    api.getConfig().then((config) => {
+      if (!cancelled) setDesktopConfig(config)
+    })
+    const unsubscribe = api.onStatus((status) => setDesktopStatus(status))
+    return () => {
+      cancelled = true
+      unsubscribe()
+    }
+  }, [open])
+
+  async function saveDesktopConfig(nextConfig: { enabled: boolean; search: string; add: string }) {
+    const api = (window as unknown as {
+      electronAPI?: {
+        shortcuts?: {
+          setConfig: (config: { enabled: boolean; search: string; add: string }) => Promise<{ enabled: boolean; search: string; add: string }>
+        }
+      }
+    }).electronAPI?.shortcuts
+    if (!api) return
+    setSavingDesktopConfig(true)
+    try {
+      const saved = await api.setConfig(nextConfig)
+      setDesktopConfig(saved)
+    } finally {
+      setSavingDesktopConfig(false)
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -55,12 +112,12 @@ export function ShortcutsModal({ open, onClose }: Props) {
             <header className="flex items-center justify-between mb-5">
               <h2 className="font-display font-black text-2xl uppercase flex items-center gap-2">
                 <Keyboard size={22} strokeWidth={3} />
-                Atajos
+                {t('shortcuts.title')}
               </h2>
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="Cerrar"
+                aria-label={t('common.close')}
                 className="border-3 border-ink p-1 hover:bg-accent-pink transition-colors"
               >
                 <X size={18} strokeWidth={3} />
@@ -68,9 +125,9 @@ export function ShortcutsModal({ open, onClose }: Props) {
             </header>
 
             <ul className="space-y-3">
-              {shortcuts.map((s) => (
+              {shortcuts.map((s, idx) => (
                 <li
-                  key={s.description}
+                  key={idx}
                   className="flex items-center justify-between gap-4"
                 >
                   <span className="font-mono text-sm">{s.description}</span>
@@ -89,8 +146,63 @@ export function ShortcutsModal({ open, onClose }: Props) {
             </ul>
 
             <p className="mt-6 text-xs font-mono text-ink-soft text-center italic">
-              En Mac: Cmd en lugar de Ctrl
+              {t('shortcuts.mac_hint')}
             </p>
+
+            {desktopStatus && (
+              <div className="mt-5 border-3 border-ink bg-bg-elevated p-3">
+                <p className="mb-2 font-display text-xs font-black uppercase">
+                  Desktop global shortcuts
+                </p>
+                {desktopConfig && (
+                  <div className="mb-3 grid gap-2 border-b-2 border-ink pb-3">
+                    <label className="flex items-center justify-between gap-3 font-mono text-xs">
+                      <span>Enabled</span>
+                      <input
+                        type="checkbox"
+                        checked={desktopConfig.enabled}
+                        onChange={(event) => {
+                          const next = { ...desktopConfig, enabled: event.target.checked }
+                          setDesktopConfig(next)
+                          void saveDesktopConfig(next)
+                        }}
+                      />
+                    </label>
+                    <label className="grid gap-1 font-mono text-xs">
+                      <span>Palette shortcut</span>
+                      <input
+                        value={desktopConfig.search}
+                        onChange={(event) => setDesktopConfig({ ...desktopConfig, search: event.target.value })}
+                        onBlur={() => void saveDesktopConfig(desktopConfig)}
+                        className="border-2 border-ink bg-bg-primary px-2 py-1 outline-none"
+                      />
+                    </label>
+                    <label className="grid gap-1 font-mono text-xs">
+                      <span>Capture shortcut</span>
+                      <input
+                        value={desktopConfig.add}
+                        onChange={(event) => setDesktopConfig({ ...desktopConfig, add: event.target.value })}
+                        onBlur={() => void saveDesktopConfig(desktopConfig)}
+                        className="border-2 border-ink bg-bg-primary px-2 py-1 outline-none"
+                      />
+                    </label>
+                    {savingDesktopConfig && (
+                      <span className="font-mono text-[10px] text-ink-soft">Saving...</span>
+                    )}
+                  </div>
+                )}
+                <div className="grid gap-2">
+                  {Object.entries(desktopStatus).map(([name, status]) => (
+                    <div key={name} className="flex items-center justify-between gap-3 font-mono text-xs">
+                      <span>{status.accelerator}</span>
+                      <span className={status.registered ? 'text-accent-lime' : 'text-danger'}>
+                        {status.registered ? 'registered' : 'conflict'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}

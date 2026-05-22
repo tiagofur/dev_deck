@@ -1,7 +1,8 @@
-import { Activity, BookOpen, Boxes, Plus, Search, Settings as SettingsIcon, Share2, Sparkles, Users } from 'lucide-react'
+import { Activity, BookOpen, Boxes, Plus, Search, Settings as SettingsIcon, Share2, Sparkles, Users, Wrench } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@devdeck/ui'
 import { usePreferences, useMe } from '@devdeck/api-client'
+import { useTranslation } from '@devdeck/i18n'
 import { SyncStatusIndicator } from './SyncStatusIndicator'
 import { NotificationCenter } from './NotificationCenter'
 import { WorkspaceSwitcher } from './WorkspaceSwitcher'
@@ -25,6 +26,7 @@ export function Topbar({
   onGlobalSearch,
   reviewCount,
 }: Props) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { activeOrgId } = usePreferences()
   const { data: user } = useMe()
@@ -33,6 +35,7 @@ export function Topbar({
     <header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex items-center gap-6">
       <WorkspaceSwitcher />
       <h1
+        aria-label="DevDeck"
         className="font-display font-black text-2xl uppercase tracking-tight whitespace-nowrap cursor-pointer"
         onClick={() => navigate('/')}
       >
@@ -48,7 +51,7 @@ export function Topbar({
         <input
           id="topbar-search"
           type="search"
-          placeholder="Buscar items, comandos, prompts…  (apretá / )"
+          placeholder={t('topbar.search_placeholder')}
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           className="w-full border-3 border-ink pl-10 pr-3 py-2 font-mono text-sm
@@ -61,7 +64,7 @@ export function Topbar({
         size="sm"
         variant="ghost"
         className="whitespace-nowrap"
-        title="Búsqueda global (Ctrl+K)"
+        title={t('topbar.search_tooltip')}
       >
         <span className="flex items-center gap-2">
           <Search size={16} strokeWidth={3} />
@@ -74,7 +77,7 @@ export function Topbar({
         size="sm"
         variant="secondary"
         className="whitespace-nowrap"
-        title="Todos los items"
+        title={t('topbar.items_tooltip')}
       >
         <span className="flex items-center gap-2">
           <Boxes size={16} strokeWidth={3} />
@@ -87,7 +90,7 @@ export function Topbar({
         size="sm"
         variant="secondary"
         className="whitespace-nowrap"
-        title="Cheatsheets"
+        title={t('topbar.cheats_tooltip')}
       >
         <span className="flex items-center gap-2">
           <BookOpen size={16} strokeWidth={3} />
@@ -96,11 +99,24 @@ export function Topbar({
       </Button>
 
       <Button
+        onClick={() => navigate('/workbench')}
+        size="sm"
+        variant="secondary"
+        className="whitespace-nowrap"
+        title="Developer Workbench"
+      >
+        <span className="flex items-center gap-2">
+          <Wrench size={16} strokeWidth={3} />
+          <span className="hidden sm:inline">Workbench</span>
+        </span>
+      </Button>
+
+      <Button
         onClick={() => navigate('/review')}
         size="sm"
         variant="secondary"
         className="whitespace-nowrap"
-        title="Revisión de equipo"
+        title={t('topbar.review_tooltip')}
       >
         <span className="flex items-center gap-2">
           <Users size={16} strokeWidth={3} />
@@ -119,7 +135,7 @@ export function Topbar({
           size="sm"
           variant="secondary"
           className="whitespace-nowrap"
-          title="Team Activity"
+          title={t('topbar.activity_tooltip')}
         >
           <span className="flex items-center gap-2">
             <Activity size={16} strokeWidth={3} />
@@ -133,7 +149,7 @@ export function Topbar({
         size="sm"
         variant="secondary"
         className="whitespace-nowrap"
-        title="Red Social"
+        title={t('topbar.network_tooltip')}
       >
         <span className="flex items-center gap-2">
           <Users size={16} strokeWidth={3} />
@@ -146,7 +162,7 @@ export function Topbar({
         size="sm"
         variant="secondary"
         className="whitespace-nowrap"
-        title="Círculos compartidos"
+        title={t('topbar.circles_tooltip')}
       >
         <span className="flex items-center gap-2">
           <Share2 size={16} strokeWidth={3} />
@@ -159,7 +175,7 @@ export function Topbar({
         size="sm"
         variant="accent"
         className="whitespace-nowrap"
-        title="Modo descubrimiento (D)"
+        title={t('topbar.discover_tooltip')}
       >
         <span className="flex items-center gap-2">
           <Sparkles size={16} strokeWidth={3} />
@@ -170,7 +186,7 @@ export function Topbar({
       <Button onClick={onAdd} size="sm" className="whitespace-nowrap">
         <span className="flex items-center gap-2">
           <Plus size={16} strokeWidth={3} />
-          Capturar
+          {t('topbar.capture_button')}
         </span>
       </Button>
 
@@ -194,8 +210,8 @@ export function Topbar({
         <button
           type="button"
           onClick={() => navigate('/profile')}
-          aria-label="Ver Perfil"
-          title="Ver Perfil"
+          aria-label={t('topbar.profile_tooltip')}
+          title={t('topbar.profile_tooltip')}
           className="border-3 border-ink w-[42px] h-[42px] bg-bg-card shadow-hard flex items-center justify-center overflow-hidden
                      hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg
                      active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm

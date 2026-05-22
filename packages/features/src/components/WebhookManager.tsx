@@ -1,16 +1,11 @@
 import { useState } from 'react'
-import { Trash2, Plus, Zap, Shield, Key } from 'lucide-react'
+import { Trash2, Plus, Zap, Key } from 'lucide-react'
 import { useWebhooks, useCreateWebhook, useDeleteWebhook } from '@devdeck/api-client'
 import { Button, showToast } from '@devdeck/ui'
-
-const AVAILABLE_EVENTS = [
-  { id: 'item.created', label: 'Item Creado' },
-  { id: 'item.updated_notes', label: 'Notas Actualizadas' },
-  { id: 'runbook.created', label: 'Runbook Creado' },
-  { id: 'deck.created', label: 'Deck Creado' }
-]
+import { useTranslation } from '@devdeck/i18n'
 
 export function WebhookManager() {
+  const { t } = useTranslation()
   const { data: hooksRes, isLoading } = useWebhooks()
   const createWebhook = useCreateWebhook()
   const deleteWebhook = useDeleteWebhook()
@@ -20,18 +15,25 @@ export function WebhookManager() {
   const [selectedEvents, setSelectedEvents] = useState<string[]>([])
   const [showForm, setShowShowForm] = useState(false)
 
+  const AVAILABLE_EVENTS = [
+    { id: 'item.created', label: t('webhooks.events.item_created') },
+    { id: 'item.updated_notes', label: t('webhooks.events.item_updated_notes') },
+    { id: 'runbook.created', label: t('webhooks.events.runbook_created') },
+    { id: 'deck.created', label: t('webhooks.events.deck_created') }
+  ]
+
   const webhooks = hooksRes?.webhooks || []
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     if (!name || !url || selectedEvents.length === 0) {
-      showToast('Completá todos los campos y elegí al menos un evento', 'error')
+      showToast(t('webhooks.complete_fields_toast'), 'error')
       return
     }
     
     try {
       await createWebhook.mutateAsync({ name, url, events: selectedEvents })
-      showToast('Webhook registrado')
+      showToast(t('webhooks.registered_toast'))
       setName('')
       setUrl('')
       setSelectedEvents([])
@@ -91,7 +93,7 @@ export function WebhookManager() {
         
         {webhooks.length === 0 && !isLoading && !showForm && (
           <p className="text-center py-8 border-2 border-dashed border-ink/20 font-mono text-xs text-ink-soft italic">
-            No hay webhooks de salida configurados.
+            {t('webhooks.no_webhooks')}
           </p>
         )}
       </div>
@@ -99,31 +101,31 @@ export function WebhookManager() {
       {!showForm ? (
         <Button onClick={() => setShowShowForm(true)} className="w-full" size="sm" variant="secondary">
           <Plus size={14} className="mr-2" strokeWidth={3} />
-          Nuevo Webhook de Salida
+          {t('webhooks.new_button')}
         </Button>
       ) : (
         <form onSubmit={handleCreate} className="bg-bg-elevated border-3 border-ink p-5 shadow-hard space-y-4 animate-in slide-in-from-bottom-4 duration-300">
           <h4 className="font-display font-black uppercase text-xs tracking-widest flex items-center gap-2">
-            <Zap size={14} /> Configurar Webhook
+            <Zap size={14} /> {t('webhooks.configure_title')}
           </h4>
           
           <div className="space-y-3">
             <input 
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="Nombre (ej: Slack Integration)"
+              placeholder={t('webhooks.name_placeholder')}
               className="w-full border-2 border-ink p-2 font-mono text-xs focus:bg-accent-yellow/10 outline-none"
             />
             <input 
               value={url}
               onChange={e => setUrl(e.target.value)}
-              placeholder="URL del Endpoint (HTTPS recomendado)"
+              placeholder={t('webhooks.url_placeholder')}
               className="w-full border-2 border-ink p-2 font-mono text-xs focus:bg-accent-yellow/10 outline-none"
             />
           </div>
 
           <div className="space-y-2">
-            <p className="text-[10px] font-black uppercase text-ink-soft">Eventos Suscritos:</p>
+            <p className="text-[10px] font-black uppercase text-ink-soft">{t('webhooks.subscribed_events')}</p>
             <div className="grid grid-cols-2 gap-2">
               {AVAILABLE_EVENTS.map(ev => (
                 <button
@@ -142,10 +144,10 @@ export function WebhookManager() {
 
           <div className="flex gap-2 pt-2">
             <Button type="submit" className="flex-1" size="sm" disabled={createWebhook.isPending}>
-              Guardar Webhook
+              {t('webhooks.save_button')}
             </Button>
             <Button type="button" variant="secondary" size="sm" onClick={() => setShowShowForm(false)}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
           </div>
         </form>

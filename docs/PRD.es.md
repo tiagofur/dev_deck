@@ -1,26 +1,26 @@
 # DevDeck — Product Requirements Document
 
-> Versión: 1.0.0 (Stable) · Owner: tfurt · Última actualización: Mayo 2026
+> Versión: 1.1 · Owner: tfurt · Última actualización: Mayo 2026
 >
-> **Estado:** Roadmap de 17 Olas **COMPLETADO**. v1.0 en producción.
+> Estado: producto open-source en evolución.
 
 ---
 
 ## 0. Nombre y dominio
 
-**DevDeck** es el nombre definitivo. "Deck" evoca una baraja personal de herramientas: organizada, extensible y curada por el propio developer.
+**DevDeck** es una baraja personal de herramientas, comandos y conocimiento de desarrollo: organizada, extensible y curada por el propio developer.
 
 **Dominio:** [devdeck.ai](https://devdeck.ai)
 
 | Subdominio | Propósito |
 |------------|-----------|
 | `devdeck.ai` | Landing page + marketing + descargas |
-| `app.devdeck.ai` | Web app (React 18 — comparte pages con desktop via monorepo) |
-| `api.devdeck.ai` | Backend REST + sync engine |
+| `app.devdeck.ai` | Web app |
+| `api.devdeck.ai` | Backend REST + sync |
 | `docs.devdeck.ai` | Documentación |
 | `download.devdeck.ai` | Descargas de la app desktop |
 
-El `.ai` **no es decorativo**. DevDeck usa IA para clasificar, resumir, recuperar por intención y sugerir items relacionados — haciendo que todo lo que guardás sea **encontrable cuando lo necesitás**. Sin esas funciones, el dominio no estaría justificado.
+El `.ai` no debe ser decorativo. La IA en DevDeck existe para clasificar, resumir, enriquecer, recuperar por intención y sugerir relaciones útiles dentro del vault.
 
 ---
 
@@ -28,47 +28,115 @@ El `.ai` **no es decorativo**. DevDeck usa IA para clasificar, resumir, recupera
 
 > **DevDeck es tu memoria externa asistida por IA para el trabajo de desarrollo.**
 
-Una app **offline-first, multi-usuario y multiplataforma** donde guardar, organizar y redescubrir todo lo útil que un dev encuentra: repos, CLIs, plugins, cheatsheets, shortcuts, snippets, agentes, prompts y workflows. Con IA que clasifica, resume y recupera por intención — no por tag exacto.
+DevDeck ayuda a guardar, organizar, recuperar y reutilizar todo lo útil que un developer encuentra o construye: repos, CLIs, plugins, cheatsheets, shortcuts, snippets, agentes, prompts, requests, runbooks y workflows.
 
-### Pilares del producto (v1.0.0)
-1. **Items Polimórficos** — Vault universal para repos, CLIs, prompts, agentes, runbooks y notas.
-2. **Agentes Autónomos** — Orquestación server-side con ejecución híbrida segura en el Desktop.
-3. **Inteligencia Colectiva** — Descubrimiento de equipo, Hot Topics y analíticas de adopción organizacional.
-4. **Resiliencia Total** — Offline-first real con SQLite/OPFS y sincronización multi-región global.
-5. **Identidad Enterprise** — Soporte nativo para SAML 2.0, SCIM 2.0 y RBAC granular.
+El siguiente paso de producto es el **Developer Workbench**:
+
+> Guardás conocimiento útil, lo encontrás cuando importa y lo convertís en acciones reutilizables.
 
 ---
 
-## 2. El Problema y la Solución
+## 2. Problema
 
-### El problema de fondo
-> **El conocimiento útil para developers se pierde demasiado fácil y se recupera demasiado mal.**
+El conocimiento útil para developers se pierde demasiado fácil y se recupera demasiado mal.
 
-### La solución DevDeck
-DevDeck no solo guarda links; **contextualiza y ejecuta** el conocimiento. Mediante el enriquecimiento automático y la orquestación de agentes, transformamos una lista estática de herramientas en un sistema operativo de inteligencia activa.
+Casos típicos:
 
----
+- Un repo con estrella que después no recordás cómo se llamaba.
+- Un comando que funcionó una vez y quedó enterrado en el historial.
+- Un snippet copiado desde un tutorial que nunca llegó a una librería interna.
+- Un request API probado a mano y perdido al día siguiente.
+- Un prompt o agente que funcionó bien, pero quedó en un chat.
 
-## 3. Estado del Roadmap
-
-### ✅ Olas 1–17 Completadas
-
-DevDeck ha cumplido su ambicioso plan de desarrollo de 17 olas:
-- **Cimientos (1-4):** API Core, Monorepo y paridad Web/Desktop.
-- **Inteligencia (5-6):** Items polimórficos, embeddings y búsqueda semántica.
-- **Colaboración (7-12):** Sync bidireccional, CRDTs, plugins y reputación social.
-- **Escala (13-16):** Réplicas de lectura, SAML/SCIM, Insights de equipo y Agentes autónomos.
-- **Lanzamiento (17):** Onboarding, Documentation y Versión 1.0 Estable.
+El problema no es falta de herramientas. El problema es reconstruir contexto una y otra vez.
 
 ---
 
-## 4. Métricas de Éxito (v1.0.0)
+## 3. Solución
 
-- **Retención:** >80% de los usuarios capturan al menos 10 items por semana.
-- **Eficiencia:** El tiempo de captura (Quick Capture) es < 3 segundos.
-- **Automatización:** Los agentes de IA resuelven exitosamente el 70% de las consultas de Runbooks.
-- **Adopción Team:** Reducción del 50% en la duplicación de herramientas dentro de las organizaciones registradas.
+DevDeck combina tres capas:
+
+1. **Vault polimórfico:** items específicos para trabajo dev.
+2. **Recuperación inteligente:** búsqueda textual, fuzzy y semántica.
+3. **Acciones reutilizables:** comandos, snippets, requests, runbooks y utilities locales conectadas al vault.
+
+La frontera de producto:
+
+- DevDeck no reemplaza IDEs, launchers, clientes API o gestores de secretos.
+- DevDeck guarda el contexto que hace que esas acciones sean reutilizables.
+- Cuando una utility integrada no gana valor por estar conectada al vault, probablemente no pertenece al core.
 
 ---
 
-*Mission Accomplished: Mayo 2026 (v1.0.0 Stable)*
+## 4. Pilares
+
+| Pilar | Descripción |
+|-------|-------------|
+| **Developer-first** | Tipos, metadata y flujos pensados para desarrollo, no bookmarks genéricos. |
+| **Low-friction capture** | Guardar desde web, desktop, CLI, extensión o paste debe tomar segundos. |
+| **AI-assisted memory** | IA para clasificar, resumir y recuperar; no IA decorativa. |
+| **Local-first trust** | Funciones útiles offline y control claro de datos sensibles. |
+| **Reusable actions** | Cada comando, request, snippet o runbook debe poder volver a usarse sin reconstruir contexto. |
+| **Open-source pragmático** | Fácil de probar, self-hostear y contribuir por partes pequeñas. |
+
+---
+
+## 5. Alcance funcional
+
+### Core actual / base esperada
+
+- Items polimórficos.
+- Cheatsheets y comandos.
+- Captura desde CLI/extensión/app.
+- Enriquecimiento automático.
+- Búsqueda textual y semántica.
+- Desktop, web y CLI.
+- Self-hosting.
+
+### Próximo alcance: Developer Workbench
+
+- Utilities locales: JSON, JWT, Base64, URL encode, UUID, timestamps, hashes.
+- Guardar outputs como snippets/notas.
+- Paleta interna para buscar, abrir tools, copiar comandos y crear items.
+- Quick API Tester ligero con requests guardables.
+- Contexto por proyecto desde Desktop/CLI.
+
+### Fuera de alcance por ahora
+
+- Reemplazar Postman/Insomnia.
+- Reemplazar Raycast/Alfred como launcher del sistema.
+- Implementar un gestor de secretos propio.
+- Clipboard history global por defecto.
+- OCR/IA visual como feature core inicial.
+
+---
+
+## 6. Métricas de éxito
+
+- **Captura:** guardar un item útil en menos de 3 segundos.
+- **Reutilización:** encontrar y copiar/abrir/ejecutar una acción guardada en menos de 10 segundos.
+- **Retención:** usuarios que capturan y reutilizan items cada semana.
+- **Search success:** búsquedas que terminan en una acción concreta.
+- **Trust:** porcentaje de utilities locales usadas sin red.
+- **Contribución:** issues pequeñas resueltas por contributors externos.
+
+---
+
+## 7. Riesgos
+
+| Riesgo | Mitigación |
+|--------|------------|
+| Scope creep | Cada feature debe demostrar conexión clara con el vault. |
+| Prometer demasiado | Documentar fases y estado real de implementación. |
+| Privacidad | Features sensibles siempre opt-in, locales y con apagado visible. |
+| Seguridad de secretos | Usar keychains/gestores existentes; no inventar criptografía propia. |
+| Comunidad lenta | Crear demos, issues pequeñas y docs de contribución accionables. |
+
+---
+
+## 8. Documentos relacionados
+
+- [VISION.es.md](VISION.es.md)
+- [DEV_WORKBENCH.es.md](DEV_WORKBENCH.es.md)
+- [COMPETITIVE_ANALYSIS.es.md](COMPETITIVE_ANALYSIS.es.md)
+- [TECHNICAL_ROADMAP_AI_OFFLINE.es.md](TECHNICAL_ROADMAP_AI_OFFLINE.es.md)

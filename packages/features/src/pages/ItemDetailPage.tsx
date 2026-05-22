@@ -35,8 +35,10 @@ import { NotesEditor } from '../components/NotesEditor'
 import { TagsEditor } from '../components/TagsEditor'
 import { TeamReviewCard } from '../components/TeamReviewCard'
 import { AppShell } from '../components/AppShell'
+import { useTranslation } from '@devdeck/i18n'
 
 export function ItemDetailPage() {
+	const { t } = useTranslation()
 	const { id } = useParams<{ id: string }>()
 	const navigate = useNavigate()
 	const [activeTab, setActiveTab] = useState<'notes' | 'runbooks'>('notes')
@@ -48,28 +50,17 @@ export function ItemDetailPage() {
 
 	const currentItem = item
 
-	async function saveNotes(next: string) {
-		await updateItem.mutateAsync({ id: currentItem!.id, input: { notes: next } })
-	}
-
-	async function saveTags(next: string[]) {
-		await updateItem.mutateAsync({ id: currentItem!.id, input: { tags: next } })
-	}
-
-	async function saveField(field: string, val: string) {
-		await updateItem.mutateAsync({ id: currentItem!.id, input: { [field]: val } })
-	}
-
 	async function toggleFavorite() {
+		if (!currentItem) return
 		await updateItem.mutateAsync({
-			id: currentItem!.id,
-			input: { is_favorite: !currentItem!.is_favorite },
+			id: currentItem.id,
+			input: { is_favorite: !currentItem.is_favorite },
 		})
 	}
 
 	async function rerunAI() {
 		await aiEnrich.mutateAsync(currentItem!.id)
-		showToast('Análisis en curso...')
+		showToast(t('item_detail.rerun_ai_toast'))
 	}
 
 	async function markForTeamReview() {
@@ -78,7 +69,7 @@ export function ItemDetailPage() {
 				id: currentItem!.id,
 				input: { tags: [...currentItem!.tags, 'team-review'] },
 			})
-			showToast('Marcado para revisión de equipo')
+			showToast(t('item_detail.mark_review_toast'))
 		} catch (e) {
 			showToast((e as Error).message, 'error')
 		}
@@ -90,7 +81,7 @@ export function ItemDetailPage() {
 				id: currentItem!.id,
 				input: { tags: currentItem!.tags.filter((tag) => tag !== 'team-review') },
 			})
-			showToast('Quitado de revisión')
+			showToast(t('item_detail.remove_review_toast'))
 		} catch (e) {
 			showToast((e as Error).message, 'error')
 		}
@@ -105,7 +96,7 @@ export function ItemDetailPage() {
 					is_favorite: true,
 				},
 			})
-			showToast('Aprobado para el vault del equipo')
+			showToast(t('item_detail.approve_review_toast'))
 		} catch (e) {
 			showToast((e as Error).message, 'error')
 		}
@@ -113,31 +104,30 @@ export function ItemDetailPage() {
 
 	async function copyShareSummary() {
 		try {
-			await navigator.clipboard.writeText(buildShareSummary(currentItem!))
-			showToast('Resumen copiado')
+			await navigator.clipboard.writeText(buildShareSummary(currentItem!, t))
+			showToast(t('item_detail.copy_summary_toast'))
 		} catch {
-			showToast('No se pudo copiar', 'error')
+			showToast(t('item_detail.copy_summary_error'), 'error')
 		}
 	}
 
 	// Cmd+D: Toggle favorite
 	useEffect(() => {
 		function onKey(e: KeyboardEvent) {
-			const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
-			const modKey = isMac ? e.metaKey : e.ctrlKey
-			if (modKey && e.key.toLowerCase() === 'd') {
+			if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'd') {
 				e.preventDefault()
 				toggleFavorite()
 			}
 		}
 		window.addEventListener('keydown', onKey)
 		return () => window.removeEventListener('keydown', onKey)
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [currentItem?.id, currentItem?.is_favorite])
 
 	async function saveAITags(next: string[]) {
 		try {
 			await reviewAITags.mutateAsync({ id: currentItem!.id, input: { ai_tags: next, apply: false } })
-			showToast('Sugerencias guardadas')
+			showToast(t('item_detail.save_ai_tags_toast'))
 		} catch (e) {
 			showToast((e as Error).message, 'error')
 		}
@@ -146,7 +136,7 @@ export function ItemDetailPage() {
 	async function applyAITags(next: string[]) {
 		try {
 			await reviewAITags.mutateAsync({ id: currentItem!.id, input: { ai_tags: next, apply: true } })
-			showToast('Tags sugeridos aplicados')
+			showToast(t('item_detail.apply_ai_tags_toast'))
 		} catch (e) {
 			showToast((e as Error).message, 'error')
 		}
@@ -154,16 +144,16 @@ export function ItemDetailPage() {
 
 	async function onDelete() {
 		const ok = await confirm({
-			title: 'Borrar item',
-			message: `Esto va a eliminar "${currentItem?.title || '(sin título)'}" para siempre. No se puede deshacer.`,
-			confirmLabel: 'Borrar',
-			cancelLabel: 'Cancelar',
+			title: t('item_detail.delete_item_title'),
+			message: t('item_detail.delete_item_confirm', { title: currentItem?.title || t('common.untitled') }),
+			confirmLabel: t('common.delete'),
+			cancelLabel: t('common.cancel'),
 			variant: 'danger',
 		})
 		if (!ok) return
 		try {
 			await deleteItem.mutateAsync(currentItem!.id)
-			showToast('Item borrado')
+			showToast(t('item_detail.delete_item_success'))
 			navigate('/items', { replace: true })
 		} catch (e) {
 			showToast((e as Error).message, 'error')
@@ -173,7 +163,7 @@ export function ItemDetailPage() {
 	if (isLoading) {
 		return (
 			<AppShell contentClassName="flex-1 overflow-y-auto">
-				<div className="min-h-full p-12 text-center animate-pulse">Cargando item…</div>
+				<div className="min-h-full p-12 text-center animate-pulse">{t('item_detail.loading_item')}</div>
 			</AppShell>
 		)
 	}
@@ -181,17 +171,21 @@ export function ItemDetailPage() {
 		return (
 			<AppShell contentClassName="flex-1 overflow-y-auto">
 				<div className="min-h-full flex flex-col items-center justify-center gap-4 p-8 text-center">
-					<p className="font-display font-black text-3xl uppercase">Item no encontrado o borrado</p>
+					<p className="font-display font-black text-3xl uppercase">{t('item_detail.item_not_found_title')}</p>
 					<p className="font-mono text-sm text-ink-soft max-w-md">
-						El item ya no existe en tu vault, o fue eliminado mientras esta pantalla estaba abierta.
+						{t('item_detail.item_not_found_desc')}
 					</p>
 					<Button variant="primary" onClick={() => navigate('/items', { replace: true })}>
-						Volver a items
+						{t('item_detail.back_to_items')}
 					</Button>
 				</div>
 			</AppShell>
 		)
 	}
+
+	const saveNotes = async (next: string) => { await updateItem.mutateAsync({ id: currentItem.id, input: { notes: next } }) }
+	const saveTags = async (next: string[]) => { await updateItem.mutateAsync({ id: currentItem.id, input: { tags: next } }) }
+	const saveField = async (field: string, val: string) => { await updateItem.mutateAsync({ id: currentItem.id, input: { [field]: val } }) }
 
 	return (
 		<AppShell contentClassName="flex-1 overflow-y-auto">
@@ -201,13 +195,13 @@ export function ItemDetailPage() {
 					type="button"
 					onClick={() => navigate('/items')}
 					className="border-3 border-ink p-2 bg-bg-card shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm transition-all duration-150"
-					aria-label="Volver"
+					aria-label={t('common.back')}
 				>
 					<ArrowLeft size={20} strokeWidth={3} />
 				</button>
 				<div className="min-w-0 flex-1">
 					<p className="font-mono text-xs text-ink-soft mb-1">{currentItem.item_type}</p>
-					<h1 className="font-display font-black text-2xl uppercase tracking-tight truncate">{currentItem.title || '(sin título)'}</h1>
+					<h1 className="font-display font-black text-2xl uppercase tracking-tight truncate">{currentItem.title || `(${t('common.untitled')})`}</h1>
 				</div>
 			</header>
 
@@ -215,16 +209,16 @@ export function ItemDetailPage() {
 				<div className="lg:col-span-2 space-y-6">
 					<ItemHero item={currentItem} onRerunAI={rerunAI} rerunning={aiEnrich.isPending} />
 					<InlineTextCard
-						title="Por qué lo guardaste"
+						title={t('item_detail.why_saved_title')}
 						value={currentItem.why_saved}
-						placeholder="Ej: para migrar el deploy, para revisar después, para onboarding..."
+						placeholder={t('item_detail.why_saved_placeholder')}
 						onSave={(next) => saveField('why_saved', next)}
 						saving={updateItem.isPending}
 					/>
 					<InlineTextCard
-						title="Cuándo usarlo"
+						title={t('item_detail.when_to_use_title')}
 						value={currentItem.when_to_use}
-						placeholder="Ej: debugging, deploy, terminal, onboarding..."
+						placeholder={t('item_detail.when_to_use_placeholder')}
 						onSave={(next) => saveField('when_to_use', next)}
 						saving={updateItem.isPending}
 					/>
@@ -234,13 +228,13 @@ export function ItemDetailPage() {
 						<TabButton
 							active={activeTab === 'notes'}
 							onClick={() => setActiveTab('notes')}
-							label="Notas"
+							label={t('item_detail.notes_tab')}
 							icon={<FileText size={16} />}
 						/>
 						<TabButton
 							active={activeTab === 'runbooks'}
 							onClick={() => setActiveTab('runbooks')}
-							label="Runbooks"
+							label={t('item_detail.runbooks_tab')}
 							icon={<Library size={16} />}
 						/>
 					</div>
@@ -278,17 +272,17 @@ export function ItemDetailPage() {
 							onCopy={copyShareSummary}
 						/>
 						<div className="bg-bg-card border-3 border-ink shadow-hard p-5">
-							<h3 className="font-display font-black uppercase text-sm tracking-widest mb-3">Acciones</h3>
+							<h3 className="font-display font-black uppercase text-sm tracking-widest mb-3">{t('item_detail.actions_title')}</h3>
 							<div className="flex flex-col gap-3">
 							{currentItem.url && (
 								<Button type="button" variant="secondary" onClick={() => window.open(currentItem.url!, '_blank', 'noopener')}>
-										<span className="flex items-center gap-2"><ExternalLink size={16} strokeWidth={3} />Abrir fuente</span>
+										<span className="flex items-center gap-2"><ExternalLink size={16} strokeWidth={3} />{t('item_detail.open_source')}</span>
 									</Button>
 							)}
 								<Button type="button" variant={currentItem.is_favorite ? 'accent' : 'secondary'} onClick={toggleFavorite}>
 									<span className="flex items-center gap-2">
 										<Sparkles size={16} strokeWidth={3} className={currentItem.is_favorite ? 'fill-ink' : ''} />
-										{currentItem.is_favorite ? 'Favorito' : 'Marcar favorito'}
+										{currentItem.is_favorite ? t('item_detail.favorite') : t('item_detail.mark_favorite')}
 									</span>
 								</Button>
 								<div className="h-px bg-ink/10 my-1" />
@@ -297,7 +291,7 @@ export function ItemDetailPage() {
 									className="flex items-center gap-2 px-4 py-2 text-sm font-bold uppercase text-accent-pink hover:bg-accent-pink/10 transition-colors text-left"
 								>
 									<Trash2 size={16} />
-									Borrar para siempre
+									{t('item_detail.delete_forever')}
 								</button>
 							</div>
 						</div>
@@ -313,8 +307,8 @@ function TabButton({ active, onClick, label, icon }: { active: boolean; onClick:
 	return (
 		<button
 			onClick={onClick}
-			className={`flex items-center gap-2 px-6 py-3 font-display font-black uppercase text-xs tracking-widest transition-all
-				${active ? 'bg-bg-card border-x-3 border-t-3 border-ink -mb-[3px] z-10' : 'text-ink-soft hover:text-ink'}
+			className={`flex-1 flex items-center justify-center gap-2 py-3 font-display font-black uppercase text-xs tracking-widest transition-all
+				${active ? 'bg-accent-yellow border-x-3 border-ink -mb-[3px]' : 'bg-bg-card text-ink-soft hover:bg-bg-elevated'}
 			`}
 		>
 			{icon}
@@ -324,16 +318,17 @@ function TabButton({ active, onClick, label, icon }: { active: boolean; onClick:
 }
 
 function RunbookList({ itemId }: { itemId: string | undefined }) {
+	const { t } = useTranslation()
 	const { data: runbooks = [], isLoading } = useItemRunbooks(itemId)
 	const createRunbook = useCreateRunbook()
 
 	async function handleAdd() {
-		const title = window.prompt('Título del Runbook (ej: Setup Local)')
+		const title = window.prompt(t('item_detail.runbook.new_prompt'))
 		if (!title || !itemId) return
 		await createRunbook.mutateAsync({ itemId, title })
 	}
 
-	if (isLoading) return <div className="font-mono text-sm animate-pulse p-8 text-center">Cargando runbooks…</div>
+	if (isLoading) return <div className="font-mono text-sm animate-pulse p-8 text-center">{t('item_detail.runbook.loading')}</div>
 
 	return (
 		<div className="space-y-6">
@@ -346,26 +341,27 @@ function RunbookList({ itemId }: { itemId: string | undefined }) {
 				className="w-full border-3 border-ink border-dashed p-8 font-display font-black uppercase text-sm tracking-widest text-ink-soft hover:text-ink hover:bg-bg-elevated transition-all flex items-center justify-center gap-2"
 			>
 				<Plus size={20} strokeWidth={3} />
-				Nuevo Runbook
+				{t('item_detail.runbook.new_button')}
 			</button>
 		</div>
 	)
 }
 
 function RunbookCard({ runbook }: { runbook: Runbook }) {
+	const { t } = useTranslation()
 	const addStep = useAddRunbookStep()
 	const deleteRunbook = useDeleteRunbook()
 
 	async function handleAddStep() {
-		const label = window.prompt('Etiqueta del paso (ej: Instalar dependencias)')
+		const label = window.prompt(t('item_detail.runbook.step_label_prompt'))
 		if (!label) return
 		await addStep.mutateAsync({ runbookId: runbook.id, label })
 	}
 
 	async function handleDelete() {
 		const ok = await confirm({
-			title: 'Borrar Runbook',
-			message: `¿Estás seguro de que querés borrar "${runbook.title}" y todos sus pasos?`,
+			title: t('item_detail.runbook.delete_title'),
+			message: t('item_detail.runbook.delete_confirm', { title: runbook.title }),
 			variant: 'danger'
 		})
 		if (!ok) return
@@ -374,30 +370,30 @@ function RunbookCard({ runbook }: { runbook: Runbook }) {
 
 	return (
 		<div className="bg-bg-card border-3 border-ink shadow-hard overflow-hidden">
-			<div className="bg-bg-elevated border-b-3 border-ink p-4 flex items-center justify-between">
-				<div>
-					<h3 className="font-display font-black uppercase text-base tracking-tight">{runbook.title}</h3>
-					{runbook.description && <p className="text-xs text-ink-soft mt-1">{runbook.description}</p>}
+			<header className="bg-bg-elevated border-b-3 border-ink p-4 flex items-center justify-between">
+				<div className="flex items-center gap-3">
+					<Library size={18} strokeWidth={3} />
+					<h3 className="font-display font-black uppercase text-sm">{runbook.title}</h3>
 				</div>
-				<button onClick={handleDelete} className="p-1.5 hover:bg-accent-pink border-2 border-transparent hover:border-ink transition-all">
+				<button onClick={handleDelete} className="p-1 hover:bg-accent-pink transition-colors">
 					<Trash2 size={16} />
 				</button>
-			</div>
+			</header>
 
-			<div className="p-4 space-y-2">
+			<div className="p-4 space-y-4">
 				{runbook.steps.map((st) => (
 					<RunbookStepItem key={st.id} step={st} />
 				))}
 
 				{runbook.steps.length === 0 && (
-					<p className="text-center py-4 text-xs font-mono text-ink-soft italic">Sin pasos todavía.</p>
+					<p className="text-center py-4 text-xs font-mono text-ink-soft italic">{t('item_detail.runbook.empty_steps')}</p>
 				)}
 
 				<button
 					onClick={handleAddStep}
 					className="w-full mt-2 py-2 border-2 border-ink border-dashed text-[10px] font-mono uppercase font-bold text-ink-soft hover:text-ink hover:bg-bg-primary transition-all"
 				>
-					+ Agregar paso
+					{t('item_detail.runbook.add_step')}
 				</button>
 			</div>
 		</div>
@@ -405,6 +401,7 @@ function RunbookCard({ runbook }: { runbook: Runbook }) {
 }
 
 function RunbookStepItem({ step }: { step: RunbookStep }) {
+	const { t } = useTranslation()
 	const updateStep = useUpdateRunbookStep()
 	const [running, setRunning] = useState(false)
 	const isDesktop = typeof (window as any).electronAPI !== 'undefined'
@@ -414,39 +411,35 @@ function RunbookStepItem({ step }: { step: RunbookStep }) {
 		setRunning(true)
 		try {
 			const output = await (window as any).electronAPI.shell.runCommand(step.command)
-			showToast('Ejecutado con éxito')
+			showToast(t('item_detail.runbook.execution_success'))
 			if (output) console.log('[shell output]', output)
 		} catch (err) {
-			showToast(`Error: ${err}`, 'error')
+			showToast(`${t('common.error')}: ${err}`, 'error')
 		} finally {
 			setRunning(false)
 		}
 	}
-	
+
 	return (
-		<div className={`flex items-start gap-3 p-2 border-2 border-ink transition-colors ${step.is_completed ? 'bg-accent-lime/10' : 'bg-bg-primary'}`}>
-			<button
-				onClick={() => updateStep.mutate({ id: step.id, input: { is_completed: !step.is_completed } })}
-				className={`mt-0.5 w-5 h-5 border-2 border-ink flex items-center justify-center transition-all ${step.is_completed ? 'bg-accent-lime' : 'bg-bg-card'}`}
-			>
-				{step.is_completed && <CheckCircle2 size={14} strokeWidth={4} />}
-			</button>
-			<div className="flex-1 min-w-0">
-				<p className={`text-sm font-bold uppercase tracking-tight ${step.is_completed ? 'line-through text-ink-soft' : ''}`}>
-					{step.label}
-				</p>
-				{step.description && <p className="text-[10px] text-ink-soft mt-0.5">{step.description}</p>}
-				{step.command && (
-					<div className="mt-2 flex items-center gap-2">
-						<code className="text-[10px] font-mono bg-ink text-bg-primary px-2 py-1 flex-1 truncate">
-							{step.command}
-						</code>
+		<div className="group border-2 border-ink bg-bg-primary p-3 shadow-hard-sm">
+			<div className="flex items-start justify-between gap-3">
+				<div className="flex-1 min-w-0">
+					<p className="font-display font-bold text-xs uppercase mb-2">{step.label}</p>
+					<textarea
+						value={step.command || ''}
+						onChange={(e) => updateStep.mutate({ id: step.id, input: { command: e.target.value } })}
+						placeholder="docker-compose up -d..."
+						className="w-full bg-ink text-bg-primary font-mono text-[10px] p-2 border-2 border-ink focus:outline-none focus:bg-accent-yellow/5 resize-none h-12"
+					/>
+				</div>
+				<div className="flex flex-col gap-1">
+					{step.command && (
 						<div className="flex gap-1">
 							{isDesktop && (
 								<button
 									onClick={handleRun}
 									disabled={running}
-									title="Ejecutar comando"
+									title={t('agent.run')}
 									className="p-1 border-2 border-ink bg-bg-card hover:bg-accent-lime transition-all disabled:opacity-50"
 								>
 									<Play size={12} strokeWidth={3} className={running ? 'animate-pulse' : ''} />
@@ -455,21 +448,22 @@ function RunbookStepItem({ step }: { step: RunbookStep }) {
 							<button
 								onClick={() => {
 									navigator.clipboard.writeText(step.command!)
-									showToast('Comando copiado')
+									showToast(t('item_detail.runbook.copy_command_toast'))
 								}}
 								className="p-1 border-2 border-ink bg-bg-card hover:bg-accent-yellow transition-all"
 							>
 								<Clipboard size={12} strokeWidth={3} />
 							</button>
 						</div>
-					</div>
-				)}
+					)}
+				</div>
 			</div>
 		</div>
 	)
 }
 
 function RelatedItemsCard({ id }: { id: string | undefined }) {
+	const { t } = useTranslation()
 	const navigate = useNavigate()
 	const { data, isLoading } = useRelatedItems(id)
 	const related = data?.related || []
@@ -481,7 +475,7 @@ function RelatedItemsCard({ id }: { id: string | undefined }) {
 		<div className="bg-bg-card border-3 border-ink shadow-hard p-5">
 			<h3 className="font-display font-black uppercase text-sm tracking-widest mb-4 flex items-center gap-2">
 				<Sparkles size={16} strokeWidth={3} className="text-accent-lavender" />
-				También te puede interesar
+				{t('explore.also_interested')}
 			</h3>
 			<div className="space-y-3">
 				{related.map((r) => (
@@ -494,7 +488,7 @@ function RelatedItemsCard({ id }: { id: string | undefined }) {
 							{r.title}
 						</p>
 						<p className="font-mono text-[10px] text-ink-soft line-clamp-1">
-							{r.why_saved || 'Sin descripción'}
+							{r.why_saved || t('common.no_description')}
 						</p>
 						<div className="mt-1 h-0.5 w-0 group-hover:w-full bg-accent-lavender transition-all duration-300" />
 					</button>
@@ -505,48 +499,51 @@ function RelatedItemsCard({ id }: { id: string | undefined }) {
 }
 
 function ItemHero({ item, onRerunAI, rerunning }: { item: Item; onRerunAI: () => void; rerunning: boolean }) {
+	const { t } = useTranslation()
 	const statusTone = useMemo(() => {
-		switch (item.enrichment_status) {
-			case 'queued':
-				return 'bg-accent-yellow'
-			case 'error':
-				return 'bg-accent-pink'
-			default:
-				return 'bg-bg-elevated'
-		}
-	}, [item.enrichment_status])
-
-	const Icon = item.is_favorite ? Sparkles : Brain
+		if (item.tags.includes('team-review')) return 'bg-accent-yellow/10'
+		if (item.is_favorite) return 'bg-accent-lavender/10'
+		return 'bg-bg-card'
+	}, [item.tags, item.is_favorite])
 
 	return (
 		<div className={`border-3 border-ink p-6 shadow-hard ${statusTone} transition-colors`}>
-			<div className="flex items-start justify-between">
-				<div className="p-3 border-3 border-ink bg-bg-card shadow-hard-sm mb-4">
-					<Icon size={32} strokeWidth={3} className={item.is_favorite ? 'text-accent-yellow fill-accent-yellow' : ''} />
+			<div className="flex items-start justify-between gap-4 mb-4">
+				<div className="flex items-center gap-3">
+					<div className="w-12 h-12 border-3 border-ink bg-white flex items-center justify-center shadow-hard-sm">
+						{item.item_type === 'repo' ? <Users size={24} /> : <Brain size={24} />}
+					</div>
+					<div>
+						<h2 className="font-display font-black uppercase text-xl leading-none">{item.title || t('common.untitled')}</h2>
+						<p className="font-mono text-[10px] text-ink-soft mt-1">{item.url}</p>
+					</div>
 				</div>
 				<div className="flex items-center gap-2">
-					<span className="text-[10px] font-mono uppercase font-black px-2 py-0.5 border-2 border-ink bg-bg-card">
-						{item.enrichment_status}
-					</span>
+					{item.is_favorite && (
+						<div className="bg-accent-lavender border-2 border-ink p-1 shadow-hard-sm">
+							<Sparkles size={14} className="fill-ink" />
+						</div>
+					)}
 					<button
 						onClick={onRerunAI}
 						disabled={rerunning}
-						className="p-1.5 border-2 border-ink bg-bg-card hover:bg-accent-cyan transition-all disabled:opacity-50"
-						title="Rerun AI Enrichment"
+						className="border-2 border-ink p-1.5 bg-bg-card hover:bg-accent-yellow transition-all disabled:opacity-50"
+						title="Rerun AI analysis"
 					>
 						<Sparkles size={14} className={rerunning ? 'animate-spin' : ''} />
 					</button>
 				</div>
 			</div>
-			<p className="text-sm font-medium leading-relaxed mb-4">{item.ai_summary || item.description || 'Sin resumen disponible.'}</p>
+			<p className="text-sm font-medium leading-relaxed mb-4">{item.ai_summary || item.description || t('item_detail.no_summary')}</p>
 			{item.url && (
 				<a
 					href={item.url}
 					target="_blank"
 					rel="noopener noreferrer"
-					className="text-[10px] font-mono font-bold uppercase underline hover:text-accent-pink truncate block"
+					className="inline-flex items-center gap-2 text-xs font-mono font-black uppercase text-accent-pink hover:underline"
 				>
-					{item.url}
+					<ExternalLink size={12} />
+					Visit source
 				</a>
 			)}
 		</div>
@@ -566,6 +563,7 @@ function InlineTextCard({
 	onSave: (val: string) => void
 	saving: boolean
 }) {
+	const { t } = useTranslation()
 	const [local, setLocal] = useState(value || '')
 	const [editing, setEditing] = useState(false)
 
@@ -587,7 +585,7 @@ function InlineTextCard({
 						onClick={() => setEditing(true)}
 						className="text-[10px] font-mono uppercase font-bold underline hover:text-accent-pink"
 					>
-						Editar
+						{t('item_detail.edit_button')}
 					</button>
 				)}
 			</div>
@@ -602,10 +600,10 @@ function InlineTextCard({
 					/>
 					<div className="flex gap-2">
 						<Button size="sm" onClick={handleSave} disabled={saving}>
-							{saving ? 'Guardando…' : 'Guardar'}
+							{saving ? t('common.loading') : t('common.save')}
 						</Button>
 						<Button size="sm" variant="secondary" onClick={() => setEditing(false)}>
-							Cancelar
+							{t('common.cancel')}
 						</Button>
 					</div>
 				</div>
@@ -629,6 +627,7 @@ function AITagsReviewCard({
 	onApply: (next: string[]) => void
 	saving: boolean
 }) {
+	const { t } = useTranslation()
 	const [tags, setTags] = useState(value)
 
 	useEffect(() => {
@@ -641,7 +640,7 @@ function AITagsReviewCard({
 		<div className="bg-bg-elevated border-3 border-ink shadow-hard p-5">
 			<div className="flex items-center gap-2 mb-4">
 				<Sparkles size={18} strokeWidth={3} className="text-accent-pink" />
-				<h3 className="font-display font-black uppercase text-sm tracking-widest">Sugerencias de IA</h3>
+				<h3 className="font-display font-black uppercase text-sm tracking-widest">{t('item_detail.ai_suggestions_title')}</h3>
 			</div>
 			<div className="flex flex-wrap gap-2 mb-6">
 				{tags.map((t, i) => (
@@ -657,23 +656,23 @@ function AITagsReviewCard({
 			</div>
 			<div className="flex flex-wrap gap-3">
 				<Button size="sm" onClick={() => onApply(tags)} disabled={saving} variant="accent">
-					Aceptar y aplicar
+					{t('item_detail.accept_apply')}
 				</Button>
 				<Button size="sm" onClick={() => onSave(tags)} disabled={saving} variant="secondary">
-					Guardar borrador
+					{t('item_detail.save_draft')}
 				</Button>
 			</div>
 		</div>
 	)
 }
 
-function buildShareSummary(item: Item): string {
+function buildShareSummary(item: Item, t: any): string {
 	let s = `# ${item.title}\n`
 	if (item.url) s += `${item.url}\n`
-	if (item.why_saved) s += `\nPor qué importa: ${item.why_saved}\n`
+	if (item.why_saved) s += `\n${t('item_detail.summary_why_label')}${item.why_saved}\n`
 	s += `\n${item.ai_summary || item.description || ''}\n`
 	if (item.tags.length > 0) {
-		const tags = item.tags.filter((t) => t !== 'team-review')
+		const tags = item.tags.filter((t: string) => t !== 'team-review')
 		if (tags.length > 0) s += `\nTags: ${tags.join(', ')}`
 	}
 	return s

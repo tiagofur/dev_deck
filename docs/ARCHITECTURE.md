@@ -1,4 +1,4 @@
-# DevDeck.ai Architecture (v1.0)
+# DevDeck.ai Architecture
 
 This document describes the technical architecture, data model, and system flow of **DevDeck.ai**.
 
@@ -115,4 +115,4 @@ A single table handles multiple types (repos, clis, snippets, etc.) via `item_ty
 
 ---
 
-*Last updated: May 2026 (Version 1.0 Release)*
+*Last updated: May 2026*

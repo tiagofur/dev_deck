@@ -134,7 +134,7 @@ describe('<ItemCard>', () => {
 
   it('shows queued analysis status', () => {
     renderItemCard(<ItemCard item={makeItem({ enrichment_status: 'queued' })} />)
-    expect(screen.getByText(/analizando/i)).toBeInTheDocument()
+    expect(screen.getByText(/analyzing/i)).toBeInTheDocument()
   })
 
   it('fires onClick when clicked', async () => {
@@ -147,7 +147,7 @@ describe('<ItemCard>', () => {
 
   it('falls back to a placeholder title when empty', () => {
     renderItemCard(<ItemCard item={makeItem({ title: '' })} />)
-    expect(screen.getByText('(sin título)')).toBeInTheDocument()
+    expect(screen.getByText('untitled')).toBeInTheDocument()
   })
 
   it('renders a pretty URL (stripped scheme + www + trailing slash)', () => {

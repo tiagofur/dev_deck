@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -360,10 +361,12 @@ func (h *CheatsheetsHandler) Export(w http.ResponseWriter, r *http.Request) {
 	if detail.Description != "" {
 		sb.WriteString(detail.Description + "\n\n")
 	}
-	sb.WriteString("| Label | Command | Description |\n")
-	sb.WriteString("|-------|---------|-------------|\n")
 	for _, e := range detail.Entries {
-		sb.WriteString(fmt.Sprintf("| %s | `%s` | %s |\n", e.Label, e.Command, e.Description))
+		sb.WriteString(fmt.Sprintf("## %s\n", e.Label))
+		if e.Description != "" {
+			sb.WriteString(e.Description + "\n\n")
+		}
+		sb.WriteString(fmt.Sprintf("```bash\n%s\n```\n\n", e.Command))
 	}
 
 	w.Header().Set("Content-Type", "text/markdown")
@@ -427,7 +430,7 @@ func (h *CheatsheetsHandler) Card(w http.ResponseWriter, r *http.Request) {
 	<text x="50" y="250" font-family="sans-serif" font-size="18" fill="#1A1A1A">%d Commands</text>
 	<text x="50" y="280" font-family="sans-serif" font-size="14" font-weight="bold" fill="#FFD700">DEVDECK VAULT</text>
 </svg>
-	`, detail.Title, detail.Category, len(detail.Entries))
+	`, html.EscapeString(detail.Title), html.EscapeString(detail.Category), len(detail.Entries))
 
 	w.Header().Set("Content-Type", "image/svg+xml")
 	w.Write([]byte(svg))
