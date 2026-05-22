@@ -21,7 +21,6 @@ import {
   ItemDetailPage,
   CaptureSharePage,
   ItemsPage,
-  ExplorePage,
   LandingPage,
   RepoDetailPage,
   SettingsPage,
@@ -39,6 +38,7 @@ import {
   useGlobalShortcuts,
 } from '@devdeck/features'
 import { CaptureModal, ShortcutsModal } from '@devdeck/features'
+import { ExplorePage } from '../../../packages/features/src/pages/ExplorePage'
 import { ConfirmHost, PageTransition, Toaster } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
 import { isLoggedIn, useMe } from '@devdeck/api-client'
