@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, Sparkles, Flame, Trophy, Layers, Users } from 'lucide-react'
+import { Sparkles, Flame, Trophy, Layers, Users } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@devdeck/ui'
@@ -15,6 +15,7 @@ import {
 } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
+import { AppShell } from '../components/AppShell'
 
 type Tab = 'swipe' | 'trending' | 'leaderboard' | 'team'
 
@@ -55,16 +56,9 @@ export function DiscoveryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary flex flex-col">
+    <AppShell contentClassName="flex-1 flex flex-col overflow-hidden">
       <header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate('/')}
-            className="border-3 border-ink p-2 bg-bg-card shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all"
-            aria-label={t('common.back')}
-          >
-            <ArrowLeft size={20} strokeWidth={3} />
-          </button>
           <h1 className="font-display font-black text-2xl uppercase tracking-tight flex items-center gap-2">
             <Sparkles size={22} strokeWidth={3} className="text-accent-yellow" />
             {t('discovery.title')}
@@ -115,7 +109,7 @@ export function DiscoveryPage() {
         {activeTab === 'leaderboard' && <CuratorLeaderboard />}
         {activeTab === 'team' && activeOrgId && <TeamDiscovery orgId={activeOrgId} />}
       </main>
-    </div>
+    </AppShell>
   )
 }
 

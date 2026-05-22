@@ -11,6 +11,7 @@ import {
   XCircle,
   Loader2
 } from 'lucide-react'
+import { AppShell } from '../components/AppShell'
 import { 
   useAdminUsers, 
   useAdminWaitlist, 
@@ -28,54 +29,56 @@ export function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<Tab>('users')
 
   return (
-    <div className="min-h-screen bg-bg-primary">
-      <header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex items-center gap-4 sticky top-0 z-10">
-        <button
-          onClick={() => navigate('/settings')}
-          className="border-3 border-ink p-2 bg-bg-card shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm transition-all duration-150"
-          aria-label={t('common.back')}
-        >
-          <ArrowLeft size={20} strokeWidth={3} />
-        </button>
-        <h1 className="font-display font-black text-2xl uppercase tracking-tight flex items-center gap-2">
-          <ShieldCheck size={24} strokeWidth={3} className="text-accent-pink" />
-          {t('admin.title')}
-        </h1>
-      </header>
+    <AppShell contentClassName="flex-1 overflow-y-auto">
+      <div className="min-h-full bg-bg-primary">
+        <header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex items-center gap-4 sticky top-0 z-10">
+          <button
+            onClick={() => navigate('/settings')}
+            className="border-3 border-ink p-2 bg-bg-card shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm transition-all duration-150"
+            aria-label={t('common.back')}
+          >
+            <ArrowLeft size={20} strokeWidth={3} />
+          </button>
+          <h1 className="font-display font-black text-2xl uppercase tracking-tight flex items-center gap-2">
+            <ShieldCheck size={24} strokeWidth={3} className="text-accent-pink" />
+            {t('admin.title')}
+          </h1>
+        </header>
 
-      <main className="max-w-7xl mx-auto p-6">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar Nav */}
-          <aside className="w-full md:w-64 space-y-2">
-            <NavButton 
-              active={activeTab === 'users'} 
-              onClick={() => setActiveTab('users')} 
-              icon={<Users size={18} />} 
-              label={t('admin.users')} 
-            />
-            <NavButton 
-              active={activeTab === 'waitlist'} 
-              onClick={() => setActiveTab('waitlist')} 
-              icon={<Mail size={18} />} 
-              label={t('admin.waitlist')} 
-            />
-            <NavButton 
-              active={activeTab === 'invites'} 
-              onClick={() => setActiveTab('invites')} 
-              icon={<Ticket size={18} />} 
-              label={t('admin.invites')} 
-            />
-          </aside>
+        <main className="max-w-7xl mx-auto p-6">
+          <div className="flex flex-col md:flex-row gap-8">
+            {/* Sidebar Nav */}
+            <aside className="w-full md:w-64 space-y-2">
+              <NavButton 
+                active={activeTab === 'users'} 
+                onClick={() => setActiveTab('users')} 
+                icon={<Users size={18} />} 
+                label={t('admin.users')} 
+              />
+              <NavButton 
+                active={activeTab === 'waitlist'} 
+                onClick={() => setActiveTab('waitlist')} 
+                icon={<Mail size={18} />} 
+                label={t('admin.waitlist')} 
+              />
+              <NavButton 
+                active={activeTab === 'invites'} 
+                onClick={() => setActiveTab('invites')} 
+                icon={<Ticket size={18} />} 
+                label={t('admin.invites')} 
+              />
+            </aside>
 
-          {/* Content */}
-          <section className="flex-1 min-w-0">
-            {activeTab === 'users' && <UsersTab />}
-            {activeTab === 'waitlist' && <WaitlistTab />}
-            {activeTab === 'invites' && <InvitesTab />}
-          </section>
-        </div>
-      </main>
-    </div>
+            {/* Content */}
+            <section className="flex-1 min-w-0">
+              {activeTab === 'users' && <UsersTab />}
+              {activeTab === 'waitlist' && <WaitlistTab />}
+              {activeTab === 'invites' && <InvitesTab />}
+            </section>
+          </div>
+        </main>
+      </div>
+    </AppShell>
   )
 }
 
