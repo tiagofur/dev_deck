@@ -15,6 +15,7 @@ interface TopbarProps {
   reviewCount?: number
 }
 
+
 export function Topbar({
   query,
   onQueryChange,
