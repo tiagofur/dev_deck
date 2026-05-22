@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import { 
-  ArrowLeft, 
   Users, 
   Sparkles, 
   User as UserIcon,
@@ -9,6 +8,7 @@ import {
 import { useFollowingFeed, type FeedEvent } from '@devdeck/api-client'
 import { Button } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
+import { AppShell } from '../components/AppShell'
 
 export function FollowingFeedPage() {
   const { t } = useTranslation()
@@ -17,15 +17,8 @@ export function FollowingFeedPage() {
   const events = data?.events || []
 
   return (
-    <div className="min-h-screen bg-bg-primary">
+    <AppShell contentClassName="flex-1 overflow-y-auto">
       <header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex items-center gap-4 sticky top-0 z-10">
-        <button
-          onClick={() => navigate('/')}
-          className="border-3 border-ink p-2 bg-bg-card shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm transition-all duration-150"
-          aria-label={t('common.back')}
-        >
-          <ArrowLeft size={20} strokeWidth={3} />
-        </button>
         <h1 className="font-display font-black text-2xl uppercase tracking-tight flex items-center gap-2">
           <Users size={24} strokeWidth={3} className="text-accent-lavender" />
           {t('feed.title')}
@@ -105,6 +98,6 @@ export function FollowingFeedPage() {
           </div>
         )}
       </main>
-    </div>
+    </AppShell>
   )
 }

@@ -6,6 +6,7 @@ import { useCircleDetail, useCircleItems, useCircleMembers, useLeaveCircle } fro
 import { useTranslation } from '@devdeck/i18n'
 import { ItemGrid } from '../components/ItemGrid'
 import { detailPathForItem } from '../utils/itemRoutes'
+import { AppShell } from '../components/AppShell'
 
 export function CircleDetailPage() {
   const { t } = useTranslation()
@@ -46,15 +47,15 @@ export function CircleDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center font-mono text-ink-soft bg-bg-primary">
+      <AppShell contentClassName="flex-1 flex items-center justify-center font-mono text-ink-soft bg-bg-primary">
         {t('common.loading')}
-      </div>
+      </AppShell>
     )
   }
 
   if (errorCircle || !circle) {
     return (
-      <div className="min-h-screen bg-bg-primary p-8">
+      <AppShell contentClassName="flex-1 p-8">
         <div className="bg-bg-card border-3 border-ink shadow-hard p-6 max-w-xl mx-auto mt-20 text-center">
           <p className="font-display font-black uppercase text-xl text-danger mb-2">{t('circles.not_found_title')}</p>
           <p className="font-mono text-sm text-ink-soft mb-6">
@@ -64,12 +65,12 @@ export function CircleDetailPage() {
             {t('circles.all_circles')}
           </Button>
         </div>
-      </div>
+      </AppShell>
     )
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary flex flex-col lg:flex-row">
+    <AppShell contentClassName="flex-1 flex flex-col lg:flex-row overflow-hidden">
       {/* Left panel / Feed Area */}
       <div className="flex-1 p-8 overflow-y-auto">
         <header className="mb-8">
@@ -190,6 +191,6 @@ export function CircleDetailPage() {
           {t('circles.how_to_share_desc')}
         </div>
       </aside>
-    </div>
+    </AppShell>
   )
 }

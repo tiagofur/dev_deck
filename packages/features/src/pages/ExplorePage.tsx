@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useExploreCheatsheets } from '@devdeck/api-client'
 import type { Cheatsheet } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'
+import { AppShell } from '../components/AppShell'
 
 export function ExplorePage() {
   const { t } = useTranslation()
@@ -33,25 +34,16 @@ export function ExplorePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center font-mono text-ink-soft bg-bg-primary">
+      <AppShell contentClassName="flex-1 flex items-center justify-center font-mono text-ink-soft bg-bg-primary">
         {t('explore.loading_message')}
-      </div>
+      </AppShell>
     )
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary flex">
+    <AppShell contentClassName="flex-1 flex overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 shrink-0 border-r-3 border-ink bg-bg-elevated p-6">
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-sm font-mono text-ink-soft
-                     hover:text-ink mb-8 transition-colors"
-        >
-          <ChevronLeft size={14} strokeWidth={3} />
-          {t('common.back')}
-        </button>
-
         <h2 className="font-display font-black text-xs uppercase tracking-widest mb-4 text-ink">
           {t('common.categories')}
         </h2>
@@ -73,7 +65,7 @@ export function ExplorePage() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 p-10 max-w-6xl mx-auto">
+      <main className="flex-1 p-10 max-w-6xl mx-auto overflow-y-auto">
         <header className="mb-12">
           <div className="flex items-center gap-4 mb-4">
             <div className="bg-accent-yellow border-3 border-ink p-2 shadow-hard-sm">
@@ -118,7 +110,7 @@ export function ExplorePage() {
           </div>
         )}
       </main>
-    </div>
+    </AppShell>
   )
 }
 
