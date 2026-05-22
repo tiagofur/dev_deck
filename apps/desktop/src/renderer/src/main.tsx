@@ -21,7 +21,11 @@ const isElectron =
 
 setTokenStorage(isElectron ? electronSafeStorageAdapter : localStorageAdapter)
 
-const authMode = (import.meta.env.VITE_AUTH_MODE as 'jwt' | 'token' | undefined) ?? 'jwt'
+// In E2E tests/browser-dev (where isElectron is false), force 'token' authMode
+// and empty baseUrl to use Vite's local /api proxy.
+const authMode = !isElectron
+  ? 'token'
+  : ((import.meta.env.VITE_AUTH_MODE as 'jwt' | 'token' | undefined) ?? 'jwt')
 
 if (authMode === 'jwt') {
   const access = getAccessToken()
@@ -32,9 +36,11 @@ if (authMode === 'jwt') {
 }
 
 configureApiClient({
-  baseUrl: import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8080',
+  baseUrl: !isElectron ? '' : (import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8080'),
   authMode,
-  staticToken: import.meta.env.VITE_API_TOKEN || undefined,
+  staticToken: !isElectron
+    ? (import.meta.env.VITE_API_TOKEN || 'test-api-token')
+    : (import.meta.env.VITE_API_TOKEN || undefined),
 })
 
 startSyncEngine().catch((err) => console.error('Failed to start sync engine:', err))

@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   useGlobalSearch: vi.fn(),
   useAsk: vi.fn(),
   useCapture: vi.fn(),
+  useSystemConfig: vi.fn(),
   navigate: vi.fn(),
   showToast: vi.fn(),
 }))
@@ -24,6 +25,7 @@ vi.mock('@devdeck/api-client', () => ({
   useGlobalSearch: mocks.useGlobalSearch,
   useAsk: mocks.useAsk,
   useCapture: mocks.useCapture,
+  useSystemConfig: mocks.useSystemConfig,
 }))
 
 vi.mock('@devdeck/ui', async () => {
@@ -53,6 +55,7 @@ describe('<UnifiedCommandPalette>', () => {
     mocks.useGlobalSearch.mockReturnValue({ data: [], isLoading: false })
     mocks.useAsk.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
     mocks.useCapture.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+    mocks.useSystemConfig.mockReturnValue({ data: { ai_provider: 'openai', sync_enabled: true }, isLoading: false })
     Object.assign(navigator, {
       clipboard: {
         writeText: vi.fn().mockResolvedValue(undefined),
@@ -175,5 +178,23 @@ describe('<UnifiedCommandPalette>', () => {
 
     expect(screen.queryByText('Saved note')).not.toBeInTheDocument()
     expect(screen.getByText('Run tests')).toBeInTheDocument()
+  })
+
+  it('hides Ask AI action if AI is disabled', () => {
+    mocks.useSystemConfig.mockReturnValue({ data: { ai_provider: 'disabled', sync_enabled: true }, isLoading: false })
+    renderPalette()
+    expect(screen.queryByText(/Ask AI/i)).not.toBeInTheDocument()
+  })
+
+  it('hides Ask AI action if AI provider is heuristic', () => {
+    mocks.useSystemConfig.mockReturnValue({ data: { ai_provider: 'heuristic', sync_enabled: true }, isLoading: false })
+    renderPalette()
+    expect(screen.queryByText(/Ask AI/i)).not.toBeInTheDocument()
+  })
+
+  it('hides Ask AI action if AI provider is local', () => {
+    mocks.useSystemConfig.mockReturnValue({ data: { ai_provider: 'local', sync_enabled: true }, isLoading: false })
+    renderPalette()
+    expect(screen.queryByText(/Ask AI/i)).not.toBeInTheDocument()
   })
 })

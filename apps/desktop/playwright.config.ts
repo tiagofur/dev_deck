@@ -42,6 +42,7 @@ export default defineConfig({
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
         env: {
+          DEVDECK_E2E: 'true',
           VITE_API_URL: '',
           VITE_API_TOKEN: process.env.VITE_API_TOKEN || 'test-api-token',
           VITE_AUTH_MODE: 'token',

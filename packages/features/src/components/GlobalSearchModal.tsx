@@ -1,7 +1,7 @@
 import { BookOpen, Boxes, Code2, Search, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useGlobalSearch } from '@devdeck/api-client'
+import { useGlobalSearch, useSystemConfig } from '@devdeck/api-client'
 import type { SearchResult } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'
 
@@ -14,7 +14,9 @@ export function GlobalSearchModal({ open, onClose }: Props) {
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [mode, setMode] = useState<'text' | 'semantic' | 'hybrid'>('text')
-  const { data: results = [], isLoading } = useGlobalSearch(query, mode)
+  const { data: systemConfig } = useSystemConfig()
+  const isAiDisabled = !systemConfig?.ai_provider || ['disabled', 'heuristic', 'local'].includes(systemConfig.ai_provider)
+  const { data: results = [], isLoading } = useGlobalSearch(query, isAiDisabled ? 'text' : mode)
   const navigate = useNavigate()
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -79,27 +81,29 @@ export function GlobalSearchModal({ open, onClose }: Props) {
         </div>
 
         {/* Mode selector */}
-        <div className="flex items-center gap-2 p-3 bg-bg-elevated border-b-3 border-ink overflow-x-auto no-scrollbar shrink-0">
-          <span className="text-[10px] font-mono uppercase font-bold text-ink-soft ml-1 mr-2">{t('items.type_filter')}:</span>
-          <ModeButton 
-            active={mode === 'text'} 
-            onClick={() => setMode('text')} 
-            label="Text" 
-            title={t('search.classic_desc')}
-          />
-          <ModeButton 
-            active={mode === 'semantic'} 
-            onClick={() => setMode('semantic')} 
-            label={t('search.ai_semantic')} 
-            title="Search by meaning using embeddings"
-          />
-          <ModeButton 
-            active={mode === 'hybrid'} 
-            onClick={() => setMode('hybrid')} 
-            label={t('search.hybrid')} 
-            title="Combines text + AI for better results"
-          />
-        </div>
+        {!isAiDisabled && (
+          <div className="flex items-center gap-2 p-3 bg-bg-elevated border-b-3 border-ink overflow-x-auto no-scrollbar shrink-0">
+            <span className="text-[10px] font-mono uppercase font-bold text-ink-soft ml-1 mr-2">{t('items.type_filter')}:</span>
+            <ModeButton 
+              active={mode === 'text'} 
+              onClick={() => setMode('text')} 
+              label="Text" 
+              title={t('search.classic_desc')}
+            />
+            <ModeButton 
+              active={mode === 'semantic'} 
+              onClick={() => setMode('semantic')} 
+              label={t('search.ai_semantic')} 
+              title="Search by meaning using embeddings"
+            />
+            <ModeButton 
+              active={mode === 'hybrid'} 
+              onClick={() => setMode('hybrid')} 
+              label={t('search.hybrid')} 
+              title="Combines text + AI for better results"
+            />
+          </div>
+        )}
 
         {/* Results */}
         <div className="flex-1 overflow-y-auto min-h-0">

@@ -9,6 +9,7 @@ import {
   useGlobalSearch,
   useAsk,
   useCapture,
+  useSystemConfig,
   type SearchResult,
   type AskResponse,
 } from '@devdeck/api-client'
@@ -124,6 +125,8 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
   const [mode, setMode] = React.useState<'command' | 'ask'>('command')
   const [resultFilter, setResultFilter] = React.useState<ResultFilter>('all')
   const capture = useCapture()
+  const { data: systemConfig } = useSystemConfig()
+  const isAiDisabled = !systemConfig?.ai_provider || ['disabled', 'heuristic', 'local'].includes(systemConfig.ai_provider)
   
   const { data: searchResults = [], isLoading: searchLoading } = useGlobalSearch(query)
 
@@ -169,13 +172,13 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
   }
 
   const actions = [
-    {
+    ...(!isAiDisabled ? [{
       id: 'ask',
       title: t('palette.ask_ai_title'),
       subtitle: t('palette.ask_ai_subtitle'),
       icon: <Brain size={16} strokeWidth={3} className="text-accent-orange" />,
       onSelect: handleAsk,
-    },
+    }] : []),
     {
       id: 'capture',
       title: t('palette.capture_title'),
