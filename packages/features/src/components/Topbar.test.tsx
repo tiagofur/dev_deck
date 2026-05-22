@@ -1,12 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { Topbar } from './Topbar'
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
-  usePreferences: vi.fn(),
   useMe: vi.fn(),
 }))
 
@@ -22,7 +21,6 @@ vi.mock('@devdeck/api-client', async () => {
   const actual = await vi.importActual<typeof import('@devdeck/api-client')>('@devdeck/api-client')
   return {
     ...actual,
-    usePreferences: mocks.usePreferences,
     useMe: mocks.useMe,
   }
 })
@@ -39,52 +37,75 @@ vi.mock('./NotificationCenter', () => ({
   NotificationCenter: () => <button type="button" aria-label="Notifications">Bell</button>,
 }))
 
-function renderTopbar() {
-  return render(
-    <MemoryRouter>
-      <Topbar
-        query=""
-        onQueryChange={vi.fn()}
-        onAdd={vi.fn()}
-        onDiscovery={vi.fn()}
-        onSettings={vi.fn()}
-        onGlobalSearch={vi.fn()}
-        reviewCount={4}
-      />
-    </MemoryRouter>,
-  )
-}
-
 describe('<Topbar>', () => {
+  let onQueryChangeMock: any
+  let onAddMock: any
+  let onGlobalSearchMock: any
+  let onMenuToggleMock: any
+
   beforeEach(() => {
     mocks.navigate.mockReset()
-    mocks.usePreferences.mockReturnValue({ activeOrgId: null })
     mocks.useMe.mockReturnValue({ data: undefined })
+
+    onQueryChangeMock = vi.fn()
+    onAddMock = vi.fn()
+    onGlobalSearchMock = vi.fn()
+    onMenuToggleMock = vi.fn()
   })
 
-  it('opens secondary navigation from the More disclosure', async () => {
+  function renderTopbar() {
+    return render(
+      <MemoryRouter>
+        <Topbar
+          query=""
+          onQueryChange={onQueryChangeMock}
+          onAdd={onAddMock}
+          onGlobalSearch={onGlobalSearchMock}
+          onMenuToggle={onMenuToggleMock}
+          reviewCount={4}
+        />
+      </MemoryRouter>,
+    )
+  }
+
+  it('renders essential controls and triggers menu toggle', async () => {
     const user = userEvent.setup()
     renderTopbar()
 
-    const more = screen.getByRole('button', { name: /more/i })
-    expect(more).toHaveAttribute('aria-expanded', 'false')
+    // Workspace Switcher
+    expect(screen.getByRole('button', { name: /personal/i })).toBeInTheDocument()
 
-    await user.click(more)
+    // Sync Indicator & Notifications
+    expect(screen.getByText('Synced')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /notifications/i })).toBeInTheDocument()
 
-    expect(more).toHaveAttribute('aria-expanded', 'true')
-    const menu = screen.getByRole('navigation', { name: /more navigation/i })
-    expect(menu).toBeInTheDocument()
-    expect(within(menu).getByRole('button', { name: /cheats/i })).toBeInTheDocument()
-    expect(within(menu).getByRole('button', { name: /review 4/i })).toBeInTheDocument()
+    // Capture '+' Action
+    const captureButton = screen.getByRole('button', { name: /capture/i })
+    expect(captureButton).toBeInTheDocument()
+    await user.click(captureButton)
+    expect(onAddMock).toHaveBeenCalledOnce()
+
+    // Menu Hamburger Trigger
+    const menuToggle = screen.getByRole('button', { name: /open navigation menu/i })
+    expect(menuToggle).toBeInTheDocument()
+    await user.click(menuToggle)
+    expect(onMenuToggleMock).toHaveBeenCalledOnce()
   })
 
-  it('keeps primary navigation and actions directly reachable', () => {
+  it('interacts with global search elements', async () => {
+    const user = userEvent.setup()
     renderTopbar()
 
-    expect(screen.getByRole('button', { name: /items/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /workbench/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /discover/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /capture/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /settings/i })).toBeInTheDocument()
+    // Search input (desktop view)
+    const searchInput = screen.getByPlaceholderText(/search items, commands, prompts/i)
+    expect(searchInput).toBeInTheDocument()
+    await user.type(searchInput, 'hello')
+    expect(onQueryChangeMock).toHaveBeenCalled()
+
+    // Search button (mobile view)
+    const searchButton = screen.getByRole('button', { name: /global search/i })
+    expect(searchButton).toBeInTheDocument()
+    await user.click(searchButton)
+    expect(onGlobalSearchMock).toHaveBeenCalledOnce()
   })
 })
