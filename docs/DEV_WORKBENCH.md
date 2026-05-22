@@ -83,7 +83,9 @@ Status:
 - The palette opens Developer Workbench from the app shell.
 - It opens specific tools through deep links (`/workbench?tool=...`) when search matches JSON, JWT, API, `curl`, secrets, regex, etc.
 - It can quick-save the current input as a note through capture.
+- It can filter results by surface: all, items, repos, cheatsheets, and copyable commands.
 - It copies command search results directly when the result includes command text.
+- On Desktop, global shortcuts show registration/conflict status and can be enabled, disabled, or changed from the shortcuts modal.
 
 ### Phase 3 — Requests and Runbooks
 
@@ -111,11 +113,20 @@ Implementation notes:
 - Suggest project commands and runbooks.
 - Import non-sensitive local metadata.
 
+Status:
+
+- `devdeck project` detects folder/git remote context and searches related vault context without scanning files or reading `.env`.
+- Desktop exposes safe current-project detection through `electronAPI.project.detectCurrent()`.
+- Workbench includes a `Project` tool for name, remote, notes, related context search, and saving context as a note.
+- Related results can be opened/copied from the project context surface.
+- Existing items can be linked/unlinked with the explicit `project:<slug>` tag.
+
 ### Phase 5 — Advanced Opt-In Features
 
 - Clipboard/snippet expander.
 - Screenshot to snippet.
 - Local secret scanner before saving or sharing sensitive text. **Status:** implemented in Workbench.
+- Local explicit snippet alias manager. **Status:** first Workbench foundation implemented, off by default, with enable/pause/disable, excluded apps, preview, explicit text expansion, and manual copy.
 - Secret-manager integrations.
 - Global system shortcut.
 

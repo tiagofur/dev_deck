@@ -15,6 +15,12 @@ declare global {
       onShortcut: (callback: (name: string) => void) => () => void
       shortcuts: {
         getStatus: () => Promise<Record<string, { accelerator: string; registered: boolean }>>
+        getConfig: () => Promise<{ enabled: boolean; search: string; add: string }>
+        setConfig: (config: {
+          enabled: boolean
+          search: string
+          add: string
+        }) => Promise<{ enabled: boolean; search: string; add: string }>
         onStatus: (
           callback: (status: Record<string, { accelerator: string; registered: boolean }>) => void,
         ) => () => void

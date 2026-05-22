@@ -9,6 +9,7 @@ import { exec } from 'child_process'
 // ---------------------------------------------------------------------------
 
 const TOKEN_FILE = () => join(app.getPath('userData'), 'tokens.enc')
+const SHORTCUTS_FILE = () => join(app.getPath('userData'), 'shortcuts.json')
 
 interface TokenData {
   access: string | null
@@ -41,6 +42,18 @@ let mainWindow: BrowserWindow | null = null
 let pendingAuthCallbackURL: string | null = null
 let shortcutStatus: Record<string, { accelerator: string; registered: boolean }> = {}
 
+interface ShortcutConfig {
+  enabled: boolean
+  search: string
+  add: string
+}
+
+const DEFAULT_SHORTCUT_CONFIG: ShortcutConfig = {
+  enabled: true,
+  search: 'CommandOrControl+K',
+  add: 'CommandOrControl+N',
+}
+
 function readTokens(): TokenData {
   try {
     const file = TOKEN_FILE()
@@ -60,6 +73,26 @@ function writeTokens(data: TokenData): void {
   } catch (e) {
     console.error('[main] writeTokens failed:', e)
   }
+}
+
+function readShortcutConfig(): ShortcutConfig {
+  try {
+    const file = SHORTCUTS_FILE()
+    if (!existsSync(file)) return DEFAULT_SHORTCUT_CONFIG
+    return { ...DEFAULT_SHORTCUT_CONFIG, ...JSON.parse(readFileSync(file, 'utf-8')) }
+  } catch {
+    return DEFAULT_SHORTCUT_CONFIG
+  }
+}
+
+function writeShortcutConfig(config: ShortcutConfig): ShortcutConfig {
+  const next = {
+    enabled: config.enabled,
+    search: config.search.trim() || DEFAULT_SHORTCUT_CONFIG.search,
+    add: config.add.trim() || DEFAULT_SHORTCUT_CONFIG.add,
+  }
+  writeFileSync(SHORTCUTS_FILE(), JSON.stringify(next, null, 2), 'utf-8')
+  return next
 }
 
 // ---------------------------------------------------------------------------
@@ -123,6 +156,14 @@ function registerIpcHandlers(): void {
   })
 
   ipcMain.handle('shortcuts:get-status', async () => shortcutStatus)
+  ipcMain.handle('shortcuts:get-config', async () => readShortcutConfig())
+  ipcMain.handle('shortcuts:set-config', async (_event, config: ShortcutConfig) => {
+    const next = writeShortcutConfig(config)
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      registerGlobalShortcuts(mainWindow)
+    }
+    return next
+  })
 
   ipcMain.handle('api-tester:send', async (_event, request: ApiTesterRequest) => {
     return sendApiTesterRequest(request)
@@ -185,12 +226,22 @@ function gitRemoteToSlug(remote: string): string {
 // ---------------------------------------------------------------------------
 
 function registerGlobalShortcuts(win: BrowserWindow): void {
+  globalShortcut.unregisterAll()
+  const config = readShortcutConfig()
   const shortcuts: Record<string, string> = {
-    'CommandOrControl+K': 'search',
-    'CommandOrControl+N': 'add',
+    [config.search]: 'search',
+    [config.add]: 'add',
   }
 
   shortcutStatus = {}
+  if (!config.enabled) {
+    for (const [accelerator, name] of Object.entries(shortcuts)) {
+      shortcutStatus[name] = { accelerator, registered: false }
+    }
+    win.webContents.send('global-shortcut-status', shortcutStatus)
+    return
+  }
+
   for (const [accelerator, name] of Object.entries(shortcuts)) {
     const registered = globalShortcut.register(accelerator, () => {
       if (!win.isDestroyed()) {

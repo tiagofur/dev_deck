@@ -144,4 +144,36 @@ describe('<UnifiedCommandPalette>', () => {
     expect(onClose).toHaveBeenCalled()
     expect(mocks.navigate).toHaveBeenCalledWith('/workbench?tool=secrets')
   })
+
+  it('filters palette search results by result type', async () => {
+    mocks.useGlobalSearch.mockReturnValue({
+      data: [
+        {
+          type: 'item',
+          id: 'item-1',
+          title: 'Saved note',
+          subtitle: 'note',
+          extra: '',
+        },
+        {
+          type: 'entry',
+          id: 'cmd-1',
+          title: 'Run tests',
+          subtitle: 'Node',
+          extra: 'pnpm test',
+        },
+      ],
+      isLoading: false,
+    })
+
+    renderPalette()
+
+    expect(screen.getByText('Saved note')).toBeInTheDocument()
+    expect(screen.getByText('Run tests')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('Filter commands'))
+
+    expect(screen.queryByText('Saved note')).not.toBeInTheDocument()
+    expect(screen.getByText('Run tests')).toBeInTheDocument()
+  })
 })

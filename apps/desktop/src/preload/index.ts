@@ -22,6 +22,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   shortcuts: {
     getStatus: (): Promise<Record<string, { accelerator: string; registered: boolean }>> =>
       ipcRenderer.invoke('shortcuts:get-status'),
+    getConfig: (): Promise<{ enabled: boolean; search: string; add: string }> =>
+      ipcRenderer.invoke('shortcuts:get-config'),
+    setConfig: (config: { enabled: boolean; search: string; add: string }): Promise<{ enabled: boolean; search: string; add: string }> =>
+      ipcRenderer.invoke('shortcuts:set-config', config),
     onStatus: (
       callback: (status: Record<string, { accelerator: string; registered: boolean }>) => void,
     ): (() => void) => {

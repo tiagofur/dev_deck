@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Binary,
   Braces,
@@ -17,7 +17,7 @@ import {
   ScanSearch,
 } from 'lucide-react'
 import { Button, showToast } from '@devdeck/ui'
-import { useCapture, useGlobalSearch } from '@devdeck/api-client'
+import { useCapture, useGlobalSearch, useItem, useUpdateItem, type SearchResult } from '@devdeck/api-client'
 import { AppShell } from '../components/AppShell'
 import {
   dateToUnixTimestamp,
@@ -38,7 +38,7 @@ import {
   timestampToDate,
 } from '../workbench/utils'
 
-type ToolId = 'json' | 'jwt' | 'base64' | 'url' | 'uuid' | 'timestamp' | 'hash' | 'regex' | 'secrets' | 'api' | 'project'
+type ToolId = 'json' | 'jwt' | 'base64' | 'url' | 'uuid' | 'timestamp' | 'hash' | 'regex' | 'secrets' | 'api' | 'project' | 'expander'
 
 const tools: {
   id: ToolId
@@ -57,6 +57,7 @@ const tools: {
   { id: 'secrets', label: 'Secrets', description: 'Scan text for leaked tokens locally.', icon: ShieldAlert },
   { id: 'api', label: 'API', description: 'Send quick HTTP requests and save configs.', icon: Send },
   { id: 'project', label: 'Project', description: 'Surface context for a repo or project.', icon: FolderGit2 },
+  { id: 'expander', label: 'Aliases', description: 'Preview explicit snippet expansions locally.', icon: Clipboard },
 ]
 
 export function WorkbenchPage() {
@@ -136,6 +137,7 @@ export function WorkbenchPage() {
               {activeTool === 'secrets' && <SecretScannerTool />}
               {activeTool === 'api' && <ApiTool />}
               {activeTool === 'project' && <ProjectContextTool />}
+              {activeTool === 'expander' && <SnippetExpanderTool />}
             </section>
           </div>
         </div>
@@ -859,12 +861,14 @@ interface DesktopApiTesterAPI {
 }
 
 function ProjectContextTool() {
+  const navigate = useNavigate()
   const capture = useCapture()
   const [name, setName] = useState(() => readProjectDraft().name)
   const [remote, setRemote] = useState(() => readProjectDraft().remote)
   const [notes, setNotes] = useState(() => readProjectDraft().notes)
   const [detecting, setDetecting] = useState(false)
   const query = [name.trim(), remoteToSlug(remote)].filter(Boolean).join(' ')
+  const projectTag = projectContextTag(name, remote)
   const { data: results = [], isLoading } = useGlobalSearch(query, 'text')
   const desktopProject = typeof window !== 'undefined'
     ? (window as unknown as { electronAPI?: { project?: DesktopProjectAPI } }).electronAPI?.project
@@ -967,24 +971,311 @@ function ProjectContextTool() {
         )}
         <div className="grid gap-2">
           {results.slice(0, 8).map((result) => (
-            <div key={`${result.type}-${result.id}`} className="border-2 border-ink bg-bg-card p-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="border-2 border-ink bg-accent-yellow px-2 py-0.5 font-mono text-[10px] uppercase">
-                  {result.type}
-                </span>
-                <p className="font-display text-sm font-black uppercase">{result.title}</p>
-              </div>
-              {result.subtitle && <p className="mt-1 font-mono text-xs text-ink-soft">{result.subtitle}</p>}
-              {result.extra && (
-                <code className="mt-2 block truncate bg-ink px-2 py-1 font-mono text-[10px] text-bg-primary">
-                  {result.extra}
-                </code>
-              )}
-            </div>
+            <ProjectContextResultRow
+              key={`${result.type}-${result.id}`}
+              result={result}
+              projectTag={projectTag}
+              onOpen={(target) => {
+                if (target.type === 'item') navigate(`/items/${target.id}`)
+                else if (target.type === 'repo') navigate(`/repo/${target.id}`)
+                else if (target.type === 'cheatsheet') navigate(`/cheatsheets/${target.id}`)
+              }}
+            />
           ))}
         </div>
       </div>
     </ToolFrame>
+  )
+}
+
+function ProjectContextResultRow({
+  result,
+  projectTag,
+  onOpen,
+}: {
+  result: SearchResult
+  projectTag: string
+  onOpen: (result: SearchResult) => void
+}) {
+  const { data: item } = useItem(result.type === 'item' ? result.id : undefined)
+  const updateItem = useUpdateItem()
+  const tags = item?.tags ?? []
+  const linked = !!projectTag && tags.includes(projectTag)
+
+  async function copyProjectResult() {
+    const value = result.extra || result.title
+    await navigator.clipboard.writeText(value)
+    showToast('Copied project context item', 'success')
+  }
+
+  function openProjectResult() {
+    if (result.type === 'entry') {
+      void copyProjectResult()
+      return
+    }
+    onOpen(result)
+  }
+
+  async function toggleProjectLink() {
+    if (!projectTag || result.type !== 'item') return
+    const nextTags = linked
+      ? tags.filter((tag) => tag !== projectTag)
+      : Array.from(new Set([...tags, projectTag]))
+    await updateItem.mutateAsync({ id: result.id, input: { tags: nextTags } })
+    showToast(linked ? 'Item unlinked from project' : 'Item linked to project', 'success')
+  }
+
+  return (
+    <div className="border-2 border-ink bg-bg-card p-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="border-2 border-ink bg-accent-yellow px-2 py-0.5 font-mono text-[10px] uppercase">
+          {result.type}
+        </span>
+        {linked && (
+          <span className="border-2 border-ink bg-accent-lime px-2 py-0.5 font-mono text-[10px] uppercase">
+            linked
+          </span>
+        )}
+        <p className="font-display text-sm font-black uppercase">{result.title}</p>
+      </div>
+      {result.subtitle && <p className="mt-1 font-mono text-xs text-ink-soft">{result.subtitle}</p>}
+      {result.extra && (
+        <code className="mt-2 block truncate bg-ink px-2 py-1 font-mono text-[10px] text-bg-primary">
+          {result.extra}
+        </code>
+      )}
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button type="button" size="sm" variant="secondary" onClick={openProjectResult}>
+          {result.type === 'entry' ? 'Copy command' : 'Open'}
+        </Button>
+        {result.extra && result.type !== 'entry' && (
+          <Button type="button" size="sm" variant="secondary" onClick={copyProjectResult}>
+            Copy
+          </Button>
+        )}
+        {result.type === 'item' && (
+          <Button
+            type="button"
+            size="sm"
+            variant={linked ? 'secondary' : 'accent'}
+            onClick={toggleProjectLink}
+            disabled={!projectTag || updateItem.isPending}
+          >
+            {linked ? 'Unlink project' : 'Link project'}
+          </Button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+const EXPANDER_STORAGE_KEY = 'devdeck.workbench.expander.v1'
+
+interface SnippetAlias {
+  alias: string
+  expansion: string
+}
+
+interface SnippetExpanderConfig {
+  enabled: boolean
+  paused: boolean
+  excludedApps: string
+  aliases: SnippetAlias[]
+}
+
+function SnippetExpanderTool() {
+  const [config, setConfig] = useState<SnippetExpanderConfig>(() => readSnippetExpanderConfig())
+  const [alias, setAlias] = useState(':docker-run')
+  const [expansion, setExpansion] = useState('docker run --rm -it IMAGE sh')
+  const [input, setInput] = useState(':docker-run')
+  const [textInput, setTextInput] = useState('Deploy with :docker-run')
+  const matchedAlias = config.aliases.find((entry) => entry.alias === input.trim())
+  const output = config.enabled && !config.paused && matchedAlias ? matchedAlias.expansion : ''
+  const expandedText = config.enabled && !config.paused
+    ? expandSnippetAliases(textInput, config.aliases)
+    : ''
+
+  function persist(next: SnippetExpanderConfig) {
+    setConfig(next)
+    writeSnippetExpanderConfig(next)
+  }
+
+  function saveAlias() {
+    const cleanAlias = alias.trim()
+    if (!cleanAlias || !cleanAlias.startsWith(':') || !expansion.trim()) return
+    persist({
+      ...config,
+      aliases: [
+        { alias: cleanAlias, expansion },
+        ...config.aliases.filter((entry) => entry.alias !== cleanAlias),
+      ].slice(0, 25),
+    })
+    showToast('Alias saved locally', 'success')
+  }
+
+  function removeAlias(target: string) {
+    persist({ ...config, aliases: config.aliases.filter((entry) => entry.alias !== target) })
+  }
+
+  async function copyExpansion() {
+    if (!output) return
+    await navigator.clipboard.writeText(output)
+    showToast('Expansion copied', 'success')
+  }
+
+  async function copyExpandedText() {
+    if (!expandedText) return
+    await navigator.clipboard.writeText(expandedText)
+    showToast('Expanded text copied', 'success')
+  }
+
+  return (
+    <ToolFrame title="Snippet aliases">
+      <div className="grid gap-3 border-3 border-ink bg-bg-elevated p-4">
+        <label className="flex items-center justify-between gap-3 font-mono text-sm">
+          <span>Enabled</span>
+          <input
+            type="checkbox"
+            checked={config.enabled}
+            onChange={(event) => persist({ ...config, enabled: event.target.checked })}
+          />
+        </label>
+        <label className="flex items-center justify-between gap-3 font-mono text-sm">
+          <span>Paused</span>
+          <input
+            type="checkbox"
+            checked={config.paused}
+            onChange={(event) => persist({ ...config, paused: event.target.checked })}
+          />
+        </label>
+        <TextArea
+          label="Excluded apps"
+          value={config.excludedApps}
+          onChange={(value) => persist({ ...config, excludedApps: value })}
+          placeholder={'1Password\nKeychain Access\nTerminal with secrets'}
+        />
+        <p className="font-mono text-xs text-ink-soft">
+          This MVP is local and explicit: no global clipboard history, no silent monitoring, and no sync of typed aliases.
+        </p>
+      </div>
+
+      <div className="grid gap-3 border-3 border-ink bg-bg-elevated p-4">
+        <div className="grid gap-3 md:grid-cols-[180px_minmax(0,1fr)]">
+          <label className="grid gap-2">
+            <span className="font-display text-xs font-black uppercase tracking-widest">Alias</span>
+            <input
+              value={alias}
+              onChange={(event) => setAlias(event.target.value)}
+              className="h-11 border-3 border-ink bg-bg-primary px-3 font-mono text-sm outline-none focus:bg-accent-yellow/10"
+            />
+          </label>
+          <TextArea label="Expansion" value={expansion} onChange={setExpansion} />
+        </div>
+        <div>
+          <Button type="button" onClick={saveAlias} disabled={!alias.trim().startsWith(':') || !expansion.trim()}>
+            Save alias locally
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-3 border-3 border-ink bg-bg-elevated p-4">
+        <label className="grid gap-2">
+          <span className="font-display text-xs font-black uppercase tracking-widest">Preview alias</span>
+          <input
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            className="h-11 border-3 border-ink bg-bg-primary px-3 font-mono text-sm outline-none focus:bg-accent-yellow/10"
+          />
+        </label>
+        <TextArea
+          label="Expansion preview"
+          value={output || (config.enabled ? 'No matching alias.' : 'Snippet aliases are disabled.')}
+          readOnly
+        />
+        <div>
+          <Button type="button" variant="secondary" onClick={copyExpansion} disabled={!output}>
+            Copy expansion
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-3 border-3 border-ink bg-bg-elevated p-4">
+        <TextArea
+          label="Expand text"
+          value={textInput}
+          onChange={setTextInput}
+          placeholder="Use saved aliases inside text, e.g. deploy with :docker-run"
+        />
+        <TextArea
+          label="Expanded text"
+          value={expandedText || (config.enabled ? 'No aliases expanded.' : 'Snippet aliases are disabled.')}
+          readOnly
+        />
+        <div>
+          <Button type="button" variant="secondary" onClick={copyExpandedText} disabled={!expandedText}>
+            Copy expanded text
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-2">
+        {config.aliases.map((entry) => (
+          <div key={entry.alias} className="flex flex-wrap items-center justify-between gap-3 border-2 border-ink bg-bg-elevated p-3">
+            <div className="min-w-0">
+              <p className="font-display text-sm font-black uppercase">{entry.alias}</p>
+              <p className="truncate font-mono text-xs text-ink-soft">{entry.expansion}</p>
+            </div>
+            <Button type="button" size="sm" variant="secondary" onClick={() => removeAlias(entry.alias)}>
+              Remove
+            </Button>
+          </div>
+        ))}
+      </div>
+    </ToolFrame>
+  )
+}
+
+function readSnippetExpanderConfig(): SnippetExpanderConfig {
+  const fallback: SnippetExpanderConfig = {
+    enabled: false,
+    paused: false,
+    excludedApps: '',
+    aliases: [],
+  }
+  if (typeof window === 'undefined') return fallback
+  try {
+    const raw = window.localStorage.getItem(EXPANDER_STORAGE_KEY)
+    if (!raw) return fallback
+    const parsed = JSON.parse(raw) as Partial<SnippetExpanderConfig>
+    return {
+      ...fallback,
+      ...parsed,
+      aliases: Array.isArray(parsed.aliases) ? parsed.aliases.filter(isSnippetAlias) : [],
+    }
+  } catch {
+    return fallback
+  }
+}
+
+function writeSnippetExpanderConfig(config: SnippetExpanderConfig) {
+  if (typeof window === 'undefined' || !window.localStorage) return
+  try {
+    window.localStorage.setItem(EXPANDER_STORAGE_KEY, JSON.stringify(config))
+  } catch {
+    // In-memory state still works when localStorage is unavailable.
+  }
+}
+
+function isSnippetAlias(value: unknown): value is SnippetAlias {
+  if (!value || typeof value !== 'object') return false
+  const entry = value as Record<string, unknown>
+  return typeof entry.alias === 'string' && typeof entry.expansion === 'string'
+}
+
+function expandSnippetAliases(input: string, aliases: SnippetAlias[]): string {
+  return aliases.reduce(
+    (current, entry) => current.replaceAll(entry.alias, entry.expansion),
+    input
   )
 }
 
@@ -1008,4 +1299,14 @@ function remoteToSlug(remote: string): string {
   } catch {
     return trimmed
   }
+}
+
+function projectContextTag(name: string, remote: string): string {
+  const source = remoteToSlug(remote) || name.trim()
+  const normalized = source
+    .toLowerCase()
+    .replace(/\.git$/, '')
+    .replace(/[^a-z0-9/_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+  return normalized ? `project:${normalized}` : ''
 }

@@ -16,6 +16,8 @@ interface Shortcut {
 export function ShortcutsModal({ open, onClose }: Props) {
   const { t } = useTranslation()
   const [desktopStatus, setDesktopStatus] = useState<Record<string, { accelerator: string; registered: boolean }> | null>(null)
+  const [desktopConfig, setDesktopConfig] = useState<{ enabled: boolean; search: string; add: string } | null>(null)
+  const [savingDesktopConfig, setSavingDesktopConfig] = useState(false)
 
   const shortcuts: Shortcut[] = [
     { keys: ['Cmd', 'K'], description: t('shortcuts.global_search') },
@@ -42,6 +44,8 @@ export function ShortcutsModal({ open, onClose }: Props) {
       electronAPI?: {
         shortcuts?: {
           getStatus: () => Promise<Record<string, { accelerator: string; registered: boolean }>>
+          getConfig: () => Promise<{ enabled: boolean; search: string; add: string }>
+          setConfig: (config: { enabled: boolean; search: string; add: string }) => Promise<{ enabled: boolean; search: string; add: string }>
           onStatus: (
             callback: (status: Record<string, { accelerator: string; registered: boolean }>) => void,
           ) => () => void
@@ -57,12 +61,33 @@ export function ShortcutsModal({ open, onClose }: Props) {
     api.getStatus().then((status) => {
       if (!cancelled) setDesktopStatus(status)
     })
+    api.getConfig().then((config) => {
+      if (!cancelled) setDesktopConfig(config)
+    })
     const unsubscribe = api.onStatus((status) => setDesktopStatus(status))
     return () => {
       cancelled = true
       unsubscribe()
     }
   }, [open])
+
+  async function saveDesktopConfig(nextConfig: { enabled: boolean; search: string; add: string }) {
+    const api = (window as unknown as {
+      electronAPI?: {
+        shortcuts?: {
+          setConfig: (config: { enabled: boolean; search: string; add: string }) => Promise<{ enabled: boolean; search: string; add: string }>
+        }
+      }
+    }).electronAPI?.shortcuts
+    if (!api) return
+    setSavingDesktopConfig(true)
+    try {
+      const saved = await api.setConfig(nextConfig)
+      setDesktopConfig(saved)
+    } finally {
+      setSavingDesktopConfig(false)
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -129,6 +154,43 @@ export function ShortcutsModal({ open, onClose }: Props) {
                 <p className="mb-2 font-display text-xs font-black uppercase">
                   Desktop global shortcuts
                 </p>
+                {desktopConfig && (
+                  <div className="mb-3 grid gap-2 border-b-2 border-ink pb-3">
+                    <label className="flex items-center justify-between gap-3 font-mono text-xs">
+                      <span>Enabled</span>
+                      <input
+                        type="checkbox"
+                        checked={desktopConfig.enabled}
+                        onChange={(event) => {
+                          const next = { ...desktopConfig, enabled: event.target.checked }
+                          setDesktopConfig(next)
+                          void saveDesktopConfig(next)
+                        }}
+                      />
+                    </label>
+                    <label className="grid gap-1 font-mono text-xs">
+                      <span>Palette shortcut</span>
+                      <input
+                        value={desktopConfig.search}
+                        onChange={(event) => setDesktopConfig({ ...desktopConfig, search: event.target.value })}
+                        onBlur={() => void saveDesktopConfig(desktopConfig)}
+                        className="border-2 border-ink bg-bg-primary px-2 py-1 outline-none"
+                      />
+                    </label>
+                    <label className="grid gap-1 font-mono text-xs">
+                      <span>Capture shortcut</span>
+                      <input
+                        value={desktopConfig.add}
+                        onChange={(event) => setDesktopConfig({ ...desktopConfig, add: event.target.value })}
+                        onBlur={() => void saveDesktopConfig(desktopConfig)}
+                        className="border-2 border-ink bg-bg-primary px-2 py-1 outline-none"
+                      />
+                    </label>
+                    {savingDesktopConfig && (
+                      <span className="font-mono text-[10px] text-ink-soft">Saving...</span>
+                    )}
+                  </div>
+                )}
                 <div className="grid gap-2">
                   {Object.entries(desktopStatus).map(([name, status]) => (
                     <div key={name} className="flex items-center justify-between gap-3 font-mono text-xs">

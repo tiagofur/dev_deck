@@ -126,7 +126,9 @@ Estado de implementación:
 - La paleta abre el Workbench desde cualquier app shell.
 - La paleta abre tools específicas con deep links (`/workbench?tool=...`) cuando la búsqueda coincide con JSON, JWT, API, `curl`, secrets, regex, etc.
 - Puede crear una nota rápida desde el input actual usando capture.
+- Puede filtrar resultados por superficie: all, items, repos, cheatsheets y comandos copiables.
 - Puede copiar resultados de comandos directamente cuando el resultado trae `extra`.
+- En Desktop, los atajos globales muestran estado de registro/conflicto y se pueden habilitar/deshabilitar o cambiar desde el modal de shortcuts.
 
 ### 4.3 Quick API Tester
 
@@ -167,6 +169,14 @@ Cuando el usuario está trabajando en un repo o proyecto, DevDeck debería poder
 - Decisiones o notas técnicas.
 
 Esto convierte DevDeck en memoria de trabajo, no solo archivo histórico.
+
+Estado de implementación:
+
+- `devdeck project` detecta carpeta/remote git y busca contexto relacionado sin escanear archivos ni leer `.env`.
+- Desktop expone detección segura del proyecto actual vía `electronAPI.project.detectCurrent()`.
+- El Workbench incluye una tool `Project` para nombre, remote, notas, búsqueda de contexto relacionado y guardado como nota.
+- Los resultados relacionados se pueden abrir/copiar desde la superficie de proyecto.
+- Los items existentes se pueden vincular/desvincular usando el tag explícito `project:<slug>`.
 
 ---
 
@@ -306,6 +316,7 @@ Objetivo: ampliar poder sin romper confianza.
 - Clipboard/snippet expander.
 - OCR screenshot to snippet.
 - Secret scanner local antes de guardar/compartir texto sensible. **Estado:** implementado en Workbench.
+- Gestor local de aliases/snippets explícitos. **Estado:** primera base implementada en Workbench, apagada por defecto, con enable/pause/disable, apps excluidas, preview, expansión explícita de texto y copy manual.
 - Integraciones con gestores de secretos.
 - Atajo global del sistema.
 

@@ -32,6 +32,16 @@ interface Props {
   onClose: () => void
 }
 
+type ResultFilter = 'all' | SearchResult['type']
+
+const resultFilters: { id: ResultFilter; label: string; subtitle: string }[] = [
+  { id: 'all', label: 'Filter all results', subtitle: 'Show every matching vault result.' },
+  { id: 'item', label: 'Filter items', subtitle: 'Show saved notes, snippets, prompts, requests, and workflows.' },
+  { id: 'repo', label: 'Filter repos', subtitle: 'Show repository results only.' },
+  { id: 'cheatsheet', label: 'Filter cheatsheets', subtitle: 'Show cheatsheet results only.' },
+  { id: 'entry', label: 'Filter commands', subtitle: 'Show copyable cheatsheet commands only.' },
+]
+
 const workbenchToolShortcuts = [
   {
     id: 'json',
@@ -99,6 +109,12 @@ const workbenchToolShortcuts = [
     subtitle: 'Find related vault context for a repo.',
     keywords: ['project', 'repo', 'context', 'git'],
   },
+  {
+    id: 'expander',
+    title: 'Open snippet aliases',
+    subtitle: 'Preview explicit local snippet expansions.',
+    keywords: ['alias', 'aliases', 'snippet', 'expander', 'expand'],
+  },
 ]
 
 export function UnifiedCommandPalette({ open, onClose }: Props) {
@@ -106,6 +122,7 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
   const navigate = useNavigate()
   const [query, setQuery] = React.useState('')
   const [mode, setMode] = React.useState<'command' | 'ask'>('command')
+  const [resultFilter, setResultFilter] = React.useState<ResultFilter>('all')
   const capture = useCapture()
   
   const { data: searchResults = [], isLoading: searchLoading } = useGlobalSearch(query)
@@ -116,6 +133,7 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
     if (open) {
       setQuery('')
       setMode('command')
+      setResultFilter('all')
     }
   }, [open])
 
@@ -176,6 +194,13 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
       icon: <Plus size={16} strokeWidth={3} className="text-accent-pink" />,
       onSelect: saveQueryAsNote,
     },
+    ...resultFilters.map((filter) => ({
+      id: `filter-${filter.id}`,
+      title: resultFilter === filter.id ? `${filter.label} (active)` : filter.label,
+      subtitle: filter.subtitle,
+      icon: <Search size={16} strokeWidth={3} className="text-accent-cyan" />,
+      onSelect: () => setResultFilter(filter.id),
+    })),
     {
       id: 'go-items',
       title: t('palette.go_items_title'),
@@ -230,9 +255,13 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
       },
     }))
 
+  const filteredSearchResults = resultFilter === 'all'
+    ? searchResults
+    : searchResults.filter((result) => result.type === resultFilter)
+
   const results = [
     ...toolResults,
-    ...searchResults.map((r) => ({
+    ...filteredSearchResults.map((r) => ({
     id: `${r.type}-${r.id}`,
     type: r.type,
     title: r.title,
