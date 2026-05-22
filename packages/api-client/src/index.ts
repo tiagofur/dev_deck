@@ -287,3 +287,8 @@ export type {
   AddItemsInput,
   DeckItem,
 } from './features/decks/api'
+
+// Feature hooks — system
+export { useSystemConfig } from './features/system/api'
+export type { SystemConfig } from './features/system/api'
+
