@@ -22,6 +22,7 @@ import {
   LogOut
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { AppShell } from '../components/AppShell'
 import {
   useMe,
   useUpdateMe,
@@ -204,18 +205,22 @@ export function ProfilePage() {
 
   if (loadingUser) {
     return (
-      <div className="min-h-screen bg-bg-primary p-8 flex items-center justify-center">
-        <div className="font-mono text-sm animate-pulse text-ink-soft">{t('profile.edit_loading_msg')}</div>
-      </div>
+      <AppShell contentClassName="flex-1 overflow-y-auto">
+        <div className="min-h-full bg-bg-primary p-8 flex items-center justify-center">
+          <div className="font-mono text-sm animate-pulse text-ink-soft">{t('profile.edit_loading_msg')}</div>
+        </div>
+      </AppShell>
     )
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-bg-primary p-8 flex flex-col items-center justify-center gap-4">
-        <p className="font-display font-black text-2xl uppercase">{t('profile.login_required')}</p>
-        <Button onClick={() => navigate('/login')}>{t('profile.login_button')}</Button>
-      </div>
+      <AppShell contentClassName="flex-1 overflow-y-auto">
+        <div className="min-h-full bg-bg-primary p-8 flex flex-col items-center justify-center gap-4">
+          <p className="font-display font-black text-2xl uppercase">{t('profile.login_required')}</p>
+          <Button onClick={() => navigate('/login')}>{t('profile.login_button')}</Button>
+        </div>
+      </AppShell>
     )
   }
 
@@ -263,7 +268,8 @@ export function ProfilePage() {
   const recentItems = itemsRes?.items || []
 
   return (
-    <div className="min-h-screen bg-bg-primary pb-20">
+    <AppShell contentClassName="flex-1 overflow-y-auto">
+      <div className="min-h-full bg-bg-primary pb-20">
       {/* Topbar back action */}
       <header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -840,7 +846,8 @@ export function ProfilePage() {
           isSubmitting={uploadAvatar.isPending}
         />
       )}
-    </div>
+      </div>
+    </AppShell>
   )
 }
 
