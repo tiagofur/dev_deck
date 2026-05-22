@@ -3,6 +3,7 @@ import { ArrowLeft, Bell, Check, Eye, EyeOff, Globe, Laptop, Settings as Setting
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, confirm } from '@devdeck/ui'
+import { AppShell } from '../components/AppShell'
 import {
   getAccessToken,
   getConfig,
@@ -79,7 +80,8 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary">
+    <AppShell contentClassName="flex-1 overflow-y-auto">
+      <div className="min-h-full bg-bg-primary">
       <header className="border-b-3 border-ink bg-bg-card px-6 py-4 flex items-center gap-4">
         <button
           onClick={() => navigate('/')}
@@ -312,7 +314,8 @@ export function SettingsPage() {
           </div>
         </Section>
       </main>
-    </div>
+      </div>
+    </AppShell>
   )
 }
 
