@@ -71,17 +71,14 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	as := deps.AuthService
 	embSvc := deps.Embeddings
 
-	var authH *handlers.AuthHandler
-	if cfg.AuthMode == "jwt" && as != nil {
-		authH = handlers.NewAuthHandler(st, as, handlers.AuthConfig{
-			GitHubClientID:          cfg.GitHubClientID,
-			GitHubClientSecret:      cfg.GitHubClientSecret,
-			GitHubOAuthCallbackURL:  cfg.GitHubOAuthCallbackURL,
-			WebOAuthRedirectURL:     cfg.WebOAuthRedirectURL,
-			DesktopOAuthRedirectURL: cfg.DesktopOAuthRedirectURL,
-			RequireInvite:           cfg.RequireInvite,
-		})
-	}
+	authH := handlers.NewAuthHandler(st, as, handlers.AuthConfig{
+		GitHubClientID:          cfg.GitHubClientID,
+		GitHubClientSecret:      cfg.GitHubClientSecret,
+		GitHubOAuthCallbackURL:  cfg.GitHubOAuthCallbackURL,
+		WebOAuthRedirectURL:     cfg.WebOAuthRedirectURL,
+		DesktopOAuthRedirectURL: cfg.DesktopOAuthRedirectURL,
+		RequireInvite:           cfg.RequireInvite,
+	})
 
 	reposH := handlers.NewReposHandler(st, en)
 	statsH := handlers.NewStatsHandler(st)
@@ -153,8 +150,17 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			})
 		})
 
-		if authH != nil {
-			r.Route("/auth", func(r chi.Router) {
+		r.Route("/auth", func(r chi.Router) {
+			// Profile endpoints (available in both token and jwt modes)
+			r.Group(func(r chi.Router) {
+				r.Use(mw.TokenAuth(cfg, as, st))
+				r.Get("/me", authH.Me)
+				r.Patch("/me", authH.UpdateMe)
+				r.Patch("/me/onboarding/complete", authH.CompleteOnboarding)
+			})
+
+			// OAuth/JWT only endpoints
+			if cfg.AuthMode == "jwt" {
 				r.Get("/providers", authH.Providers)
 				r.Post("/register", authH.Register)
 				r.Post("/login", authH.LoginLocal)
@@ -170,15 +176,8 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 
 				r.Post("/refresh", authH.Refresh)
 				r.Post("/logout", authH.Logout)
-
-				r.Group(func(r chi.Router) {
-					r.Use(mw.TokenAuth(cfg, as, st))
-					r.Get("/me", authH.Me)
-					r.Patch("/me", authH.UpdateMe)
-					r.Patch("/me/onboarding/complete", authH.CompleteOnboarding)
-				})
-			})
-		}
+			}
+		})
 
 		r.Group(func(r chi.Router) {
 			r.Use(mw.TokenAuth(cfg, as, st))

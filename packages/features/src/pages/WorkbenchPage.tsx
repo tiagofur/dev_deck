@@ -1,4 +1,5 @@
-import { FormEvent, useMemo, useState } from 'react'
+import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   Binary,
   Braces,
@@ -9,6 +10,7 @@ import {
   KeyRound,
   Link,
   Save,
+  ShieldAlert,
   ShieldCheck,
   Send,
   FolderGit2,
@@ -30,12 +32,13 @@ import {
   parseCurlCommand,
   parseHeaders,
   requestConfigToCurl,
+  scanSecrets,
   serializeRequestConfig,
   testRegex,
   timestampToDate,
 } from '../workbench/utils'
 
-type ToolId = 'json' | 'jwt' | 'base64' | 'url' | 'uuid' | 'timestamp' | 'hash' | 'regex' | 'api' | 'project'
+type ToolId = 'json' | 'jwt' | 'base64' | 'url' | 'uuid' | 'timestamp' | 'hash' | 'regex' | 'secrets' | 'api' | 'project'
 
 const tools: {
   id: ToolId
@@ -51,12 +54,23 @@ const tools: {
   { id: 'timestamp', label: 'Time', description: 'Convert UNIX timestamps and dates.', icon: CalendarClock },
   { id: 'hash', label: 'Hash', description: 'Generate SHA digests locally.', icon: Hash },
   { id: 'regex', label: 'Regex', description: 'Test expressions against sample text.', icon: ScanSearch },
+  { id: 'secrets', label: 'Secrets', description: 'Scan text for leaked tokens locally.', icon: ShieldAlert },
   { id: 'api', label: 'API', description: 'Send quick HTTP requests and save configs.', icon: Send },
   { id: 'project', label: 'Project', description: 'Surface context for a repo or project.', icon: FolderGit2 },
 ]
 
 export function WorkbenchPage() {
-  const [activeTool, setActiveTool] = useState<ToolId>('json')
+  const [searchParams] = useSearchParams()
+  const requestedTool = searchParams.get('tool')
+  const [activeTool, setActiveTool] = useState<ToolId>(
+    isToolId(requestedTool) ? requestedTool : 'json'
+  )
+
+  useEffect(() => {
+    if (isToolId(requestedTool) && requestedTool !== activeTool) {
+      setActiveTool(requestedTool)
+    }
+  }, [activeTool, requestedTool])
 
   return (
     <AppShell contentClassName="flex-1 overflow-auto">
@@ -119,6 +133,7 @@ export function WorkbenchPage() {
               {activeTool === 'timestamp' && <TimestampTool />}
               {activeTool === 'hash' && <HashTool />}
               {activeTool === 'regex' && <RegexTool />}
+              {activeTool === 'secrets' && <SecretScannerTool />}
               {activeTool === 'api' && <ApiTool />}
               {activeTool === 'project' && <ProjectContextTool />}
             </section>
@@ -127,6 +142,10 @@ export function WorkbenchPage() {
       </main>
     </AppShell>
   )
+}
+
+function isToolId(value: string | null): value is ToolId {
+  return tools.some((tool) => tool.id === value)
 }
 
 function ToolFrame({
@@ -440,6 +459,59 @@ function RegexTool() {
       )}
       <TextArea label="Matches" value={output} readOnly />
       <ResultActions output={output} title="Regex test matches" itemType="note" />
+    </ToolFrame>
+  )
+}
+
+function SecretScannerTool() {
+  const [input, setInput] = useState('')
+  const findings = useMemo(() => scanSecrets(input), [input])
+  const output = findings.length
+    ? JSON.stringify({ count: findings.length, findings }, null, 2)
+    : input.trim()
+      ? 'No common secret patterns detected.'
+      : ''
+
+  return (
+    <ToolFrame title="Secret scanner">
+      <TextArea
+        label="Input"
+        value={input}
+        onChange={setInput}
+        placeholder="Paste .env content, logs, curl commands, stack traces, or snippets before saving/sharing."
+      />
+      <div className={`border-3 border-ink p-4 ${
+        findings.length ? 'bg-accent-pink' : 'bg-accent-lime'
+      }`}>
+        <div className="flex flex-wrap items-center gap-3">
+          <ShieldAlert size={18} strokeWidth={3} />
+          <span className="font-display text-sm font-black uppercase">
+            {findings.length ? `${findings.length} finding${findings.length === 1 ? '' : 's'}` : 'No findings'}
+          </span>
+        </div>
+        <p className="mt-2 font-mono text-xs text-ink-soft">
+          Runs locally in this session. Values are masked in the report.
+        </p>
+      </div>
+      {findings.length > 0 && (
+        <div className="grid gap-2">
+          {findings.map((finding, index) => (
+            <div key={`${finding.type}-${finding.line}-${finding.column}-${index}`} className="border-2 border-ink bg-bg-elevated p-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="border-2 border-ink bg-accent-yellow px-2 py-0.5 font-mono text-[10px] uppercase">
+                  {finding.severity}
+                </span>
+                <span className="font-display text-sm font-black uppercase">{finding.type}</span>
+              </div>
+              <p className="mt-2 font-mono text-xs text-ink-soft">
+                line {finding.line}, column {finding.column}: {finding.match}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+      <TextArea label="Report" value={output} readOnly />
+      <ResultActions output={findings.length ? output : ''} title="Secret scan report" itemType="note" />
     </ToolFrame>
   )
 }

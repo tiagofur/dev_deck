@@ -1051,5 +1051,12 @@
     "invite_code_label": "Invitation Code",
     "invite_code_placeholder": "Ex: DEVDECK-XXXX-XXXX",
     "waitlist_hint": "If you don't have one, join the waitlist on the web."
+  },
+  "workspace": {
+    "personal": "Personal",
+    "personal_vault": "Personal Vault",
+    "workspaces_title": "Workspaces",
+    "create_team": "Create Team",
+    "team_name_prompt": "Enter the name for your new team:"
   }
 }

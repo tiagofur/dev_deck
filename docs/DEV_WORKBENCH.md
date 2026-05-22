@@ -54,6 +54,7 @@ If not, it probably belongs in another app.
 - Base64 / URL tools.
 - UUID and timestamp tools.
 - Regex tester.
+- Local secret scanner for `.env`, logs, commands, and snippets before saving or sharing.
 - Copy result.
 - Save output as snippet or note.
 
@@ -65,6 +66,7 @@ Status:
 - UUID and timestamp tools: implemented.
 - SHA-1 / SHA-256 hashing: implemented.
 - Regex tester: implemented.
+- Local secret scanner with masked values: implemented.
 - Copy result and save output as item: implemented.
 
 ### Phase 2 — Palette MVP
@@ -75,6 +77,13 @@ Status:
 - Copy saved commands.
 - Quick item creation.
 - Type-specific actions.
+
+Status:
+
+- The palette opens Developer Workbench from the app shell.
+- It opens specific tools through deep links (`/workbench?tool=...`) when search matches JSON, JWT, API, `curl`, secrets, regex, etc.
+- It can quick-save the current input as a note through capture.
+- It copies command search results directly when the result includes command text.
 
 ### Phase 3 — Requests and Runbooks
 
@@ -106,6 +115,7 @@ Implementation notes:
 
 - Clipboard/snippet expander.
 - Screenshot to snippet.
+- Local secret scanner before saving or sharing sensitive text. **Status:** implemented in Workbench.
 - Secret-manager integrations.
 - Global system shortcut.
 

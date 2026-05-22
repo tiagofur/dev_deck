@@ -6,6 +6,7 @@ import {
   parseHeaders,
   parseCurlCommand,
   requestConfigToCurl,
+  scanSecrets,
   serializeRequestConfig,
   testRegex,
   timestampToDate,
@@ -108,5 +109,39 @@ describe('workbench utils', () => {
         { match: 'devdeck', index: 8, groups: ['dev', 'deck'] },
       ],
     })
+  })
+
+  it('detects and masks likely secrets locally', () => {
+    expect(
+      scanSecrets(
+        [
+          'OPENAI_API_KEY=sk-testabcdefghijklmnopqrstuvwxyz',
+          'GITHUB_TOKEN=ghp_abcdefghijklmnopqrstuvwxyz123456',
+          'PASSWORD=supersecretvalue',
+        ].join('\n')
+      )
+    ).toEqual([
+      {
+        type: 'OpenAI API key',
+        severity: 'high',
+        line: 1,
+        column: 16,
+        match: 'sk-tes...wxyz',
+      },
+      {
+        type: 'GitHub token',
+        severity: 'high',
+        line: 2,
+        column: 14,
+        match: 'ghp_ab...3456',
+      },
+      {
+        type: 'Likely secret assignment',
+        severity: 'medium',
+        line: 3,
+        column: 1,
+        match: 'PASSWO...alue',
+      },
+    ])
   })
 })

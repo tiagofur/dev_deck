@@ -135,6 +135,64 @@ export function testRegex(pattern: string, flags: string, sample: string): Regex
   }
 }
 
+export interface SecretFinding {
+  type: string
+  severity: 'high' | 'medium'
+  line: number
+  column: number
+  match: string
+}
+
+const SECRET_PATTERNS: {
+  type: string
+  severity: SecretFinding['severity']
+  pattern: RegExp
+}[] = [
+  { type: 'GitHub token', severity: 'high', pattern: /\bgh[pousr]_[A-Za-z0-9_]{20,}\b/g },
+  { type: 'OpenAI API key', severity: 'high', pattern: /\bsk-[A-Za-z0-9_-]{20,}\b/g },
+  { type: 'AWS access key', severity: 'high', pattern: /\bAKIA[0-9A-Z]{16}\b/g },
+  { type: 'Slack token', severity: 'high', pattern: /\bxox[baprs]-[A-Za-z0-9-]{20,}\b/g },
+  { type: 'Private key block', severity: 'high', pattern: /-----BEGIN [A-Z ]*PRIVATE KEY-----/g },
+  {
+    type: 'Likely secret assignment',
+    severity: 'medium',
+    pattern: /\b(?:api[_-]?key|secret|token|password|passwd|pwd)\b\s*[:=]\s*["']?[^"'\s]{12,}/gi,
+  },
+]
+
+export function scanSecrets(input: string): SecretFinding[] {
+  const findings: SecretFinding[] = []
+  for (const { type, severity, pattern } of SECRET_PATTERNS) {
+    for (const match of input.matchAll(pattern)) {
+      const index = match.index ?? 0
+      const { line, column } = getLineColumn(input, index)
+      findings.push({
+        type,
+        severity,
+        line,
+        column,
+        match: maskSecret(match[0]),
+      })
+    }
+  }
+
+  return findings.sort((left, right) => left.line - right.line || left.column - right.column)
+}
+
+function getLineColumn(input: string, index: number): { line: number; column: number } {
+  const before = input.slice(0, index)
+  const lines = before.split('\n')
+  return {
+    line: lines.length,
+    column: lines[lines.length - 1].length + 1,
+  }
+}
+
+function maskSecret(value: string): string {
+  if (value.length <= 12) return '*'.repeat(value.length)
+  return `${value.slice(0, 6)}...${value.slice(-4)}`
+}
+
 export function parseHeaders(input: string): Record<string, string> {
   const headers: Record<string, string> = {}
   for (const rawLine of input.split('\n')) {

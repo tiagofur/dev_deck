@@ -32,6 +32,75 @@ interface Props {
   onClose: () => void
 }
 
+const workbenchToolShortcuts = [
+  {
+    id: 'json',
+    title: 'Open JSON formatter',
+    subtitle: 'Format and validate JSON locally.',
+    keywords: ['json', 'format', 'formatter', 'validate', 'payload'],
+  },
+  {
+    id: 'jwt',
+    title: 'Open JWT decoder',
+    subtitle: 'Decode JWT header and payload locally.',
+    keywords: ['jwt', 'token', 'decode', 'auth'],
+  },
+  {
+    id: 'base64',
+    title: 'Open Base64 tool',
+    subtitle: 'Encode or decode UTF-8 text.',
+    keywords: ['base64', 'encode', 'decode'],
+  },
+  {
+    id: 'url',
+    title: 'Open URL encoder',
+    subtitle: 'Encode or decode URL components.',
+    keywords: ['url', 'uri', 'encode', 'decode'],
+  },
+  {
+    id: 'uuid',
+    title: 'Open UUID generator',
+    subtitle: 'Generate UUID v4 values.',
+    keywords: ['uuid', 'guid', 'id', 'generate'],
+  },
+  {
+    id: 'timestamp',
+    title: 'Open timestamp converter',
+    subtitle: 'Convert UNIX timestamps and ISO dates.',
+    keywords: ['time', 'timestamp', 'unix', 'date'],
+  },
+  {
+    id: 'hash',
+    title: 'Open hash generator',
+    subtitle: 'Generate SHA-1 and SHA-256 digests locally.',
+    keywords: ['hash', 'sha', 'sha256', 'digest'],
+  },
+  {
+    id: 'regex',
+    title: 'Open regex tester',
+    subtitle: 'Test expressions against sample text.',
+    keywords: ['regex', 'regexp', 'pattern', 'match'],
+  },
+  {
+    id: 'secrets',
+    title: 'Open secret scanner',
+    subtitle: 'Find leaked tokens before saving or sharing.',
+    keywords: ['secret', 'secrets', 'token', 'password', 'key', 'env'],
+  },
+  {
+    id: 'api',
+    title: 'Open API tester',
+    subtitle: 'Send HTTP requests, import cURL, and save configs.',
+    keywords: ['api', 'http', 'request', 'curl', 'fetch'],
+  },
+  {
+    id: 'project',
+    title: 'Open project context',
+    subtitle: 'Find related vault context for a repo.',
+    keywords: ['project', 'repo', 'context', 'git'],
+  },
+]
+
 export function UnifiedCommandPalette({ open, onClose }: Props) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -139,7 +208,31 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
     },
   ]
 
-  const results = searchResults.map((r) => ({
+  const toolResults = workbenchToolShortcuts
+    .filter((tool) => {
+      const normalized = query.trim().toLowerCase()
+      if (!normalized) return false
+      return [tool.title, tool.subtitle, ...tool.keywords].some((value) =>
+        value.toLowerCase().includes(normalized)
+      )
+    })
+    .slice(0, 4)
+    .map((tool) => ({
+      id: `workbench-${tool.id}`,
+      type: 'tool',
+      title: tool.title,
+      subtitle: tool.subtitle,
+      actionLabel: 'Open',
+      icon: <Wrench size={14} />,
+      onSelect: () => {
+        onClose()
+        navigate(`/workbench?tool=${tool.id}`)
+      },
+    }))
+
+  const results = [
+    ...toolResults,
+    ...searchResults.map((r) => ({
     id: `${r.type}-${r.id}`,
     type: r.type,
     title: r.title,
@@ -154,7 +247,8 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
       else if (r.type === 'repo') navigate(`/repo/${r.id}`)
       else if (r.type === 'cheatsheet') navigate(`/cheatsheets/${r.id}`)
     },
-  }))
+    })),
+  ]
 
   return (
     <CommandPalette

@@ -82,6 +82,7 @@ Primera tanda recomendada:
 - UNIX timestamp converter.
 - SHA-256 / SHA-1 hash generator.
 - Regex tester simple.
+- Secret scanner local para `.env`, logs, comandos y snippets antes de guardarlos o compartirlos.
 
 Reglas:
 
@@ -99,6 +100,7 @@ Estado de implementación:
 - UUID y timestamp tools: implementado.
 - SHA-1 / SHA-256: implementado.
 - Regex tester simple: implementado.
+- Secret scanner local con valores enmascarados: implementado.
 - Copiar resultado y guardar output como item: implementado.
 
 ### 4.2 Command Palette
@@ -118,6 +120,13 @@ Después:
 - Atajo global en Desktop.
 - Acciones rápidas por item.
 - Resultados project-aware según el repo/carpeta actual.
+
+Estado de implementación:
+
+- La paleta abre el Workbench desde cualquier app shell.
+- La paleta abre tools específicas con deep links (`/workbench?tool=...`) cuando la búsqueda coincide con JSON, JWT, API, `curl`, secrets, regex, etc.
+- Puede crear una nota rápida desde el input actual usando capture.
+- Puede copiar resultados de comandos directamente cuando el resultado trae `extra`.
 
 ### 4.3 Quick API Tester
 
@@ -296,6 +305,7 @@ Objetivo: ampliar poder sin romper confianza.
 
 - Clipboard/snippet expander.
 - OCR screenshot to snippet.
+- Secret scanner local antes de guardar/compartir texto sensible. **Estado:** implementado en Workbench.
 - Integraciones con gestores de secretos.
 - Atajo global del sistema.
 

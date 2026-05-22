@@ -8,8 +8,17 @@ const mocks = vi.hoisted(() => ({
   useGlobalSearch: vi.fn(),
   useAsk: vi.fn(),
   useCapture: vi.fn(),
+  navigate: vi.fn(),
   showToast: vi.fn(),
 }))
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
+  return {
+    ...actual,
+    useNavigate: () => mocks.navigate,
+  }
+})
 
 vi.mock('@devdeck/api-client', () => ({
   useGlobalSearch: mocks.useGlobalSearch,
@@ -123,5 +132,16 @@ describe('<UnifiedCommandPalette>', () => {
       expect(mocks.showToast).toHaveBeenCalledWith('Copied to clipboard', 'success')
       expect(onClose).toHaveBeenCalled()
     })
+  })
+
+  it('opens matching workbench tools directly from the palette', async () => {
+    const onClose = vi.fn()
+    renderPalette(true, onClose)
+
+    fireEvent.change(screen.getByPlaceholderText(/Search or run a command/), { target: { value: 'secret' } })
+    fireEvent.click(screen.getByText('Open secret scanner'))
+
+    expect(onClose).toHaveBeenCalled()
+    expect(mocks.navigate).toHaveBeenCalledWith('/workbench?tool=secrets')
   })
 })

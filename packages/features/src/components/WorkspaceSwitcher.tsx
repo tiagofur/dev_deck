@@ -7,8 +7,10 @@ import {
   setPreferences 
 } from '@devdeck/api-client'
 import { useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from '@devdeck/i18n'
 
 export function WorkspaceSwitcher() {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const { data: orgsRes, isLoading } = useUserOrgs()
   const createOrg = useCreateOrg()
@@ -37,7 +39,7 @@ export function WorkspaceSwitcher() {
   }
 
   async function handleCreate() {
-    const name = window.prompt('Nombre del nuevo equipo:')
+    const name = window.prompt(t('workspace.team_name_prompt'))
     if (!name) return
     try {
       const newOrg = await createOrg.mutateAsync(name)
@@ -61,7 +63,7 @@ export function WorkspaceSwitcher() {
           <Globe size={16} strokeWidth={3} className="text-accent-cyan" />
         )}
         <span className="font-display font-black uppercase text-[10px] tracking-widest truncate max-w-[100px]">
-          {activeOrg ? activeOrg.name : 'Personal'}
+          {activeOrg ? activeOrg.name : t('workspace.personal')}
         </span>
         <ChevronDown size={14} strokeWidth={3} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
@@ -69,7 +71,7 @@ export function WorkspaceSwitcher() {
       {open && (
         <div className="absolute left-0 mt-3 w-56 bg-bg-card border-3 border-ink shadow-hard-lg z-[100] animate-in fade-in slide-in-from-top-2 duration-150">
           <div className="p-2 border-b-2 border-ink bg-bg-elevated font-mono text-[9px] uppercase font-black text-ink-soft">
-            Workspaces
+            {t('workspace.workspaces_title')}
           </div>
           
           <div className="max-h-60 overflow-y-auto no-scrollbar">
@@ -77,7 +79,7 @@ export function WorkspaceSwitcher() {
               active={activeOrgId === null} 
               onClick={() => handleSwitch(null)} 
               icon={<Globe size={14} />} 
-              label="Vault Personal" 
+              label={t('workspace.personal_vault')}
             />
             
             {orgs.map(org => (
@@ -97,7 +99,7 @@ export function WorkspaceSwitcher() {
             className="w-full flex items-center gap-2 p-3 border-t-2 border-ink hover:bg-accent-lime/10 transition-colors text-left"
           >
             <Plus size={14} strokeWidth={3} />
-            <span className="font-display font-black uppercase text-[10px] tracking-widest">Crear Equipo</span>
+            <span className="font-display font-black uppercase text-[10px] tracking-widest">{t('workspace.create_team')}</span>
           </button>
         </div>
       )}
