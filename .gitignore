@@ -18,6 +18,7 @@ pnpm-debug.log*
 
 # Root/node workspaces
 node_modules/
+.pnpm-store/
 
 # Go backend
 backend/bin/
