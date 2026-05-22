@@ -127,7 +127,8 @@
   "sync": {
     "offline": "Offline",
     "pending_count": "{{count}} pending",
-    "synced": "Synced"
+    "synced": "Synced",
+    "cloud_mode": "Cloud Mode"
   },
   "profile": {
     "title": "My Profile",

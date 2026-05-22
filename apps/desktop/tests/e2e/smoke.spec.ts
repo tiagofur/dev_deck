@@ -121,6 +121,8 @@ test.describe('DevDeck — desktop renderer E2E', () => {
   })
 
   test('5. command palette: Ctrl+K opens global search command palette', async ({ page }) => {
+    // Wait for page to be fully loaded and hydrated
+    await expect(page.getByLabel('DevDeck').first()).toBeVisible({ timeout: 15_000 })
     // Trigger the global shortcut
     await page.keyboard.press('Control+k')
     // Command palette action should be visible.
