@@ -185,4 +185,16 @@ describe('<UnifiedCommandPalette>', () => {
     renderPalette()
     expect(screen.queryByText(/Ask AI/i)).not.toBeInTheDocument()
   })
+
+  it('hides Ask AI action if AI provider is heuristic', () => {
+    mocks.useSystemConfig.mockReturnValue({ data: { ai_provider: 'heuristic', sync_enabled: true }, isLoading: false })
+    renderPalette()
+    expect(screen.queryByText(/Ask AI/i)).not.toBeInTheDocument()
+  })
+
+  it('hides Ask AI action if AI provider is local', () => {
+    mocks.useSystemConfig.mockReturnValue({ data: { ai_provider: 'local', sync_enabled: true }, isLoading: false })
+    renderPalette()
+    expect(screen.queryByText(/Ask AI/i)).not.toBeInTheDocument()
+  })
 })

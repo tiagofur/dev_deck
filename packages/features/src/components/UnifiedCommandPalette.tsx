@@ -126,7 +126,7 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
   const [resultFilter, setResultFilter] = React.useState<ResultFilter>('all')
   const capture = useCapture()
   const { data: systemConfig } = useSystemConfig()
-  const isAiDisabled = systemConfig?.ai_provider === 'disabled'
+  const isAiDisabled = !systemConfig?.ai_provider || ['disabled', 'heuristic', 'local'].includes(systemConfig.ai_provider)
   
   const { data: searchResults = [], isLoading: searchLoading } = useGlobalSearch(query)
 

@@ -15,7 +15,7 @@ export function GlobalSearchModal({ open, onClose }: Props) {
   const [query, setQuery] = useState('')
   const [mode, setMode] = useState<'text' | 'semantic' | 'hybrid'>('text')
   const { data: systemConfig } = useSystemConfig()
-  const isAiDisabled = systemConfig?.ai_provider === 'disabled'
+  const isAiDisabled = !systemConfig?.ai_provider || ['disabled', 'heuristic', 'local'].includes(systemConfig.ai_provider)
   const { data: results = [], isLoading } = useGlobalSearch(query, isAiDisabled ? 'text' : mode)
   const navigate = useNavigate()
   const inputRef = useRef<HTMLInputElement>(null)

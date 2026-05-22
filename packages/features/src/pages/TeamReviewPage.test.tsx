@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   useItems: vi.fn(),
   useUpdateItem: vi.fn(),
+  usePreferences: vi.fn(),
 }))
 
 vi.mock('react-router-dom', () => ({
@@ -25,6 +26,7 @@ vi.mock('@devdeck/api-client', async () => {
     ...actual,
     useItems: mocks.useItems,
     useUpdateItem: mocks.useUpdateItem,
+    usePreferences: mocks.usePreferences,
   }
 })
 
@@ -71,6 +73,8 @@ describe('<TeamReviewPage>', () => {
   beforeEach(() => {
     mocks.navigate.mockReset()
     mocks.useItems.mockReset()
+    mocks.usePreferences.mockReset()
+    mocks.usePreferences.mockReturnValue({ activeOrgId: 'org_123' })
     mocks.useUpdateItem.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
   })
 
@@ -100,5 +104,26 @@ describe('<TeamReviewPage>', () => {
     renderPage()
     await user.click(screen.getByRole('heading', { name: 'ripgrep' }))
     expect(mocks.navigate).toHaveBeenCalledWith('/items/item-1')
+  })
+
+  it('renders access denied if there is no active org configured', async () => {
+    const user = userEvent.setup()
+    mocks.usePreferences.mockReturnValue({ activeOrgId: null })
+    mocks.useItems.mockReturnValue({
+      data: { total: 0, items: [] },
+      isLoading: false,
+      error: null,
+    })
+
+    renderPage()
+
+    expect(screen.getByText('Access Denied')).toBeInTheDocument()
+    expect(screen.getByText('The Team Feed is only available within an organization.')).toBeInTheDocument()
+
+    const backButton = screen.getByRole('button', { name: 'Back to Personal Vault' })
+    expect(backButton).toBeInTheDocument()
+    
+    await user.click(backButton)
+    expect(mocks.navigate).toHaveBeenCalledWith('/')
   })
 })

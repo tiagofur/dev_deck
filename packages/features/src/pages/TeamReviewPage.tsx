@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Box, CheckCircle2, Users } from 'lucide-react'
 import { Button } from '@devdeck/ui'
-import { useItems } from '@devdeck/api-client'
+import { useItems, usePreferences } from '@devdeck/api-client'
 import { ItemCard } from '../components/ItemCard'
 import { detailPathForItem } from '../utils/itemRoutes'
 import { AppShell } from '../components/AppShell'
@@ -10,12 +10,23 @@ import { useTranslation } from '@devdeck/i18n'
 export function TeamReviewPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { activeOrgId } = usePreferences()
   const { data, isLoading, error } = useItems({
     tag: 'team-review',
     limit: 200,
     sort: 'updated_desc',
   })
   const items = data?.items ?? []
+
+  if (!activeOrgId) {
+    return (
+      <AppShell contentClassName="flex-1 p-12 text-center flex flex-col items-center justify-center gap-4 bg-bg-primary">
+        <h2 className="font-display font-black text-2xl uppercase">{t('feed.access_denied')}</h2>
+        <p className="text-ink-soft font-mono text-sm">{t('feed.only_org_desc')}</p>
+        <Button type="button" onClick={() => navigate('/')}>{t('feed.back_to_personal')}</Button>
+      </AppShell>
+    )
+  }
 
   return (
     <AppShell contentClassName="flex-1 flex flex-col overflow-hidden">
