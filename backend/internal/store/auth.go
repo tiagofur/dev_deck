@@ -139,7 +139,7 @@ func (s *Store) ListUsersAdmin(ctx context.Context) ([]map[string]any, error) {
 	return out, nil
 }
 
-func (s *Store) UpdateUser(ctx context.Context, userID uuid.UUID, bio *string, username *string, stackTags []string, website *string, location *string, githubURL *string) (*auth.User, error) {
+func (s *Store) UpdateUser(ctx context.Context, userID uuid.UUID, bio *string, username *string, stackTags []string, website *string, location *string, githubURL *string, avatarURL *string) (*auth.User, error) {
 	row := s.Writer().QueryRow(ctx, `
 		UPDATE users SET
 			bio = COALESCE($2, bio),
@@ -148,9 +148,10 @@ func (s *Store) UpdateUser(ctx context.Context, userID uuid.UUID, bio *string, u
 			website = COALESCE($5, website),
 			location = COALESCE($6, location),
 			github_url = COALESCE($7, github_url),
+			avatar_url = COALESCE($8, avatar_url),
 			updated_at = NOW()
 		WHERE id = $1
-		RETURNING `+userColumns, userID, bio, username, stackTags, website, location, githubURL)
+		RETURNING `+userColumns, userID, bio, username, stackTags, website, location, githubURL, avatarURL)
 	return scanUser(row)
 }
 

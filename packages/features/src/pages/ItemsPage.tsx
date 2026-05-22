@@ -95,8 +95,8 @@ export function ItemsPage() {
       contentClassName="flex-1 flex flex-col overflow-hidden"
     >
 
-      <nav className="border-b-3 border-ink px-6 py-3 overflow-x-auto">
-        <div className="flex gap-2">
+      <nav className="min-w-0 border-b-3 border-ink px-4 py-3 sm:px-6">
+        <div className="flex min-w-0 gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible md:pb-0">
           {TYPE_FILTERS.map((f) => {
             const active = f.key === type
             const count = f.key === 'all' ? items.length : countsByType[f.key] ?? 0
@@ -123,8 +123,8 @@ export function ItemsPage() {
         </div>
 
         {/* Stack filters — inline pills */}
-        <div className="flex gap-2 mt-3 pt-3 border-t border-ink/30">
-          <span className="text-xs font-mono text-ink-soft uppercase tracking-wide py-1">
+        <div className="mt-3 flex min-w-0 gap-2 overflow-x-auto border-t border-ink/30 pt-3 pb-1 md:flex-wrap md:overflow-visible md:pb-0">
+          <span className="shrink-0 py-1 font-mono text-xs uppercase tracking-wide text-ink-soft">
             Stack:
           </span>
           {STACKS.map((s) => {
@@ -159,8 +159,8 @@ export function ItemsPage() {
           )}
         </div>
 
-        <div className="flex gap-2 mt-3 pt-3 border-t border-ink/30">
-          <span className="text-xs font-mono text-ink-soft uppercase tracking-wide py-1">
+        <div className="mt-3 flex min-w-0 gap-2 overflow-x-auto border-t border-ink/30 pt-3 pb-1 md:flex-wrap md:overflow-visible md:pb-0">
+          <span className="shrink-0 py-1 font-mono text-xs uppercase tracking-wide text-ink-soft">
             {t('items.workflow_filter')}:
           </span>
           <button
@@ -180,7 +180,7 @@ export function ItemsPage() {
         </div>
       </nav>
 
-      <main className="flex-1 overflow-y-auto p-6">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6">
         {isLoading && <p className="font-mono text-ink-soft">{t('common.loading')}</p>}
 
         {error && (

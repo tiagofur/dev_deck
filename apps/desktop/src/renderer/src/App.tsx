@@ -16,6 +16,7 @@ import {
   AdminDashboardPage,
   PublicDeckPage,
   PublicProfilePage,
+  ProfilePage,
   ShortcutsModal,
   TeamReviewPage,
   TeamFeedPage,
@@ -258,6 +259,12 @@ function AnimatedRoutes() {
             path="/discovery"
             element={
               <AuthGuard>{withTransition(<DiscoveryPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <AuthGuard>{withTransition(<ProfilePage />)}</AuthGuard>
             }
           />
           <Route

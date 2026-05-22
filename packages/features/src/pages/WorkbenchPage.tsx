@@ -75,7 +75,7 @@ export function WorkbenchPage() {
 
   return (
     <AppShell contentClassName="flex-1 overflow-auto">
-      <main className="min-h-full bg-bg-primary p-6">
+      <main className="min-h-full overflow-x-hidden bg-bg-primary p-4 sm:p-6">
         <div className="mx-auto flex max-w-7xl flex-col gap-6">
           <header className="flex flex-col gap-3 border-b-3 border-ink pb-5 md:flex-row md:items-end md:justify-between">
             <div>
@@ -93,9 +93,9 @@ export function WorkbenchPage() {
             </div>
           </header>
 
-          <div className="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
-            <aside className="border-3 border-ink bg-bg-card p-3 shadow-hard h-fit">
-              <div className="grid gap-2">
+          <div className="grid min-w-0 gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
+            <aside className="border-3 border-ink bg-bg-card p-3 shadow-hard lg:sticky lg:top-5 lg:max-h-[calc(100vh-12rem)] lg:overflow-y-auto">
+              <div className="flex gap-2 overflow-x-auto pb-1 lg:grid lg:overflow-visible lg:pb-0">
                 {tools.map((tool) => {
                   const Icon = tool.icon
                   const active = activeTool === tool.id
@@ -104,7 +104,7 @@ export function WorkbenchPage() {
                       key={tool.id}
                       type="button"
                       onClick={() => setActiveTool(tool.id)}
-                      className={`flex items-start gap-3 border-2 border-ink p-3 text-left transition-all ${
+                      className={`flex min-w-[11rem] items-start gap-3 border-2 border-ink p-3 text-left transition-all lg:min-w-0 ${
                         active
                           ? 'bg-accent-yellow shadow-hard-sm'
                           : 'bg-bg-elevated hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-sm'
@@ -125,7 +125,7 @@ export function WorkbenchPage() {
               </div>
             </aside>
 
-            <section className="min-w-0 border-3 border-ink bg-bg-card shadow-hard">
+            <section className="min-w-0 overflow-hidden border-3 border-ink bg-bg-card shadow-hard">
               {activeTool === 'json' && <JsonTool />}
               {activeTool === 'jwt' && <JwtTool />}
               {activeTool === 'base64' && <TransformTool tool="base64" />}
