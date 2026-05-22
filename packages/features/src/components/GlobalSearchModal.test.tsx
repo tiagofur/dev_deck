@@ -59,7 +59,7 @@ describe('<GlobalSearchModal>', () => {
     mocks.useSystemConfig.mockReturnValue({ data: { ai_provider: 'disabled', sync_enabled: true }, isLoading: false })
     renderModal()
     expect(screen.queryByText('Text')).not.toBeInTheDocument()
-    expect(screen.queryByText('AI Semantic')).not.toBeInTheDocument()
+    expect(screen.queryByText('AI (Semantic)')).not.toBeInTheDocument()
     expect(screen.queryByText('Hybrid')).not.toBeInTheDocument()
   })
 
@@ -67,7 +67,7 @@ describe('<GlobalSearchModal>', () => {
     mocks.useSystemConfig.mockReturnValue({ data: { ai_provider: 'heuristic', sync_enabled: true }, isLoading: false })
     renderModal()
     expect(screen.queryByText('Text')).not.toBeInTheDocument()
-    expect(screen.queryByText('AI Semantic')).not.toBeInTheDocument()
+    expect(screen.queryByText('AI (Semantic)')).not.toBeInTheDocument()
     expect(screen.queryByText('Hybrid')).not.toBeInTheDocument()
   })
 
@@ -75,7 +75,7 @@ describe('<GlobalSearchModal>', () => {
     mocks.useSystemConfig.mockReturnValue({ data: { ai_provider: 'local', sync_enabled: true }, isLoading: false })
     renderModal()
     expect(screen.queryByText('Text')).not.toBeInTheDocument()
-    expect(screen.queryByText('AI Semantic')).not.toBeInTheDocument()
+    expect(screen.queryByText('AI (Semantic)')).not.toBeInTheDocument()
     expect(screen.queryByText('Hybrid')).not.toBeInTheDocument()
   })
 })

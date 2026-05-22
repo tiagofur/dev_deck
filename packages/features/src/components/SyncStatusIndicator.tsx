@@ -11,6 +11,10 @@ export function SyncStatusIndicator() {
   const [syncing, setSyncInProgress] = useState(false)
 
   useEffect(() => {
+    if (systemConfig?.sync_enabled === false) {
+      return
+    }
+
     const updateStatus = () => setOnline(navigator.onLine)
     window.addEventListener('online', updateStatus)
     window.addEventListener('offline', updateStatus)
@@ -28,7 +32,7 @@ export function SyncStatusIndicator() {
       window.removeEventListener('offline', updateStatus)
       clearInterval(interval)
     }
-  }, [])
+  }, [systemConfig?.sync_enabled])
 
   const handleSync = async () => {
     setSyncInProgress(true)
