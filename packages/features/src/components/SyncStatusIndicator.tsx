@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Cloud, CloudOff, RefreshCw } from 'lucide-react'
-import { getPendingCount, syncNow } from '@devdeck/api-client'
+import { getPendingCount, syncNow, useSystemConfig } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'
 
 export function SyncStatusIndicator() {
   const { t } = useTranslation()
+  const { data: systemConfig } = useSystemConfig()
   const [pending, setPending] = useState(0)
   const [online, setOnline] = useState(navigator.onLine)
   const [syncing, setSyncInProgress] = useState(false)
@@ -14,10 +15,13 @@ export function SyncStatusIndicator() {
     window.addEventListener('online', updateStatus)
     window.addEventListener('offline', updateStatus)
     
-    const interval = setInterval(async () => {
+    const fetchPending = async () => {
       const count = await getPendingCount()
       setPending(count)
-    }, 2000)
+    }
+
+    void fetchPending()
+    const interval = setInterval(fetchPending, 2000)
 
     return () => {
       window.removeEventListener('online', updateStatus)
@@ -35,6 +39,15 @@ export function SyncStatusIndicator() {
     } finally {
       setSyncInProgress(false)
     }
+  }
+
+  if (systemConfig && !systemConfig.sync_enabled) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-1 bg-accent-cyan border-2 border-ink shadow-hard-sm text-[10px] font-mono uppercase font-bold">
+        <Cloud size={12} strokeWidth={3} />
+        {t('sync.cloud_mode')}
+      </div>
+    )
   }
 
   if (!online) {
