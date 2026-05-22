@@ -117,11 +117,13 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		FrontendURL: cfg.FrontendURL,
 	})
 	scimH := handlers.NewSCIMHandler(st)
+	systemH := handlers.NewSystemConfigHandler(cfg.AIProvider, false)
 
 	r.Route("/api", func(r chi.Router) {
 		// Optional auth for all public API routes
 		r.Use(mw.OptionalTokenAuth(cfg, as, st))
 
+		r.Get("/system/config", systemH.GetConfig)
 		r.Get("/suggestions/commands", suggestionsH.Commands)
 		r.Get("/plugins/featured", pluginsH.ListFeatured)
 		r.Post("/waitlist", invitesH.JoinWaitlist)
