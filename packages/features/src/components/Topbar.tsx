@@ -74,7 +74,7 @@ export function Topbar({
 
   return (
     <header className="relative z-30 border-b-3 border-ink bg-bg-card px-3 py-3 sm:px-4 lg:px-6">
-      <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center xl:gap-5">
+      <div className="grid min-w-0 gap-3 2xl:grid-cols-[auto_minmax(18rem,1fr)_auto] 2xl:items-center">
         <div className="flex min-w-0 items-center gap-3">
           <div className="min-w-0 shrink-0">
             <WorkspaceSwitcher />
@@ -86,137 +86,117 @@ export function Topbar({
           >
             Dev<span className="border-2 border-ink bg-accent-pink px-1.5">Deck</span>
           </h1>
-
-          <div className="relative min-w-0 flex-1 xl:hidden">
-            <Search
-              size={18}
-              strokeWidth={2.5}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
-            />
-            <input
-              id="topbar-search-compact"
-              type="search"
-              placeholder={t('topbar.search_placeholder')}
-              value={query}
-              onChange={(e) => onQueryChange(e.target.value)}
-              className="w-full min-w-0 border-3 border-ink py-2 pl-10 pr-3 font-mono text-sm focus:bg-accent-yellow/20 focus:outline-none"
-            />
-          </div>
         </div>
 
-        <div className="hidden min-w-[16rem] max-w-xl flex-1 xl:block">
-          <div className="relative">
-            <Search
-              size={18}
-              strokeWidth={2.5}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
-            />
-            <input
-              id="topbar-search"
-              type="search"
-              placeholder={t('topbar.search_placeholder')}
-              value={query}
-              onChange={(e) => onQueryChange(e.target.value)}
-              className="w-full border-3 border-ink py-2 pl-10 pr-3 font-mono text-sm focus:bg-accent-yellow/20 focus:outline-none"
-            />
-          </div>
+        <div className="relative min-w-0 2xl:max-w-xl">
+          <Search
+            size={18}
+            strokeWidth={2.5}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
+          />
+          <input
+            id="topbar-search"
+            type="search"
+            placeholder={t('topbar.search_placeholder')}
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+            className="w-full min-w-0 border-3 border-ink py-2 pl-10 pr-3 font-mono text-sm focus:bg-accent-yellow/20 focus:outline-none"
+          />
         </div>
 
-        <div className="flex min-w-0 items-center justify-between gap-3 xl:contents">
-          <nav aria-label="Primary navigation" className="min-w-0 overflow-x-auto pb-1 xl:overflow-visible xl:pb-0">
-            <div className="flex w-max items-center gap-2 xl:w-auto">
-              <TopbarAction
-                label="Search"
-                title={t('topbar.search_tooltip')}
-                icon={Search}
-                onClick={onGlobalSearch}
-                variant="ghost"
-                className="hidden sm:inline-flex"
-              />
-              {primaryNav.map(({ key, ...item }) => (
-                <TopbarAction key={key} {...item} onClick={() => activate({ key, ...item })} />
-              ))}
-              <TopbarAction
-                label="Discover"
-                title={t('topbar.discover_tooltip')}
-                icon={Sparkles}
-                onClick={onDiscovery}
-                variant="accent"
-              />
-              <TopbarAction label={t('topbar.capture_button')} icon={Plus} onClick={onAdd} />
-              <div className="hidden items-center gap-2 min-[1800px]:flex">
-                {secondaryNav.map((item) => (
-                  <TopbarAction
-                    key={item.key}
-                    label={item.label}
-                    title={item.title}
-                    icon={item.icon}
-                    badge={item.badge}
-                    onClick={() => activate(item)}
-                  />
-                ))}
-              </div>
-              {secondaryNav.length > 0 && (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  className="whitespace-nowrap min-[1800px]:hidden"
-                  aria-expanded={menuOpen}
-                  aria-controls="topbar-more-menu"
-                  onClick={() => setMenuOpen((open) => !open)}
-                >
-                  <span className="flex items-center gap-2">
-                    <Menu size={16} strokeWidth={3} />
-                    More
-                    <ChevronDown
-                      size={14}
-                      strokeWidth={3}
-                      className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`}
-                    />
-                  </span>
-                </Button>
-              )}
-            </div>
-          </nav>
+        <div className="flex min-w-0 items-center gap-2 overflow-x-auto pb-1 2xl:justify-end 2xl:overflow-visible 2xl:pb-0">
+          <SyncStatusIndicator />
+          <NotificationCenter />
+          <button
+            type="button"
+            onClick={onSettings}
+            aria-label="Settings"
+            title="Settings"
+            className="shrink-0 border-3 border-ink bg-bg-card p-2 shadow-hard transition-all duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm"
+          >
+            <SettingsIcon size={16} strokeWidth={3} />
+          </button>
 
-          <div className="flex shrink-0 items-center gap-2">
-            <SyncStatusIndicator />
-            <NotificationCenter />
+          {user && (
             <button
               type="button"
-              onClick={onSettings}
-              aria-label="Settings"
-              title="Settings"
-              className="shrink-0 border-3 border-ink bg-bg-card p-2 shadow-hard transition-all duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm"
+              onClick={() => navigate('/profile')}
+              aria-label={t('topbar.profile_tooltip')}
+              title={t('topbar.profile_tooltip')}
+              className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center overflow-hidden border-3 border-ink bg-bg-card shadow-hard transition-all duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm"
             >
-              <SettingsIcon size={16} strokeWidth={3} />
+              <img
+                src={user.avatar_url}
+                alt={user.display_name || user.username || 'Avatar'}
+                className="h-full w-full object-cover"
+              />
             </button>
-
-            {user && (
-              <button
-                type="button"
-                onClick={() => navigate('/profile')}
-                aria-label={t('topbar.profile_tooltip')}
-                title={t('topbar.profile_tooltip')}
-                className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center overflow-hidden border-3 border-ink bg-bg-card shadow-hard transition-all duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm"
-              >
-                <img
-                  src={user.avatar_url}
-                  alt={user.display_name || user.username || 'Avatar'}
-                  className="h-full w-full object-cover"
-                />
-              </button>
-            )}
-          </div>
+          )}
         </div>
       </div>
+
+      <nav aria-label="Primary navigation" className="mt-3 min-w-0 overflow-x-auto pb-1">
+        <div className="flex w-max items-center gap-2">
+          <TopbarAction
+            label="Search"
+            title={t('topbar.search_tooltip')}
+            icon={Search}
+            onClick={onGlobalSearch}
+            variant="ghost"
+            className="hidden sm:inline-flex"
+          />
+          {primaryNav.map(({ key, ...item }) => (
+            <TopbarAction key={key} {...item} onClick={() => activate({ key, ...item })} />
+          ))}
+          <TopbarAction
+            label="Discover"
+            title={t('topbar.discover_tooltip')}
+            icon={Sparkles}
+            onClick={onDiscovery}
+            variant="accent"
+          />
+          <TopbarAction label={t('topbar.capture_button')} icon={Plus} onClick={onAdd} />
+          <div className="hidden items-center gap-2 min-[1800px]:flex">
+            {secondaryNav.map((item) => (
+              <TopbarAction
+                key={item.key}
+                label={item.label}
+                title={item.title}
+                icon={item.icon}
+                badge={item.badge}
+                onClick={() => activate(item)}
+              />
+            ))}
+          </div>
+          {secondaryNav.length > 0 && (
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              className="whitespace-nowrap min-[1800px]:hidden"
+              aria-expanded={menuOpen}
+              aria-controls="topbar-more-menu"
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              <span className="flex items-center gap-2">
+                <Menu size={16} strokeWidth={3} />
+                More
+                <ChevronDown
+                  size={14}
+                  strokeWidth={3}
+                  className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`}
+                />
+              </span>
+            </Button>
+          )}
+        </div>
+      </nav>
 
       {menuOpen && secondaryNav.length > 0 && (
         <nav
           id="topbar-more-menu"
           aria-label="More navigation"
-          className="absolute left-3 right-3 top-[calc(100%-0.25rem)] grid gap-2 border-3 border-ink bg-bg-card p-3 shadow-hard xl:left-auto xl:right-6 xl:w-80 min-[1800px]:hidden"
+          className="absolute left-3 right-3 top-[calc(100%-0.25rem)] grid gap-2 border-3 border-ink bg-bg-card p-3 shadow-hard sm:left-auto sm:right-6 sm:w-80 min-[1800px]:hidden"
         >
           {secondaryNav.map((item) => (
             <TopbarAction

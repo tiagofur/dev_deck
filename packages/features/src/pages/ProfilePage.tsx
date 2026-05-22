@@ -18,15 +18,18 @@ import {
   EyeOff,
   Briefcase,
   History,
-  Terminal
+  Terminal,
+  LogOut
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import {
   useMe,
   useUpdateMe,
+  useUploadAvatar,
   useDecks,
   useItems,
-  useStats
+  useStats,
+  logoutCurrentSession
 } from '@devdeck/api-client'
 import { Button, showToast } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
@@ -41,10 +44,21 @@ export function ProfilePage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { data: user, isLoading: loadingUser } = useMe()
+
+  const handleLogout = async () => {
+    try {
+      await logoutCurrentSession()
+      showToast(t('common.logout_msg'))
+      navigate('/login')
+    } catch (err) {
+      showToast((err as Error).message || t('common.error'), 'error')
+    }
+  }
   const { data: decks = [], isLoading: loadingDecks } = useDecks()
   const { data: itemsRes } = useItems({ limit: 10 })
   const { data: stats } = useStats()
   const updateMe = useUpdateMe()
+  const uploadAvatar = useUploadAvatar()
 
   // Edit Modal State
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -56,6 +70,83 @@ export function ProfilePage() {
   const [stackTags, setStackTags] = useState<string[]>([])
   const [newTag, setNewTag] = useState('')
 
+  // Crop Modal and Avatar State
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null)
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null)
+
+  const triggerFileSelect = () => {
+    document.getElementById('avatar-file-input')?.click()
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      showToast(t('profile.invalid_image_type', 'El archivo no es una imagen válida'), 'error')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showToast(t('profile.image_too_large', 'La imagen supera el límite de 5MB'), 'error')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setCropImageSrc(reader.result)
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleCropSave = async (blob: Blob) => {
+    try {
+      const formData = new FormData()
+      formData.append('avatar', blob, 'avatar.png')
+      
+      const result = await uploadAvatar.mutateAsync(formData)
+      setAvatarPreviewUrl(result.avatar_url)
+      showToast(t('profile.avatar_uploaded', '¡Imagen de perfil subida con éxito!'))
+      setCropImageSrc(null)
+    } catch (err) {
+      showToast((err as Error).message || t('profile.upload_error', 'Error al subir la imagen'), 'error')
+    }
+  }
+
+  const handleGithubSync = async () => {
+    const url = githubUrl.trim()
+    if (!url) {
+      showToast(t('profile.github_url_empty', 'Introduce tu URL de GitHub primero'), 'error')
+      return
+    }
+
+    let parsedUsername = url
+    if (url.includes('github.com/')) {
+      const parts = url.split('github.com/')
+      const pathPart = parts[parts.length - 1]
+      parsedUsername = pathPart.split('/')[0]
+    }
+
+    parsedUsername = parsedUsername.trim()
+    if (!parsedUsername) {
+      showToast(t('profile.github_username_invalid', 'No se pudo obtener el usuario de la URL'), 'error')
+      return
+    }
+
+    const githubAvatarUrl = `https://github.com/${parsedUsername}.png`
+
+    try {
+      await updateMe.mutateAsync({
+        avatar_url: githubAvatarUrl,
+      })
+      setAvatarPreviewUrl(githubAvatarUrl)
+      showToast(t('profile.github_synced', '¡Avatar sincronizado desde GitHub!'))
+    } catch (err) {
+      showToast((err as Error).message || t('profile.github_sync_error', 'Error al sincronizar con GitHub'), 'error')
+    }
+  }
+
   // Open Modal and pre-populate fields
   const openEditModal = () => {
     if (user) {
@@ -65,6 +156,7 @@ export function ProfilePage() {
       setLocation(user.location || '')
       setGithubUrl(user.github_url || '')
       setStackTags(user.stack_tags || [])
+      setAvatarPreviewUrl(user.avatar_url || '')
     }
     setIsModalOpen(true)
   }
@@ -190,10 +282,16 @@ export function ProfilePage() {
             {t('profile.title')}
           </h1>
         </div>
-        <Button onClick={openEditModal} variant="accent" className="flex items-center gap-2">
-          <Edit3 size={16} strokeWidth={3} />
-          {t('profile.edit_profile')}
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button onClick={openEditModal} variant="accent" className="flex items-center gap-2">
+            <Edit3 size={16} strokeWidth={3} />
+            {t('profile.edit_profile')}
+          </Button>
+          <Button onClick={handleLogout} variant="secondary" className="flex items-center gap-2">
+            <LogOut size={16} strokeWidth={3} />
+            {t('settings.logout_button')}
+          </Button>
+        </div>
       </header>
 
       <main className="max-w-5xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
@@ -537,6 +635,48 @@ export function ProfilePage() {
 
             {/* Form Fields */}
             <div className="space-y-6 flex-1">
+              {/* Avatar Editing Area */}
+              <div className="flex flex-col items-center gap-4 border-b-2 border-dashed border-ink/20 pb-6 mb-6">
+                <label className="font-display font-black text-xs uppercase text-ink">
+                  {t('profile.avatar_label', 'Imagen de Perfil')}
+                </label>
+                <div className="flex flex-col sm:flex-row items-center gap-6 w-full">
+                  <div 
+                    onClick={triggerFileSelect}
+                    className="w-24 h-24 border-4 border-ink shadow-hard overflow-hidden bg-accent-yellow rounded-none shrink-0 relative cursor-pointer hover:scale-105 active:scale-95 transition-all group"
+                  >
+                    <img src={avatarPreviewUrl || user.avatar_url} alt="Avatar Preview" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-ink/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-opacity">
+                      <Plus size={20} strokeWidth={3} />
+                      <span className="font-mono text-[9px] uppercase tracking-wider">{t('profile.change_avatar_hover', 'Cambiar')}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 space-y-2 text-center sm:text-left">
+                    <p className="font-mono text-xs text-ink-soft">
+                      {t('profile.avatar_instructions', 'Haz clic en la imagen para subir una foto personalizada, o sincroniza tu avatar desde GitHub.')}
+                    </p>
+                    <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                      <Button onClick={triggerFileSelect} size="sm" variant="secondary">
+                        {t('profile.upload_custom_btn', 'Subir Imagen')}
+                      </Button>
+                      {githubUrl && (
+                        <Button onClick={handleGithubSync} size="sm" variant="accent">
+                          {t('profile.sync_github_btn', 'Sincronizar GitHub')}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {/* Hidden File Input */}
+                <input
+                  type="file"
+                  id="avatar-file-input"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </div>
               {/* Username */}
               <div className="space-y-2">
                 <label className="font-display font-black text-xs uppercase text-ink block">
@@ -649,13 +789,18 @@ export function ProfilePage() {
                   <label className="font-display font-black text-xs uppercase text-ink block flex items-center gap-1.5">
                     <Github size={14} className="text-accent-pink" /> {t('profile.github_label')}
                   </label>
-                  <input
-                    type="text"
-                    placeholder="https://github.com/tux"
-                    value={githubUrl}
-                    onChange={(e) => setGithubUrl(e.target.value)}
-                    className="w-full border-3 border-ink px-3 py-1.5 font-mono text-xs focus:outline-none"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="https://github.com/tux"
+                      value={githubUrl}
+                      onChange={(e) => setGithubUrl(e.target.value)}
+                      className="flex-1 border-3 border-ink px-3 py-1.5 font-mono text-xs focus:outline-none"
+                    />
+                    <Button onClick={handleGithubSync} size="sm" variant="accent">
+                      {t('profile.sync_avatar_btn_small', 'Sincronizar')}
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
@@ -685,6 +830,182 @@ export function ProfilePage() {
           </div>
         </div>
       )}
+
+      {/* CROP MODAL */}
+      {cropImageSrc && (
+        <CropModal
+          imageSrc={cropImageSrc}
+          onClose={() => setCropImageSrc(null)}
+          onCrop={handleCropSave}
+          isSubmitting={uploadAvatar.isPending}
+        />
+      )}
+    </div>
+  )
+}
+
+interface CropModalProps {
+  imageSrc: string
+  onClose: () => void
+  onCrop: (blob: Blob) => void
+  isSubmitting: boolean
+}
+
+export function CropModal({ imageSrc, onClose, onCrop, isSubmitting }: CropModalProps) {
+  const [zoom, setZoom] = useState(1)
+  const [offset, setOffset] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const canvasRef = React.useRef<HTMLCanvasElement>(null)
+  const imageRef = React.useRef<HTMLImageElement | null>(null)
+
+  // Load image
+  React.useEffect(() => {
+    const img = new Image()
+    img.src = imageSrc
+    img.onload = () => {
+      imageRef.current = img
+      setZoom(1)
+      setOffset({ x: 0, y: 0 })
+      draw()
+    }
+  }, [imageSrc])
+
+  // Draw on canvas whenever zoom, offset, or image changes
+  const draw = () => {
+    const canvas = canvasRef.current
+    const img = imageRef.current
+    if (!canvas || !img) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    // Brutalist styling light gray bg
+    ctx.fillStyle = '#f3f4f6'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    ctx.save()
+    ctx.translate(canvas.width / 2, canvas.height / 2)
+    ctx.scale(zoom, zoom)
+    ctx.translate(offset.x, offset.y)
+
+    const imgRatio = img.width / img.height
+    let drawWidth = canvas.width
+    let drawHeight = canvas.height
+
+    if (imgRatio > 1) {
+      drawHeight = canvas.height
+      drawWidth = canvas.height * imgRatio
+    } else {
+      drawWidth = canvas.width
+      drawHeight = canvas.width / imgRatio
+    }
+
+    ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight)
+    ctx.restore()
+
+    // Draw solid brutalist crop border
+    ctx.strokeStyle = '#000000'
+    ctx.lineWidth = 3
+    ctx.strokeRect(0, 0, canvas.width, canvas.height)
+  }
+
+  React.useEffect(() => {
+    draw()
+  }, [zoom, offset])
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    setIsDragging(true)
+    setDragStart({ x: e.clientX - offset.x * zoom, y: e.clientY - offset.y * zoom })
+  }
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDragging) return
+    const dx = (e.clientX - dragStart.x) / zoom
+    const dy = (e.clientY - dragStart.y) / zoom
+    setOffset({ x: dx, y: dy })
+  }
+
+  const handleMouseUpOrLeave = () => {
+    setIsDragging(false)
+  }
+
+  const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
+    e.preventDefault()
+    const zoomFactor = 0.05
+    const nextZoom = e.deltaY < 0 ? Math.min(zoom + zoomFactor, 4) : Math.max(zoom - zoomFactor, 0.5)
+    setZoom(nextZoom)
+  }
+
+  const handleConfirm = () => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    canvas.toBlob((blob) => {
+      if (blob) {
+        onCrop(blob)
+      }
+    }, 'image/png')
+  }
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-ink/80 backdrop-blur-sm" />
+
+      <div className="bg-bg-card border-4 border-ink p-6 max-w-md w-full shadow-hard relative z-10 flex flex-col items-center">
+        <h3 className="font-display font-black text-xl uppercase mb-4 w-full text-left border-b-3 border-ink pb-2">
+          ✂️ Recortar Imagen
+        </h3>
+
+        <div className="border-3 border-ink shadow-hard overflow-hidden bg-bg-primary relative cursor-move">
+          <canvas
+            ref={canvasRef}
+            width={300}
+            height={300}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUpOrLeave}
+            onMouseLeave={handleMouseUpOrLeave}
+            onWheel={handleWheel}
+            className="block select-none touch-none"
+          />
+        </div>
+
+        <p className="font-mono text-[10px] text-ink-soft mt-3 text-center">
+          Arrastra para mover la foto · Usa la rueda o el control para hacer zoom
+        </p>
+
+        <div className="w-full mt-4 flex items-center gap-3">
+          <span className="font-mono text-xs uppercase font-bold">Zoom:</span>
+          <input
+            type="range"
+            min="0.5"
+            max="4"
+            step="0.01"
+            value={zoom}
+            onChange={(e) => setZoom(parseFloat(e.target.value))}
+            className="flex-1 accent-ink h-2 bg-bg-primary border-2 border-ink rounded-none cursor-pointer"
+          />
+          <span className="font-mono text-xs font-bold w-8 text-right">{Math.round(zoom * 100)}%</span>
+        </div>
+
+        <div className="flex justify-end gap-3 w-full border-t-3 border-ink pt-4 mt-6">
+          <button
+            onClick={onClose}
+            className="border-3 border-ink px-4 py-2 font-display font-bold uppercase bg-white text-ink hover:-translate-y-0.5 hover:shadow-hard-sm active:translate-y-0 active:shadow-none transition-all cursor-pointer"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleConfirm}
+            disabled={isSubmitting}
+            className="border-3 border-ink px-4 py-2 font-display font-bold uppercase bg-accent-pink text-white hover:-translate-y-0.5 hover:shadow-hard-sm active:translate-y-0 active:shadow-none transition-all cursor-pointer flex items-center gap-2"
+          >
+            {isSubmitting ? 'Subiendo...' : 'Aceptar'}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

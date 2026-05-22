@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -395,13 +398,14 @@ func (h *AuthHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
 		Website   *string  `json:"website"`
 		Location  *string  `json:"location"`
 		GitHubURL *string  `json:"github_url"`
+		AvatarURL *string  `json:"avatar_url"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
 		return
 	}
 
-	user, err := h.store.UpdateUser(r.Context(), userID, req.Bio, req.Username, req.StackTags, req.Website, req.Location, req.GitHubURL)
+	user, err := h.store.UpdateUser(r.Context(), userID, req.Bio, req.Username, req.StackTags, req.Website, req.Location, req.GitHubURL, req.AvatarURL)
 	if err != nil {
 		if errors.Is(err, store.ErrAlreadyExists) {
 			writeError(w, http.StatusConflict, "USERNAME_TAKEN", "username already taken")
@@ -413,6 +417,82 @@ func (h *AuthHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, http.StatusOK, user)
 }
+
+// POST /api/auth/me/avatar
+func (h *AuthHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
+	userID, ok := authctx.UserID(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "not authenticated")
+		return
+	}
+
+	// Limit request size to 5MB
+	r.Body = http.MaxBytesReader(w, r.Body, 5*1024*1024)
+	if err := r.ParseMultipartForm(5 * 1024 * 1024); err != nil {
+		writeError(w, http.StatusBadRequest, "FILE_TOO_LARGE", "file is too large (max 5MB)")
+		return
+	}
+
+	file, _, err := r.FormFile("avatar")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "MISSING_FILE", "missing avatar file field")
+		return
+	}
+	defer file.Close()
+
+	// Read first 512 bytes to validate content type
+	buffer := make([]byte, 512)
+	n, err := file.Read(buffer)
+	if err != nil && n == 0 {
+		writeError(w, http.StatusBadRequest, "INVALID_FILE", "cannot read file")
+		return
+	}
+	contentType := http.DetectContentType(buffer[:n])
+	if !strings.HasPrefix(contentType, "image/") {
+		writeError(w, http.StatusBadRequest, "INVALID_FORMAT", "file is not a valid image")
+		return
+	}
+
+	// Reset file pointer
+	if _, err := file.Seek(0, 0); err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	// Ensure uploads directory exists
+	uploadsDir := "./uploads"
+	if err := os.MkdirAll(uploadsDir, 0755); err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	// Generate filename using userID and timestamp
+	filename := fmt.Sprintf("%s-%d.png", userID, time.Now().Unix())
+	filepath := filepath.Join(uploadsDir, filename)
+
+	out, err := os.Create(filepath)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+	defer out.Close()
+
+	if _, err = io.Copy(out, file); err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	// Update database
+	avatarURL := "/uploads/" + filename
+	_, err = h.store.UpdateUser(r.Context(), userID, nil, nil, nil, nil, nil, nil, &avatarURL)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]string{"avatar_url": avatarURL})
+}
+
 
 // PATCH /api/auth/me/onboarding/complete
 func (h *AuthHandler) CompleteOnboarding(w http.ResponseWriter, r *http.Request) {

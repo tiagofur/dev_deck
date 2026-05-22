@@ -156,6 +156,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				r.Use(mw.TokenAuth(cfg, as, st))
 				r.Get("/me", authH.Me)
 				r.Patch("/me", authH.UpdateMe)
+				r.Post("/me/avatar", authH.UploadAvatar)
 				r.Patch("/me/onboarding/complete", authH.CompleteOnboarding)
 			})
 
@@ -390,6 +391,9 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			ur.Delete("/{id}", scimH.DeleteUser)
 		})
 	})
+
+	// Serve static files from the uploads directory
+	r.Handle("/uploads/*", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
 
 	return r
 }

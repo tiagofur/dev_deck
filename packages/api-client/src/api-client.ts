@@ -65,9 +65,12 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const { activeOrgId } = getPreferences()
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     Authorization: `Bearer ${getBearerToken()}`,
     ...(init.headers as Record<string, string> || {}),
+  }
+
+  if (!(init.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json'
   }
 
   if (activeOrgId) {
@@ -83,6 +86,8 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (res.status === 401 && authMode === 'jwt' && getRefreshToken()) {
     const refreshed = await refreshAccessToken()
     if (refreshed) {
+      // Update authorization header with new token before retrying.
+      headers.Authorization = `Bearer ${getBearerToken()}`
       // Retry the original request with new token.
       const retryRes = await fetch(`${baseUrl}${path}`, {
         ...init,
@@ -123,8 +128,14 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 export const api = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, body?: unknown) =>
-    request<T>(path, { method: 'POST', body: body !== undefined ? JSON.stringify(body) : undefined }),
+    request<T>(path, {
+      method: 'POST',
+      body: body instanceof FormData ? body : (body !== undefined ? JSON.stringify(body) : undefined),
+    }),
   patch: <T>(path: string, body?: unknown) =>
-    request<T>(path, { method: 'PATCH', body: body !== undefined ? JSON.stringify(body) : undefined }),
+    request<T>(path, {
+      method: 'PATCH',
+      body: body instanceof FormData ? body : (body !== undefined ? JSON.stringify(body) : undefined),
+    }),
   del: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 }

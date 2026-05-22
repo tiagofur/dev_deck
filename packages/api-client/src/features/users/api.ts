@@ -58,6 +58,7 @@ export interface UpdateUserInput {
   website?: string
   location?: string
   github_url?: string
+  avatar_url?: string
 }
 
 const USERS_KEY = ['users'] as const
@@ -77,6 +78,20 @@ export function useUpdateMe() {
     mutationFn: (input: UpdateUserInput) => api.patch<User>('/api/auth/me', input),
     onSuccess: (user) => {
       qc.setQueryData([...USERS_KEY, 'me'], user)
+    },
+  })
+}
+
+/** POST /api/auth/me/avatar — upload profile avatar. */
+export function useUploadAvatar() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (formData: FormData) => api.post<{ avatar_url: string }>('/api/auth/me/avatar', formData),
+    onSuccess: (data) => {
+      qc.setQueryData([...USERS_KEY, 'me'], (old: User | undefined) => {
+        if (!old) return old
+        return { ...old, avatar_url: data.avatar_url }
+      })
     },
   })
 }

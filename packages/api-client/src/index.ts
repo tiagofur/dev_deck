@@ -54,6 +54,7 @@ export { useDevices, useDeleteDevice } from './features/sync/api'
 export {
   useMe,
   useUpdateMe,
+  useUploadAvatar,
   usePublicProfile,
   useUserPublicDecks,
   useAdminUsers,
