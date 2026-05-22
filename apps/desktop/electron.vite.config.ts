@@ -2,6 +2,12 @@ import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 
+if (process.env.DEVDECK_E2E === 'true') {
+  process.env.VITE_API_URL = ''
+  process.env.VITE_AUTH_MODE = 'token'
+  process.env.VITE_API_TOKEN = process.env.VITE_API_TOKEN || 'test-api-token'
+}
+
 export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin()],
@@ -21,6 +27,7 @@ export default defineConfig({
   },
   renderer: {
     root: resolve(__dirname, 'src/renderer'),
+    envDir: process.env.VITE_AUTH_MODE === 'token' ? false : undefined,
     plugins: [react()],
     worker: {
       format: 'es',

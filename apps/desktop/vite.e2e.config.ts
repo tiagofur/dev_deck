@@ -2,8 +2,15 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 
+if (process.env.DEVDECK_E2E === 'true') {
+  process.env.VITE_API_URL = ''
+  process.env.VITE_AUTH_MODE = 'token'
+  process.env.VITE_API_TOKEN = process.env.VITE_API_TOKEN || 'test-api-token'
+}
+
 export default defineConfig({
   root: resolve(__dirname, 'src/renderer'),
+  envDir: false,
   plugins: [react()],
   resolve: {
     alias: {

@@ -195,6 +195,7 @@ jobs:
       AUTH_MODE: token
       API_TOKEN: test-api-token
       LOCAL_AUTH_ENABLED: 'true'
+      AI_PROVIDER: ollama
       VITE_API_URL: http://localhost:8080
       VITE_AUTH_MODE: token
       VITE_API_TOKEN: test-api-token
