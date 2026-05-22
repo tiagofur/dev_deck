@@ -10,7 +10,7 @@ if (process.env.DEVDECK_E2E === 'true') {
 
 export default defineConfig({
   root: resolve(__dirname, 'src/renderer'),
-  envDir: false,
+  envDir: resolve(__dirname, 'non-existent'),
   plugins: [react()],
   resolve: {
     alias: {

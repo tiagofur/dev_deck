@@ -27,7 +27,7 @@ export default defineConfig({
   },
   renderer: {
     root: resolve(__dirname, 'src/renderer'),
-    envDir: process.env.VITE_AUTH_MODE === 'token' ? false : undefined,
+    envDir: process.env.VITE_AUTH_MODE === 'token' ? resolve(__dirname, 'non-existent') : undefined,
     plugins: [react()],
     worker: {
       format: 'es',
