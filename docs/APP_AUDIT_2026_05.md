@@ -202,7 +202,7 @@ Apply **progressive disclosure**. Enterprise/social features should be visible O
 - [ ] P2.8 — Add Runbooks entry point in sidebar or Topbar
 - [ ] P2.9 — Navigation audit: ensure all sections are reachable
 - [ ] P2.10 — Verify NotificationCenter actually receives events
-- [ ] **P0.UX — UX Overhaul: redesign navigation and information architecture** (see §7)
+- [x] **P0.UX — UX Overhaul: redesign navigation and information architecture** (see §7) — *Completado e integrado en main vía PR #55*
 
 ---
 
