@@ -522,11 +522,12 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 
 ## Ola 12 — Colaboración Social y Curación Pública
 
-### Fase 41 — Conexión entre Usuarios (Following)
+### Fase 41 — Círculos Colaborativos (Circles) & Conexión (Following)
 
-- Social: Implementación de sistema de "Seguir" (Follow/Following) entre perfiles públicos
-- Feed: Muro de actividad global con los items más recientes guardados por los curadores que seguís
-- Notificaciones: Alertas cuando alguien que seguís publica un nuevo Deck
+- **Círculos Colaborativos:** Compartir con amigos en tiempo real hallazgos de repositorios, comandos útiles de bash, cheatsheets y herramientas del Workbench en grupos cerrados/círculos privados.
+- **Social:** Implementación de sistema de "Seguir" (Follow/Following) entre perfiles públicos.
+- **Feed:** Muro de actividad global con los items más recientes guardados por los curadores que seguís y las actualizaciones de tus círculos.
+- **Notificaciones:** Alertas cuando alguien que seguís publica un nuevo Deck o hay actividad en tus círculos.
 
 ### Fase 42 — Descubrimiento Comunitario y Rankings
 

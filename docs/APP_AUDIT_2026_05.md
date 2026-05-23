@@ -196,7 +196,7 @@ Apply **progressive disclosure**. Enterprise/social features should be visible O
 - [x] P0.2 — SyncStatusIndicator: validate or replace with honest "Cloud only" state
 - [x] P0.3 — Conditional nav: hide Team/Org routes for users without org
 - [ ] P1.4 — Improve heuristic AI tagger (`internal/ai/heuristic.go`)
-- [ ] P1.5 — Decide on Circles: add to roadmap or mark experimental
+- [x] P1.5 — Decide on Circles: add to roadmap or mark experimental
 - [x] P1.6 — Refactor WorkbenchPage into per-tool components
 - [/] P1.7 — Refactor ProfilePage into sub-components
 - [ ] P2.8 — Add Runbooks entry point in sidebar or Topbar
