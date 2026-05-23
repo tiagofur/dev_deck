@@ -1,4 +1,4 @@
-import { ArrowLeft, Copy, Filter, Plus, Search, Trash2, X } from 'lucide-react'
+import { ArrowLeft, Copy, Filter, Plus, Search, Share2, Trash2, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@devdeck/ui'
@@ -9,10 +9,14 @@ import {
   useDeleteCheatsheet,
   useDeleteEntry,
   useUpdateEntry,
+  useCapture,
+  useCircles,
+  useShareToCircle,
 } from '@devdeck/api-client'
-import type { Entry } from '@devdeck/api-client'
+import type { CheatsheetDetail, Entry } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
+import { ShareToCirclePanel } from '../components/ShareToCirclePanel'
 
 export function CheatsheetDetailPage() {
   const { t } = useTranslation()
@@ -24,11 +28,15 @@ export function CheatsheetDetailPage() {
   const [searchFilter, setSearchFilter] = useState('')
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null)
   const [addingNew, setAddingNew] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
 
   const createEntry = useCreateEntry(id ?? '')
   const updateEntry = useUpdateEntry(id ?? '')
   const deleteEntry = useDeleteEntry(id ?? '')
   const deleteCheatsheet = useDeleteCheatsheet()
+  const capture = useCapture()
+  const { data: circles = [] } = useCircles()
+  const shareToCircle = useShareToCircle()
 
   async function handleDeleteCheatsheet() {
     if (!id || !detail) return
@@ -128,6 +136,28 @@ export function CheatsheetDetailPage() {
     }
   }
 
+  async function handleShareCheatsheet({ circleId, context }: { circleId: string; context: string }) {
+    if (!detail) return
+    try {
+      const captured = await capture.mutateAsync({
+        source: 'manual',
+        text: formatCheatsheetForSharing(detail),
+        title_hint: `Cheatsheet: ${detail.title}`,
+        type_hint: 'snippet',
+        tags: ['cheatsheet', detail.category, 'circle-share'].filter(Boolean),
+        why_saved: context,
+      })
+      const itemId = captured.item?.id || captured.duplicate_of
+      if (!itemId) throw new Error('Could not capture cheatsheet before sharing.')
+
+      await shareToCircle.mutateAsync({ circleId, itemId })
+      showToast('Cheatsheet shared to Circle', 'success')
+      setShareOpen(false)
+    } catch (err) {
+      showToast((err as Error).message || 'Could not share cheatsheet', 'error')
+    }
+  }
+
   return (
     <AppShell contentClassName="flex-1 overflow-y-auto">
       <div className="min-h-full bg-bg-primary">
@@ -160,6 +190,16 @@ export function CheatsheetDetailPage() {
             {detail.description}
           </p>
         )}
+        <button
+          type="button"
+          onClick={() => setShareOpen((open) => !open)}
+          disabled={circles.length === 0}
+          aria-label="Share cheatsheet to Circle"
+          className="border-3 border-ink p-2 bg-bg-card shadow-hard hover:bg-accent-yellow
+                     disabled:opacity-50 transition-colors ml-auto lg:ml-0"
+        >
+          <Share2 size={18} strokeWidth={3} />
+        </button>
         {!detail.is_seed && (
           <button
             type="button"
@@ -175,6 +215,20 @@ export function CheatsheetDetailPage() {
       </header>
 
       <div className="max-w-5xl mx-auto p-6">
+        {shareOpen && (
+          <div className="mb-6">
+            <ShareToCirclePanel
+              circles={circles}
+              isSharing={capture.isPending || shareToCircle.isPending}
+              title="Share cheatsheet to Circle"
+              description="Add context so the Circle knows when to use this cheatsheet."
+              submitLabel="Save and share cheatsheet"
+              onClose={() => setShareOpen(false)}
+              onShare={handleShareCheatsheet}
+            />
+          </div>
+        )}
+
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-3 mb-6">
           {/* Search */}
@@ -259,6 +313,26 @@ export function CheatsheetDetailPage() {
       </div>
     </AppShell>
   )
+}
+
+function formatCheatsheetForSharing(detail: CheatsheetDetail): string {
+  const lines = [`# ${detail.title}`, '', `Category: ${detail.category}`]
+  if (detail.description) {
+    lines.push('', detail.description)
+  }
+  if (detail.entries.length > 0) {
+    lines.push('', '## Entries')
+    detail.entries.forEach((entry) => {
+      lines.push('', `### ${entry.label}`, '', '```bash', entry.command, '```')
+      if (entry.description) {
+        lines.push('', entry.description)
+      }
+      if (entry.tags.length > 0) {
+        lines.push('', `Tags: ${entry.tags.join(', ')}`)
+      }
+    })
+  }
+  return lines.join('\n')
 }
 
 // ─── Entry Card ───
