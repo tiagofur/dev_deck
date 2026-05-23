@@ -11,6 +11,7 @@
 | [PRD.md](PRD.md) | **Product Requirements Document.** Visión, tipos de items, funcionalidades por ola (1–7), user stories, métricas, constraints, decisiones y riesgos. Punto de entrada principal para entender el producto. |
 | [VISION.md](VISION.md) | **Visión y posicionamiento.** Qué es DevDeck (y qué no es), diferenciadores genuinos, taglines por audiencia, roadmap de posicionamiento y preguntas frecuentes de posicionamiento. |
 | [DEV_WORKBENCH.md](DEV_WORKBENCH.md) · [DEV_WORKBENCH.es.md](DEV_WORKBENCH.es.md) | **Developer Workbench.** Evolución de memoria a acción contextual: utilities locales, paleta, requests reutilizables, límites de producto y roadmap recomendado. |
+| [CIRCLES_COMMUNITY.md](CIRCLES_COMMUNITY.md) · [CIRCLES_COMMUNITY.es.md](CIRCLES_COMMUNITY.es.md) | **Circles y contribución comunitaria.** Modelo de producto para convertir hallazgos individuales en memoria reutilizable para grupos/comunidades de developers. |
 | [COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md) | **Análisis competitivo.** Comparación detallada con GitHub Stars, Raindrop, Pocket, Notion, Obsidian, Raycast y Pieces.app. Incluye tablas de pros/contras y posicionamiento relativo. |
 
 ---
@@ -56,8 +57,9 @@ Si llegás sin contexto, el orden recomendado es:
 2. **[VISION.md](VISION.md)** — por qué existe y para quién
 3. **[PRD.md](PRD.md)** — qué hace, cómo crece, qué se decidió
 4. **[DEV_WORKBENCH.md](DEV_WORKBENCH.md)** — hacia dónde evoluciona memoria + acción
-5. **[ARCHITECTURE.md](ARCHITECTURE.md)** — cómo está construido
-6. **[ROADMAP.md](../ROADMAP.md)** — qué está hecho y qué viene
+5. **[CIRCLES_COMMUNITY.md](CIRCLES_COMMUNITY.md)** — cómo DevDeck convierte hallazgos en memoria comunitaria
+6. **[ARCHITECTURE.md](ARCHITECTURE.md)** — cómo está construido
+7. **[ROADMAP.md](../ROADMAP.md)** — qué está hecho y qué viene
 
 Para contribuir o extender el producto:
 - Agregá items al PRD antes de implementar
