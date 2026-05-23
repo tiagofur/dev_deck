@@ -98,7 +98,7 @@ func TestStore_Circles(t *testing.T) {
 		t.Fatalf("CreateItem failed: %v", err)
 	}
 
-	err = st.ShareItemToCircle(ctx, c1.ID, it.ID, u1.ID)
+	err = st.ShareItemToCircle(ctx, c1.ID, it.ID, u1.ID, "Useful when onboarding a new shell workflow.")
 	if err != nil {
 		t.Fatalf("ShareItemToCircle failed: %v", err)
 	}
@@ -110,6 +110,9 @@ func TestStore_Circles(t *testing.T) {
 	}
 	if len(circleItems) != 1 || circleItems[0].ID != it.ID || circleItems[0].Title != "Cool Tip" {
 		t.Errorf("unexpected circle items: %+v", circleItems)
+	}
+	if got := circleItems[0].Meta["circle_share_context"]; got != "Useful when onboarding a new shell workflow." {
+		t.Errorf("expected circle share context metadata, got %v", got)
 	}
 
 	// 5. Leave Circle

@@ -137,10 +137,32 @@ export function CircleDetailPage() {
               </Button>
             </div>
           ) : (
-            <ItemGrid
-              items={items}
-              onSelect={(it) => navigate(detailPathForItem(it))}
-            />
+            <div className="grid gap-5">
+              {items.map((item) => {
+                const shareContext = typeof item.meta?.circle_share_context === 'string'
+                  ? item.meta.circle_share_context
+                  : ''
+
+                return (
+                  <div key={item.id} className="grid gap-3">
+                    {shareContext ? (
+                      <div className="border-3 border-ink bg-accent-yellow/30 p-4 shadow-hard-sm">
+                        <p className="font-display text-xs font-black uppercase tracking-widest">
+                          {t('circles.why_shared')}
+                        </p>
+                        <p className="mt-2 font-mono text-sm text-ink">
+                          {shareContext}
+                        </p>
+                      </div>
+                    ) : null}
+                    <ItemGrid
+                      items={[item]}
+                      onSelect={(it) => navigate(detailPathForItem(it))}
+                    />
+                  </div>
+                )
+              })}
+            </div>
           )}
         </section>
       </div>

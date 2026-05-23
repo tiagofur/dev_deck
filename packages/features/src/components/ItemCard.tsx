@@ -74,9 +74,9 @@ export function ItemCard({ item, onClick }: Props) {
   const { data: circles = [] } = useCircles()
   const shareToCircle = useShareToCircle()
 
-  async function handleShare({ circleId, circleName }: { circleId: string; circleName: string }) {
+  async function handleShare({ circleId, circleName, context }: { circleId: string; circleName: string; context: string }) {
     try {
-      await shareToCircle.mutateAsync({ circleId, itemId: item.id })
+      await shareToCircle.mutateAsync({ circleId, itemId: item.id, shareContext: context })
       showToast(t('card.shared_success', { name: circleName }))
       setShareMenuOpen(false)
     } catch (err) {

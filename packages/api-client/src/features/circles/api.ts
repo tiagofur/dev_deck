@@ -32,6 +32,7 @@ export interface JoinCircleInput {
 export interface ShareToCircleInput {
   circleId: string
   itemId: string
+  shareContext?: string
 }
 
 const CIRCLES_KEY = ['circles']
@@ -102,8 +103,11 @@ export function useJoinCircle() {
 export function useShareToCircle() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ circleId, itemId }: ShareToCircleInput) => {
-      return api.post<void>(`/api/circles/${circleId}/share`, { item_id: itemId })
+    mutationFn: async ({ circleId, itemId, shareContext }: ShareToCircleInput) => {
+      return api.post<void>(`/api/circles/${circleId}/share`, {
+        item_id: itemId,
+        share_context: shareContext ?? '',
+      })
     },
     onSuccess: (_, { circleId }) => {
       queryClient.invalidateQueries({ queryKey: [...CIRCLES_KEY, 'items', circleId] })
