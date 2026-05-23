@@ -125,16 +125,38 @@ export function CircleDetailPage() {
           </div>
 
           {items.length === 0 ? (
-            <div className="bg-bg-card border-3 border-ink shadow-hard p-12 text-center max-w-xl mx-auto">
+            <div className="bg-bg-card border-3 border-ink shadow-hard p-8 text-center max-w-3xl mx-auto">
               <Share2 size={36} strokeWidth={2} className="mx-auto mb-4 text-ink-soft" />
               <p className="font-display font-bold text-lg uppercase mb-2">{t('circles.empty_shared_vault_title')}</p>
               <p className="font-mono text-sm text-ink-soft mb-6">
                 {t('circles.empty_shared_vault_desc')}
               </p>
-              <Button onClick={() => navigate('/items')}>
-                {t('circles.go_to_my_items')}
-                <ArrowRight size={14} strokeWidth={3} className="ml-2 inline" />
-              </Button>
+              <div className="grid gap-3 text-left sm:grid-cols-3 mb-6">
+                <div className="border-2 border-ink bg-bg-elevated p-3">
+                  <p className="font-display text-xs font-black uppercase">{t('circles.empty_step_find')}</p>
+                  <p className="mt-1 font-mono text-xs text-ink-soft">{t('circles.empty_step_find_desc')}</p>
+                </div>
+                <div className="border-2 border-ink bg-bg-elevated p-3">
+                  <p className="font-display text-xs font-black uppercase">{t('circles.empty_step_context')}</p>
+                  <p className="mt-1 font-mono text-xs text-ink-soft">{t('circles.empty_step_context_desc')}</p>
+                </div>
+                <div className="border-2 border-ink bg-bg-elevated p-3">
+                  <p className="font-display text-xs font-black uppercase">{t('circles.empty_step_share')}</p>
+                  <p className="mt-1 font-mono text-xs text-ink-soft">{t('circles.empty_step_share_desc')}</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button onClick={() => navigate('/items')}>
+                  {t('circles.go_to_my_items')}
+                  <ArrowRight size={14} strokeWidth={3} className="ml-2 inline" />
+                </Button>
+                <Button variant="secondary" onClick={() => navigate('/workbench')}>
+                  {t('circles.go_to_workbench')}
+                </Button>
+                <Button variant="secondary" onClick={() => navigate('/cheatsheets')}>
+                  {t('circles.go_to_cheatsheets')}
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="grid gap-5">

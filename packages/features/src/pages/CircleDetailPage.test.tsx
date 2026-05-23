@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { CircleDetailPage } from './CircleDetailPage'
 
@@ -67,9 +67,12 @@ const sharedItem = {
 }
 
 describe('<CircleDetailPage>', () => {
+  const navigate = vi.fn()
+
   beforeEach(() => {
     mocks.useParams.mockReturnValue({ id: 'circle-1' })
-    mocks.useNavigate.mockReturnValue(vi.fn())
+    navigate.mockReset()
+    mocks.useNavigate.mockReturnValue(navigate)
     mocks.useCircleDetail.mockReturnValue({
       data: {
         id: 'circle-1',
@@ -92,5 +95,19 @@ describe('<CircleDetailPage>', () => {
     expect(screen.getByText('Use this when explaining JWT refresh token rotation.')).toBeInTheDocument()
     expect(screen.getByText(/Shared by Ada Lovelace/i)).toBeInTheDocument()
     expect(screen.getByText('Useful Auth Repo')).toBeInTheDocument()
+  })
+
+  it('guides members to contribute when the shared vault is empty', () => {
+    mocks.useCircleItems.mockReturnValue({ data: [], isLoading: false })
+
+    render(<CircleDetailPage />)
+
+    expect(screen.getByText('Start the shared vault')).toBeInTheDocument()
+    expect(screen.getByText('1. Find signal')).toBeInTheDocument()
+    expect(screen.getByText('2. Add context')).toBeInTheDocument()
+    expect(screen.getByText('3. Share to Circle')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /open workbench/i }))
+    expect(navigate).toHaveBeenCalledWith('/workbench')
   })
 })
