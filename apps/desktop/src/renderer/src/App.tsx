@@ -6,6 +6,9 @@ import {
   CheatsheetDetailPage,
   CheatsheetsListPage,
   CaptureModal,
+  CircleDetailPage,
+  CircleJoinPage,
+  CirclesPage,
   DiscoveryPage,
   HomePage,
   ItemDetailPage,
@@ -295,6 +298,24 @@ function AnimatedRoutes() {
             path="/cheatsheets/:id"
             element={
               <AuthGuard>{withTransition(<CheatsheetDetailPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/circles"
+            element={
+              <AuthGuard>{withTransition(<CirclesPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/circles/:id"
+            element={
+              <AuthGuard>{withTransition(<CircleDetailPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/circles/join/:inviteCode"
+            element={
+              <AuthGuard>{withTransition(<CircleJoinPage />)}</AuthGuard>
             }
           />
           <Route path="/deck/:slug" element={withTransition(<PublicDeckPage />)} />
