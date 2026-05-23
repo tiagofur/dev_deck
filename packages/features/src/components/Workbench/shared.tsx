@@ -1,7 +1,8 @@
 import * as React from 'react'
-import { Clipboard, Save } from 'lucide-react'
+import { Clipboard, Save, Share2 } from 'lucide-react'
 import { Button, showToast } from '@devdeck/ui'
-import { useCapture } from '@devdeck/api-client'
+import { useCapture, useCircles, useShareToCircle } from '@devdeck/api-client'
+import { ShareToCirclePanel } from '../ShareToCirclePanel'
 
 export function ToolFrame({
   title,
@@ -58,6 +59,9 @@ export function ResultActions({
   itemType?: 'snippet' | 'note'
 }) {
   const capture = useCapture()
+  const { data: circles = [] } = useCircles()
+  const shareToCircle = useShareToCircle()
+  const [shareOpen, setShareOpen] = React.useState(false)
 
   async function copy() {
     if (!output) return
@@ -82,20 +86,67 @@ export function ResultActions({
     }
   }
 
+  async function share({ circleId, context }: { circleId: string; context: string }) {
+    if (!output.trim()) return
+    try {
+      const captured = await capture.mutateAsync({
+        source: 'manual',
+        text: output,
+        title_hint: title,
+        type_hint: itemType,
+        tags: ['workbench', 'circle-share'],
+        why_saved: context,
+      })
+      const itemId = captured.item?.id || captured.duplicate_of
+      if (!itemId) throw new Error('Could not capture output before sharing.')
+
+      await shareToCircle.mutateAsync({ circleId, itemId })
+      showToast('Shared to Circle', 'success')
+      setShareOpen(false)
+    } catch (err) {
+      showToast((err as Error).message || 'Could not share output', 'error')
+    }
+  }
+
   return (
-    <div className="flex flex-wrap gap-3">
-      <Button type="button" size="sm" variant="secondary" onClick={copy} disabled={!output}>
-        <span className="flex items-center gap-2">
-          <Clipboard size={15} strokeWidth={3} />
-          Copy
-        </span>
-      </Button>
-      <Button type="button" size="sm" onClick={save} disabled={!output || capture.isPending}>
-        <span className="flex items-center gap-2">
-          <Save size={15} strokeWidth={3} />
-          Save output
-        </span>
-      </Button>
+    <div className="grid gap-3">
+      <div className="flex flex-wrap gap-3">
+        <Button type="button" size="sm" variant="secondary" onClick={copy} disabled={!output}>
+          <span className="flex items-center gap-2">
+            <Clipboard size={15} strokeWidth={3} />
+            Copy
+          </span>
+        </Button>
+        <Button type="button" size="sm" onClick={save} disabled={!output || capture.isPending}>
+          <span className="flex items-center gap-2">
+            <Save size={15} strokeWidth={3} />
+            Save output
+          </span>
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="secondary"
+          onClick={() => setShareOpen((open) => !open)}
+          disabled={!output || circles.length === 0}
+        >
+          <span className="flex items-center gap-2">
+            <Share2 size={15} strokeWidth={3} />
+            Share to Circle
+          </span>
+        </Button>
+      </div>
+
+      {shareOpen && (
+        <ShareToCirclePanel
+          circles={circles}
+          isSharing={capture.isPending || shareToCircle.isPending}
+          title="Share output to Circle"
+          submitLabel="Save and share"
+          onClose={() => setShareOpen(false)}
+          onShare={share}
+        />
+      )}
     </div>
   )
 }
