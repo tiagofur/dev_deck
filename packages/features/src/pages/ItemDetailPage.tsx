@@ -10,6 +10,7 @@ import {
 	Library,
 	Plus,
 	Play,
+	Share2,
 	Sparkles,
 	Trash2,
 	Users,
@@ -27,6 +28,9 @@ import {
 	useUpdateRunbookStep,
 	useDeleteRunbook,
 	useUpdateItem,
+	useCapture,
+	useCircles,
+	useShareToCircle,
 	type Item,
 	type Runbook,
 	type RunbookStep,
@@ -35,6 +39,7 @@ import { NotesEditor } from '../components/NotesEditor'
 import { TagsEditor } from '../components/TagsEditor'
 import { TeamReviewCard } from '../components/TeamReviewCard'
 import { AppShell } from '../components/AppShell'
+import { ShareToCirclePanel } from '../components/ShareToCirclePanel'
 import { useTranslation } from '@devdeck/i18n'
 
 export function ItemDetailPage() {
@@ -351,6 +356,10 @@ function RunbookCard({ runbook }: { runbook: Runbook }) {
 	const { t } = useTranslation()
 	const addStep = useAddRunbookStep()
 	const deleteRunbook = useDeleteRunbook()
+	const capture = useCapture()
+	const { data: circles = [] } = useCircles()
+	const shareToCircle = useShareToCircle()
+	const [shareOpen, setShareOpen] = useState(false)
 
 	async function handleAddStep() {
 		const label = window.prompt(t('item_detail.runbook.step_label_prompt'))
@@ -368,6 +377,28 @@ function RunbookCard({ runbook }: { runbook: Runbook }) {
 		await deleteRunbook.mutateAsync({ id: runbook.id, itemId: runbook.item_id })
 	}
 
+	async function handleShare({ circleId, context }: { circleId: string; context: string }) {
+		const text = formatRunbookForSharing(runbook)
+		try {
+			const captured = await capture.mutateAsync({
+				source: 'manual',
+				text,
+				title_hint: `Runbook: ${runbook.title}`,
+				type_hint: 'workflow',
+				tags: ['runbook', 'circle-share'],
+				why_saved: context,
+			})
+			const itemId = captured.item?.id || captured.duplicate_of
+			if (!itemId) throw new Error('Could not capture runbook before sharing.')
+
+			await shareToCircle.mutateAsync({ circleId, itemId })
+			showToast('Runbook shared to Circle', 'success')
+			setShareOpen(false)
+		} catch (err) {
+			showToast((err as Error).message || 'Could not share runbook', 'error')
+		}
+	}
+
 	return (
 		<div className="bg-bg-card border-3 border-ink shadow-hard overflow-hidden">
 			<header className="bg-bg-elevated border-b-3 border-ink p-4 flex items-center justify-between">
@@ -375,12 +406,34 @@ function RunbookCard({ runbook }: { runbook: Runbook }) {
 					<Library size={18} strokeWidth={3} />
 					<h3 className="font-display font-black uppercase text-sm">{runbook.title}</h3>
 				</div>
-				<button onClick={handleDelete} className="p-1 hover:bg-accent-pink transition-colors">
-					<Trash2 size={16} />
-				</button>
+				<div className="flex items-center gap-2">
+					<button
+						onClick={() => setShareOpen((open) => !open)}
+						disabled={circles.length === 0}
+						title="Share runbook to Circle"
+						className="p-1 border-2 border-transparent hover:border-ink hover:bg-accent-yellow transition-colors disabled:opacity-40"
+					>
+						<Share2 size={16} />
+					</button>
+					<button onClick={handleDelete} className="p-1 hover:bg-accent-pink transition-colors">
+						<Trash2 size={16} />
+					</button>
+				</div>
 			</header>
 
 			<div className="p-4 space-y-4">
+				{shareOpen && (
+					<ShareToCirclePanel
+						circles={circles}
+						isSharing={capture.isPending || shareToCircle.isPending}
+						title="Share runbook to Circle"
+						description="Add context so the Circle knows when to use this runbook."
+						submitLabel="Save and share runbook"
+						onClose={() => setShareOpen(false)}
+						onShare={handleShare}
+					/>
+				)}
+
 				{runbook.steps.map((st) => (
 					<RunbookStepItem key={st.id} step={st} />
 				))}
@@ -398,6 +451,26 @@ function RunbookCard({ runbook }: { runbook: Runbook }) {
 			</div>
 		</div>
 	)
+}
+
+function formatRunbookForSharing(runbook: Runbook): string {
+	const lines = [`# ${runbook.title}`]
+	if (runbook.description) {
+		lines.push('', runbook.description)
+	}
+	if (runbook.steps.length > 0) {
+		lines.push('', '## Steps')
+		runbook.steps.forEach((step, index) => {
+			lines.push('', `${index + 1}. ${step.label}`)
+			if (step.command) {
+				lines.push('', '```bash', step.command, '```')
+			}
+			if (step.description) {
+				lines.push('', step.description)
+			}
+		})
+	}
+	return lines.join('\n')
 }
 
 function RunbookStepItem({ step }: { step: RunbookStep }) {

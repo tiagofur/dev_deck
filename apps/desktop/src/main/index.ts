@@ -280,6 +280,7 @@ function createWindow(): void {
       nodeIntegration: false,
       sandbox: true,
       preload: preloadPath,
+      webSecurity: !process.env.ELECTRON_RENDERER_URL,
     },
   })
   mainWindow = win

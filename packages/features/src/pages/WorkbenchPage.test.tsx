@@ -6,8 +6,10 @@ import { WorkbenchPage } from './WorkbenchPage'
 
 const mocks = vi.hoisted(() => ({
   useCapture: vi.fn(),
+  useCircles: vi.fn(),
   useGlobalSearch: vi.fn(),
   useItem: vi.fn(),
+  useShareToCircle: vi.fn(),
   useUpdateItem: vi.fn(),
 }))
 
@@ -16,8 +18,10 @@ vi.mock('@devdeck/api-client', async () => {
   return {
     ...actual,
     useCapture: mocks.useCapture,
+    useCircles: mocks.useCircles,
     useGlobalSearch: mocks.useGlobalSearch,
     useItem: mocks.useItem,
+    useShareToCircle: mocks.useShareToCircle,
     useUpdateItem: mocks.useUpdateItem,
   }
 })
@@ -39,8 +43,10 @@ describe('<WorkbenchPage>', () => {
     vi.clearAllMocks()
     vi.unstubAllGlobals()
     mocks.useCapture.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+    mocks.useCircles.mockReturnValue({ data: [], isLoading: false })
     mocks.useGlobalSearch.mockReturnValue({ data: [], isLoading: false })
     mocks.useItem.mockReturnValue({ data: undefined, isLoading: false })
+    mocks.useShareToCircle.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
     mocks.useUpdateItem.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
     Object.assign(navigator, {
       clipboard: {
@@ -158,5 +164,46 @@ describe('<WorkbenchPage>', () => {
 
     expect(screen.getByLabelText('Expansion preview')).toHaveValue('docker run --rm -it IMAGE sh')
     expect(screen.getByLabelText('Expanded text')).toHaveValue('Deploy with docker run --rm -it IMAGE sh')
+  })
+
+  it('requires context before sharing Workbench output to a Circle', async () => {
+    const captureOutput = vi.fn().mockResolvedValue({
+      item: { id: 'item-1' },
+      duplicate_of: null,
+      enrichment_status: 'ok',
+    })
+    const shareToCircle = vi.fn().mockResolvedValue({})
+    mocks.useCapture.mockReturnValue({ mutateAsync: captureOutput, isPending: false })
+    mocks.useCircles.mockReturnValue({
+      data: [{ id: 'circle-1', name: 'Frontend Guild' }],
+      isLoading: false,
+    })
+    mocks.useShareToCircle.mockReturnValue({ mutateAsync: shareToCircle, isPending: false })
+
+    renderWorkbench()
+
+    fireEvent.change(screen.getByLabelText('Input'), { target: { value: '{"name":"DevDeck"}' } })
+    fireEvent.click(screen.getByRole('button', { name: /share to circle/i }))
+
+    const saveAndShare = screen.getByRole('button', { name: /save and share/i })
+    expect(saveAndShare).toBeDisabled()
+
+    fireEvent.change(screen.getByLabelText('Circle'), { target: { value: 'circle-1' } })
+    fireEvent.change(screen.getByLabelText('Why this matters'), {
+      target: { value: 'Useful payload shape for our API examples.' },
+    })
+    fireEvent.click(saveAndShare)
+
+    await waitFor(() => {
+      expect(captureOutput).toHaveBeenCalledWith({
+        source: 'manual',
+        text: '{\n  "name": "DevDeck"\n}',
+        title_hint: 'Formatted JSON',
+        type_hint: 'snippet',
+        tags: ['workbench', 'circle-share'],
+        why_saved: 'Useful payload shape for our API examples.',
+      })
+      expect(shareToCircle).toHaveBeenCalledWith({ circleId: 'circle-1', itemId: 'item-1' })
+    })
   })
 })

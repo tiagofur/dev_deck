@@ -40,6 +40,21 @@ See [docs/DEV_WORKBENCH.md](docs/DEV_WORKBENCH.md) for the current product propo
 - [x] **Wave 11:** Mobile Bridge (PWA Share Target, Progressive Sync).
 - [x] **Wave 12:** Social Gamification and Reputation System.
 
+### Wave 12 — Social Collaboration and Public Curation
+
+#### Phase 41 — Collaborative Circles and Following
+
+- **Collaborative Circles:** Share repositories, useful bash commands, cheatsheets, Workbench tools, and other developer findings inside closed/private groups.
+- **Social graph:** Follow public curator profiles to keep high-signal developer discoveries visible after they leave chat, Slack, Discord, or community threads.
+- **Feed:** Combine recent saves from followed curators with activity from the user's Circles.
+- **Notifications:** Alert users when a followed curator publishes a new Deck or when useful activity happens in their Circles.
+
+#### Phase 42 — Community Discovery and Rankings
+
+- **Discovery:** Global feed with the most-saved developer findings of the week.
+- **Gamification:** Contribution points and expertise badges based on high-signal contributions, not raw posting volume.
+- **Leaderboard:** Rank useful curators and starred Decks so communities can find trustworthy references faster.
+
 ## Waves 13–16: Enterprise & Agents
 
 - [x] **Wave 13:** Global Scalability (Read Replicas, Multi-region Sync).
