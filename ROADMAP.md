@@ -34,7 +34,7 @@ See [docs/DEV_WORKBENCH.md](docs/DEV_WORKBENCH.md) for the current product propo
 ## Waves 7–12: Advanced Features
 
 - [x] **Wave 7:** Versioning and Multi-device management.
-- [x] **Wave 8:** Smart Notifications and Social Following.
+- [x] **Wave 8:** Smart Notifications, Social Following, and collaborative Circles (share repos, tools, bash, etc. with friends).
 - [x] **Wave 9:** Real-time Collaboration (Yjs, WebSockets, CRDTs).
 - [x] **Wave 10:** Plugin SDK and Outbound Webhooks (HMAC signatures).
 - [x] **Wave 11:** Mobile Bridge (PWA Share Target, Progressive Sync).

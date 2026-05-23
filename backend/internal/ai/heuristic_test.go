@@ -16,6 +16,25 @@ func TestHeuristicSummarize(t *testing.T) {
 		want string
 	}{
 		{
+			name: "why_saved wins and adds context",
+			in: Input{
+				Type:        items.TypeRepo,
+				Title:       "charmbracelet/bubbletea",
+				Description: "A powerful TUI framework for Go",
+				WhySaved:    "Use for building my next terminal client",
+			},
+			want: "Saved because: Use for building my next terminal client. A powerful TUI framework for Go.",
+		},
+		{
+			name: "crates.io ecosystem summary",
+			in: Input{
+				Type:  items.TypeTool,
+				Title: "ripgrep",
+				URL:   ptr("https://crates.io/crates/ripgrep"),
+			},
+			want: "Rust crate ripgrep saved for systems development.",
+		},
+		{
 			name: "description wins for repo",
 			in: Input{
 				Type:        items.TypeRepo,
@@ -63,6 +82,24 @@ func TestHeuristicSuggestTags(t *testing.T) {
 		in   Input
 		want []string
 	}{
+		{
+			name: "crates.io url maps cargo and rust",
+			in: Input{
+				Type:  items.TypeTool,
+				Title: "ripgrep",
+				URL:   ptr("https://crates.io/crates/ripgrep"),
+			},
+			want: []string{"cargo", "ripgrep", "rust", "tool"},
+		},
+		{
+			name: "vitest keyword maps testing and qa",
+			in: Input{
+				Type:        items.TypeArticle,
+				Title:       "Unit testing guidelines",
+				Description: "We use vitest for fast unit validation",
+			},
+			want: []string{"qa", "reading", "testing", "unit"},
+		},
 		{
 			name: "repo pulls language topics and host",
 			in: Input{

@@ -16,14 +16,42 @@ type heuristicProvider struct{}
 func (heuristicProvider) Enabled() bool { return true }
 
 func (heuristicProvider) Summarize(_ context.Context, in Input) (string, error) {
-	desc := cleanSentence(in.Description)
 	title := strings.TrimSpace(in.Title)
+	desc := cleanSentence(in.Description)
 	host := hostTag(in.URL)
 
+	// 1. Prioridad: Captura del por qué (why_saved) proveído por el usuario
+	if in.WhySaved != "" {
+		if desc != "" {
+			return truncate(fmt.Sprintf("Saved because: %s. %s", in.WhySaved, desc), 160), nil
+		}
+		return truncate(fmt.Sprintf("Saved because: %s. Reference: %s.", in.WhySaved, fallbackTitle(title, "untitled reference")), 160), nil
+	}
+
+	// 2. Prioridad: Descripción en el scraper
 	if desc != "" {
 		return truncate(desc, 160), nil
 	}
 
+	// 3. Prioridad: Intención del ecosistema detectado por URL
+	if in.URL != nil {
+		u, err := url.Parse(*in.URL)
+		if err == nil && u.Host != "" {
+			hLower := strings.ToLower(u.Hostname())
+			switch {
+			case strings.Contains(hLower, "npmjs.com") || strings.Contains(hLower, "yarnpkg.com"):
+				return truncate(fmt.Sprintf("NPM package %s saved for node/javascript projects.", fallbackTitle(title, "package")), 160), nil
+			case strings.Contains(hLower, "crates.io"):
+				return truncate(fmt.Sprintf("Rust crate %s saved for systems development.", fallbackTitle(title, "crate")), 160), nil
+			case strings.Contains(hLower, "pypi.org") || strings.Contains(hLower, "pypi.python.org"):
+				return truncate(fmt.Sprintf("Python package %s saved for python development.", fallbackTitle(title, "package")), 160), nil
+			case strings.Contains(hLower, "pkg.go.dev"):
+				return truncate(fmt.Sprintf("Go module %s saved for backend development.", fallbackTitle(title, "module")), 160), nil
+			}
+		}
+	}
+
+	// 4. Prioridad: Fallbacks dinámicos por tipo de item
 	switch in.Type {
 	case items.TypeRepo:
 		if title == "" {
@@ -36,7 +64,7 @@ func (heuristicProvider) Summarize(_ context.Context, in Input) (string, error) 
 		}
 		return truncate(fmt.Sprintf("Article saved for later: %s.", fallbackTitle(title, "untitled article")), 160), nil
 	case items.TypeCLI:
-		return truncate(fmt.Sprintf("CLI command or install snippet: %s.", fallbackTitle(title, "command")), 160), nil
+		return truncate(fmt.Sprintf("CLI command or terminal utility: %s.", fallbackTitle(title, "command")), 160), nil
 	case items.TypeSnippet:
 		return truncate(fmt.Sprintf("Code snippet saved for reuse: %s.", fallbackTitle(title, "snippet")), 160), nil
 	case items.TypeShortcut:
@@ -62,6 +90,7 @@ func (heuristicProvider) Summarize(_ context.Context, in Input) (string, error) 
 func (heuristicProvider) SuggestTags(_ context.Context, in Input) ([]string, error) {
 	var tags []string
 
+	// 1. Lenguaje y topics meta (de GitHub/OG)
 	if lang := normalizeTag(stringMeta(in.Meta, "language")); lang != "" {
 		tags = append(tags, lang)
 	}
@@ -70,10 +99,18 @@ func (heuristicProvider) SuggestTags(_ context.Context, in Input) ([]string, err
 			tags = append(tags, tag)
 		}
 	}
-	if host := hostTag(in.URL); host != "" {
-		tags = append(tags, host)
+
+	// 2. Ecosistema por URL
+	for _, tag := range hostAndEcosystemTags(in.URL) {
+		tags = append(tags, tag)
 	}
 
+	// 3. Mapeo dinámico de palabras clave tecnológicas
+	for _, tag := range techKeywordTags(in.Title, in.Description) {
+		tags = append(tags, tag)
+	}
+
+	// 4. Mapeos tradicionales basados en tipo de item
 	switch in.Type {
 	case items.TypeRepo:
 		tags = append(tags, "repository")
@@ -109,6 +146,7 @@ func (heuristicProvider) SuggestTags(_ context.Context, in Input) ([]string, err
 		tags = append(tags, "tool")
 	}
 
+	// 5. Palabras clave adicionales del título
 	for _, word := range keywordTags(in.Type, in.Title) {
 		tags = append(tags, word)
 	}
@@ -144,6 +182,82 @@ func truncate(s string, n int) string {
 		return string(runes[:n])
 	}
 	return strings.TrimSpace(string(runes[:n-1])) + "…"
+}
+
+func hostAndEcosystemTags(rawURL *string) []string {
+	if rawURL == nil || strings.TrimSpace(*rawURL) == "" {
+		return nil
+	}
+	u, err := url.Parse(*rawURL)
+	if err != nil || u.Host == "" {
+		return nil
+	}
+
+	var tags []string
+	host := strings.ToLower(strings.TrimPrefix(u.Hostname(), "www."))
+
+	switch {
+	case host == "github.com":
+		tags = append(tags, "github")
+	case host == "npmjs.com" || host == "yarnpkg.com":
+		tags = append(tags, "npm", "node", "javascript")
+	case host == "crates.io":
+		tags = append(tags, "rust", "cargo")
+	case host == "pypi.org" || host == "pypi.python.org":
+		tags = append(tags, "python", "pip")
+	case host == "pkg.go.dev":
+		tags = append(tags, "go", "golang")
+	case host == "hub.docker.com":
+		tags = append(tags, "docker", "containers")
+	case host == "aws.amazon.com":
+		tags = append(tags, "aws", "cloud")
+	case host == "cloud.google.com":
+		tags = append(tags, "gcp", "cloud")
+	case host == "kubernetes.io":
+		tags = append(tags, "kubernetes", "k8s")
+	default:
+		parts := strings.Split(host, ".")
+		if len(parts) >= 2 {
+			tags = append(tags, normalizeTag(parts[len(parts)-2]))
+		}
+	}
+	return tags
+}
+
+func techKeywordTags(title, description string) []string {
+	combined := strings.ToLower(title + " " + description)
+	var tags []string
+
+	mappings := []struct {
+		keywords []string
+		tags     []string
+	}{
+		{[]string{"react", "nextjs", "next.js", "vue", "angular", "svelte", "nuxt", "tailwind"}, []string{"frontend", "web"}},
+		{[]string{"golang", "goroutine", "go-lang"}, []string{"go", "backend"}},
+		{[]string{"rustlang", "cargo", "rust"}, []string{"rust", "systems"}},
+		{[]string{"python", "django", "flask", "fastapi"}, []string{"python", "backend"}},
+		{[]string{"bash", "shell", "zsh", "fish", "command-line", "terminal"}, []string{"cli", "terminal"}},
+		{[]string{"postgres", "mysql", "sqlite", "mongodb", "redis", "prisma", "sql", "database"}, []string{"database", "sql"}},
+		{[]string{"docker", "kubernetes", "k8s", "helm", "terraform", "ansible"}, []string{"devops", "infrastructure"}},
+		{[]string{"openai", "gemini", "llm", "ai", "langchain", "rag", "agent", "deepseek"}, []string{"ai", "machine-learning"}},
+		{[]string{"testing", "test", "vitest", "playwright", "jest", "cypress"}, []string{"testing", "qa"}},
+		{[]string{"typescript", "ts", "javascript", "js"}, []string{"javascript"}},
+	}
+
+	for _, m := range mappings {
+		matched := false
+		for _, kw := range m.keywords {
+			if strings.Contains(combined, kw) {
+				matched = true
+				break
+			}
+		}
+		if matched {
+			tags = append(tags, m.tags...)
+		}
+	}
+
+	return tags
 }
 
 func hostTag(raw *string) string {
