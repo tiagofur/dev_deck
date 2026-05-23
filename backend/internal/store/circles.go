@@ -205,9 +205,16 @@ func (s *Store) ListCircleItems(ctx context.Context, circleID uuid.UUID) ([]*ite
 	}
 	if len(itemIDs) > 0 {
 		metaRows, err := s.Reader().Query(ctx, `
-			SELECT item_id, share_context, shared_by::text, shared_at::text
-			FROM circle_items
-			WHERE circle_id = $1 AND item_id = ANY($2)
+			SELECT
+				ci.item_id,
+				ci.share_context,
+				ci.shared_by::text,
+				COALESCE(NULLIF(u.display_name, ''), u.username, u.login, ci.shared_by::text) AS shared_by_name,
+				COALESCE(u.username, u.login, '') AS shared_by_username,
+				ci.shared_at::text
+			FROM circle_items ci
+			LEFT JOIN users u ON u.id = ci.shared_by
+			WHERE ci.circle_id = $1 AND ci.item_id = ANY($2)
 		`, circleID, itemIDs)
 		if err != nil {
 			return nil, err
@@ -215,15 +222,24 @@ func (s *Store) ListCircleItems(ctx context.Context, circleID uuid.UUID) ([]*ite
 		defer metaRows.Close()
 
 		type shareMeta struct {
-			context  string
-			sharedBy string
-			sharedAt string
+			context          string
+			sharedBy         string
+			sharedByName     string
+			sharedByUsername string
+			sharedAt         string
 		}
 		byItemID := map[uuid.UUID]shareMeta{}
 		for metaRows.Next() {
 			var itemID uuid.UUID
 			var meta shareMeta
-			if err := metaRows.Scan(&itemID, &meta.context, &meta.sharedBy, &meta.sharedAt); err != nil {
+			if err := metaRows.Scan(
+				&itemID,
+				&meta.context,
+				&meta.sharedBy,
+				&meta.sharedByName,
+				&meta.sharedByUsername,
+				&meta.sharedAt,
+			); err != nil {
 				return nil, err
 			}
 			byItemID[itemID] = meta
@@ -238,6 +254,8 @@ func (s *Store) ListCircleItems(ctx context.Context, circleID uuid.UUID) ([]*ite
 			}
 			it.Meta["circle_share_context"] = meta.context
 			it.Meta["circle_shared_by"] = meta.sharedBy
+			it.Meta["circle_shared_by_name"] = meta.sharedByName
+			it.Meta["circle_shared_by_username"] = meta.sharedByUsername
 			it.Meta["circle_shared_at"] = meta.sharedAt
 		}
 	}

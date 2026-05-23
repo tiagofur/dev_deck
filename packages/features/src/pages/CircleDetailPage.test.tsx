@@ -52,6 +52,9 @@ const sharedItem = {
   source_channel: 'manual',
   meta: {
     circle_share_context: 'Use this when explaining JWT refresh token rotation.',
+    circle_shared_by_name: 'Ada Lovelace',
+    circle_shared_by_username: 'ada',
+    circle_shared_at: '2026-05-23T21:00:00Z',
   },
   ai_summary: '',
   ai_tags: [],
@@ -87,6 +90,7 @@ describe('<CircleDetailPage>', () => {
 
     expect(screen.getByText('Why this was shared')).toBeInTheDocument()
     expect(screen.getByText('Use this when explaining JWT refresh token rotation.')).toBeInTheDocument()
+    expect(screen.getByText(/Shared by Ada Lovelace/i)).toBeInTheDocument()
     expect(screen.getByText('Useful Auth Repo')).toBeInTheDocument()
   })
 })

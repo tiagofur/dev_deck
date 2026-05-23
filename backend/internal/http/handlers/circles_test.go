@@ -83,6 +83,9 @@ func TestCircles_CRUDAndFlows(t *testing.T) {
 	if got := circleItems[0].Meta["circle_share_context"]; got != "Useful when teaching fast Git status checks." {
 		t.Fatalf("expected share context metadata, got: %v", got)
 	}
+	if got := circleItems[0].Meta["circle_shared_by_name"]; got == "" {
+		t.Fatalf("expected share attribution name metadata, got: %v", got)
+	}
 
 	// 6. List Members
 	membersRec := ts.do(t, http.MethodGet, "/api/circles/"+created.ID.String()+"/members", nil)
