@@ -18,7 +18,6 @@ import {
   Users,
   Wrench,
   Share2,
-  Loader2,
   type LucideIcon,
 } from 'lucide-react'
 import type { Item, ItemType } from '@devdeck/api-client'
@@ -33,6 +32,7 @@ import {
 } from '@devdeck/api-client'
 import { TagChip, hashIndex, showToast } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
+import { ShareToCirclePanel } from './ShareToCirclePanel'
 
 interface TypeStyle {
   hue: string
@@ -74,8 +74,7 @@ export function ItemCard({ item, onClick }: Props) {
   const { data: circles = [] } = useCircles()
   const shareToCircle = useShareToCircle()
 
-  async function handleShare(e: React.MouseEvent, circleId: string, circleName: string) {
-    e.stopPropagation()
+  async function handleShare({ circleId, circleName }: { circleId: string; circleName: string }) {
     try {
       await shareToCircle.mutateAsync({ circleId, itemId: item.id })
       showToast(t('card.shared_success', { name: circleName }))
@@ -179,38 +178,22 @@ export function ItemCard({ item, onClick }: Props) {
           {shareMenuOpen && (
             <div
               onClick={(e) => e.stopPropagation()}
-              className="absolute right-0 top-6 z-30 w-48 bg-bg-card border-3 border-ink shadow-hard p-2 font-mono text-[11px]"
+              className="absolute right-0 top-6 z-30 w-72 font-mono text-[11px]"
             >
-              <div className="flex items-center justify-between border-b-2 border-ink pb-1.5 mb-1.5">
-                <span className="font-display font-black uppercase text-[9px] tracking-wider">
-                  {t('card.share_in')}
-                </span>
-                <button
-                  onClick={() => setShareMenuOpen(false)}
-                  className="hover:text-accent-pink"
-                >
-                  <X size={10} strokeWidth={3} />
-                </button>
-              </div>
-
               {circles.length === 0 ? (
-                <div className="py-1 text-ink-soft text-center text-[10px]">
+                <div className="bg-bg-card border-3 border-ink shadow-hard p-3 py-2 text-ink-soft text-center text-[10px]">
                   {t('card.no_circles')}
                 </div>
               ) : (
-                <div className="max-h-32 overflow-y-auto space-y-1">
-                  {circles.map((c) => (
-                    <button
-                      key={c.id}
-                      disabled={shareToCircle.isPending}
-                      onClick={(e) => handleShare(e, c.id, c.name)}
-                      className="w-full text-left p-1 hover:bg-accent-pink hover:text-white truncate border border-transparent hover:border-ink transition-colors flex items-center justify-between gap-1"
-                    >
-                      <span className="truncate">{c.name}</span>
-                      {shareToCircle.isPending && <Loader2 size={10} className="animate-spin shrink-0" />}
-                    </button>
-                  ))}
-                </div>
+                <ShareToCirclePanel
+                  circles={circles}
+                  isSharing={shareToCircle.isPending}
+                  title={t('card.share_in')}
+                  description="Add context so the Circle knows why this item is useful."
+                  submitLabel="Share item"
+                  onClose={() => setShareMenuOpen(false)}
+                  onShare={handleShare}
+                />
               )}
             </div>
           )}

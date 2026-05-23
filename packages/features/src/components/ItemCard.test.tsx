@@ -1,9 +1,29 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { beforeEach, describe, it, expect, vi } from 'vitest'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ItemCard } from './ItemCard'
 import type { Item } from '@devdeck/api-client'
+
+const mocks = vi.hoisted(() => ({
+  useAIEnrichItem: vi.fn(),
+  useCircles: vi.fn(),
+  useReviewItemAITags: vi.fn(),
+  useShareToCircle: vi.fn(),
+  useUpdateItem: vi.fn(),
+}))
+
+vi.mock('@devdeck/api-client', async () => {
+  const actual = await vi.importActual<typeof import('@devdeck/api-client')>('@devdeck/api-client')
+  return {
+    ...actual,
+    useAIEnrichItem: mocks.useAIEnrichItem,
+    useCircles: mocks.useCircles,
+    useReviewItemAITags: mocks.useReviewItemAITags,
+    useShareToCircle: mocks.useShareToCircle,
+    useUpdateItem: mocks.useUpdateItem,
+  }
+})
 
 function renderItemCard(ui: React.ReactElement) {
   const client = new QueryClient({
@@ -48,6 +68,15 @@ function makeItem(patch: Partial<Item> = {}): Item {
 }
 
 describe('<ItemCard>', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mocks.useAIEnrichItem.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+    mocks.useCircles.mockReturnValue({ data: [], isLoading: false })
+    mocks.useReviewItemAITags.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+    mocks.useShareToCircle.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+    mocks.useUpdateItem.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+  })
+
   it('renders title and description', () => {
     renderItemCard(<ItemCard item={makeItem()} />)
     expect(screen.getByRole('heading')).toHaveTextContent('charmbracelet/bubbletea')
@@ -161,5 +190,35 @@ describe('<ItemCard>', () => {
       />,
     )
     expect(screen.getByText('ripgrep.dev/docs')).toBeInTheDocument()
+  })
+
+  it('requires context before sharing an item to a Circle', async () => {
+    const user = userEvent.setup()
+    const shareToCircle = vi.fn().mockResolvedValue({})
+    mocks.useCircles.mockReturnValue({
+      data: [{ id: 'circle-1', name: 'Frontend Guild' }],
+      isLoading: false,
+    })
+    mocks.useShareToCircle.mockReturnValue({ mutateAsync: shareToCircle, isPending: false })
+
+    renderItemCard(<ItemCard item={makeItem()} />)
+
+    await user.click(screen.getByRole('button', { name: /share in circle/i }))
+
+    const shareItem = screen.getByRole('button', { name: /share item/i })
+    expect(shareItem).toBeDisabled()
+
+    fireEvent.change(screen.getByLabelText('Circle'), { target: { value: 'circle-1' } })
+    fireEvent.change(screen.getByLabelText('Why this matters'), {
+      target: { value: 'Reference repo for terminal UI experiments.' },
+    })
+    await user.click(shareItem)
+
+    await waitFor(() => {
+      expect(shareToCircle).toHaveBeenCalledWith({
+        circleId: 'circle-1',
+        itemId: 'a1b2c3-id',
+      })
+    })
   })
 })
