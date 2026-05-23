@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 
 	"devdeck/internal/authctx"
 	"devdeck/internal/store"
@@ -135,7 +136,8 @@ func (h *CirclesHandler) Join(w http.ResponseWriter, r *http.Request) {
 }
 
 type ShareItemInput struct {
-	ItemID uuid.UUID `json:"item_id"`
+	ItemID       uuid.UUID `json:"item_id"`
+	ShareContext string    `json:"share_context"`
 }
 
 func (h *CirclesHandler) ShareItem(w http.ResponseWriter, r *http.Request) {
@@ -179,7 +181,7 @@ func (h *CirclesHandler) ShareItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.store.ShareItemToCircle(r.Context(), circleID, in.ItemID, userID)
+	err = h.store.ShareItemToCircle(r.Context(), circleID, in.ItemID, userID, strings.TrimSpace(in.ShareContext))
 	if err != nil {
 		writeInternal(w, err)
 		return

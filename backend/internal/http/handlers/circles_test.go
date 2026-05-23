@@ -64,7 +64,8 @@ func TestCircles_CRUDAndFlows(t *testing.T) {
 	})
 
 	shareRec := ts.do(t, http.MethodPost, "/api/circles/"+created.ID.String()+"/share", map[string]any{
-		"item_id": item.ID.String(),
+		"item_id":       item.ID.String(),
+		"share_context": "Useful when teaching fast Git status checks.",
 	})
 	if shareRec.Code != http.StatusNoContent {
 		t.Fatalf("share item: expected 204, got %d, body: %s", shareRec.Code, shareRec.Body.String())
@@ -78,6 +79,9 @@ func TestCircles_CRUDAndFlows(t *testing.T) {
 	circleItems := decodeJSON[[]itemResp](t, circleItemsRec)
 	if len(circleItems) != 1 || circleItems[0].ID != item.ID {
 		t.Fatalf("expected 1 circle item matching seed, got: %+v", circleItems)
+	}
+	if got := circleItems[0].Meta["circle_share_context"]; got != "Useful when teaching fast Git status checks." {
+		t.Fatalf("expected share context metadata, got: %v", got)
 	}
 
 	// 6. List Members

@@ -165,12 +165,15 @@ func (s *Store) IsCircleMember(ctx context.Context, userID, circleID uuid.UUID) 
 	return role, true
 }
 
-func (s *Store) ShareItemToCircle(ctx context.Context, circleID, itemID, userID uuid.UUID) error {
+func (s *Store) ShareItemToCircle(ctx context.Context, circleID, itemID, userID uuid.UUID, shareContext string) error {
 	_, err := s.Writer().Exec(ctx, `
-		INSERT INTO circle_items (circle_id, item_id, shared_by)
-		VALUES ($1, $2, $3)
-		ON CONFLICT (circle_id, item_id) DO NOTHING
-	`, circleID, itemID, userID)
+		INSERT INTO circle_items (circle_id, item_id, shared_by, share_context)
+		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (circle_id, item_id) DO UPDATE SET
+			shared_by = EXCLUDED.shared_by,
+			shared_at = now(),
+			share_context = EXCLUDED.share_context
+	`, circleID, itemID, userID, shareContext)
 	return err
 }
 
@@ -188,17 +191,60 @@ func (s *Store) ListCircleItems(ctx context.Context, circleID uuid.UUID) ([]*ite
 	defer rows.Close()
 
 	var list []*items.Item
+	var itemIDs []uuid.UUID
 	for rows.Next() {
 		it, err := scanItem(rows)
 		if err != nil {
 			return nil, err
 		}
 		list = append(list, it)
+		itemIDs = append(itemIDs, it.ID)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if len(itemIDs) > 0 {
+		metaRows, err := s.Reader().Query(ctx, `
+			SELECT item_id, share_context, shared_by::text, shared_at::text
+			FROM circle_items
+			WHERE circle_id = $1 AND item_id = ANY($2)
+		`, circleID, itemIDs)
+		if err != nil {
+			return nil, err
+		}
+		defer metaRows.Close()
+
+		type shareMeta struct {
+			context  string
+			sharedBy string
+			sharedAt string
+		}
+		byItemID := map[uuid.UUID]shareMeta{}
+		for metaRows.Next() {
+			var itemID uuid.UUID
+			var meta shareMeta
+			if err := metaRows.Scan(&itemID, &meta.context, &meta.sharedBy, &meta.sharedAt); err != nil {
+				return nil, err
+			}
+			byItemID[itemID] = meta
+		}
+		if err := metaRows.Err(); err != nil {
+			return nil, err
+		}
+		for _, it := range list {
+			meta, ok := byItemID[it.ID]
+			if !ok {
+				continue
+			}
+			it.Meta["circle_share_context"] = meta.context
+			it.Meta["circle_shared_by"] = meta.sharedBy
+			it.Meta["circle_shared_at"] = meta.sharedAt
+		}
 	}
 	if list == nil {
 		list = []*items.Item{}
 	}
-	return list, rows.Err()
+	return list, nil
 }
 
 func (s *Store) ListCircleMembers(ctx context.Context, circleID uuid.UUID) ([]circles.CircleMemberDetail, error) {

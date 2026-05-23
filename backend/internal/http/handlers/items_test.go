@@ -13,17 +13,18 @@ import (
 // only what the test needs so the fixture stays stable if we add
 // fields to the Item struct.
 type itemResp struct {
-	ID               uuid.UUID `json:"id"`
-	Type             string    `json:"item_type"`
-	Title            string    `json:"title"`
-	Tags             []string  `json:"tags"`
-	Notes            string    `json:"notes"`
-	Archived         bool      `json:"archived"`
-	WhySaved         string    `json:"why_saved"`
-	WhenToUse        string    `json:"when_to_use"`
-	AISummary        string    `json:"ai_summary"`
-	AITags           []string  `json:"ai_tags"`
-	EnrichmentStatus string    `json:"enrichment_status"`
+	ID               uuid.UUID      `json:"id"`
+	Type             string         `json:"item_type"`
+	Title            string         `json:"title"`
+	Tags             []string       `json:"tags"`
+	Notes            string         `json:"notes"`
+	Archived         bool           `json:"archived"`
+	WhySaved         string         `json:"why_saved"`
+	WhenToUse        string         `json:"when_to_use"`
+	AISummary        string         `json:"ai_summary"`
+	AITags           []string       `json:"ai_tags"`
+	Meta             map[string]any `json:"meta"`
+	EnrichmentStatus string         `json:"enrichment_status"`
 }
 
 type itemListResp struct {

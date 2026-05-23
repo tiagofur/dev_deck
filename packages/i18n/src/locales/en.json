@@ -703,6 +703,7 @@
     "leave_button": "Leave",
     "all_circles": "All Circles",
     "shared_vault": "Shared Vault",
+    "why_shared": "Why this was shared",
     "shared_items_count": "{{count}} item shared",
     "shared_items_count_plural": "{{count}} items shared",
     "empty_shared_vault_title": "Empty Vault",

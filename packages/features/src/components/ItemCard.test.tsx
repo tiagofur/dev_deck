@@ -218,6 +218,7 @@ describe('<ItemCard>', () => {
       expect(shareToCircle).toHaveBeenCalledWith({
         circleId: 'circle-1',
         itemId: 'a1b2c3-id',
+        shareContext: 'Reference repo for terminal UI experiments.',
       })
     })
   })
