@@ -94,6 +94,9 @@ describe('<CircleDetailPage>', () => {
     expect(screen.getByText('Why this was shared')).toBeInTheDocument()
     expect(screen.getByText('Use this when explaining JWT refresh token rotation.')).toBeInTheDocument()
     expect(screen.getByText(/Shared by Ada Lovelace/i)).toBeInTheDocument()
+    expect(screen.getByText('Type: repo')).toBeInTheDocument()
+    expect(screen.getByText('Source: manual')).toBeInTheDocument()
+    expect(screen.getByText('#auth')).toBeInTheDocument()
     expect(screen.getByText('Useful Auth Repo')).toBeInTheDocument()
   })
 

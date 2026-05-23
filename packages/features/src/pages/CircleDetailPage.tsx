@@ -178,10 +178,12 @@ export function CircleDetailPage() {
                 const sharedDateLabel = sharedDate && !Number.isNaN(sharedDate.getTime())
                   ? sharedDate.toLocaleDateString()
                   : ''
+                const sourceChannel = item.source_channel?.trim()
+                const visibleTags = item.tags.slice(0, 3)
 
                 return (
                   <div key={item.id} className="grid gap-3">
-                    {shareContext || attribution ? (
+                    {shareContext || attribution || sourceChannel || visibleTags.length > 0 ? (
                       <div className="border-3 border-ink bg-accent-yellow/30 p-4 shadow-hard-sm">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <p className="font-display text-xs font-black uppercase tracking-widest">
@@ -199,6 +201,29 @@ export function CircleDetailPage() {
                             {shareContext}
                           </p>
                         ) : null}
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <span className="border-2 border-ink bg-bg-card px-2 py-1 font-mono text-[10px] font-bold uppercase">
+                            {t('circles.item_type_chip', { type: item.item_type })}
+                          </span>
+                          {sourceChannel ? (
+                            <span className="border-2 border-ink bg-bg-card px-2 py-1 font-mono text-[10px] font-bold uppercase">
+                              {t('circles.source_chip', { source: sourceChannel })}
+                            </span>
+                          ) : null}
+                          {visibleTags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="border-2 border-ink bg-bg-card px-2 py-1 font-mono text-[10px] font-bold"
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                          {item.tags.length > visibleTags.length ? (
+                            <span className="border-2 border-ink bg-bg-card px-2 py-1 font-mono text-[10px] font-bold">
+                              {t('circles.more_tags_chip', { count: item.tags.length - visibleTags.length })}
+                            </span>
+                          ) : null}
+                        </div>
                       </div>
                     ) : null}
                     <ItemGrid
