@@ -17,6 +17,7 @@ type Input struct {
 	Description string
 	URL         *string
 	Meta        map[string]any
+	WhySaved    string
 }
 
 // Output is the suggestion payload written back to the item row.

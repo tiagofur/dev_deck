@@ -19,6 +19,7 @@ func SanitizeForAI(item *items.Item) Input {
 		Description: truncateRunes(strings.TrimSpace(deref(item.Description)), 500),
 		URL:         item.URL,
 		Meta:        sanitizeMeta(item.Meta),
+		WhySaved:    strings.TrimSpace(item.WhySaved),
 	}
 }
 
