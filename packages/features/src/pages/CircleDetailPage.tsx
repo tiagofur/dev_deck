@@ -142,17 +142,41 @@ export function CircleDetailPage() {
                 const shareContext = typeof item.meta?.circle_share_context === 'string'
                   ? item.meta.circle_share_context
                   : ''
+                const sharedByName = typeof item.meta?.circle_shared_by_name === 'string'
+                  ? item.meta.circle_shared_by_name
+                  : ''
+                const sharedByUsername = typeof item.meta?.circle_shared_by_username === 'string'
+                  ? item.meta.circle_shared_by_username
+                  : ''
+                const sharedAt = typeof item.meta?.circle_shared_at === 'string'
+                  ? item.meta.circle_shared_at
+                  : ''
+                const attribution = sharedByName || sharedByUsername
+                const sharedDate = sharedAt ? new Date(sharedAt) : null
+                const sharedDateLabel = sharedDate && !Number.isNaN(sharedDate.getTime())
+                  ? sharedDate.toLocaleDateString()
+                  : ''
 
                 return (
                   <div key={item.id} className="grid gap-3">
-                    {shareContext ? (
+                    {shareContext || attribution ? (
                       <div className="border-3 border-ink bg-accent-yellow/30 p-4 shadow-hard-sm">
-                        <p className="font-display text-xs font-black uppercase tracking-widest">
-                          {t('circles.why_shared')}
-                        </p>
-                        <p className="mt-2 font-mono text-sm text-ink">
-                          {shareContext}
-                        </p>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="font-display text-xs font-black uppercase tracking-widest">
+                            {t('circles.why_shared')}
+                          </p>
+                          {attribution ? (
+                            <p className="font-mono text-xs text-ink-soft">
+                              {t('circles.shared_by', { name: attribution })}
+                              {sharedDateLabel ? ` · ${sharedDateLabel}` : ''}
+                            </p>
+                          ) : null}
+                        </div>
+                        {shareContext ? (
+                          <p className="mt-2 font-mono text-sm text-ink">
+                            {shareContext}
+                          </p>
+                        ) : null}
                       </div>
                     ) : null}
                     <ItemGrid

@@ -114,6 +114,12 @@ func TestStore_Circles(t *testing.T) {
 	if got := circleItems[0].Meta["circle_share_context"]; got != "Useful when onboarding a new shell workflow." {
 		t.Errorf("expected circle share context metadata, got %v", got)
 	}
+	if got := circleItems[0].Meta["circle_shared_by_name"]; got != "User One" {
+		t.Errorf("expected circle share attribution name, got %v", got)
+	}
+	if got := circleItems[0].Meta["circle_shared_by_username"]; got != "user1" {
+		t.Errorf("expected circle share attribution username, got %v", got)
+	}
 
 	// 5. Leave Circle
 	err = st.LeaveCircle(ctx, c1.ID, u2.ID)
