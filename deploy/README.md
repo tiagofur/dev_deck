@@ -60,7 +60,7 @@ ALLOWED_GITHUB_LOGINS=tu-usuario,otro-colega
 JWT_SECRET=<hex-32-chars>
 REFRESH_SECRET=<hex-32-chars>
 
-# IA (Opcional, pero recomendado para v1.0)
+# IA (Opcional, pero recomendado para v0.5 beta)
 AI_PROVIDER=openai
 OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-4o
@@ -93,9 +93,9 @@ docker compose logs -f api
 docker compose logs -f web
 ```
 
-## 5. Aplicar migraciones (v1.0.0)
+## 5. Aplicar migraciones (0.5.0 beta)
 
-DevDeck v1.0.0 requiere aplicar todas las migraciones del core:
+DevDeck 0.5.0 beta requiere aplicar las migraciones del core disponibles:
 
 ```bash
 for f in ../backend/migrations/*.sql; do
@@ -107,7 +107,7 @@ done
 ## 6. Probar que está vivo
 
 ```bash
-# Health (público - incluye DB ping en v1.0)
+# Health (público - incluye DB ping en v0.5 beta)
 curl https://devdeck.ai/healthz
 
 # Métricas (Prometheus)
@@ -116,7 +116,7 @@ curl https://devdeck.ai/metrics
 
 Si todo está bien, vas a ver `{"status":"ok"}` y una lista de métricas que incluyen `devdeck_agent_tool_calls_total`.
 
-## 7. Observabilidad (v1.0.0)
+## 7. Observabilidad (0.5.0 beta)
 
 DevDeck incluye un stack de monitoreo integrado:
 

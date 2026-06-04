@@ -1,9 +1,9 @@
 {
   "name": "@devdeck/web",
-  "version": "1.0.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
-  "description": "DevDeck — web client (React).",
+  "description": "DevDeck \u2014 web client (React).",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

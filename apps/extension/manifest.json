@@ -1,15 +1,19 @@
 {
   "manifest_version": 3,
-  "name": "DevDeck — Browser Extension",
+  "name": "DevDeck \u2014 Browser Extension",
   "description": "Capture repositories, documentation, and technical notes with a single click. The browser companion for your Knowledge OS.",
-  "version": "1.0.0",
+  "version": "0.5.0",
   "action": {
     "default_popup": "src/popup/index.html"
   },
   "content_scripts": [
     {
-      "js": ["src/content/index.tsx"],
-      "matches": ["<all_urls>"]
+      "js": [
+        "src/content/index.tsx"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ],
   "background": {
@@ -20,8 +24,15 @@
     "page": "src/options/index.html",
     "open_in_tab": true
   },
-  "permissions": ["activeTab", "storage", "alarms", "contextMenus"],
-  "host_permissions": ["<all_urls>"],
+  "permissions": [
+    "activeTab",
+    "storage",
+    "alarms",
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "commands": {
     "capture-tab": {
       "suggested_key": {

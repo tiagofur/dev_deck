@@ -1,6 +1,6 @@
-# DevDeck — Roadmap Técnico: Offline-first + Sync + Multi-usuario + IA (v1.0)
+# DevDeck — Roadmap Técnico: Offline-first + Sync + Multi-usuario + IA (v0.5 beta)
 
-> Versión: 1.0.0 (Stable) · Última actualización: Mayo 2026
+> Versión: 0.5.0 (Beta Pública) · Última actualización: Mayo 2026
 
 Este documento detalla la arquitectura implementada para las Olas 5 y 6.
 Todas las fases técnicas descritas aquí se encuentran **COMPLETADAS** y en producción.
@@ -64,4 +64,4 @@ Sistema multi-tenant con perfiles públicos y vaults compartidos (Teams).
 
 ---
 
-*Misión técnica v1.0.0 cumplida. Roadmap finalizado.*
+*Misión técnica de beta pública en progreso. Roadmap hacia 1.0 pendiente de hardening.*

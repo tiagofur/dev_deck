@@ -1,4 +1,4 @@
-# Especificación de la API de DevDeck.ai (v1.0)
+# Especificación de la API de DevDeck.ai (v0.5 beta)
 
 Este documento describe la API REST de **DevDeck.ai**.
 

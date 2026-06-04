@@ -1,4 +1,4 @@
-# DevDeck — Browser Extension (v1.0.0 Stable)
+# DevDeck — Browser Extension (v0.5.0 Public Beta)
 
 > The browser companion for your Knowledge OS. Capture repositories, documentation, and technical notes with a single click or keyboard shortcut.
 
@@ -31,4 +31,4 @@ Located in `apps/extension/` within the DevDeck monorepo.
 Default: `Cmd/Ctrl+Shift+D`. You can customize this in `chrome://extensions/shortcuts`.
 
 ---
-*Part of the DevDeck v1.0.0 Stable release.*
+*Part of the DevDeck v0.5.0 Public Beta release.*

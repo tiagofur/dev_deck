@@ -1,4 +1,4 @@
-# DevDeck.ai API Specification (v1.0)
+# DevDeck.ai API Specification (0.5.0 Public Beta)
 
 This document describes the REST API for **DevDeck.ai**.
 
@@ -11,8 +11,6 @@ The API uses **JWT (JSON Web Tokens)** for most operations and **API Keys** for 
 
 - **JWT Header:** `Authorization: Bearer <access_token>`
 - **API Key Header:** `X-API-Key: devdeck_<token>`
-- **SAML SSO:** Supported for enterprise organizations.
-- **SCIM 2.0:** Supported for automatic user provisioning.
 
 ---
 
@@ -34,24 +32,11 @@ Manage the core knowledge vault.
 - `DELETE /api/items/:id`: Permanent removal.
 - `POST /api/items/:id/ai-enrich`: Trigger LLM classification and summarization.
 
-### 3.2 AI Agents (Wave 16)
-- `POST /api/agent/chat`: Interactive agent chat (Server-Sent Events).
-- Supports multi-step orchestration and tool calling.
-
-### 3.3 Organizations & Teams (Wave 15)
-- `GET /api/orgs`: List user organizations.
-- `POST /api/orgs`: Create a new team vault.
-- `GET /api/orgs/:id/insights`: Aggregated adoption analytics (Admin only).
-- `GET /api/orgs/:id/discovery/trending`: Team-wide trending tags (Hot Topics).
-- `GET /api/orgs/:id/discovery/recommendations`: Smart tool suggestions from the team.
-
-### 3.4 Identity & Enterprise (Wave 14)
+### 3.2 Identity
 - `GET /api/auth/me`: Current user profile and onboarding status.
 - `PATCH /api/auth/me/onboarding/complete`: Mark product tour as finished.
-- `GET /api/saml/metadata`: SP Metadata for identity providers.
-- `POST /api/scim/v2/Users`: Standard SCIM provisioning endpoint.
 
-### 3.5 Global Search
+### 3.3 Global Search
 - `GET /api/search?q=query&mode=hybrid`: Unified search across items and cheatsheets.
 - Modes: `text` (fuzzy), `vector` (semantic), `hybrid` (RRF merge).
 
@@ -81,9 +66,7 @@ Errors follow a predictable structure:
 
 ## 5. Rate Limits
 - **Standard:** 2000 req/5m.
-- **AI Agent:** 50 req/1h (Cloud Pro) | 5 req/1h (Free).
-- **Public Feed:** 500 req/1m.
 
 ---
 
-*Last updated: May 2026 (v1.0.0 Stable)*
+*Last updated: June 2026 (0.5.0 Public Beta)*

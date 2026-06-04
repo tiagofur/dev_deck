@@ -1,102 +1,192 @@
 # DevDeck.ai
 
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/tiagofur)
+[![Buy Me a Coffee](https://img.shields.io/badge/Support-Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/tiagofur)
 
-> **Your AI-assisted external memory for development work.**
+> **The developer memory layer for everything useful you discover, build, and share.**
 
-[Leer en español](README.es.md)
+[Leer en español](README.es.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [Community model](docs/CIRCLES_COMMUNITY.md)
 
-An **offline-first, multi-user, and multi-platform** app to save, organize, and rediscover everything useful a developer finds: repos, CLIs, plugins, cheatsheets, shortcuts, snippets, agents, prompts, and workflows. Powered by AI that classifies, summarizes, and retrieves by intent — not just exact tags.
+DevDeck is an open-source desktop/web app for developers who keep losing useful repos, CLIs, snippets, prompts, shortcuts, cheatsheets, and workflow notes across chats, bookmarks, browser tabs, and GitHub stars.
+
+It turns scattered discoveries into a searchable engineering memory: capture useful artifacts, enrich them with context, retrieve them by intent, use them inside a developer workbench, and share high-signal findings with trusted Circles.
 
 Domain: **[devdeck.ai](https://devdeck.ai)**
 
+Current version: **0.5.0 Public Beta** — functional, useful, and actively being polished before a stable 1.0 release.
+
 ---
 
-## Why DevDeck?
+## Why this exists
 
-The real problem isn't "saving repos." It's being unable to find what you already discovered: a useful CLI shared in a chat, an IDE plugin whose name you forgot, a macOS shortcut that took hours to learn, or a repo that solved exactly your current problem.
+Developers do not have a saving problem. We have a **rediscovery problem**.
 
-DevDeck is your **curated collection of dev knowledge** — with AI that makes everything you save findable weeks later, even if you don't remember what you called it.
+You saw the perfect CLI in a Discord thread. A repo solved an auth problem. A prompt helped with a code review. A shortcut saved you five minutes. Three weeks later, you remember the shape of the solution — but not the name, link, flags, or context.
+
+DevDeck is built for that moment.
+
+It is not another bookmark graveyard. It is a practical, AI-assisted memory system for daily development work.
+
+---
+
+## The daily loop
+
+1. **Capture** a repo, CLI, snippet, shortcut, prompt, article, runbook, or note.
+2. **Add context**: why it matters, when to use it, tags, source, and gotchas.
+3. **Retrieve by intent** using fuzzy and semantic search instead of exact names only.
+4. **Use it in Workbench** for reusable developer workflows, snippets, requests, and project context.
+5. **Share to Circles** so a group or community can build private collective memory instead of losing signal in chat.
+
+This is the product direction: from “my saved links” to **our reusable engineering memory**.
+
+---
+
+## What is already in the app
+
+- **Vault:** save and organize developer artifacts such as repos, CLIs, prompts, snippets, shortcuts, articles, tools, notes, and how-tos.
+- **AI enrichment:** classify, summarize, and tag saved items with OpenAI or local Ollama-backed flows.
+- **Search:** fuzzy and semantic retrieval powered by Postgres extensions such as `pg_trgm` and `pgvector`.
+- **Developer Workbench:** reusable local utilities, command palette, saved requests, snippets, runbooks, and project context tools.
+- **Circles:** private shared spaces where developers can contribute findings with context, attribution, source metadata, and tags.
+- **Multi-surface app:** shared React feature package for Web and Desktop, plus a browser extension and Go CLI.
+- **Offline-first direction:** local-first desktop/web architecture with sync-oriented docs and implementation work in progress.
+
+DevDeck is still evolving. If something is rough, that is exactly where contributors can have a visible impact.
+
+---
+
+## Screenshots and demo
+
+> Public screenshots and demo assets are being prepared for the community launch.
+
+For now, the best demo path is:
+
+1. Open the app.
+2. Capture a few real tools you use weekly.
+3. Add “why this matters” context.
+4. Try Workbench actions.
+5. Create a Circle and share one useful finding with context.
+
+That is the core experience we are polishing for public adoption.
 
 ---
 
 ## Stack
 
 - **Desktop:** Electron + React 18 + TypeScript + Tailwind + Framer Motion
-- **Web:** React 18 + Vite + React Router + TanStack Query (shares 100% of pages and components with Desktop)
-- **Backend:** Go + Chi + pgx + pgvector
-- **DB:** Postgres 16 (with `pg_trgm` + `pgvector` for fuzzy and semantic search)
-- **AI:** OpenAI API / Ollama (local)
-- **Offline:** Local SQLite (Electron) + sql.js/OPFS (Web)
-- **Deploy:** Self-hosted VPS · Docker Compose · Caddy (Automatic TLS)
-- **Domain:** [devdeck.ai](https://devdeck.ai) · `app.devdeck.ai` · `api.devdeck.ai`
+- **Web:** React 18 + Vite + React Router + TanStack Query
+- **Backend:** Go + Chi + pgx + Postgres 16
+- **Search:** `pg_trgm` + `pgvector`
+- **AI:** OpenAI API and local Ollama-oriented flows
+- **CLI:** Go
+- **Extension:** Manifest V3 + Vite
+- **Deploy:** Docker Compose + Caddy for self-hosted VPS deployments
 
-### Repo Layout (pnpm workspaces monorepo)
+### Monorepo layout
 
-```
+```txt
 dev_deck/
 ├── apps/
-│   ├── desktop/          # Electron app (React renderer)
-│   └── web/              # Web app (React + BrowserRouter)
+│   ├── desktop/          # Electron app
+│   ├── extension/        # Browser extension
+│   └── web/              # Web app
 ├── packages/
-│   ├── ui/               # Design system: Button, TagChip, Toaster, tailwind-preset
-│   ├── api-client/       # Fetch wrapper + TanStack Query hooks + auth adapters
-│   └── features/         # Pages + domain components (shared between apps)
+│   ├── ui/               # Design system
+│   ├── api-client/       # Fetch wrapper + TanStack Query hooks
+│   ├── features/         # Shared pages and domain components
+│   ├── i18n/             # Locale resources
+│   └── realtime-client/  # Realtime collaboration client
 ├── backend/              # Go API
-├── cli/                  # `devdeck` CLI (Go)
-├── extension/            # Browser extension (Manifest v3)
+├── cli/                  # devdeck CLI
 ├── deploy/               # Docker Compose + Caddy
-└── docs/                 # Documentation
+└── docs/                 # Product, architecture, launch, and ops docs
 ```
 
-Both apps import pages and components from the `@devdeck/features` package — they only differ in the shell (HashRouter + PasteInterceptor on desktop, BrowserRouter + AuthGuard on web). See [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md).
+---
+
+## Quick start for contributors
+
+```bash
+pnpm install
+pnpm typecheck
+pnpm test
+```
+
+Run the desktop app:
+
+```bash
+pnpm dev:desktop
+```
+
+Run the web app:
+
+```bash
+pnpm dev:web
+```
+
+Run the backend locally:
+
+```bash
+cd backend
+cp .env.example .env
+docker compose -f ../deploy/docker-compose.local.yml up -d db
+go run ./cmd/api
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full setup and PR flow.
 
 ---
 
-## Screenshots
+## How to contribute
+
+The project is especially looking for help with:
+
+- UI/UX polish and responsive layout improvements.
+- Desktop/Web parity fixes.
+- Better onboarding and demo data.
+- Circle/community collaboration flows.
+- Search and AI enrichment quality.
+- CLI, extension, and capture integrations.
+- Tests, docs, and self-hosting reliability.
+
+Before opening a PR:
+
+1. Search existing issues.
+2. Open or use an approved issue.
+3. Keep the PR small and focused.
+4. Include tests or a clear verification note.
+
+Small, high-quality PRs are more valuable than giant feature drops.
+
 ---
 
-> 📸 **Explore screenshots and live demos on [DevDeck.ai](https://devdeck.ai)**
+## Support the project
+
+DevDeck is an indie open-source project. If it helps you, or if you want to support the push toward a polished public launch:
+
+- Sponsor/support: [Buy Me a Coffee](https://www.buymeacoffee.com/tiagofur)
+- Share the repo with developers who collect tools, repos, commands, and workflows.
+- Open issues with sharp feedback.
+- Contribute small PRs that improve launch readiness.
+
+Possible future sustainability paths include hosted community Circles, paid setup/support, curated workflow packs, and sponsorships — without compromising the open-source core.
 
 ---
 
 ## Documentation
 
-### Product & Vision
 | Doc | Content |
-|-----|-----------|
-| [docs/VISION.md](docs/VISION.md) | Vision, positioning, differentiators |
-| [docs/PRD.md](docs/PRD.md) | Product, features, user stories, scope by waves |
-| [docs/DEV_WORKBENCH.md](docs/DEV_WORKBENCH.md) | Developer Workbench: local utilities, palette, reusable actions |
-| [docs/COMPETITIVE_ANALYSIS.md](docs/COMPETITIVE_ANALYSIS.md) | Detailed competitive analysis |
-| [docs/LANDING.md](docs/LANDING.md) · [docs/LANDING_COPY.md](docs/LANDING_COPY.md) | Landing copy (ES / EN) |
-
-### Architecture & Decisions
-| Doc | Content |
-|-----|-----------|
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Diagram, stack, DB schema |
-| [docs/API.md](docs/API.md) | OpenAPI spec |
-| [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | Tokens, palette, typography |
-| [docs/TECHNICAL_ROADMAP_AI_OFFLINE.md](docs/TECHNICAL_ROADMAP_AI_OFFLINE.md) | Technical roadmap: offline, sync, AI |
-| [docs/adr/0001-items-polymorphism.md](docs/adr/0001-items-polymorphism.md) | ADR: polymorphic items model |
-| [docs/adr/0002-sync-strategy.md](docs/adr/0002-sync-strategy.md) | ADR: offline-first sync strategy |
-| [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md) | ADR: pnpm workspaces monorepo + React on web |
-
-### Operation & Contribution
-| Doc | Content |
-|-----|-----------|
-| [cli/README.md](cli/README.md) | Real installation and usage of the `devdeck` CLI (P0) |
-| [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md) | Step-by-step self-hosting guide |
-| [docs/CAPTURE.md](docs/CAPTURE.md) | Capture channels spec (extension, CLI, paste, share) |
-| [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | Test plan and CI |
-| [docs/REVIEW_2026_04.md](docs/REVIEW_2026_04.md) | **April 2026 Technical Review** — motivates Wave 4.5 |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | How to contribute |
-| [SECURITY.md](SECURITY.md) | Security policy |
+|-----|---------|
+| [docs/CIRCLES_COMMUNITY.md](docs/CIRCLES_COMMUNITY.md) | Circles as private collective memory for developer communities |
+| [docs/DEV_WORKBENCH.md](docs/DEV_WORKBENCH.md) | Developer Workbench direction and workflows |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture and technical design |
+| [docs/API.md](docs/API.md) | API documentation |
+| [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md) | Self-hosting guide |
+| [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | Testing and CI strategy |
+| [docs/LAUNCH_KIT.md](docs/LAUNCH_KIT.md) | Community launch copy and checklist |
+| [ROADMAP.md](ROADMAP.md) | Product roadmap |
 
 ---
 
-## Status
+## License
 
-DevDeck is an evolving open-source product. The current direction is to strengthen the core vault, capture flows, semantic retrieval, and the new **Developer Workbench**: local utilities, command palette, reusable requests, snippets, and runbooks connected to your saved context.
-
-See [ROADMAP.md](ROADMAP.md) and [docs/DEV_WORKBENCH.md](docs/DEV_WORKBENCH.md) for the product direction.
+Apache-2.0. See [LICENSE](LICENSE).

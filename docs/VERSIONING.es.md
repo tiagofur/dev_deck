@@ -9,14 +9,25 @@
 DevDeck usa [Semantic Versioning](https://semver.org/) (SemVer) con el formato `MAJOR.MINOR.PATCH`:
 
 | Componente | Cuándo cambia | Ejemplo |
-|-----------|-------------|--------|
-| **MAJOR** | Cambios incompatibles en la API | `0.x.0` → `1.0.0` |
-| **MINOR** | Nueva funcionalidad compatibles | `0.1.0` → `0.2.0` |
-| **PATCH** | Bug fixes compatibles | `0.1.0` → `0.1.1` |
+|-----------|---------------|---------|
+| **MAJOR** | Contrato de producto/API estable y cambios incompatibles | `0.x.0` → `1.0.0` |
+| **MINOR** | Nuevas funcionalidades compatibles o hitos de beta pública | `0.5.0` → `0.6.0` |
+| **PATCH** | Bug fixes compatibles | `0.5.0` → `0.5.1` |
 
-**Estado actual:** `1.0.0` (Ola 17 - Lanzamiento estable)
+**Estado actual:** `0.5.0` — beta pública / hito de launch-readiness.
 
-> DevDeck ha alcanzado su versión `1.0.0` estable tras completar las 17 olas del roadmap.
+> DevDeck todavía no es un producto estable `1.0.0`. La posición pública honesta es: beta open-source funcional, con dirección clara de memoria para developers, polish activo y lanzamiento comunitario en progreso.
+
+### Cuándo DevDeck puede ser 1.0.0
+
+DevDeck no debería etiquetarse como `1.0.0` hasta que esto sea verdad:
+
+- Onboarding/demo limpio para que una persona nueva vea valor en minutos.
+- Setup local y self-hosting verificados en una máquina limpia.
+- Flujos core de capture/search/workbench/Circles suficientemente estables para uso público.
+- README público, screenshots/GIFs y docs de contribución confiables.
+- Limitaciones conocidas documentadas con honestidad.
+- CI/E2E crítico confiable.
 
 ---
 
@@ -33,19 +44,13 @@ Usamos el formato [Keep a Changelog](https://keepachangelog.com/):
 ### Removed
 ### Fixed
 ### Security
-
----
-
-## [0.1.0] - 2026-05-03
-### Added
-- Stack filter
-- Smart tags
-...
 ```
 
 **Archivos:**
-- `CHANGELOG.md` — Changelog del proyecto
-- `package.json` — Versión del monorepo
+- `CHANGELOG.md` — changelog del proyecto
+- `package.json` — versión del monorepo
+- `apps/*/package.json` y `packages/*/package.json` — versiones de paquetes workspace
+- `apps/extension/manifest.json` — versión de la extensión
 
 ---
 
@@ -53,45 +58,34 @@ Usamos el formato [Keep a Changelog](https://keepachangelog.com/):
 
 Los mensajes de commit siguen [Conventional Commits](https://www.conventionalcommits.org/):
 
-```
-<tipo>[ámbito opcional]: <descripción>
-
-[body opcional]
-
-[footer opcional]
+```txt
+<tipo>[scope opcional]: <descripción>
 ```
 
 **Tipos:**
 
-| Tipo | Descripción | Genera release |
-|------|------------|--------------|
+| Tipo | Descripción | Release |
+|------|-------------|---------|
 | `feat` | Nueva funcionalidad | `minor` bump |
 | `fix` | Bug fix | `patch` bump |
-| `docs` | Documentación | ❌ |
-| `style` | Formateo (CSS, etc) | ❌ |
-| `refactor` | Refactor sin cambio funcional | ❌ |
-| `perf` | Optimización de performance | ❌ |
-| `test` | Agregar/modificar tests | ❌ |
-| `build` | Cambios en build system | ❌ |
-| `ci` | Cambios en CI/CD | ❌ |
-| `chore` | Mantenimiento | ❌ |
-| `revert` | Revertir commit anterior | ❌ |
-| `improvement` | Mejora de feature existente | `patch` bump |
+| `docs` | Documentación | sin bump automático |
+| `style` | Formato/CSS-only | sin bump automático |
+| `refactor` | Refactor sin cambio funcional | sin bump automático |
+| `perf` | Optimización | patch/minor según impacto |
+| `test` | Tests | sin bump automático |
+| `build` | Build system | sin bump automático |
+| `ci` | CI/CD | sin bump automático |
+| `chore` | Mantenimiento | sin bump automático |
+| `revert` | Revert de commit anterior | depende del cambio revertido |
 
 **Ejemplos:**
 
 ```bash
-feat(ui): add stack filter with multi-select pills
-fix(items): resolve N+1 query in items list
-docs(api): update authentication endpoint docs
-chore: add release workflow
+feat(circles): share workbench output with context
+fix(items): resolve duplicate capture regression
+docs(launch): clarify public beta positioning
+chore(release): set public beta version to 0.5.0
 ```
-
-**Reglas de validación:**
-- Header máximo 72 caracteres
-- Subject en minúsculas
-- Tipo obligatorio
-- Descripción obligatoria (sin punto al final)
 
 ---
 
@@ -109,74 +103,50 @@ pnpm release
 ```
 
 **Qué hace `bumpp`:**
-1. Detecta tipo de cambio (feat→minor, fix→patch)
-2. Sube versión en `package.json`
-3. Actualiza `CHANGELOG.md` con nuevos cambios
-4. Crea git tag (`v0.1.0`)
-5. push con tags
+1. Detecta tipo de cambio.
+2. Actualiza versión en `package.json`.
+3. Actualiza `CHANGELOG.md`.
+4. Crea git tag.
+5. Pushea tags cuando se confirma.
 
-### Release automático (CI)
+### Disciplina de release
 
-El workflow `.github/workflows/release.yml` se ejecuta en cada push a `main`:
-
-1. **Checkout** con todo el history (`fetch-depth: 0`)
-2. **Install** dependencias
-3. **Test** + **Build**
-4. **bumpp** — detecta tipo, actualiza versión, crea tag
-5. **conventional-changelog** — regenera changelog completo
-6. **GitHub Release** — crea release en GitHub con notes
+No llamar una release “stable” si el producto no es realmente estable para usuarios públicos. Por ahora, usar lenguaje de **beta pública**.
 
 ---
 
 ## 5. Scripts disponibles
 
 ```bash
-# Verificar mensajes de commit
-pnpm lint:commit
-
-# Generar changelog (solo cambios desde último tag)
-pnpm changelog
-
-# Regenerar changelog completo
-pnpm changelog:all
-
-# Release local (bump + tag + changelog)
-pnpm release
+pnpm lint:commit      # Verificar mensajes de commit
+pnpm changelog        # Generar changelog desde cambios recientes
+pnpm changelog:all    # Regenerar changelog completo
+pnpm release          # Release local: bump + tag + changelog
 ```
 
 ---
 
 ## 6. Git Tags
 
-Tags siguen el formato `v<versión>`:
+Los tags siguen el formato `v<versión>`:
 
 ```bash
-v0.1.0    # Versión 0.1.0
-v0.1.1    # Patch posterior
-v0.2.0    # Nueva funcionalidad
-v1.0.0    # Primer release estable
-```
-
-**Ver tags locales:**
-```bash
-git tag -l
-```
-
-**Push de tags:**
-```bash
-git push --tags
+v0.5.0    # Beta pública / hito de launch-readiness
+v0.5.1    # Patch para fixes beta
+v0.6.0    # Próximo hito beta
+v1.0.0    # Primer release estable, solo al cumplir criterios de launch-readiness
 ```
 
 ---
 
 ## 7. GitHub Releases
 
-Las releases se crean automáticamente en cada merge a `main` via `.github/workflows/release.yml`.
+Cada release debería incluir:
 
-Cada release incluye:
-- **Tag** con versión
-- **Release notes** generadas automáticamente desde commits
-- **Changelog** desde `CHANGELOG.md`
+- Tag con versión.
+- Release notes generadas desde commits o curadas manualmente.
+- Estado honesto: alpha, beta, release candidate o stable.
+- Limitaciones conocidas cuando corresponda.
 
 ---
 
@@ -186,30 +156,8 @@ Cada release incluye:
 |---------|-----------|
 | `CHANGELOG.md` | Changelog del proyecto |
 | `.commitlintrc.json` | Reglas de validación de commits |
-| `.github/workflows/release.yml` | CI para auto-release |
-| `package.json` | Scripts de release (`pnpm release`) |
-
----
-
-## 9. Ejemplo de flujo completo
-
-```bash
-# 1. Trabajar en feature
-git checkout -b feat/new-feature
-git commit -m "feat(items): add new feature"
-git commit -m "fix(items): resolve bug"
-git push
-
-# 2. Crear PR y merge a main
-# (CI corre tests + typecheck + build)
-
-# 3. En merge a main → Release workflow se dispara
-#    - CI genera: v0.2.0
-#    - GitHub crea: Release v0.2.0
-
-# 4. Ver changelog
-pnpm changelog
-```
+| `package.json` | Scripts de release y versión del monorepo |
+| `apps/extension/manifest.json` | Versión de la extensión |
 
 ---
 
