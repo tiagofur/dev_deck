@@ -1,8 +1,8 @@
 {
   "name": "@devdeck/desktop",
-  "version": "1.0.0",
+  "version": "0.5.0",
   "private": true,
-  "description": "DevDeck — your personal dev multi-tool. Desktop app.",
+  "description": "DevDeck \u2014 your personal dev multi-tool. Desktop app.",
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",

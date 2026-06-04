@@ -12,6 +12,19 @@ Thank you for your interest in contributing to DevDeck! This is an indie project
 2.  **Discussion first**: For new features, please open a **Discussion Issue** first. Do not send large PRs without prior acknowledgment.
 3.  **Reporting bugs**: Open an issue with clear reproduction steps, version, OS, and stack traces if applicable.
 
+## Best First Contributions
+
+DevDeck is currently preparing for a community launch. The most useful contributions are small, visible improvements that make the app easier to try, understand, and trust:
+
+- Polish one empty/loading/error state.
+- Improve one onboarding or README section.
+- Add one focused test for an existing feature.
+- Fix one Desktop/Web parity gap.
+- Improve one Circle sharing or community-memory flow.
+- Make local setup or self-hosting easier to follow.
+
+If you are new here, look for issues labeled `good first issue` or ask for a small launch-readiness task.
+
 ---
 
 ## Local Setup
@@ -95,6 +108,7 @@ We follow **Conventional Commits**: `feat:`, `fix:`, `docs:`, `test:`, `refactor
 - One PR = One concern.
 - Ensure the CI is green before requesting a review.
 - A minimum of one maintainer approval is required for merging.
+- Keep PRs small. Large PRs are harder to review, harder to debug, and more likely to be split.
 
 ---
 

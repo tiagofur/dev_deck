@@ -1,6 +1,6 @@
 # DevDeck — Copy y estructura de contenido para devdeck.ai (versión en inglés)
 
-> Versión: 1.0.0 (Stable) · Última actualización: Mayo 2026
+> Versión: 0.5.0 (Beta Pública) · Última actualización: Mayo 2026
 
 Este documento define el contenido, copy y estructura de secciones para la landing page de **devdeck.ai**.
 Refleja el estado final del producto tras completar las 17 olas del roadmap.

@@ -1,7 +1,7 @@
 {
   "name": "devdeck",
-  "version": "1.0.0",
-  "description": "DevDeck monorepo — desktop, web, shared packages.",
+  "version": "0.5.0",
+  "description": "DevDeck monorepo \u2014 desktop, web, shared packages.",
   "scripts": {
     "dev:desktop": "pnpm -F @devdeck/desktop dev",
     "dev:web": "pnpm -F @devdeck/web dev",

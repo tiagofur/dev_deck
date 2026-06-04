@@ -15,8 +15,8 @@ Ver [docs/DEV_WORKBENCH.es.md](docs/DEV_WORKBENCH.es.md) para la propuesta de pr
 ### Ola 4.5 a 17 — Cerradas
 - ✅ §16.5 Higiene de repo (ADRs, docs, licensing)
 - ✅ §16.9 `POST /api/items/capture` con detección, dedupe y enrich async
-- ✅ §16.10 CLI `devdeck` (v1.0.0 Stable)
-- ✅ §16.11 Extensión de browser (v1.0.0 Stable)
+- ✅ §16.10 CLI `devdeck` (v0.5.0 Beta Pública)
+- ✅ §16.11 Extensión de browser (v0.5.0 Beta Pública)
 - ✅ Wave 5-12: Features avanzadas, sync y social
 - ✅ Wave 13-16: Enterprise identity y Agentes autónomos
 - ✅ Wave 17: Lanzamiento y Onboarding
@@ -67,13 +67,13 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - Response incluye `duplicate_of` cuando aplica y `enrichment_status`. ✅
 - Tests end-to-end con los 9 tipos de input + dedupe intra-tabla + dedupe cross-table contra `repos` legacy. ✅
 
-### Fase 16.10 — CLI `devdeck` (v1.0.0 Stable) ✅
+### Fase 16.10 — CLI `devdeck` (v0.5.0 Beta Pública) ✅
 - Localizado en `cli/` (Go con Cobra).
 - Soporte para `login`, `logout`, `add`, `search`, `list`, `open`, `status`, `import`.
 - Nuevo comando interactivo: `devdeck agent` para chatear con el vault.
 - Almacenamiento seguro de tokens en el Keychain del sistema.
 
-### Fase 16.11 — Extensión de browser (v1.0.0 Stable) ✅
+### Fase 16.11 — Extensión de browser (v0.5.0 Beta Pública) ✅
 - Localizada en `apps/extension/` (React + manifest v3).
 - Atajo `Cmd/Ctrl+Shift+D` para captura inmediata.
 - Menús contextuales para guardar links y fragmentos de texto como notas.
@@ -117,8 +117,8 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - [x] ≥ 5 flows E2E pasando en Electron (Playwright skeleton con los 5 flows).
 - [x] Endpoint `/api/items/capture` en producción con tests.
 - [x] Web client migrado a React y compartiendo código con desktop (§16.13).
-- [x] CLI `devdeck` en release v1.0.0 Stable con distribución global.
-- [x] Extensión Chrome en Chrome Web Store (v1.0.0 Stable). ✅
+- [x] CLI `devdeck` en release v0.5.0 Beta Pública con distribución global.
+- [x] Extensión Chrome en Chrome Web Store (v0.5.0 Beta Pública). ✅
 - [x] README con screenshots (enlace a [devdeck.ai](https://devdeck.ai)). ✅
 - [x] `api.exe` fuera del repo.
 - [x] ADRs 0001, 0002 y 0003 con decisión final ("Aceptadas").
@@ -605,16 +605,16 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - Docs: Documentación técnica completa para desarrolladores y administradores
 - Marketing: Preparación de assets para lanzamiento en Product Hunt / GitHub Trending
 
-### Fase 53 — Hardening de Producción, Team Alerts y v1.0 Release (FINAL)
+### Fase 53 — Hardening de Producción, Team Alerts y v0.5 Public Beta (FINAL)
 
 - Monitoring: Implementación de observabilidad global con Prometheus para Agentes e IA
 - Security: Mitigación de SSRF en enriquecedores y auditoría final de flujos de identidad
 - Alerts: Sistema de Team Alerts proactivo vía webhooks para Hot Topics internos. ✅
-- Launch: Publicación de la v1.0 estable y finalización del Roadmap de 17 Olas
+- Launch: Publicación de la v0.5 beta pública y finalización del Roadmap de 17 Olas
 
 ---
 
-## Stack actualizado (v1.0)
+## Stack actualizado (v0.5 beta)
 
 | Capa | Tecnología |
 |------|-----------|
