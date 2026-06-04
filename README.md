@@ -4,7 +4,7 @@
 
 > **The developer memory layer for everything useful you discover, build, and share.**
 
-[Leer en español](README.es.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [Community model](docs/CIRCLES_COMMUNITY.md)
+[Leer en español](README.es.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [Support](docs/SUPPORT.md) · [Community model](docs/CIRCLES_COMMUNITY.md)
 
 DevDeck is an open-source desktop/web app for developers who keep losing useful repos, CLIs, snippets, prompts, shortcuts, cheatsheets, and workflow notes across chats, bookmarks, browser tabs, and GitHub stars.
 
@@ -161,9 +161,10 @@ Small, high-quality PRs are more valuable than giant feature drops.
 
 ## Support the project
 
-DevDeck is an indie open-source project. If it helps you, or if you want to support the push toward a polished public launch:
+DevDeck is an indie open-source project. Support helps fund domain/hosting costs, CI, development time, public beta polish, and AI-assisted coding tools used to move faster while still reviewing changes carefully.
 
 - Sponsor/support: [Buy Me a Coffee](https://www.buymeacoffee.com/tiagofur)
+- Read the support plan: [docs/SUPPORT.md](docs/SUPPORT.md)
 - Share the repo with developers who collect tools, repos, commands, and workflows.
 - Open issues with sharp feedback.
 - Contribute small PRs that improve launch readiness.
@@ -183,6 +184,7 @@ Possible future sustainability paths include hosted community Circles, paid setu
 | [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md) | Self-hosting guide |
 | [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | Testing and CI strategy |
 | [docs/LAUNCH_KIT.md](docs/LAUNCH_KIT.md) | Community launch copy and checklist |
+| [docs/SUPPORT.md](docs/SUPPORT.md) | Funding, support, and sustainability plan |
 | [ROADMAP.md](ROADMAP.md) | Product roadmap |
 
 ---
