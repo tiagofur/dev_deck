@@ -3,9 +3,11 @@ package store
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"devdeck/internal/domain/auth"
+	"devdeck/internal/domain/items"
 	"devdeck/internal/store/seed"
 
 	"github.com/google/uuid"
@@ -175,17 +177,66 @@ func (s *Store) InstallStarterKit(ctx context.Context, kitID string) error {
 	}
 
 	for _, si := range selected.Items {
-		url := si.URL
-		_, _ = s.CreateItem(ctx, CreateItemInput{
+		var url *string
+		var normalizedURL *string
+		if si.URL != "" {
+			url = &si.URL
+			norm := items.NormalizeURL(si.URL)
+			if norm != "" {
+				normalizedURL = &norm
+			}
+		}
+		exists, err := s.onboardingItemExists(ctx, si.Title)
+		if err != nil {
+			return err
+		}
+		if exists {
+			continue
+		}
+
+		if _, err := s.CreateItem(ctx, CreateItemInput{
 			Type:          si.Type,
 			Title:         si.Title,
-			URL:           &url,
+			URL:           url,
+			URLNormalized: normalizedURL,
+			Description:   stringPtrOrNil(si.Description),
+			Notes:         si.Notes,
 			Tags:          si.Tags,
+			WhySaved:      si.WhySaved,
+			WhenToUse:     si.WhenToUse,
 			SourceChannel: "onboarding",
-		})
+			Meta:          si.Meta,
+		}); err != nil && !errors.Is(err, ErrAlreadyExists) {
+			return err
+		}
 	}
 
 	return nil
+}
+
+func (s *Store) onboardingItemExists(ctx context.Context, title string) (bool, error) {
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 1)
+	args := append([]any{}, scopeArgs...)
+	args = append(args, title)
+
+	var exists bool
+	err := s.Reader().QueryRow(ctx, `
+		SELECT EXISTS (
+			SELECT 1
+			FROM items
+			WHERE `+scopeSQL+`
+			  AND source_channel = 'onboarding'
+			  AND title = $`+fmt.Sprint(len(args))+`
+		)
+	`, args...).Scan(&exists)
+	return exists, err
+}
+
+func stringPtrOrNil(value string) *string {
+	if value == "" {
+		return nil
+	}
+	return &value
 }
 
 // ─── Refresh Sessions ───
