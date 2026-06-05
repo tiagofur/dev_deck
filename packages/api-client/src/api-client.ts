@@ -60,6 +60,40 @@ function getBearerToken(): string {
   return staticToken ?? ''
 }
 
+function resolveUploadUrl(value: string): string {
+  if (!value.startsWith('/uploads/')) return value
+
+  const { baseUrl } = getConfig()
+  if (!baseUrl) return value
+
+  return `${baseUrl.replace(/\/$/, '')}${value}`
+}
+
+function normalizeUploadUrls<T>(value: T, key?: string): T {
+  if (typeof value === 'string') {
+    return (key?.toLowerCase().endsWith('_url') ? resolveUploadUrl(value) : value) as T
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => normalizeUploadUrls(item)) as T
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([entryKey, entryValue]) => [
+        entryKey,
+        normalizeUploadUrls(entryValue, entryKey),
+      ]),
+    ) as T
+  }
+
+  return value
+}
+
+async function readJSON<T>(res: Response): Promise<T> {
+  return normalizeUploadUrls((await res.json()) as T)
+}
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const { baseUrl, authMode } = getConfig()
   const { activeOrgId } = getPreferences()
@@ -104,7 +138,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
         throw new APIError(retryRes.status, code, message)
       }
       if (retryRes.status === 204) return undefined as T
-      return (await retryRes.json()) as T
+      return readJSON<T>(retryRes)
     }
   }
 
@@ -122,7 +156,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
 
   if (res.status === 204) return undefined as T
-  return (await res.json()) as T
+  return readJSON<T>(res)
 }
 
 export const api = {
