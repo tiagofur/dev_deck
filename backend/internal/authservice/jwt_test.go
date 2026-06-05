@@ -54,8 +54,21 @@ func TestService_ValidateAccessToken_RejectsTamperedToken(t *testing.T) {
 	user := auth.User{ID: uuid.New(), Login: "x", Role: "user"}
 	token, _, _ := svc.GenerateAccessToken(user)
 
-	// Flip a character in the signature.
-	tampered := token[:len(token)-2] + "AA"
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 || parts[2] == "" {
+		t.Fatalf("expected JWT with non-empty signature, got %q", token)
+	}
+
+	replacement := "A"
+	if parts[2][0] == 'A' {
+		replacement = "B"
+	}
+	parts[2] = replacement + parts[2][1:]
+	tampered := strings.Join(parts, ".")
+	if tampered == token {
+		t.Fatal("tampered token should differ from original token")
+	}
+
 	if _, _, _, err := svc.ValidateAccessToken(tampered); err != ErrInvalidToken {
 		t.Errorf("expected ErrInvalidToken on tampered jwt, got %v", err)
 	}
