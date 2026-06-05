@@ -391,7 +391,7 @@ function RunbookCard({ runbook }: { runbook: Runbook }) {
 			const itemId = captured.item?.id || captured.duplicate_of
 			if (!itemId) throw new Error('Could not capture runbook before sharing.')
 
-			await shareToCircle.mutateAsync({ circleId, itemId })
+			await shareToCircle.mutateAsync({ circleId, itemId, shareContext: context })
 			showToast('Runbook shared to Circle', 'success')
 			setShareOpen(false)
 		} catch (err) {

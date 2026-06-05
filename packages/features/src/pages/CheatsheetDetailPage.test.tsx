@@ -123,7 +123,11 @@ describe('<CheatsheetDetailPage>', () => {
         tags: ['cheatsheet', 'vcs', 'circle-share'],
         why_saved: 'Useful baseline commands for onboarding.',
       })
-      expect(shareToCircle).toHaveBeenCalledWith({ circleId: 'circle-1', itemId: 'item-1' })
+      expect(shareToCircle).toHaveBeenCalledWith({
+        circleId: 'circle-1',
+        itemId: 'item-1',
+        shareContext: 'Useful baseline commands for onboarding.',
+      })
     })
   })
 })

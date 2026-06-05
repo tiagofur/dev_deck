@@ -150,7 +150,7 @@ export function CheatsheetDetailPage() {
       const itemId = captured.item?.id || captured.duplicate_of
       if (!itemId) throw new Error('Could not capture cheatsheet before sharing.')
 
-      await shareToCircle.mutateAsync({ circleId, itemId })
+      await shareToCircle.mutateAsync({ circleId, itemId, shareContext: context })
       showToast('Cheatsheet shared to Circle', 'success')
       setShareOpen(false)
     } catch (err) {
