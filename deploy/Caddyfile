@@ -14,6 +14,11 @@
         reverse_proxy api:8080
     }
 
+    # Uploaded user assets
+    handle /uploads/* {
+        reverse_proxy api:8080
+    }
+
     # SPA — serve React app
     handle /* {
         reverse_proxy web:3000
