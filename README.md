@@ -56,17 +56,17 @@ DevDeck is still evolving. If something is rough, that is exactly where contribu
 
 ## Screenshots and demo
 
-> Public screenshots and demo assets are being prepared for the community launch.
+![DevDeck public beta demo loop](docs/assets/launch/devdeck-demo-loop.gif)
 
-For now, the best demo path is:
+Launch-safe demo screenshots are generated from local demo data, not private user records.
 
-1. Open the app.
-2. Capture a few real tools you use weekly.
-3. Add “why this matters” context.
-4. Try Workbench actions.
-5. Create a Circle and share one useful finding with context.
+| Vault | Workbench | Circles | Shared Circle vault |
+|-------|-----------|---------|---------------------|
+| ![DevDeck Vault screenshot](docs/assets/launch/devdeck-vault.png) | ![DevDeck Workbench screenshot](docs/assets/launch/devdeck-workbench.png) | ![DevDeck Circles screenshot](docs/assets/launch/devdeck-circles.png) | ![DevDeck shared Circle vault screenshot](docs/assets/launch/devdeck-circle-detail.png) |
 
-That is the core experience we are polishing for public adoption.
+The core demo path is: capture useful developer artifacts, add context, use them in Workbench, then share high-signal findings with a trusted Circle.
+
+See [docs/assets/launch/README.md](docs/assets/launch/README.md) to regenerate these assets.
 
 ---
 
