@@ -16,6 +16,7 @@ import {
 import { useLocation, Link, useNavigate } from 'react-router-dom'
 import { usePreferences, useMe } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'
+import { UserAvatar } from './UserAvatar'
 
 interface NavSidebarProps {
   isOpen: boolean
@@ -187,10 +188,10 @@ export function NavSidebar({ isOpen, onClose, reviewCount }: NavSidebarProps) {
       {user && (
         <div className="p-4 border-t-3 border-ink bg-bg-elevated flex items-center gap-3 shrink-0">
           <div className="h-9 w-9 shrink-0 overflow-hidden border-2 border-ink shadow-hard-sm">
-            <img
+            <UserAvatar
               src={user.avatar_url}
               alt={user.display_name || user.username || 'Avatar'}
-              className="h-full w-full object-cover"
+              iconSize={18}
             />
           </div>
           <div className="min-w-0 flex-1">

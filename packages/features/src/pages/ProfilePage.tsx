@@ -28,6 +28,7 @@ import { EditProfileModal } from '../components/Profile/EditProfileModal'
 import { ReputationDashboard } from '../components/Profile/ReputationDashboard'
 import { TechStackSection } from '../components/Profile/TechStackSection'
 import { ActivityTimeline } from '../components/Profile/ActivityTimeline'
+import { UserAvatar } from '../components/UserAvatar'
 
 export function ProfilePage() {
   const { t } = useTranslation()
@@ -154,7 +155,13 @@ export function ProfilePage() {
                 onClick={() => setIsModalOpen(true)}
                 className="w-28 h-28 border-4 border-ink shadow-hard overflow-hidden bg-accent-yellow rounded-none shrink-0 relative cursor-pointer group-hover:scale-105 transition-transform"
               >
-                <img src={user.avatar_url} alt={user.display_name} className="w-full h-full object-cover" />
+                <UserAvatar
+                  src={user.avatar_url}
+                  alt={user.display_name || user.username || user.login || 'Avatar'}
+                  imageClassName="w-full h-full object-cover"
+                  fallbackClassName="w-full h-full flex items-center justify-center bg-accent-yellow text-ink"
+                  iconSize={48}
+                />
                 <div className="absolute inset-0 bg-ink/70 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                   <Edit3 className="text-white" size={24} />
                 </div>
