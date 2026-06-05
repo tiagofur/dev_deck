@@ -1,0 +1,52 @@
+name: Feature request
+description: Suggest a focused improvement for DevDeck.
+title: "feat(scope): describe the improvement"
+labels: [enhancement, status:needs-review]
+body:
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I have searched existing issues and this is not a duplicate.
+          required: true
+        - label: I understand this issue needs `status:approved` before a PR can be opened.
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem description
+      description: What user pain or contributor friction does this solve?
+      placeholder: New users struggle to understand ...
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Keep the first version small and reviewable.
+      placeholder: Add a focused change that ...
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Vault/items
+        - Workbench
+        - Circles/community
+        - Search/AI enrichment
+        - Onboarding/demo data
+        - Desktop/Web parity
+        - CLI/extension
+        - Self-hosting/deploy
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      placeholder: What other approaches did you consider?

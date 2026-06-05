@@ -6,11 +6,26 @@ Thank you for your interest in contributing to DevDeck! This is an indie project
 
 ---
 
+## Fast Path
+
+If this is your first contribution, start with [docs/FIRST_CONTRIBUTION.md](docs/FIRST_CONTRIBUTION.md).
+
+The short version:
+
+1. Pick or open an issue.
+2. Wait for `status:approved`.
+3. Keep the PR focused on that one issue.
+4. Run the smallest relevant verification command.
+5. Open a PR with `Closes #...` and exactly one `type:*` label.
+
+---
+
 ## Before You Start
 
 1.  **Read the vision**: Check `docs/VISION.md` and `docs/PRD.md`. If your proposal doesn't align with the project's direction, we might decline it. Save yourself some time!
-2.  **Discussion first**: For new features, please open a **Discussion Issue** first. Do not send large PRs without prior acknowledgment.
-3.  **Reporting bugs**: Open an issue with clear reproduction steps, version, OS, and stack traces if applicable.
+2.  **Issue first**: For code or docs changes, open or claim an issue and wait for `status:approved` before opening a PR.
+3.  **Shape unclear ideas carefully**: If the idea is still rough, start in [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions) to ask questions, share context, and narrow the first useful step before opening an issue.
+4.  **Reporting bugs**: Use the bug report template with clear reproduction steps, version, OS, and logs if applicable.
 
 ## Best First Contributions
 
@@ -23,7 +38,9 @@ DevDeck is currently preparing for a community launch. The most useful contribut
 - Improve one Circle sharing or community-memory flow.
 - Make local setup or self-hosting easier to follow.
 
-If you are new here, look for issues labeled `good first issue` or ask for a small launch-readiness task.
+If you are new here, look for issues labeled `good first issue` or ask for a small launch-readiness task in [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions). See [docs/DISCUSSIONS.md](docs/DISCUSSIONS.md) before opening rough proposals.
+
+The best first issues are already scoped to fit a small PR. If a change starts growing, split it before opening the PR.
 
 ---
 
@@ -106,15 +123,19 @@ We follow **Conventional Commits**: `feat:`, `fix:`, `docs:`, `test:`, `refactor
 
 - Branch from `main` with a descriptive name: `feat/capture-endpoint`.
 - One PR = One concern.
+- Link an approved issue with `Closes #...`.
+- Use [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions) for questions or rough proposals before opening a large PR.
+- Add exactly one `type:*` label.
 - Ensure the CI is green before requesting a review.
 - A minimum of one maintainer approval is required for merging.
 - Keep PRs small. Large PRs are harder to review, harder to debug, and more likely to be split.
+- Do not add `Co-Authored-By` or AI attribution trailers.
 
 ---
 
 ## Code of Conduct
 
-Be respectful. If you have an issue with another contributor, please contact a maintainer privately. We keep the drama out of public discussions.
+Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Be respectful, direct, and constructive. If you have an issue with another contributor, contact a maintainer privately.
 
 ---
 

@@ -1,0 +1,65 @@
+name: Bug report
+description: Report something that is broken or behaving unexpectedly.
+title: "fix(scope): describe the bug"
+labels: [bug, status:needs-review]
+body:
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I have searched existing issues and this is not a duplicate.
+          required: true
+        - label: I understand this issue needs `status:approved` before a PR can be opened.
+          required: true
+  - type: textarea
+    id: bug
+    attributes:
+      label: Bug description
+      description: What is broken?
+      placeholder: DevDeck does X, but I expected Y.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. See ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: What should happen instead?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: What happened? Include screenshots or logs if useful.
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Affected surface
+      options:
+        - Web app
+        - Desktop app
+        - Browser extension
+        - CLI
+        - Backend/API
+        - Docs
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: OS, browser, commit, logs, screenshots, or workaround.

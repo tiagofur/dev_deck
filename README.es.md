@@ -6,6 +6,8 @@ Una app **offline-first, multi-usuario y multiplataforma** donde guardar, organi
 
 Dominio: **[devdeck.ai](https://devdeck.ai)**
 
+[English](README.md) · [Roadmap](ROADMAP.md) · [Contribuir](CONTRIBUTING.es.md) · [Discusiones](https://github.com/tiagofur/dev_deck/discussions) · [Guía de discusiones](docs/DISCUSSIONS.md) · [Soporte](docs/SUPPORT.md) · [Modelo de comunidad](docs/CIRCLES_COMMUNITY.md)
+
 ---
 
 ## ¿Por qué DevDeck?
