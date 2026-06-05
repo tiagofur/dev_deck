@@ -24,7 +24,7 @@ The short version:
 
 1.  **Read the vision**: Check `docs/VISION.md` and `docs/PRD.md`. If your proposal doesn't align with the project's direction, we might decline it. Save yourself some time!
 2.  **Issue first**: For code or docs changes, open or claim an issue and wait for `status:approved` before opening a PR.
-3.  **Shape unclear ideas carefully**: If the idea is still rough, open a feature request and explain the uncertainty instead of sending a large PR.
+3.  **Shape unclear ideas carefully**: If the idea is still rough, start in [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions) to ask questions, share context, and narrow the first useful step before opening an issue.
 4.  **Reporting bugs**: Use the bug report template with clear reproduction steps, version, OS, and logs if applicable.
 
 ## Best First Contributions
@@ -38,7 +38,7 @@ DevDeck is currently preparing for a community launch. The most useful contribut
 - Improve one Circle sharing or community-memory flow.
 - Make local setup or self-hosting easier to follow.
 
-If you are new here, look for issues labeled `good first issue` or ask for a small launch-readiness task.
+If you are new here, look for issues labeled `good first issue` or ask for a small launch-readiness task in [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions).
 
 The best first issues are already scoped to fit a small PR. If a change starts growing, split it before opening the PR.
 
@@ -124,6 +124,7 @@ We follow **Conventional Commits**: `feat:`, `fix:`, `docs:`, `test:`, `refactor
 - Branch from `main` with a descriptive name: `feat/capture-endpoint`.
 - One PR = One concern.
 - Link an approved issue with `Closes #...`.
+- Use [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions) for questions or rough proposals before opening a large PR.
 - Add exactly one `type:*` label.
 - Ensure the CI is green before requesting a review.
 - A minimum of one maintainer approval is required for merging.

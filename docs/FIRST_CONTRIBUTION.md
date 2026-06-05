@@ -58,4 +58,6 @@ Every PR should:
 
 ## Need help?
 
-Open an issue with a clear problem statement. If the idea is still rough, say what is uncertain and keep the proposed first step small.
+Use [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions) for questions, rough ideas, community workflows, and early feedback.
+
+Open an issue only when the problem or proposal is clear enough to become a focused, reviewable task. If the idea is still rough, start in Discussions first and keep the proposed first step small.

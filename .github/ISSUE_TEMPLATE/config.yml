@@ -1,1 +1,5 @@
 blank_issues_enabled: false
+contact_links:
+  - name: Questions, ideas, and community discussion
+    url: https://github.com/tiagofur/dev_deck/discussions
+    about: Ask usage questions, shape rough ideas, and share community workflows before opening an issue.

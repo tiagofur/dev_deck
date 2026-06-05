@@ -5,7 +5,7 @@ Gracias por querer ayudar. DevDeck es un proyecto indie con visión fuerte, así
 ## Antes de empezar
 
 1. Leé `docs/VISION.md` y `docs/PRD.md`. Si tu propuesta no encaja, probablemente te digamos que no. Mejor ahorrarte el tiempo.
-2. Para features nuevas: abrí un **issue de discusión** primero. No envíes PRs grandes sin ack previo.
+2. Para features nuevas o ideas todavía verdes: empezá en [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions). No envíes PRs grandes sin ack previo.
 3. Para bugs: abrí un issue con repro pasos, versión, OS, stack trace si aplica.
 
 ## Setup local
@@ -114,6 +114,7 @@ Closes #123
 
 - Branch desde `main`, nombre descriptivo: `feat/capture-endpoint`, `fix/reorder-race`.
 - Un PR = una cosa. Si estás tocando backend + frontend para una misma feature, ok, pero no mezcles features distintas.
+- Usá [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions) para preguntas, propuestas verdes o coordinación comunitaria antes de abrir un PR grande.
 - Descripción del PR debe tener:
   - **Qué** cambia.
   - **Por qué** (link al issue).
