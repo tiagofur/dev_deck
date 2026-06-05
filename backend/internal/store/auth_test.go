@@ -3,7 +3,9 @@ package store_test
 import (
 	"testing"
 
+	"devdeck/internal/authctx"
 	"devdeck/internal/domain/auth"
+	"devdeck/internal/domain/items"
 )
 
 func TestStore_Auth_GitHub(t *testing.T) {
@@ -52,5 +54,85 @@ func TestStore_Auth_GitHub(t *testing.T) {
 	}
 	if byID.GitHubID == nil || *byID.GitHubID != ghUser.ID {
 		t.Errorf("github id mismatch: %d", byID.GitHubID)
+	}
+}
+
+func TestStore_InstallStarterKit_SeedsContextualDemoItems(t *testing.T) {
+	st, ctx := newStore(t)
+
+	userID := mustUUID(t, "00000000-0000-0000-0000-000000000001")
+	ctx = authctx.WithUserID(ctx, userID)
+
+	if err := st.InstallStarterKit(ctx, "devdeck-demo"); err != nil {
+		t.Fatalf("InstallStarterKit failed: %v", err)
+	}
+
+	res, err := st.ListItems(ctx, items.ListParams{
+		Sort:  "title_asc",
+		Limit: 20,
+	})
+	if err != nil {
+		t.Fatalf("ListItems failed: %v", err)
+	}
+	if res.Total != 5 {
+		t.Fatalf("expected 5 demo items, got %d", res.Total)
+	}
+
+	var repo *items.Item
+	var prompt *items.Item
+	for _, it := range res.Items {
+		if it.SourceChannel != "onboarding" {
+			t.Fatalf("expected onboarding source channel for %q, got %q", it.Title, it.SourceChannel)
+		}
+		if it.WhySaved == "" {
+			t.Fatalf("expected why_saved for %q", it.Title)
+		}
+		if it.WhenToUse == "" {
+			t.Fatalf("expected when_to_use for %q", it.Title)
+		}
+		switch it.Title {
+		case "TanStack Query offline mutation patterns":
+			repo = it
+		case "Launch PR risk review prompt":
+			prompt = it
+		}
+	}
+
+	if repo == nil {
+		t.Fatal("expected TanStack Query demo repo")
+	}
+	if repo.URLNormalized == nil || *repo.URLNormalized != "https://github.com/TanStack/query" {
+		t.Fatalf("expected normalized repo URL, got %v", repo.URLNormalized)
+	}
+	if repo.Description == nil || *repo.Description == "" {
+		t.Fatal("expected repo description")
+	}
+	if repo.Meta["language"] != "TypeScript" {
+		t.Fatalf("expected repo language metadata, got %#v", repo.Meta["language"])
+	}
+
+	if prompt == nil {
+		t.Fatal("expected launch review prompt")
+	}
+	if prompt.Type != items.TypePrompt {
+		t.Fatalf("expected prompt item type, got %q", prompt.Type)
+	}
+	if prompt.Notes == "" {
+		t.Fatal("expected prompt notes")
+	}
+
+	if err := st.InstallStarterKit(ctx, "devdeck-demo"); err != nil {
+		t.Fatalf("InstallStarterKit second run failed: %v", err)
+	}
+
+	after, err := st.ListItems(ctx, items.ListParams{
+		Sort:  "title_asc",
+		Limit: 20,
+	})
+	if err != nil {
+		t.Fatalf("ListItems after second run failed: %v", err)
+	}
+	if after.Total != 5 {
+		t.Fatalf("expected idempotent install to keep 5 items, got %d", after.Total)
 	}
 }
