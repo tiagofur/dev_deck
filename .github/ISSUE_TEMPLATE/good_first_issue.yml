@@ -1,0 +1,42 @@
+name: Good first issue candidate
+description: Propose a small, contributor-friendly task.
+title: "docs(scope): make one contributor-friendly improvement"
+labels: [good first issue, help wanted, status:needs-review]
+body:
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I have searched existing issues and this is not a duplicate.
+          required: true
+        - label: I understand this issue needs `status:approved` before a PR can be opened.
+          required: true
+  - type: textarea
+    id: task
+    attributes:
+      label: Small task
+      description: What exactly should a new contributor change?
+      placeholder: Improve one empty state, add one test, or clarify one doc section.
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Suggested files
+      description: List likely files or folders so contributors know where to start.
+      placeholder: |
+        - packages/features/src/...
+        - docs/...
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of done
+      placeholder: |
+        - Copy is updated.
+        - A focused test is added or a verification note is included.
+        - PR links this issue.
+    validations:
+      required: true

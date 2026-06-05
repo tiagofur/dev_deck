@@ -4,7 +4,7 @@
 
 > **The developer memory layer for everything useful you discover, build, and share.**
 
-[Leer en español](README.es.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [Support](docs/SUPPORT.md) · [Community model](docs/CIRCLES_COMMUNITY.md)
+[Leer en español](README.es.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [First contribution](docs/FIRST_CONTRIBUTION.md) · [Support](docs/SUPPORT.md) · [Community model](docs/CIRCLES_COMMUNITY.md)
 
 DevDeck is an open-source desktop/web app for developers who keep losing useful repos, CLIs, snippets, prompts, shortcuts, cheatsheets, and workflow notes across chats, bookmarks, browser tabs, and GitHub stars.
 
@@ -157,6 +157,8 @@ Before opening a PR:
 
 Small, high-quality PRs are more valuable than giant feature drops.
 
+New here? Start with [docs/FIRST_CONTRIBUTION.md](docs/FIRST_CONTRIBUTION.md), then pick a `good first issue` with `status:approved`.
+
 ---
 
 ## Support the project
@@ -178,6 +180,7 @@ Possible future sustainability paths include hosted community Circles, paid setu
 | Doc | Content |
 |-----|---------|
 | [docs/CIRCLES_COMMUNITY.md](docs/CIRCLES_COMMUNITY.md) | Circles as private collective memory for developer communities |
+| [docs/FIRST_CONTRIBUTION.md](docs/FIRST_CONTRIBUTION.md) | Short path for a first issue-backed PR |
 | [docs/DEV_WORKBENCH.md](docs/DEV_WORKBENCH.md) | Developer Workbench direction and workflows |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture and technical design |
 | [docs/API.md](docs/API.md) | API documentation |
