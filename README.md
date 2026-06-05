@@ -4,7 +4,7 @@
 
 > **The developer memory layer for everything useful you discover, build, and share.**
 
-[Leer en español](README.es.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [First contribution](docs/FIRST_CONTRIBUTION.md) · [Discussions](https://github.com/tiagofur/dev_deck/discussions) · [Support](docs/SUPPORT.md) · [Community model](docs/CIRCLES_COMMUNITY.md)
+[Leer en español](README.es.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [First contribution](docs/FIRST_CONTRIBUTION.md) · [Discussions](https://github.com/tiagofur/dev_deck/discussions) · [Discussions guide](docs/DISCUSSIONS.md) · [Support](docs/SUPPORT.md) · [Community model](docs/CIRCLES_COMMUNITY.md)
 
 DevDeck is an open-source desktop/web app for developers who keep losing useful repos, CLIs, snippets, prompts, shortcuts, cheatsheets, and workflow notes across chats, bookmarks, browser tabs, and GitHub stars.
 

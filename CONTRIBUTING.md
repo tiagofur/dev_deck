@@ -38,7 +38,7 @@ DevDeck is currently preparing for a community launch. The most useful contribut
 - Improve one Circle sharing or community-memory flow.
 - Make local setup or self-hosting easier to follow.
 
-If you are new here, look for issues labeled `good first issue` or ask for a small launch-readiness task in [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions).
+If you are new here, look for issues labeled `good first issue` or ask for a small launch-readiness task in [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions). See [docs/DISCUSSIONS.md](docs/DISCUSSIONS.md) before opening rough proposals.
 
 The best first issues are already scoped to fit a small PR. If a change starts growing, split it before opening the PR.
 

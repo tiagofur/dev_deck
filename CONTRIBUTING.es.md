@@ -114,7 +114,7 @@ Closes #123
 
 - Branch desde `main`, nombre descriptivo: `feat/capture-endpoint`, `fix/reorder-race`.
 - Un PR = una cosa. Si estás tocando backend + frontend para una misma feature, ok, pero no mezcles features distintas.
-- Usá [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions) para preguntas, propuestas verdes o coordinación comunitaria antes de abrir un PR grande.
+- Usá [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions) para preguntas, propuestas verdes o coordinación comunitaria antes de abrir un PR grande. Ver [docs/DISCUSSIONS.md](docs/DISCUSSIONS.md) para categorías y formatos sugeridos.
 - Descripción del PR debe tener:
   - **Qué** cambia.
   - **Por qué** (link al issue).

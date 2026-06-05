@@ -58,6 +58,6 @@ Every PR should:
 
 ## Need help?
 
-Use [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions) for questions, rough ideas, community workflows, and early feedback.
+Use [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions) for questions, rough ideas, community workflows, and early feedback. See [docs/DISCUSSIONS.md](DISCUSSIONS.md) for category guidance and posting formats.
 
 Open an issue only when the problem or proposal is clear enough to become a focused, reviewable task. If the idea is still rough, start in Discussions first and keep the proposed first step small.
