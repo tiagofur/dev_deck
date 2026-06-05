@@ -153,15 +153,9 @@ export function ProjectContextTool() {
           <h3 className="font-display text-sm font-black uppercase">Related vault context</h3>
           {isLoading && <span className="font-mono text-xs text-ink-soft">Searching...</span>}
         </div>
-        {!query && (
-          <p className="font-mono text-sm text-ink-soft">
-            Add a project name or remote to search your vault.
-          </p>
-        )}
+        {!query && <ProjectContextEmptyState state="missing-project" />}
         {query && !isLoading && results.length === 0 && (
-          <p className="font-mono text-sm text-ink-soft">
-            No related items yet. Save a command, request, note, or runbook with this project name.
-          </p>
+          <ProjectContextEmptyState state="no-related-context" projectTag={projectTag} />
         )}
         <div className="grid gap-2">
           {results.slice(0, 8).map((result) => (
@@ -179,6 +173,61 @@ export function ProjectContextTool() {
         </div>
       </div>
     </ToolFrame>
+  )
+}
+
+function ProjectContextEmptyState({
+  state,
+  projectTag,
+}: {
+  state: 'missing-project' | 'no-related-context'
+  projectTag?: string
+}) {
+  if (state === 'missing-project') {
+    return (
+      <div className="grid gap-4 border-2 border-ink bg-bg-card p-4 shadow-hard-sm">
+        <div>
+          <p className="font-display text-base font-black uppercase">Start with one real project</p>
+          <p className="mt-1 font-mono text-sm text-ink-soft">
+            Add a project name or Git remote so Workbench can pull matching commands, notes, requests,
+            and runbooks from your vault.
+          </p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <EmptyStep title="1. Name it" body="Use the repo or folder name you actually work in." />
+          <EmptyStep title="2. Add notes" body="Capture local gotchas, scripts, services, and setup hints." />
+          <EmptyStep title="3. Link context" body="Tag useful vault items so the project becomes reusable." />
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid gap-4 border-2 border-ink bg-accent-yellow/25 p-4 shadow-hard-sm">
+      <div>
+        <p className="font-display text-base font-black uppercase">Build this project memory</p>
+        <p className="mt-1 font-mono text-sm text-ink-soft">
+          No related items yet. Save one command, API request, note, or workflow with this project in mind.
+        </p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <EmptyStep title="Save a command" body="Example: pnpm test, make migrate, docker compose up." />
+        <EmptyStep title="Save a gotcha" body="Write the setup detail future you would forget." />
+        <EmptyStep
+          title="Use the project tag"
+          body={projectTag ? `Tag related items with ${projectTag}.` : 'Add a project name to generate a project tag.'}
+        />
+      </div>
+    </div>
+  )
+}
+
+function EmptyStep({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="border-2 border-ink bg-bg-elevated p-3">
+      <p className="font-display text-xs font-black uppercase">{title}</p>
+      <p className="mt-1 font-mono text-xs text-ink-soft">{body}</p>
+    </div>
   )
 }
 

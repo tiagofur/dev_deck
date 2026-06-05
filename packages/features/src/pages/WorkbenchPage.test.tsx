@@ -120,6 +120,27 @@ describe('<WorkbenchPage>', () => {
     })
   })
 
+  it('guides users to start Project Context with a real project', () => {
+    renderWorkbench('/workbench?tool=project')
+
+    expect(screen.getByText('Start with one real project')).toBeInTheDocument()
+    expect(screen.getByText('1. Name it')).toBeInTheDocument()
+    expect(screen.getByText('2. Add notes')).toBeInTheDocument()
+    expect(screen.getByText('3. Link context')).toBeInTheDocument()
+  })
+
+  it('guides users to build project memory when no related context exists', () => {
+    renderWorkbench('/workbench?tool=project')
+
+    fireEvent.change(screen.getByLabelText('Project name'), { target: { value: 'dev_deck' } })
+
+    expect(screen.getByText('Build this project memory')).toBeInTheDocument()
+    expect(screen.getByText('Save a command')).toBeInTheDocument()
+    expect(screen.getByText('Save a gotcha')).toBeInTheDocument()
+    expect(screen.getByText('Use the project tag')).toBeInTheDocument()
+    expect(screen.getByText('Tag related items with project:dev_deck.')).toBeInTheDocument()
+  })
+
   it('links an existing item to the current project with a project tag', async () => {
     const mutateAsync = vi.fn().mockResolvedValue({})
     mocks.useGlobalSearch.mockReturnValue({
