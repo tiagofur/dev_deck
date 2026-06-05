@@ -5,6 +5,7 @@ import { useTranslation } from '@devdeck/i18n'
 import { SyncStatusIndicator } from './SyncStatusIndicator'
 import { NotificationCenter } from './NotificationCenter'
 import { WorkspaceSwitcher } from './WorkspaceSwitcher'
+import { UserAvatar } from './UserAvatar'
 
 interface TopbarProps {
   query: string
@@ -107,10 +108,10 @@ export function Topbar({
               title={t('topbar.profile_tooltip')}
               className="flex h-[36px] w-[36px] sm:h-[38px] sm:w-[38px] shrink-0 cursor-pointer items-center justify-center overflow-hidden border-3 border-ink bg-bg-card shadow-hard transition-all duration-150 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm"
             >
-              <img
+              <UserAvatar
                 src={user.avatar_url}
                 alt={user.display_name || user.username || 'Avatar'}
-                className="h-full w-full object-cover"
+                iconSize={18}
               />
             </button>
           )}

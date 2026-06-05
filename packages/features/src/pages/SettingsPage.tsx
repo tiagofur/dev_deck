@@ -1,4 +1,4 @@
-import { ArrowLeft, Bell, Check, Eye, EyeOff, Globe, Laptop, Settings as SettingsIcon, ShieldCheck, Smartphone, Trash2 } from 'lucide-react'
+import { ArrowLeft, Check, Eye, EyeOff, Globe, Laptop, Settings as SettingsIcon, Smartphone, Trash2 } from 'lucide-react'
 
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -12,7 +12,6 @@ import {
   useDeleteDevice,
   useDevices,
   useMe,
-  useUpdateMe,
   usePreferences,
   useAPIKeys,
   useCreateAPIKey,
@@ -40,21 +39,8 @@ export function SettingsPage() {
   const navigate = useNavigate()
   const prefs = usePreferences()
   const { data: me } = useMe()
-  const updateMe = useUpdateMe()
   
   const [tokenVisible, setTokenVisible] = useState(false)
-  const [editingBio, setEditingBio] = useState(false)
-  const [bio, setBio] = useState('')
-
-  async function handleSaveBio() {
-    try {
-      await updateMe.mutateAsync({ bio })
-      setEditingBio(false)
-      showToast(t('common.profile_updated'))
-    } catch (err) {
-      showToast((err as Error).message, 'error')
-    }
-  }
 
   const cfg = getConfig()
   const apiUrl = cfg.baseUrl || 'same-origin'
@@ -100,80 +86,6 @@ export function SettingsPage() {
       </header>
 
       <main className="max-w-2xl mx-auto p-6 space-y-6">
-        {/* Perfil */}
-        <Section title={t('settings.public_profile')}>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 border-2 border-ink shadow-hard-sm overflow-hidden bg-accent-yellow shrink-0">
-                {me?.avatar_url && (
-                  <img src={me.avatar_url} alt={me.display_name} className="w-full h-full object-cover" />
-                )}
-              </div>
-              <div>
-                <p className="font-display font-black text-xl uppercase leading-none">{me?.display_name || t('common.loading')}</p>
-                <p className="font-mono text-[10px] text-ink-soft uppercase font-bold mt-1">
-                  {t('settings.plan_label')} <span className="text-accent-pink">{me?.plan || t('settings.plan_free')}</span>
-                </p>
-              </div>
-            </div>
-
-            <Field label={t('settings.bio_label')}>
-              {editingBio ? (
-                <div className="space-y-2">
-                  <textarea
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    className="w-full border-2 border-ink p-3 font-mono text-sm min-h-[100px] focus:outline-none focus:bg-accent-yellow/5"
-                    placeholder={t('settings.bio_placeholder')}
-                  />
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={handleSaveBio} disabled={updateMe.isPending}>
-                      {updateMe.isPending ? t('common.loading') : t('common.save')}
-                    </Button>
-                    <Button size="sm" variant="secondary" onClick={() => setEditingBio(false)}>
-                      {t('common.cancel')}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="group relative">
-                  <p className="text-sm font-medium italic text-ink-soft min-h-[1.5em]">
-                    {me?.bio ? `"${me.bio}"` : t('settings.no_bio')}
-                  </p>
-                  <button
-                    onClick={() => {
-                      setBio(me?.bio || '')
-                      setEditingBio(true)
-                    }}
-                    className="mt-2 text-[10px] font-mono uppercase font-bold underline hover:text-accent-pink"
-                  >
-                    {t('settings.edit_bio')}
-                  </button>
-                </div>
-              )}
-            </Field>
-
-            {me?.username && (
-              <Field label={t('settings.public_url')}>
-                <p className="text-xs font-mono break-all text-ink-soft">
-                  devdeck.ai/u/{me.username}
-                </p>
-              </Field>
-            )}
-
-            {me?.role === 'admin' && (
-              <div className="pt-4 border-t-2 border-ink/10">
-                <Button variant="accent" className="w-full" onClick={() => navigate('/admin')}>
-                  <span className="flex items-center gap-2">
-                    <ShieldCheck size={16} strokeWidth={3} />
-                    {t('settings.admin_panel')}
-                  </span>
-                </Button>
-              </div>
-            )}
-          </div>
-        </Section>
-
         {/* Personalidad */}
         <Section title={t('settings.personality')}>
           <Toggle
