@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { ItemDetailPage } from './ItemDetailPage'
 
@@ -13,6 +13,14 @@ const mocks = vi.hoisted(() => ({
 	useReviewItemAITags: vi.fn(),
 	useUserTags: vi.fn(),
 	useRelatedItems: vi.fn(),
+	useItemRunbooks: vi.fn(),
+	useCreateRunbook: vi.fn(),
+	useAddRunbookStep: vi.fn(),
+	useUpdateRunbookStep: vi.fn(),
+	useDeleteRunbook: vi.fn(),
+	useCapture: vi.fn(),
+	useCircles: vi.fn(),
+	useShareToCircle: vi.fn(),
 	showToast: vi.fn(),
 	confirm: vi.fn(),
 }))
@@ -37,6 +45,14 @@ vi.mock('@devdeck/api-client', async () => {
 		useReviewItemAITags: mocks.useReviewItemAITags,
 		useUserTags: mocks.useUserTags,
 		useRelatedItems: mocks.useRelatedItems,
+		useItemRunbooks: mocks.useItemRunbooks,
+		useCreateRunbook: mocks.useCreateRunbook,
+		useAddRunbookStep: mocks.useAddRunbookStep,
+		useUpdateRunbookStep: mocks.useUpdateRunbookStep,
+		useDeleteRunbook: mocks.useDeleteRunbook,
+		useCapture: mocks.useCapture,
+		useCircles: mocks.useCircles,
+		useShareToCircle: mocks.useShareToCircle,
 	}
 })
 
@@ -88,6 +104,14 @@ describe('<ItemDetailPage>', () => {
 		mocks.useReviewItemAITags.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
 		mocks.useUserTags.mockReturnValue({ data: ['cli', 'search'], isLoading: false })
 		mocks.useRelatedItems.mockReturnValue({ data: [], isLoading: false, error: null })
+		mocks.useItemRunbooks.mockReturnValue({ data: [], isLoading: false })
+		mocks.useCreateRunbook.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+		mocks.useAddRunbookStep.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+		mocks.useUpdateRunbookStep.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+		mocks.useDeleteRunbook.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+		mocks.useCapture.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+		mocks.useCircles.mockReturnValue({ data: [], isLoading: false })
+		mocks.useShareToCircle.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
 	})
 
 	it('renders AI summary and suggested tags', () => {
@@ -141,6 +165,74 @@ describe('<ItemDetailPage>', () => {
 		expect(mutateAsync).toHaveBeenCalledWith({
 			id: 'item-1',
 			input: { tags: ['search'], is_favorite: true },
+		})
+	})
+
+
+
+	it('shares a runbook to a Circle with persisted context', async () => {
+		const capture = vi.fn().mockResolvedValue({
+			item: { id: 'captured-runbook' },
+			duplicate_of: null,
+			enrichment_status: 'ok',
+		})
+		const shareToCircle = vi.fn().mockResolvedValue({})
+		mocks.useItemRunbooks.mockReturnValue({
+			data: [
+				{
+					id: 'runbook-1',
+					item_id: 'item-1',
+					title: 'Deploy API',
+					created_at: '2026-04-30T00:00:00Z',
+					steps: [
+						{
+							id: 'step-1',
+							runbook_id: 'runbook-1',
+							position: 1,
+							label: 'Restart API',
+							command: 'docker compose up -d api',
+							description: 'Restart only the API service.',
+							created_at: '2026-04-30T00:00:00Z',
+						},
+					],
+				},
+			],
+			isLoading: false,
+		})
+		mocks.useCapture.mockReturnValue({ mutateAsync: capture, isPending: false })
+		mocks.useCircles.mockReturnValue({
+			data: [{ id: 'circle-1', name: 'Ops Guild' }],
+			isLoading: false,
+		})
+		mocks.useShareToCircle.mockReturnValue({ mutateAsync: shareToCircle, isPending: false })
+
+		render(<ItemDetailPage />)
+		fireEvent.click(screen.getByRole('button', { name: /runbooks/i }))
+		fireEvent.click(screen.getByTitle('Share runbook to Circle'))
+
+		const saveAndShare = screen.getByRole('button', { name: /save and share runbook/i })
+		expect(saveAndShare).toBeDisabled()
+
+		fireEvent.change(screen.getByLabelText('Circle'), { target: { value: 'circle-1' } })
+		fireEvent.change(screen.getByLabelText('Why this matters'), {
+			target: { value: 'Useful for production deploy handoffs.' },
+		})
+		fireEvent.click(saveAndShare)
+
+		await waitFor(() => {
+			expect(capture).toHaveBeenCalledWith({
+				source: 'manual',
+				text: expect.stringContaining('docker compose up -d api'),
+				title_hint: 'Runbook: Deploy API',
+				type_hint: 'workflow',
+				tags: ['runbook', 'circle-share'],
+				why_saved: 'Useful for production deploy handoffs.',
+			})
+			expect(shareToCircle).toHaveBeenCalledWith({
+				circleId: 'circle-1',
+				itemId: 'captured-runbook',
+				shareContext: 'Useful for production deploy handoffs.',
+			})
 		})
 	})
 

@@ -224,7 +224,11 @@ describe('<WorkbenchPage>', () => {
         tags: ['workbench', 'circle-share'],
         why_saved: 'Useful payload shape for our API examples.',
       })
-      expect(shareToCircle).toHaveBeenCalledWith({ circleId: 'circle-1', itemId: 'item-1' })
+      expect(shareToCircle).toHaveBeenCalledWith({
+        circleId: 'circle-1',
+        itemId: 'item-1',
+        shareContext: 'Useful payload shape for our API examples.',
+      })
     })
   })
 })
