@@ -58,6 +58,16 @@ DevDeck is still evolving. If something is rough, that is exactly where contribu
 
 > Public screenshots and demo assets are being prepared for the community launch.
 
+Launch screenshot asset plan:
+
+| Planned path | Required shot | Purpose |
+| --- | --- | --- |
+| `docs/assets/screenshots/vault-realistic-artifacts.png` | Vault populated with realistic repos, CLIs, snippets, prompts, articles, tools, notes, and how-tos. Show source metadata, tags, and short "why this matters" context. | Demonstrates the core capture and organization workflow with data that looks like a real developer vault. |
+| `docs/assets/screenshots/workbench-developer-flow.png` | Developer Workbench with the command palette, saved requests, snippets, runbooks, and project context tools visible in one focused workflow. | Shows how saved knowledge turns into reusable local developer actions. |
+| `docs/assets/screenshots/circle-shared-vault-context.png` | A Circle with one shared finding, attribution, source metadata, tags, and context from another developer. | Explains why Circles are more than a shared bookmark list. |
+
+Use a consistent desktop crop, avoid private tokens or customer data, and do not link these paths from the README until the image files are committed.
+
 For now, the best demo path is:
 
 1. Open the app.
