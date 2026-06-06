@@ -4,6 +4,7 @@ import { Button, showToast } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
 import { useUpdateMe, useUploadAvatar, User } from '@devdeck/api-client'
 import { CropModal } from './CropModal'
+import { UserAvatar } from '../UserAvatar'
 
 export interface EditProfileModalProps {
   isOpen: boolean
@@ -201,7 +202,13 @@ export function EditProfileModal({ isOpen, onClose, user }: EditProfileModalProp
                   onClick={triggerFileSelect}
                   className="w-24 h-24 border-4 border-ink shadow-hard overflow-hidden bg-accent-yellow rounded-none shrink-0 relative cursor-pointer hover:scale-105 active:scale-95 transition-all group"
                 >
-                  <img src={avatarPreviewUrl || user.avatar_url} alt="Avatar Preview" className="w-full h-full object-cover" />
+                  <UserAvatar
+                    src={avatarPreviewUrl || user.avatar_url}
+                    alt="Avatar Preview"
+                    imageClassName="w-full h-full object-cover"
+                    fallbackClassName="w-full h-full flex items-center justify-center bg-accent-yellow text-ink"
+                    iconSize={36}
+                  />
                   <div className="absolute inset-0 bg-ink/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-opacity">
                     <Plus size={20} strokeWidth={3} />
                     <span className="font-mono text-[9px] uppercase tracking-wider">{t('profile.change_avatar_hover', 'Cambiar')}</span>
