@@ -30,6 +30,48 @@ type RunbookStep struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
+// RunbookWithItem is a Runbook plus the parent item title, so list
+// surfaces can link back to the item without extra lookups.
+type RunbookWithItem struct {
+	Runbook
+	ItemTitle string `json:"item_title"`
+}
+
+func (s *Store) ListRunbooksByUser(ctx context.Context, userID uuid.UUID) ([]RunbookWithItem, error) {
+	rows, err := s.Reader().Query(ctx, `
+		SELECT r.id, r.user_id, r.item_id, r.title, r.description, r.created_at, r.updated_at, i.title
+		FROM runbooks r
+		JOIN items i ON i.id = r.item_id
+		WHERE r.user_id = $1
+		ORDER BY r.updated_at DESC
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var runbooks []RunbookWithItem
+	for rows.Next() {
+		var rb RunbookWithItem
+		var itemTitle *string
+		if err := rows.Scan(&rb.ID, &rb.UserID, &rb.ItemID, &rb.Title, &rb.Description, &rb.CreatedAt, &rb.UpdatedAt, &itemTitle); err != nil {
+			return nil, err
+		}
+		if itemTitle != nil {
+			rb.ItemTitle = *itemTitle
+		}
+
+		steps, err := s.listRunbookSteps(ctx, rb.ID)
+		if err != nil {
+			return nil, err
+		}
+		rb.Steps = steps
+
+		runbooks = append(runbooks, rb)
+	}
+	return runbooks, rows.Err()
+}
+
 func (s *Store) ListRunbooksByItem(ctx context.Context, itemID uuid.UUID) ([]Runbook, error) {
 	rows, err := s.Reader().Query(ctx, `
 		SELECT id, user_id, item_id, title, description, created_at, updated_at

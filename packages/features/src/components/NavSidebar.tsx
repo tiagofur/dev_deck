@@ -4,6 +4,7 @@ import {
   Boxes, 
   Folder, 
   BookOpen, 
+  Library, 
   Wrench, 
   Sparkles, 
   Share2, 
@@ -95,6 +96,13 @@ export function NavSidebar({ isOpen, onClose, reviewCount }: NavSidebarProps) {
             icon={BookOpen}
             label={t('nav.cheatsheets')}
             active={isActive('/cheatsheets')}
+            onClick={onClose}
+          />
+          <NavItem
+            to="/runbooks"
+            icon={Library}
+            label={t('nav.runbooks')}
+            active={isActive('/runbooks')}
             onClick={onClose}
           />
         </Section>

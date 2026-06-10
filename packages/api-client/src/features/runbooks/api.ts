@@ -53,6 +53,21 @@ async function upsertLocalRunbookStep(step: RunbookStep) {
 	)
 }
 
+export interface RunbookWithItem extends Runbook {
+	item_title: string
+}
+
+/** GET /api/runbooks — every runbook for the current user, newest first */
+export function useRunbooks() {
+	return useQuery({
+		queryKey: [...RUNBOOKS_KEY, 'all'],
+		queryFn: async () => {
+			const res = await api.get<{ runbooks: RunbookWithItem[] }>('/api/runbooks')
+			return res.runbooks ?? []
+		},
+	})
+}
+
 /** GET /api/items/:id/runbooks */
 export function useItemRunbooks(itemId: string | undefined) {
 	return useQuery({

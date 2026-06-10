@@ -273,13 +273,14 @@ export {
 
 // Feature hooks — runbooks (Ola 5+)
 export {
+	useRunbooks,
 	useItemRunbooks,
 	useCreateRunbook,
 	useAddRunbookStep,
 	useUpdateRunbookStep,
 	useDeleteRunbook,
 } from './features/runbooks/api'
-export type { Runbook, RunbookStep } from './features/runbooks/api'
+export type { Runbook, RunbookStep, RunbookWithItem } from './features/runbooks/api'
 export type {
   Deck,
   CreateDeckInput,

@@ -408,6 +408,19 @@
     "go_to_items": "Go to items",
     "org_required_desc": "Team Review is a shared curation queue where your organization triages items marked for review. It needs an active team workspace."
   },
+  "runbooks": {
+    "title": "Runbooks",
+    "subtitle": "Operational knowledge that lives next to your items: setup steps, commands, and how-to sequences you can reuse without rebuilding context.",
+    "loading": "Loading runbooks...",
+    "error_loading": "Could not load runbooks",
+    "empty_title": "No runbooks yet",
+    "empty_desc": "Runbooks are created from an item's detail page. Open an item and add the steps you don't want to figure out twice.",
+    "go_to_items": "Go to items",
+    "steps_count": "{{count}} steps",
+    "commands_count": "{{count}} commands",
+    "from_item": "from {{title}}",
+    "open_arrow": "Open item →"
+  },
   "waitlist": {
     "title": "Join the Waitlist",
     "grow_desc": "DevDeck is growing. Leave us your email and we will send you an invitation soon.",
@@ -769,6 +782,7 @@
     "items": "Items",
     "repos": "Repos",
     "cheatsheets": "Cheatsheets",
+    "runbooks": "Runbooks",
     "tools": "Tools",
     "workbench": "Workbench",
     "discovery": "Discovery",
