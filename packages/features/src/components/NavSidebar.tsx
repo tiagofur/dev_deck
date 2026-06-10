@@ -6,7 +6,6 @@ import {
   BookOpen, 
   Library, 
   Wrench, 
-  Sparkles, 
   Share2, 
   Users, 
   Activity, 
@@ -115,13 +114,6 @@ export function NavSidebar({ isOpen, onClose, reviewCount }: NavSidebarProps) {
             icon={Wrench}
             label={t('nav.workbench')}
             active={isActive('/workbench')}
-            onClick={onClose}
-          />
-          <NavItem
-            to="/discovery"
-            icon={Sparkles}
-            label={t('nav.discovery')}
-            active={isActive('/discovery')}
             onClick={onClose}
           />
         </Section>

@@ -76,7 +76,7 @@ describe('<NavSidebar>', () => {
     expect(within(sidebar).getByRole('link', { name: /repos/i })).toBeInTheDocument()
     expect(within(sidebar).getByRole('link', { name: /cheatsheets/i })).toBeInTheDocument()
     expect(within(sidebar).getByRole('link', { name: /workbench/i })).toBeInTheDocument()
-    expect(within(sidebar).getByRole('link', { name: /discovery/i })).toBeInTheDocument()
+    expect(within(sidebar).queryByRole('link', { name: /discovery/i })).not.toBeInTheDocument()
     expect(within(sidebar).getByRole('link', { name: /circles/i })).toBeInTheDocument()
     expect(within(sidebar).getByRole('link', { name: /following/i })).toBeInTheDocument()
     expect(within(sidebar).getByRole('link', { name: /settings/i })).toBeInTheDocument()

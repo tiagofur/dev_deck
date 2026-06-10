@@ -1,23 +1,40 @@
 import clsx from 'clsx'
-import { BookOpen, ChevronLeft, Search, Star } from 'lucide-react'
+import { BookOpen, ChevronLeft, Search, Sparkles, Star } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useExploreCheatsheets, useFeatureFlags } from '@devdeck/api-client'
 import type { Cheatsheet } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'
 import { AppShell } from '../components/AppShell'
 import { FeatureDisabledState } from '../components/FeatureDisabledState'
+import { DiscoverySurface } from '../components/Discovery/DiscoverySurface'
+
+type ExploreSurface = 'cheatsheets' | 'discovery'
 
 export function ExplorePage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const features = useFeatureFlags()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [searchFilter, setSearchFilter] = useState('')
   const { data: cheatsheets = [], isLoading } = useExploreCheatsheets(selectedCategory ?? undefined)
 
+  const surface: ExploreSurface = searchParams.get('tab') === 'discovery' ? 'discovery' : 'cheatsheets'
+  const selectSurface = (next: ExploreSurface) =>
+    setSearchParams(next === 'discovery' ? { tab: 'discovery' } : {}, { replace: true })
+
   if (!features.explore) {
     return <FeatureDisabledState featureName={t('nav.explore')} />
+  }
+
+  if (surface === 'discovery') {
+    return (
+      <AppShell contentClassName="flex-1 flex flex-col overflow-hidden">
+        <SurfaceTabs surface={surface} onSelect={selectSurface} />
+        <DiscoverySurface />
+      </AppShell>
+    )
   }
 
   const categoryLabels: Record<string, string> = {
@@ -47,7 +64,9 @@ export function ExplorePage() {
   }
 
   return (
-    <AppShell contentClassName="flex-1 flex overflow-hidden">
+    <AppShell contentClassName="flex-1 flex flex-col overflow-hidden">
+      <SurfaceTabs surface={surface} onSelect={selectSurface} />
+      <div className="flex-1 flex overflow-hidden">
       {/* Sidebar */}
       <aside className="w-64 shrink-0 border-r-3 border-ink bg-bg-elevated p-6">
         <h2 className="font-display font-black text-xs uppercase tracking-widest mb-4 text-ink">
@@ -116,7 +135,60 @@ export function ExplorePage() {
           </div>
         )}
       </main>
+      </div>
     </AppShell>
+  )
+}
+
+function SurfaceTabs({
+  surface,
+  onSelect,
+}: {
+  surface: ExploreSurface
+  onSelect: (next: ExploreSurface) => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <div className="border-b-3 border-ink bg-bg-card px-6 py-3 flex items-center gap-3">
+      <div className="flex bg-bg-card border-3 border-ink shadow-hard-sm">
+        <SurfaceTabButton
+          active={surface === 'cheatsheets'}
+          onClick={() => onSelect('cheatsheets')}
+          icon={<BookOpen size={14} />}
+          label={t('explore.tabs.cheatsheets')}
+        />
+        <SurfaceTabButton
+          active={surface === 'discovery'}
+          onClick={() => onSelect('discovery')}
+          icon={<Sparkles size={14} />}
+          label={t('explore.tabs.discovery')}
+        />
+      </div>
+    </div>
+  )
+}
+
+function SurfaceTabButton({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean
+  onClick: () => void
+  icon: React.ReactNode
+  label: string
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-4 py-2 font-display font-black uppercase text-[10px] tracking-widest flex items-center gap-2 transition-colors
+        ${active ? 'bg-accent-yellow text-ink border-x-2 border-ink first:border-l-0 last:border-r-0' : 'bg-bg-card text-ink-soft hover:bg-bg-elevated'}
+      `}
+    >
+      {icon}
+      {label}
+    </button>
   )
 }
 
