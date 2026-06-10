@@ -64,10 +64,10 @@
 
 | File | Description |
 |------|-------------|
-| [REVIEW_2026_04.md](REVIEW_2026_04.md) | **Technical review (April 2026).** Hardening, capture, and testing debt — origin of Wave 4.5. |
-| [APP_AUDIT_2026_05.md](APP_AUDIT_2026_05.md) | **App audit (May 2026).** Full feature inventory, user-impact classification, and the P0–P2 progressive disclosure plan. |
-| [APP_AUDIT_REVIEW_2026_05.md](APP_AUDIT_REVIEW_2026_05.md) | **Audit verification (May 2026).** Evidence for the P0/P1 work and the community plan around Circles. |
-| [FEATURE_REVIEW_2026_06.md](FEATURE_REVIEW_2026_06.md) | **Product and docs review (June 2026).** Yes/no decision menu on app and docs improvements; origin of issues #113–#130. |
+| [REVIEW_2026_04.md](archive/REVIEW_2026_04.md) | **Technical review (April 2026).** Hardening, capture, and testing debt — origin of Wave 4.5. |
+| [APP_AUDIT_2026_05.md](archive/APP_AUDIT_2026_05.md) | **App audit (May 2026).** Full feature inventory, user-impact classification, and the P0–P2 progressive disclosure plan. |
+| [APP_AUDIT_REVIEW_2026_05.md](archive/APP_AUDIT_REVIEW_2026_05.md) | **Audit verification (May 2026).** Evidence for the P0/P1 work and the community plan around Circles. |
+| [FEATURE_REVIEW_2026_06.md](archive/FEATURE_REVIEW_2026_06.md) | **Product and docs review (June 2026).** Yes/no decision menu on app and docs improvements; origin of issues #113–#130. |
 
 ---
 
@@ -88,3 +88,12 @@ To contribute or extend the product:
 - Start with [FIRST_CONTRIBUTION.md](FIRST_CONTRIBUTION.md) and pick an approved `good first issue`.
 - Keep ROADMAP.md updated when you complete roadmap items.
 - Keep ARCHITECTURE.md in sync with infra/schema changes.
+
+---
+
+## Language policy
+
+- **English is the canonical language** for all public documentation: when a doc and its counterpart disagree, the English version wins.
+- Spanish versions (`*.es.md` and the [Spanish index](README.es.md)) are best-effort translations in the app's rioplatense voice and **may lag behind**.
+- If you change a doc that has a language counterpart, update it in the same PR or add a visible "translation pending" note — the PR template checklist reminds you.
+- Exception: [LANDING.md](LANDING.md) is original Spanish content (not a translation), just as [LANDING_COPY.md](LANDING_COPY.md) is original English content.
