@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { testRegex } from '../../workbench/utils'
-import { ToolFrame, TextArea, ResultActions } from './shared'
+import { ToolFrame, TextArea, ResultActions, ExampleButton } from './shared'
 
 export function RegexTool() {
   const [pattern, setPattern] = useState('')
@@ -13,6 +13,13 @@ export function RegexTool() {
 
   return (
     <ToolFrame title="Regex tester">
+      <ExampleButton
+        onLoad={() => {
+          setPattern('(\\w+)@(\\w+)\\.dev')
+          setFlags('gi')
+          setSample('Contact ana@devdeck.dev or leo@example.dev for demo access.')
+        }}
+      />
       <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_140px]">
         <label className="grid gap-2">
           <span className="font-display text-xs font-black uppercase tracking-widest">Pattern</span>

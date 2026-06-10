@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Button } from '@devdeck/ui'
 import { timestampToDate, dateToUnixTimestamp } from '../../workbench/utils'
-import { ToolFrame, TextArea, ResultActions } from './shared'
+import { ToolFrame, TextArea, ResultActions, ExampleButton } from './shared'
 
 export function TimestampTool() {
   const [input, setInput] = useState('')
@@ -17,6 +17,12 @@ export function TimestampTool() {
 
   return (
     <ToolFrame title="Timestamp converter">
+      <ExampleButton
+        onLoad={() => {
+          setMode('to-date')
+          setInput('1716249600')
+        }}
+      />
       <div className="flex gap-2">
         <Button
           type="button"

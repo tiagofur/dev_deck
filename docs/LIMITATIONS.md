@@ -16,7 +16,6 @@
 
 - **AI enrichment requires a configured provider.** Summaries, smart tags, semantic search, and Ask DevDeck need OpenAI, Ollama, or another supported provider. Without one, DevDeck uses a built-in heuristic tagger and text/fuzzy search, and the interactive AI surfaces are hidden rather than shown as dead buttons.
 - **Heuristic tagging is more limited** than provider-backed enrichment: it works from URL patterns, metadata, and keywords, not from understanding content.
-- **The weekly digest currently depends on an AI provider** for its summary. A no-AI fallback is tracked in #115.
 
 ## Search
 

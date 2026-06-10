@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Clipboard, Save, Share2 } from 'lucide-react'
+import { Clipboard, Save, Share2, Sparkles } from 'lucide-react'
 import { Button, showToast } from '@devdeck/ui'
 import { useCapture, useCircles, useShareToCircle } from '@devdeck/api-client'
 import { ShareToCirclePanel } from '../ShareToCirclePanel'
@@ -46,6 +46,23 @@ export function TextArea({
         className="min-h-48 w-full resize-y border-3 border-ink bg-bg-primary p-3 font-mono text-sm outline-none focus:bg-accent-yellow/10"
       />
     </label>
+  )
+}
+
+/**
+ * One-click sample loader so a first-time user sees what the tool does
+ * without bringing their own data. Sample data must be obviously fake.
+ */
+export function ExampleButton({ onLoad }: { onLoad: () => void }) {
+  return (
+    <div>
+      <Button type="button" size="sm" variant="secondary" onClick={onLoad}>
+        <span className="flex items-center gap-2">
+          <Sparkles size={15} strokeWidth={3} />
+          Try an example
+        </span>
+      </Button>
+    </div>
   )
 }
 
