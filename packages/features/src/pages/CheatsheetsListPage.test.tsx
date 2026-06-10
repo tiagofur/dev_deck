@@ -72,32 +72,30 @@ describe('CheatsheetsListPage empty state', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.useCheatsheets.mockReturnValue({ data: [], isLoading: false })
+    mocks.useCreateCheatsheet.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+    mocks.useDeleteCheatsheet.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
   })
 
-  it('shows guided empty state with explanation and action button when no cheatsheets exist', async () => {
-    const { user } = await import('@testing-library/react')
+  it('shows guided empty state and opens the create modal from its action', async () => {
+    const user = userEvent.setup()
     const { CheatsheetsListPage } = await import('./CheatsheetsListPage')
     renderWithProviders(<CheatsheetsListPage />)
 
-    // Should show the explanation hint text
+    expect(screen.getByText('cheatsheets.empty_state')).toBeInTheDocument()
     expect(screen.getByText('cheatsheets.empty_state_hint')).toBeInTheDocument()
 
-    // Should show the action button
-    const button = screen.getByTestId('button')
-    expect(button).toBeInTheDocument()
-
-    // Clicking the button should call navigate (handled by the modal)
-    await user.click(button)
-    expect(mocks.navigate).not.toHaveBeenCalled() // navigate is mocked but the modal opens instead
+    // No form inputs until the create modal opens.
+    expect(screen.queryAllByRole('textbox')).toHaveLength(0)
+    await user.click(screen.getByText('cheatsheets.empty_state_action'))
+    expect(screen.queryAllByRole('textbox').length).toBeGreaterThan(0)
   })
 
-  it('shows category-specific hint when a category filter is active', async () => {
-    mocks.useCheatsheets.mockReturnValue({
-      data: [],
-      isLoading: false,
-    })
+  it('shows the category-specific hint when a category filter is active', async () => {
+    const user = userEvent.setup()
     const { CheatsheetsListPage } = await import('./CheatsheetsListPage')
     renderWithProviders(<CheatsheetsListPage />)
+
+    await user.click(screen.getByText('cheatsheets.categories.vcs'))
 
     expect(screen.getByText('cheatsheets.empty_state_category')).toBeInTheDocument()
   })
