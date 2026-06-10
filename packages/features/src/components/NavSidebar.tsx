@@ -15,7 +15,7 @@ import {
   Shield 
 } from 'lucide-react'
 import { useLocation, Link, useNavigate } from 'react-router-dom'
-import { usePreferences, useMe } from '@devdeck/api-client'
+import { usePreferences, useMe, useFeatureFlags } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'
 import { UserAvatar } from './UserAvatar'
 
@@ -27,6 +27,7 @@ interface NavSidebarProps {
 
 export function NavSidebar({ isOpen, onClose, reviewCount }: NavSidebarProps) {
   const { t } = useTranslation()
+  const features = useFeatureFlags()
   const navigate = useNavigate()
   const location = useLocation()
   const { activeOrgId } = usePreferences()
@@ -153,14 +154,16 @@ export function NavSidebar({ isOpen, onClose, reviewCount }: NavSidebarProps) {
               active={isActive('/feed')}
               onClick={onClose}
             />
-            <NavItem
-              to="/review"
-              icon={Users}
-              label={t('nav.review')}
-              active={isActive('/review')}
-              badge={reviewCount}
-              onClick={onClose}
-            />
+            {features.team_review && (
+              <NavItem
+                to="/review"
+                icon={Users}
+                label={t('nav.review')}
+                active={isActive('/review')}
+                badge={reviewCount}
+                onClick={onClose}
+              />
+            )}
           </Section>
         )}
 

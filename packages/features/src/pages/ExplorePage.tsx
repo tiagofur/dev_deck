@@ -2,17 +2,23 @@ import clsx from 'clsx'
 import { BookOpen, ChevronLeft, Search, Star } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useExploreCheatsheets } from '@devdeck/api-client'
+import { useExploreCheatsheets, useFeatureFlags } from '@devdeck/api-client'
 import type { Cheatsheet } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'
 import { AppShell } from '../components/AppShell'
+import { FeatureDisabledState } from '../components/FeatureDisabledState'
 
 export function ExplorePage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const features = useFeatureFlags()
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [searchFilter, setSearchFilter] = useState('')
   const { data: cheatsheets = [], isLoading } = useExploreCheatsheets(selectedCategory ?? undefined)
+
+  if (!features.explore) {
+    return <FeatureDisabledState featureName={t('nav.explore')} />
+  }
 
   const categoryLabels: Record<string, string> = {
     vcs: t('cheatsheets.categories.vcs'),

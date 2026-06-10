@@ -18,6 +18,7 @@ import {
   useDecks,
   useItems,
   useStats,
+  useFeatureFlags,
   logoutCurrentSession
 } from '@devdeck/api-client'
 import { Button, showToast } from '@devdeck/ui'
@@ -38,6 +39,7 @@ export function ProfilePage() {
   const { data: decks = [], isLoading: loadingDecks } = useDecks()
   const { data: itemsRes } = useItems({ limit: 10 })
   const { data: stats } = useStats()
+  const features = useFeatureFlags()
 
   // Edit Modal State
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -224,13 +226,15 @@ export function ProfilePage() {
 
           {/* RIGHT COLUMN: Stats, Tech Stack, Decks, Timeline */}
           <div className="lg:col-span-2 space-y-8">
-            <ReputationDashboard
-              totalItems={totalItemsCount}
-              decksCount={decks.length}
-              streakDays={stats?.streak_days || 0}
-              reputation={reputation}
-              achievements={achievements}
-            />
+            {features.reputation && (
+              <ReputationDashboard
+                totalItems={totalItemsCount}
+                decksCount={decks.length}
+                streakDays={stats?.streak_days || 0}
+                reputation={reputation}
+                achievements={achievements}
+              />
+            )}
 
             <TechStackSection
               stackTags={user.stack_tags}

@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   usePreferences: vi.fn(),
   useMe: vi.fn(),
+  useFeatureFlags: vi.fn(),
 }))
 
 vi.mock('react-router-dom', async () => {
@@ -24,6 +25,7 @@ vi.mock('@devdeck/api-client', async () => {
     ...actual,
     usePreferences: mocks.usePreferences,
     useMe: mocks.useMe,
+    useFeatureFlags: mocks.useFeatureFlags,
   }
 })
 
@@ -34,6 +36,12 @@ describe('<NavSidebar>', () => {
     mocks.navigate.mockReset()
     mocks.usePreferences.mockReturnValue({ activeOrgId: null })
     mocks.useMe.mockReturnValue({ data: { role: 'user', username: 'tiago', avatar_url: 'avatar.png' } })
+    mocks.useFeatureFlags.mockReturnValue({
+      explore: false,
+      reputation: false,
+      team_review: true,
+      realtime: false,
+    })
     onCloseMock = vi.fn()
   })
 
@@ -92,6 +100,21 @@ describe('<NavSidebar>', () => {
     expect(within(updatedSidebar).getByText('Team')).toBeInTheDocument()
     expect(within(updatedSidebar).getByRole('link', { name: /activity/i })).toBeInTheDocument()
     expect(within(updatedSidebar).getByRole('link', { name: /review/i })).toBeInTheDocument()
+  })
+
+  it('hides the Review entry when the team_review feature flag is off', () => {
+    mocks.usePreferences.mockReturnValue({ activeOrgId: 'org_123' })
+    mocks.useFeatureFlags.mockReturnValue({
+      explore: false,
+      reputation: false,
+      team_review: false,
+      realtime: false,
+    })
+    renderSidebar()
+
+    const sidebar = screen.getByTestId('desktop-sidebar')
+    expect(within(sidebar).getByRole('link', { name: /activity/i })).toBeInTheDocument()
+    expect(within(sidebar).queryByRole('link', { name: /review/i })).not.toBeInTheDocument()
   })
 
   it('renders a badge with the reviewCount on the Review item if present', () => {

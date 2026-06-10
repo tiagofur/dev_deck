@@ -117,7 +117,12 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		FrontendURL: cfg.FrontendURL,
 	})
 	scimH := handlers.NewSCIMHandler(st)
-	systemH := handlers.NewSystemConfigHandler(cfg.AIProvider, false)
+	systemH := handlers.NewSystemConfigHandler(cfg.AIProvider, false, handlers.SystemFeatures{
+		Explore:    cfg.FeatureExplore,
+		Reputation: cfg.FeatureReputation,
+		TeamReview: cfg.FeatureTeamReview,
+		Realtime:   cfg.FeatureRealtime,
+	})
 
 	r.Route("/api", func(r chi.Router) {
 		// Optional auth for all public API routes
@@ -371,7 +376,9 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 
 		// Public deck (no auth)
 		r.Get("/decks/{slug}/public", publicDeckH.Get)
-		r.Get("/realtime/{roomID}", realtimeH.Connect)
+		if cfg.FeatureRealtime {
+			r.Get("/realtime/{roomID}", realtimeH.Connect)
+		}
 
 		// Public profile (no auth)
 		r.Get("/users/{username}/public", profileH.GetPublic)

@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm'
 import { Edit3, Eye, Save, Users, X } from 'lucide-react'
 import { Button } from '@devdeck/ui'
 import { createRoom } from '@devdeck/realtime-client'
+import { useFeatureFlags } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
  */
 export function NotesEditor({ value, onSave, saving, roomID }: Props) {
   const { t } = useTranslation()
+  const features = useFeatureFlags()
   const [mode, setMode] = useState<'view' | 'edit'>('view')
   const [draft, setDraft] = useState(value)
   const [others, setOthers] = useState<number>(0)
@@ -33,7 +35,7 @@ export function NotesEditor({ value, onSave, saving, roomID }: Props) {
 
   // Real-time setup
   useEffect(() => {
-    if (!roomID || mode !== 'edit') return
+    if (!features.realtime || !roomID || mode !== 'edit') return
 
     const room = createRoom(roomID)
     roomRef.current = room
@@ -64,7 +66,7 @@ export function NotesEditor({ value, onSave, saving, roomID }: Props) {
       awareness.off('change', handleAwareness)
       room.destroy()
     }
-  }, [roomID, mode])
+  }, [roomID, mode, features.realtime])
 
   function handleDraftChange(val: string) {
     setDraft(val)

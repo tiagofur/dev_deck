@@ -37,6 +37,14 @@ type Config struct {
 	RateLimitPerMinute int  `env:"RATE_LIMIT_PER_MINUTE" envDefault:"120"`
 	RateLimitDisabled  bool `env:"RATE_LIMIT_DISABLED" envDefault:"false"`
 
+	// ─── Feature flags (June 2026 review, issue #123) ───
+	// Premature social/enterprise surfaces ship default-off so solo users
+	// see a focused app. Flip them on when a community/team exists.
+	FeatureExplore    bool `env:"FEATURE_EXPLORE" envDefault:"false"`
+	FeatureReputation bool `env:"FEATURE_REPUTATION" envDefault:"false"`
+	FeatureTeamReview bool `env:"FEATURE_TEAM_REVIEW" envDefault:"false"`
+	FeatureRealtime   bool `env:"FEATURE_REALTIME" envDefault:"false"`
+
 	// ─── Wave 4: Auth ───
 	JWTSecret               string `env:"JWT_SECRET"`
 	GitHubClientID          string `env:"GITHUB_CLIENT_ID"`
