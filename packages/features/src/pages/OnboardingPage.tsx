@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Rocket, Box, Check, ArrowRight, Loader2, Sparkles } from 'lucide-react'
+import { Rocket, Box, Check, ArrowRight, Loader2, Plus, Search, Wrench } from 'lucide-react'
 import { Button, showToast } from '@devdeck/ui'
 import { 
   useOnboardingKits, 
@@ -9,7 +9,7 @@ import {
   useCompleteOnboarding,
   useMe
 } from '@devdeck/api-client'
-import { useTranslation, Trans } from '@devdeck/i18n'
+import { useTranslation } from '@devdeck/i18n'
 
 export function OnboardingPage() {
   const { t } = useTranslation()
@@ -145,46 +145,54 @@ export function OnboardingPage() {
           )}
 
           {step === 3 && (
-            <motion.div 
+            <motion.div
               key="step3"
               initial={{ x: 20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -20, opacity: 0 }}
-              className="space-y-8 py-4 text-center"
+              className="space-y-8 py-4"
             >
-              <div className="space-y-4">
-                <div className="w-20 h-20 bg-accent-lime border-4 border-ink rounded-full flex items-center justify-center shadow-hard mx-auto">
-                   <Sparkles size={40} strokeWidth={3} />
-                </div>
-                <h2 className="font-display font-black text-3xl uppercase tracking-tighter">{t('onboarding.ready_title')}</h2>
-                <p className="text-lg font-mono leading-relaxed max-w-md mx-auto">
-                   <Trans 
-                    i18nKey="onboarding.ready_desc"
-                    components={{ 1: <span className="underline decoration-accent-pink decoration-4" /> }}
-                   />
-                </p>
+              <div className="space-y-2">
+                <h2 className="font-display font-black text-3xl uppercase tracking-tighter">{t('onboarding.loop_title')}</h2>
+                <p className="font-mono text-sm text-ink-soft">{t('onboarding.loop_subtitle')}</p>
               </div>
 
-              <div className="bg-bg-primary border-3 border-ink p-6 space-y-4 text-left shadow-hard-sm">
-                 <div className="flex items-center gap-3">
-                    <Check className="text-accent-lime" strokeWidth={4} size={20} />
-                    <span className="font-display font-black uppercase text-xs">{t('onboarding.sync_active')}</span>
-                 </div>
-                 <div className="flex items-center gap-3">
-                    <Check className="text-accent-lime" strokeWidth={4} size={20} />
-                    <span className="font-display font-black uppercase text-xs">{t('onboarding.ai_ready')}</span>
-                 </div>
-                 <div className="flex items-center gap-3 opacity-40">
-                    <div className="w-5 h-5 border-2 border-ink rounded-sm" />
-                    <span className="font-display font-black uppercase text-xs">{t('onboarding.first_item_captured')}</span>
-                 </div>
+              <div className="space-y-4">
+                <LoopStep
+                  number={1}
+                  icon={<Plus size={20} strokeWidth={3} />}
+                  color="bg-accent-yellow"
+                  title={t('onboarding.loop_capture')}
+                  desc={t('onboarding.loop_capture_desc')}
+                />
+                <LoopStep
+                  number={2}
+                  icon={<Search size={20} strokeWidth={3} />}
+                  color="bg-accent-cyan"
+                  title={t('onboarding.loop_retrieve')}
+                  desc={t('onboarding.loop_retrieve_desc')}
+                  kbd="Ctrl+K"
+                />
+                <LoopStep
+                  number={3}
+                  icon={<Wrench size={20} strokeWidth={3} />}
+                  color="bg-accent-lime"
+                  title={t('onboarding.loop_reuse')}
+                  desc={t('onboarding.loop_reuse_desc')}
+                />
               </div>
+
+              {selectedKit === 'devdeck-demo' && (
+                <p className="border-3 border-ink bg-accent-lavender/40 p-4 font-mono text-sm">
+                  {t('onboarding.loop_demo_hint')}
+                </p>
+              )}
 
               <div className="flex gap-4">
                  <Button variant="secondary" onClick={() => setStep(2)}>{t('onboarding.back_button')}</Button>
-                 <Button 
-                    onClick={handleFinish} 
-                    className="flex-1 bg-accent-pink" 
+                 <Button
+                    onClick={handleFinish}
+                    className="flex-1 bg-accent-pink"
                     disabled={installing}
                  >
                     {installing ? <Loader2 className="animate-spin" /> : t('onboarding.enter_button')}
@@ -193,6 +201,41 @@ export function OnboardingPage() {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+    </div>
+  )
+}
+
+function LoopStep({
+  number,
+  icon,
+  color,
+  title,
+  desc,
+  kbd,
+}: {
+  number: number
+  icon: React.ReactNode
+  color: string
+  title: string
+  desc: string
+  kbd?: string
+}) {
+  return (
+    <div className="flex items-start gap-4 border-3 border-ink bg-bg-primary p-4 shadow-hard-sm">
+      <div className={`w-10 h-10 border-2 border-ink ${color} flex items-center justify-center shrink-0 shadow-hard-sm`}>
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="font-display font-black uppercase text-sm tracking-tight">
+          {number}. {title}
+          {kbd && (
+            <kbd className="ml-2 border-2 border-ink bg-bg-card px-1.5 py-0.5 font-mono text-[10px] shadow-hard-sm align-middle">
+              {kbd}
+            </kbd>
+          )}
+        </p>
+        <p className="font-mono text-xs text-ink-soft mt-1 leading-relaxed">{desc}</p>
       </div>
     </div>
   )
