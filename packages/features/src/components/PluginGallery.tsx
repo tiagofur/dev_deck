@@ -10,6 +10,11 @@ import {
 import { Button, showToast } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
 
+/**
+ * Card-style plugin gallery. Currently unused in Settings — the catalog
+ * has three entries, so the compact IntegrationsList is shown instead.
+ * Bring this back when the catalog is large enough to deserve a gallery.
+ */
 export function PluginGallery() {
   const { t } = useTranslation()
   const { data: featuredRes, isLoading } = useFeaturedPlugins()

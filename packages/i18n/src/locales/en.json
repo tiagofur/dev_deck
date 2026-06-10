@@ -89,6 +89,7 @@
     "output_webhooks": "Outgoing Webhooks",
     "output_webhooks_desc": "Subscribe to DevDeck events to notify external systems (e.g., Slack, Zapier).",
     "plugin_gallery": "Plugin Gallery",
+    "integrations": "Integrations",
     "enterprise": "Enterprise",
     "saml_title": "SSO Authentication (SAML)",
     "saml_desc": "Configure single sign-on for your organization.",
