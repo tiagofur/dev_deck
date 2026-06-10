@@ -2,6 +2,8 @@
 
 Thanks for considering a contribution to DevDeck. The best first PR is small, useful, and easy to review.
 
+Not sure where things live? Read the one-page [architecture map](ARCHITECTURE_MAP.md) first.
+
 ## Quick path
 
 1. Pick an issue labeled [`good first issue`](https://github.com/tiagofur/dev_deck/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%22) or [`help wanted`](https://github.com/tiagofur/dev_deck/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22help%20wanted%22).
