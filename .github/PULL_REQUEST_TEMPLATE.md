@@ -28,5 +28,6 @@ Closes #
 - [ ] Kept the PR small and focused
 - [ ] Included tests or a clear verification note
 - [ ] Updated docs if behavior changed
+- [ ] If I changed a doc with a language counterpart (`*.es.md`), I updated it too or flagged it as translation-pending
 - [ ] Used a conventional commit message
 - [ ] No `Co-Authored-By` or AI attribution trailers

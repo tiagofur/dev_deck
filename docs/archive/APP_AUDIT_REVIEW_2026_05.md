@@ -1,5 +1,7 @@
 # DevDeck — App Audit Review & Community Plan (May 2026)
 
+> ⚠️ **Historical document (archived).** This is a dated snapshot; parts of it no longer reflect the current state of the product. See [ROADMAP.md](../../ROADMAP.md) for current status.
+
 > Date: 2026-05-23  
 > Source audit: `docs/APP_AUDIT_2026_05.md`  
 > Goal: verify that claimed P0/P1 work is not only present, but product-quality, then turn the social/community surface into a daily-use growth loop for developer communities.

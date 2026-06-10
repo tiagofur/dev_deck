@@ -13,6 +13,7 @@
 | [DEV_WORKBENCH.md](DEV_WORKBENCH.md) · [DEV_WORKBENCH.es.md](DEV_WORKBENCH.es.md) | **Developer Workbench.** Evolución de memoria a acción contextual: utilities locales, paleta, requests reutilizables, límites de producto y roadmap recomendado. |
 | [CIRCLES_COMMUNITY.md](CIRCLES_COMMUNITY.md) · [CIRCLES_COMMUNITY.es.md](CIRCLES_COMMUNITY.es.md) | **Circles y contribución comunitaria.** Modelo de producto para convertir hallazgos individuales en memoria reutilizable para grupos/comunidades de developers. |
 | [COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md) | **Análisis competitivo.** Comparación detallada con GitHub Stars, Raindrop, Pocket, Notion, Obsidian, Raycast y Pieces.app. Incluye tablas de pros/contras y posicionamiento relativo. |
+| [LIMITATIONS.md](LIMITATIONS.md) | **Limitaciones conocidas.** Lista honesta de lo que la 0.5.0 Public Beta todavía no hace. |
 
 ---
 
@@ -30,6 +31,7 @@
 | Archivo | Descripción |
 |---------|-------------|
 | [ARCHITECTURE.es.md](ARCHITECTURE.es.md) | **Arquitectura del sistema.** Diagrama de alto nivel, stack técnico (Go + Chi + Postgres + pgvector, monorepo pnpm workspaces con Electron + React desktop y React web que comparten `@devdeck/ui` / `@devdeck/api-client` / `@devdeck/features`), decisiones de arquitectura y schema de la base de datos. |
+| [ARCHITECTURE_MAP.md](ARCHITECTURE_MAP.md) | **Mapa de arquitectura para contribuidores.** Orientación en una página: flujo de requests, layout del monorepo, dónde cambiar qué y cómo verificar antes de un PR. |
 | [VERSIONING.es.md](VERSIONING.es.md) | **Versionado y release.** Sistema de versionado SemVer, estrategia de release, Conventional Commits, changelog (Keep a Changelog), scripts de release, GitHub Actions para auto-release. |
 | [adr/0001-items-polymorphism.es.md](adr/0001-items-polymorphism.es.md) | **ADR 0001.** Modelo polimórfico de `items` (single-table + JSONB + generated columns). |
 | [adr/0002-sync-strategy.es.md](adr/0002-sync-strategy.es.md) | **ADR 0002.** Estrategia de sync offline-first. |
@@ -60,10 +62,10 @@
 
 | Archivo | Descripción |
 |---------|-------------|
-| [REVIEW_2026_04.md](REVIEW_2026_04.md) | **Review técnica (abril 2026).** Hardening, captura y deuda de testing — origen de la Ola 4.5. |
-| [APP_AUDIT_2026_05.md](APP_AUDIT_2026_05.md) | **Auditoría de app (mayo 2026).** Inventario completo de features, clasificación por impacto de usuario y plan P0–P2 de progressive disclosure. |
-| [APP_AUDIT_REVIEW_2026_05.md](APP_AUDIT_REVIEW_2026_05.md) | **Verificación de la auditoría (mayo 2026).** Evidencia del trabajo P0/P1 y plan de comunidad alrededor de Circles. |
-| [FEATURE_REVIEW_2026_06.md](FEATURE_REVIEW_2026_06.md) | **Revisión de producto y docs (junio 2026).** Menú de decisiones Sí/No sobre mejoras de app y documentación; origen de los issues #113–#130. |
+| [REVIEW_2026_04.md](archive/REVIEW_2026_04.md) | **Review técnica (abril 2026).** Hardening, captura y deuda de testing — origen de la Ola 4.5. |
+| [APP_AUDIT_2026_05.md](archive/APP_AUDIT_2026_05.md) | **Auditoría de app (mayo 2026).** Inventario completo de features, clasificación por impacto de usuario y plan P0–P2 de progressive disclosure. |
+| [APP_AUDIT_REVIEW_2026_05.md](archive/APP_AUDIT_REVIEW_2026_05.md) | **Verificación de la auditoría (mayo 2026).** Evidencia del trabajo P0/P1 y plan de comunidad alrededor de Circles. |
+| [FEATURE_REVIEW_2026_06.md](archive/FEATURE_REVIEW_2026_06.md) | **Revisión de producto y docs (junio 2026).** Menú de decisiones Sí/No sobre mejoras de app y documentación; origen de los issues #113–#130. |
 
 ---
 
@@ -95,5 +97,9 @@ Para contribuir o extender el producto:
 
 ---
 
-> **Idioma de la documentación:** español rioplatense (casual) — la misma voz de la app.
-> Excepción: [LANDING_COPY.md](LANDING_COPY.md) está en inglés porque es la versión pública para audiencia global.
+## Política de idiomas
+
+- **El inglés es el idioma canónico** de toda la documentación pública: ante cualquier diferencia entre un doc y su contraparte, vale la versión en inglés.
+- Las versiones en español (`*.es.md` y este índice) son traducciones best-effort en voz rioplatense (la misma de la app) y **pueden quedar desfasadas**.
+- Si cambiás un doc que tiene contraparte de idioma: actualizala en el mismo PR, o agregale una nota visible de "traducción pendiente" — el checklist del PR template lo recuerda.
+- Excepción: [LANDING.md](LANDING.md) es contenido propio en español (no traducción), igual que [LANDING_COPY.md](LANDING_COPY.md) lo es en inglés.

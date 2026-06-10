@@ -187,7 +187,7 @@ Migrations corren automáticamente al boot del `api` container. **Siempre hacer 
 - `JWT_SECRET` cambió: todos los tokens viejos quedan inválidos. Normal después de rotar el secret.
 
 ### SSRF o scraping bloqueado
-- El scraper de Open Graph bloquea IPs privadas por seguridad (ver `REVIEW_2026_04.md §3.4`). Si necesitás scrapear una URL interna, no es el caso de uso — usá "guardar como note" manual.
+- El scraper de Open Graph bloquea IPs privadas por seguridad (ver `archive/REVIEW_2026_04.md §3.4`). Si necesitás scrapear una URL interna, no es el caso de uso — usá "guardar como note" manual.
 
 ---
 

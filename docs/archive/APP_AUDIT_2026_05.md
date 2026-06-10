@@ -1,5 +1,7 @@
 # DevDeck — App Audit (May 2026)
 
+> ⚠️ **Historical document (archived).** This is a dated snapshot; parts of it no longer reflect the current state of the product. See [ROADMAP.md](../../ROADMAP.md) for current status.
+
 > **Date:** 2026-05-21
 > **Scope:** Full feature inventory, gap analysis, and UX improvement recommendations.
 > **Goal:** Balance feature count vs. real user utility. No new features — improve what exists.

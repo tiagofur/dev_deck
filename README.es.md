@@ -87,7 +87,9 @@ Ambas apps importan pages y componentes del package `@devdeck/features` — solo
 | [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md) | Guía paso a paso para self-host |
 | [docs/CAPTURE.md](docs/CAPTURE.md) | Spec de canales de captura (extensión, CLI, paste, share) |
 | [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | Plan de tests y CI |
-| [docs/REVIEW_2026_04.md](docs/REVIEW_2026_04.md) | **Review técnico de abril 2026** — motiva Ola 4.5 |
+| [docs/LIMITATIONS.md](docs/LIMITATIONS.md) | Limitaciones conocidas de la 0.5.0 Public Beta |
+| [docs/ARCHITECTURE_MAP.md](docs/ARCHITECTURE_MAP.md) | Mapa de arquitectura en una página para contribuidores |
+| [docs/archive/REVIEW_2026_04.md](docs/archive/REVIEW_2026_04.md) | **Review técnico de abril 2026** — motiva Ola 4.5 |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Cómo contribuir |
 | [SECURITY.md](SECURITY.md) | Política de seguridad |
 

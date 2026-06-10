@@ -29,7 +29,7 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 
 ## 🌊 Ola 4.5 — Hardening & Capture (NUEVO)
 
-> **Por qué existe esta ola:** la review de abril 2026 (ver `docs/REVIEW_2026_04.md`) identificó dos riesgos bloqueantes para Ola 5: (1) cero tests, (2) captura con fricción. Esta ola atiende ambos en ~4 semanas y deja la base lista para iterar rápido.
+> **Por qué existe esta ola:** la review de abril 2026 (ver `docs/archive/REVIEW_2026_04.md`) identificó dos riesgos bloqueantes para Ola 5: (1) cero tests, (2) captura con fricción. Esta ola atiende ambos en ~4 semanas y deja la base lista para iterar rápido.
 
 ### Fase 16.5 — Higiene de repo ✅
 - Remover `backend/api.exe` y agregar `*.exe`, `api`, `api.bin` a `.gitignore`. ✅
@@ -327,7 +327,7 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 > - Modelo polimórfico de `items`: **Opción A (single-table + JSONB + generated columns)**. Ver `docs/adr/0001-items-polymorphism.md`.
 > - Quick capture: endpoint `POST /api/items/capture` ya existe desde Ola 4.5. Ola 5 solo expande tipos soportados.
 > - IA: Ollama como default, OpenAI opt-in. Rate limits obligatorios desde el primer endpoint (ver Fase 18).
-> - Búsqueda híbrida: RRF (Reciprocal Rank Fusion), no ponderación lineal. Ver `docs/REVIEW_2026_04.md §3.2`.
+> - Búsqueda híbrida: RRF (Reciprocal Rank Fusion), no ponderación lineal. Ver `docs/archive/REVIEW_2026_04.md §3.2`.
 
 > **Objetivo:** convertir DevDeck de directorio de repos a knowledge OS para developers. Justificar el `.ai` con features de IA que resuelven fricción real, no decorativas.
 

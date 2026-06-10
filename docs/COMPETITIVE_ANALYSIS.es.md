@@ -2,7 +2,7 @@
 
 > Versión: 1.1 · Owner: tfurt · Última actualización: 2026-06-10
 
-> **Nota de estado (junio 2026):** las menciones a "offline-first" en este documento describen la dirección de producto, no el estado actual. El sync offline está pospuesto a post-1.0; hoy la app funciona en cloud mode (las utilities del Workbench sí corren 100% local, sin red). La IA (resúmenes, tags, búsqueda semántica) requiere un provider configurado (OpenAI u Ollama local); sin provider, DevDeck usa un tagger heurístico integrado. Ver [FEATURE_REVIEW_2026_06.md](FEATURE_REVIEW_2026_06.md) (decisión A5) y el [ROADMAP](../ROADMAP.md).
+> **Nota de estado (junio 2026):** las menciones a "offline-first" en este documento describen la dirección de producto, no el estado actual. El sync offline está pospuesto a post-1.0; hoy la app funciona en cloud mode (las utilities del Workbench sí corren 100% local, sin red). La IA (resúmenes, tags, búsqueda semántica) requiere un provider configurado (OpenAI u Ollama local); sin provider, DevDeck usa un tagger heurístico integrado. Ver [FEATURE_REVIEW_2026_06.md](archive/FEATURE_REVIEW_2026_06.md) (decisión A5) y el [ROADMAP](../ROADMAP.md).
 
 ---
 

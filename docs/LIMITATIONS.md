@@ -8,7 +8,7 @@
 
 ## Sync and offline
 
-- **There is no offline-first sync yet.** DevDeck runs in honest cloud mode: the app needs to reach the API to read and write your vault. Offline sync (local SQLite + conflict resolution) is intentionally deferred until after `1.0.0` (see [FEATURE_REVIEW_2026_06.md](FEATURE_REVIEW_2026_06.md), decision A5).
+- **There is no offline-first sync yet.** DevDeck runs in honest cloud mode: the app needs to reach the API to read and write your vault. Offline sync (local SQLite + conflict resolution) is intentionally deferred until after `1.0.0` (see [FEATURE_REVIEW_2026_06.md](archive/FEATURE_REVIEW_2026_06.md), decision A5).
 - **Workbench utilities do run fully local.** JSON formatter, JWT decoder, Base64/URL tools, UUID/timestamp, hashes, regex tester, and the secret scanner work in-app without network access.
 - **Full vault export is not available yet.** Today only cheatsheets and decks can be exported; a complete vault export/backup (JSON + Markdown) is tracked in #122.
 

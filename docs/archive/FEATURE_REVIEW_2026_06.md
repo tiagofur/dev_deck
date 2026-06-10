@@ -1,5 +1,7 @@
 # DevDeck — Revisión de producto y documentación (Junio 2026)
 
+> ⚠️ **Documento histórico (archivado).** Es un snapshot con fecha; partes ya no reflejan el estado actual del producto. Ver [ROADMAP.md](../../ROADMAP.md) para el estado vigente.
+
 > **Fecha:** 2026-06-10
 > **Objetivo:** proponer mejoras en la app y en la documentación, manteniendo el principio rector: *una app útil para la mayoría de los usuarios, sin abrumar*. Cada propuesta es una decisión Sí/No para el owner.
 > **Método:** lectura completa de `docs/` (PRD, VISION, DEV_WORKBENCH, CIRCLES, auditorías de abril/mayo, ROADMAP, análisis competitivo) + verificación puntual contra el código.

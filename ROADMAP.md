@@ -20,7 +20,7 @@ The priority before a stable `1.0.0` is not more hype. It is trust:
 - stable capture/search/workbench/Circles flows,
 - and a contributor path that makes small PRs easy.
 
-Offline-first sync is intentionally deferred until after `1.0.0` (see [docs/FEATURE_REVIEW_2026_06.md](docs/FEATURE_REVIEW_2026_06.md), decision A5). Today DevDeck runs in honest cloud mode; Workbench utilities work fully local, and a full vault export (#122) covers data ownership in the meantime.
+Offline-first sync is intentionally deferred until after `1.0.0` (see [docs/archive/FEATURE_REVIEW_2026_06.md](docs/archive/FEATURE_REVIEW_2026_06.md), decision A5). Today DevDeck runs in honest cloud mode; Workbench utilities work fully local, and a full vault export (#122) covers data ownership in the meantime.
 
 ---
 
@@ -32,7 +32,7 @@ Offline-first sync is intentionally deferred until after `1.0.0` (see [docs/FEAT
 - [x] Position DevDeck honestly as `0.5.0 Public Beta`.
 - [x] Add screenshots and/or a short demo GIF.
 - [ ] Add realistic demo/seed data for a first-run experience (#117).
-- [ ] Document known limitations clearly (#129).
+- [x] Document known limitations clearly (#129).
 - [ ] Verify local setup on a clean machine.
 
 ### Core developer memory loop
@@ -66,7 +66,7 @@ Offline-first sync is intentionally deferred until after `1.0.0` (see [docs/FEAT
 - [x] Add contributor call-to-action in README.
 - [x] Add best-first-contribution guidance.
 - [ ] Create at least 5 `good first issue` tasks.
-- [ ] Add a short architecture map for new contributors (#129).
+- [x] Add a short architecture map for new contributors (#129).
 - [ ] Keep PRs small, issue-backed, and CI-verified.
 
 ---
