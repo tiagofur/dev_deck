@@ -8,7 +8,7 @@ import {
   requestConfigToCurl,
   parseCurlCommand,
 } from '../../workbench/utils'
-import { ToolFrame, TextArea, ResultActions } from './shared'
+import { ToolFrame, TextArea, ResultActions, ExampleButton } from './shared'
 
 const API_REQUEST_HISTORY_STORAGE_KEY = 'devdeck.workbench.apiRequests.v1'
 
@@ -256,6 +256,13 @@ export function ApiTool() {
           <TextArea label="Body" value={body} onChange={setBody} placeholder='{"hello":"devdeck"}' />
         )}
         <div className="grid gap-3 border-3 border-ink bg-bg-elevated p-4">
+          <ExampleButton
+            onLoad={() =>
+              setCurlImport(
+                "curl -X GET 'https://api.github.com/repos/golang/go' -H 'Accept: application/vnd.github+json'"
+              )
+            }
+          />
           <TextArea
             label="Import cURL"
             value={curlImport}

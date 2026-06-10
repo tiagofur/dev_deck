@@ -6,7 +6,7 @@ import {
   encodeUrl,
   decodeUrl,
 } from '../../workbench/utils'
-import { ToolFrame, TextArea, ResultActions } from './shared'
+import { ToolFrame, TextArea, ResultActions, ExampleButton } from './shared'
 
 export function TransformTool({ tool }: { tool: 'base64' | 'url' }) {
   const [input, setInput] = useState('')
@@ -24,6 +24,16 @@ export function TransformTool({ tool }: { tool: 'base64' | 'url' }) {
 
   return (
     <ToolFrame title={tool === 'base64' ? 'Base64' : 'URL encoding'}>
+      <ExampleButton
+        onLoad={() => {
+          setMode('encode')
+          setInput(
+            tool === 'base64'
+              ? 'DevDeck saves your best finds.'
+              : 'https://example.dev/search?q=developer memory&lang=es'
+          )
+        }}
+      />
       <div className="flex gap-2">
         {(['encode', 'decode'] as const).map((nextMode) => (
           <Button

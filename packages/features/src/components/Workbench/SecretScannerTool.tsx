@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { ShieldAlert } from 'lucide-react'
 import { scanSecrets } from '../../workbench/utils'
-import { ToolFrame, TextArea, ResultActions } from './shared'
+import { ToolFrame, TextArea, ResultActions, ExampleButton } from './shared'
 
 export function SecretScannerTool() {
   const [input, setInput] = useState('')
@@ -14,6 +14,19 @@ export function SecretScannerTool() {
 
   return (
     <ToolFrame title="Secret scanner">
+      <ExampleButton
+        onLoad={() =>
+          setInput(
+            [
+              '# demo .env — every value here is fake',
+              'API_URL=https://api.example.dev',
+              'AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE',
+              'GITHUB_TOKEN=ghp_1234567890abcdefghijklmnopqrstuvwxyz12',
+              'DB_PASSWORD=correct-horse-battery-staple',
+            ].join('\n')
+          )
+        }
+      />
       <TextArea
         label="Input"
         value={input}
