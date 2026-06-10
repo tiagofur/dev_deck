@@ -117,8 +117,25 @@ export function useOnboardingKits() {
 
 /** POST /api/onboarding/install — install a kit. */
 export function useInstallStarterKit() {
+  const qc = useQueryClient()
   return useMutation({
     mutationFn: (kitId: string) => api.post('/api/onboarding/install', { kit_id: kitId }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['items'] })
+      qc.invalidateQueries({ queryKey: ['stats'] })
+    },
+  })
+}
+
+/** DELETE /api/onboarding/demo — remove every item still tagged 'demo'. */
+export function useRemoveDemoData() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.del<{ removed: number }>('/api/onboarding/demo'),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['items'] })
+      qc.invalidateQueries({ queryKey: ['stats'] })
+    },
   })
 }
 
