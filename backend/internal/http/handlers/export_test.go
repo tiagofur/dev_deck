@@ -62,14 +62,14 @@ func TestVaultExport_JSONIncludesItemsAndRunbooks(t *testing.T) {
 
 func TestVaultExport_MarkdownRendersSections(t *testing.T) {
 	ts := newTestServer(t)
-	seedCapture(t, ts, capturePayload{Text: "Cmd+Shift+P", TitleHint: "Command palette shortcut"})
+	seedCapture(t, ts, capturePayload{Text: "Cmd+Shift+P"})
 
 	rec := ts.do(t, http.MethodGet, "/api/export/vault?format=markdown", nil)
 	if rec.Code != http.StatusOK {
 		t.Fatalf("markdown export: %d %s", rec.Code, rec.Body.String())
 	}
 	body := rec.Body.String()
-	for _, want := range []string{"# DevDeck vault export", "## Items (1)", "Command palette shortcut", "## Runbooks (0)"} {
+	for _, want := range []string{"# DevDeck vault export", "## Items (1)", "Cmd+Shift+P", "## Runbooks (0)"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("markdown missing %q\n%s", want, body)
 		}
