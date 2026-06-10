@@ -6,6 +6,7 @@ import (
 	"devdeck/internal/authctx"
 	"devdeck/internal/domain/auth"
 	"devdeck/internal/domain/items"
+	"devdeck/internal/store/seed"
 )
 
 func TestStore_Auth_GitHub(t *testing.T) {
@@ -63,19 +64,29 @@ func TestStore_InstallStarterKit_SeedsContextualDemoItems(t *testing.T) {
 	userID := mustUUID(t, "00000000-0000-0000-0000-000000000001")
 	ctx = authctx.WithUserID(ctx, userID)
 
-	if err := st.InstallStarterKit(ctx, "devdeck-demo"); err != nil {
+	wantItems := 0
+	for _, kit := range seed.GetStarterKits() {
+		if kit.ID == seed.DemoKitID {
+			wantItems = len(kit.Items)
+		}
+	}
+	if wantItems == 0 {
+		t.Fatal("demo kit not found or empty")
+	}
+
+	if err := st.InstallStarterKit(ctx, seed.DemoKitID); err != nil {
 		t.Fatalf("InstallStarterKit failed: %v", err)
 	}
 
 	res, err := st.ListItems(ctx, items.ListParams{
 		Sort:  "title_asc",
-		Limit: 20,
+		Limit: 100,
 	})
 	if err != nil {
 		t.Fatalf("ListItems failed: %v", err)
 	}
-	if res.Total != 5 {
-		t.Fatalf("expected 5 demo items, got %d", res.Total)
+	if res.Total != wantItems {
+		t.Fatalf("expected %d demo items, got %d", wantItems, res.Total)
 	}
 
 	var repo *items.Item
@@ -121,18 +132,18 @@ func TestStore_InstallStarterKit_SeedsContextualDemoItems(t *testing.T) {
 		t.Fatal("expected prompt notes")
 	}
 
-	if err := st.InstallStarterKit(ctx, "devdeck-demo"); err != nil {
+	if err := st.InstallStarterKit(ctx, seed.DemoKitID); err != nil {
 		t.Fatalf("InstallStarterKit second run failed: %v", err)
 	}
 
 	after, err := st.ListItems(ctx, items.ListParams{
 		Sort:  "title_asc",
-		Limit: 20,
+		Limit: 100,
 	})
 	if err != nil {
 		t.Fatalf("ListItems after second run failed: %v", err)
 	}
-	if after.Total != 5 {
-		t.Fatalf("expected idempotent install to keep 5 items, got %d", after.Total)
+	if after.Total != wantItems {
+		t.Fatalf("expected idempotent install to keep %d items, got %d", wantItems, after.Total)
 	}
 }
