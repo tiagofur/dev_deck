@@ -29,7 +29,7 @@ import {
 import { showToast } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
 import { WebhookManager } from '../components/WebhookManager'
-import { PluginGallery } from '../components/PluginGallery'
+import { IntegrationsList } from '../components/IntegrationsList'
 import { OrgInsights } from '../components/OrgInsights'
 
 const APP_VERSION = '1.0.0'
@@ -128,8 +128,8 @@ export function SettingsPage() {
           <WebhookManager />
         </Section>
 
-        <Section title={`${t('settings.developer')}: ${t('settings.plugin_gallery')}`}>
-          <PluginGallery />
+        <Section title={`${t('settings.developer')}: ${t('settings.integrations')}`}>
+          <IntegrationsList />
         </Section>
 
         {/* Enterprise */}
