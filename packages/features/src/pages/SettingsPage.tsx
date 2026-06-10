@@ -30,6 +30,7 @@ import { showToast } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
 import { WebhookManager } from '../components/WebhookManager'
 import { IntegrationsList } from '../components/IntegrationsList'
+import { ImportStarsSection } from '../components/ImportStarsSection'
 import { OrgInsights } from '../components/OrgInsights'
 
 const APP_VERSION = '1.0.0'
@@ -126,6 +127,10 @@ export function SettingsPage() {
             {t('settings.output_webhooks_desc')}
           </p>
           <WebhookManager />
+        </Section>
+
+        <Section title={t('settings.import_stars_title')}>
+          <ImportStarsSection />
         </Section>
 
         <Section title={`${t('settings.developer')}: ${t('settings.integrations')}`}>

@@ -59,6 +59,32 @@ func newTestServer(t *testing.T) *testServer {
 			}`))
 		case "/repos/notfound/repo":
 			w.WriteHeader(http.StatusNotFound)
+		case "/users/octofake/starred":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`[
+				{
+					"full_name": "charmbracelet/glow",
+					"html_url": "https://github.com/charmbracelet/glow",
+					"description": "Render markdown on the CLI",
+					"language": "Go",
+					"stargazers_count": 900,
+					"forks_count": 40,
+					"topics": ["cli","markdown"],
+					"owner": {"avatar_url": "https://avatars.example/charmbracelet"}
+				},
+				{
+					"full_name": "BurntSushi/ripgrep",
+					"html_url": "https://github.com/BurntSushi/ripgrep",
+					"description": "Recursively search directories",
+					"language": "Rust",
+					"stargazers_count": 5000,
+					"forks_count": 200,
+					"topics": ["search"],
+					"owner": {"avatar_url": "https://avatars.example/burntsushi"}
+				}
+			]`))
+		case "/users/ghostuser/starred":
+			w.WriteHeader(http.StatusNotFound)
 		default:
 			w.WriteHeader(http.StatusNotFound)
 		}
