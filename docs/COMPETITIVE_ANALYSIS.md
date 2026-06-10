@@ -38,12 +38,15 @@ How **DevDeck.ai** compares to other bookmarking and knowledge management tools.
 
 | Feature | DevDeck | Raindrop | GitHub Stars | Notion |
 |---------|---------|----------|--------------|--------|
-| **AI Summary** | ✅ (Built-in) | ❌ | ❌ | ⚠️ (Manual) |
+| **AI Summary** | ✅ (With provider)* | ❌ | ❌ | ⚠️ (Manual) |
 | **CLI Capture** | ✅ (Native) | ❌ | ❌ | ❌ |
 | **Snippet Support** | ✅ (High) | ⚠️ (Basic) | ❌ | ✅ (High) |
-| **Offline-First** | ✅ (Desktop) | ⚠️ (Pro only) | ❌ | ⚠️ (Sync issues) |
+| **Offline-First** | 🟡 (Planned)** | ⚠️ (Pro only) | ❌ | ⚠️ (Sync issues) |
 | **Open Source** | ✅ | ❌ | ❌ | ❌ |
 | **Self-Hostable** | ✅ | ❌ | ❌ | ❌ |
+
+> \* AI summaries and tags require a configured provider (OpenAI or local Ollama). Without one, DevDeck falls back to a built-in heuristic tagger.
+> \*\* Offline-first sync is product direction, deferred until after 1.0. Today DevDeck runs in cloud mode; Workbench utilities do run fully local without network access.
 
 ---
 

@@ -14,9 +14,11 @@
 
 DevDeck helps developers save, organize, retrieve, and reuse useful development knowledge: repos, CLIs, plugins, cheatsheets, shortcuts, snippets, agents, prompts, requests, runbooks, and workflows.
 
-The next product step is the **Developer Workbench**:
+The **Developer Workbench** shipped this direction (see phase status in [DEV_WORKBENCH.md](DEV_WORKBENCH.md)):
 
 > Save useful knowledge, find it when it matters, and turn it into reusable actions.
+
+The current product step is launch readiness: first-run experience, honest docs, and Circles as community memory (see the [ROADMAP](../ROADMAP.md)).
 
 ---
 

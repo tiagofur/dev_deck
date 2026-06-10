@@ -1,6 +1,8 @@
 # DevDeck — Análisis Competitivo
 
-> Versión: 1.0 · Owner: tfurt · Última actualización: 2026-04-08
+> Versión: 1.1 · Owner: tfurt · Última actualización: 2026-06-10
+
+> **Nota de estado (junio 2026):** las menciones a "offline-first" en este documento describen la dirección de producto, no el estado actual. El sync offline está pospuesto a post-1.0; hoy la app funciona en cloud mode (las utilities del Workbench sí corren 100% local, sin red). La IA (resúmenes, tags, búsqueda semántica) requiere un provider configurado (OpenAI u Ollama local); sin provider, DevDeck usa un tagger heurístico integrado. Ver [FEATURE_REVIEW_2026_06.md](FEATURE_REVIEW_2026_06.md) (decisión A5) y el [ROADMAP](../ROADMAP.md).
 
 ---
 
@@ -220,7 +222,7 @@ GitHub Stars es el punto de partida conceptual de DevDeck (de hecho, el producto
 
 | Herramienta | Categoría | Offline-first | IA útil para devs | Assets de dev como 1er nivel | Búsqueda semántica | Multiplataforma |
 |-------------|-----------|:---:|:---:|:---:|:---:|:---:|
-| **DevDeck** | Knowledge OS para devs | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **DevDeck** | Knowledge OS para devs | 🟡 (roadmap) | ✅ (con provider) | ✅ | ✅ (con provider) | ✅ |
 | Raindrop.io | Bookmark manager | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Notion | PKM / workspace | ❌ | Parcial* | ❌ | ❌ | ✅ |
 | Obsidian | PKM offline | ✅ | Parcial** | ❌ | Parcial** | ✅ |
@@ -231,7 +233,8 @@ GitHub Stars es el punto de partida conceptual de DevDeck (de hecho, el producto
 > \* Notion AI escribe y resume texto, pero no entiende el dominio de dev tools.  
 > \*\* Obsidian tiene plugins de IA y búsqueda semántica, pero requieren configuración avanzada; no son out-of-the-box.  
 > \*\*\* Raycast AI responde preguntas, pero no organiza tu colección personal de herramientas.  
-> † Dash es macOS; Zeal es Linux/Windows. Ninguno es multiplataforma completo.
+> † Dash es macOS; Zeal es Linux/Windows. Ninguno es multiplataforma completo.  
+> 🟡 El offline-first de DevDeck está pospuesto a post-1.0; hoy la app funciona en cloud mode (las utilities del Workbench sí corren 100% local). "Con provider" = requiere OpenAI u Ollama configurado; sin provider se usa el tagger heurístico y búsqueda de texto/fuzzy.
 
 ---
 

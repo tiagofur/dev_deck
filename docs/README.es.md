@@ -8,7 +8,7 @@
 
 | Archivo | Descripción |
 |---------|-------------|
-| [PRD.md](PRD.md) | **Product Requirements Document.** Visión, tipos de items, funcionalidades por ola (1–7), user stories, métricas, constraints, decisiones y riesgos. Punto de entrada principal para entender el producto. |
+| [PRD.md](PRD.md) | **Product Requirements Document.** Visión, problema, solución en capas (vault polimórfico + recuperación inteligente + acciones reutilizables), pilares, alcance (core + Workbench + fuera de scope) y métricas de éxito. Punto de entrada principal para entender el producto. |
 | [VISION.md](VISION.md) | **Visión y posicionamiento.** Qué es DevDeck (y qué no es), diferenciadores genuinos, taglines por audiencia, roadmap de posicionamiento y preguntas frecuentes de posicionamiento. |
 | [DEV_WORKBENCH.md](DEV_WORKBENCH.md) · [DEV_WORKBENCH.es.md](DEV_WORKBENCH.es.md) | **Developer Workbench.** Evolución de memoria a acción contextual: utilities locales, paleta, requests reutilizables, límites de producto y roadmap recomendado. |
 | [CIRCLES_COMMUNITY.md](CIRCLES_COMMUNITY.md) · [CIRCLES_COMMUNITY.es.md](CIRCLES_COMMUNITY.es.md) | **Circles y contribución comunitaria.** Modelo de producto para convertir hallazgos individuales en memoria reutilizable para grupos/comunidades de developers. |
@@ -37,6 +37,33 @@
 | [TECHNICAL_ROADMAP_AI_OFFLINE.es.md](TECHNICAL_ROADMAP_AI_OFFLINE.es.md) | **Roadmap técnico detallado.** Plan de implementación de las Olas 5–7: offline-first con SQLite local + sync engine, embeddings + búsqueda vectorial, multi-usuario. |
 | [API.es.md](API.es.md) | **Referencia de API REST.** Especificación OpenAPI de todos los endpoints (`/api/repos`, `/api/cheatsheets`, `/api/search`, `/api/auth`, etc.). |
 | [DESIGN_SYSTEM.es.md](DESIGN_SYSTEM.es.md) | **Design system.** Tokens CSS, paleta de colores neo-brutalist, tipografía, componentes, estados de la mascota Snarkel y principios de diseño de la UI. |
+| [CAPTURE.md](CAPTURE.md) · [CAPTURE.es.md](CAPTURE.es.md) | **Captura multi-canal.** Cómo funciona la captura desde CLI, extensión, paste interceptor y endpoint `/api/items/capture`. |
+| [SELF_HOSTING.md](SELF_HOSTING.md) · [SELF_HOSTING.es.md](SELF_HOSTING.es.md) | **Guía de self-hosting.** Despliegue con Docker Compose + Caddy, variables de entorno, migraciones y verificación. |
+| [TESTING_STRATEGY.md](TESTING_STRATEGY.md) · [TESTING_STRATEGY.es.md](TESTING_STRATEGY.es.md) | **Estrategia de testing y CI.** Tests de backend, unitarios de frontend, E2E y pipeline de GitHub Actions. |
+
+---
+
+## Comunidad y lanzamiento
+
+| Archivo | Descripción |
+|---------|-------------|
+| [FIRST_CONTRIBUTION.md](FIRST_CONTRIBUTION.md) | **Primera contribución.** Camino corto para un primer PR respaldado por un issue. |
+| [DISCUSSIONS.md](DISCUSSIONS.md) | **Guía de GitHub Discussions.** Categorías y cómo participar. |
+| [SUPPORT.md](SUPPORT.md) | **Soporte y sustentabilidad.** Qué financia el apoyo al proyecto y caminos futuros de sostenibilidad. |
+| [LAUNCH_KIT.md](LAUNCH_KIT.md) | **Kit de lanzamiento.** Copy por canal, checklist de launch y plan de follow-up. |
+
+---
+
+## Reviews y auditorías (históricos)
+
+> Snapshots con fecha. Para el estado actual del producto, ver siempre [ROADMAP.md](../ROADMAP.md).
+
+| Archivo | Descripción |
+|---------|-------------|
+| [REVIEW_2026_04.md](REVIEW_2026_04.md) | **Review técnica (abril 2026).** Hardening, captura y deuda de testing — origen de la Ola 4.5. |
+| [APP_AUDIT_2026_05.md](APP_AUDIT_2026_05.md) | **Auditoría de app (mayo 2026).** Inventario completo de features, clasificación por impacto de usuario y plan P0–P2 de progressive disclosure. |
+| [APP_AUDIT_REVIEW_2026_05.md](APP_AUDIT_REVIEW_2026_05.md) | **Verificación de la auditoría (mayo 2026).** Evidencia del trabajo P0/P1 y plan de comunidad alrededor de Circles. |
+| [FEATURE_REVIEW_2026_06.md](FEATURE_REVIEW_2026_06.md) | **Revisión de producto y docs (junio 2026).** Menú de decisiones Sí/No sobre mejoras de app y documentación; origen de los issues #113–#130. |
 
 ---
 
