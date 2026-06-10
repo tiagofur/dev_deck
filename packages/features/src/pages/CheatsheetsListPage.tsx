@@ -115,11 +115,20 @@ export function CheatsheetsListPage() {
         </header>
 
         {cheatsheets.length === 0 ? (
-          <div className="text-center py-20">
+          <div className="text-center py-20 space-y-4">
             <BookOpen size={64} strokeWidth={2} className="mx-auto mb-4 text-ink-soft" />
-            <p className="font-mono text-ink-soft">
+            <p className="font-mono text-ink-soft max-w-md mx-auto">
               {selectedCategory ? t('cheatsheets.empty_state_category') : t('cheatsheets.empty_state')}
             </p>
+            <p className="font-mono text-xs text-ink-soft/70 max-w-md mx-auto">
+              {t('cheatsheets.empty_state_hint')}
+            </p>
+            <Button onClick={() => setShowCreate(true)} className="mt-2">
+              <span className="flex items-center gap-2">
+                <Plus size={14} strokeWidth={3} />
+                {t('cheatsheets.empty_state_action')}
+              </span>
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">

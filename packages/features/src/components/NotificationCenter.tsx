@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Bell, Check, ExternalLink, Mail, ShieldCheck, Sparkles, X } from 'lucide-react'
+import { Bell, ExternalLink, Mail, ShieldCheck, Sparkles, X } from 'lucide-react'
 import { 
   useNotifications, 
   useUnreadNotificationsCount, 
@@ -121,8 +121,13 @@ export function NotificationCenter() {
               </div>
             ) : (
               <div className="p-12 text-center space-y-4">
-                <Check size={32} className="mx-auto text-accent-lime" strokeWidth={3} />
-                <p className="font-mono text-xs text-ink-soft uppercase font-bold tracking-tight">{t('notifications.all_clear')}</p>
+                <Bell size={32} className="mx-auto text-accent-lime" strokeWidth={3} />
+                <p className="font-mono text-xs text-ink-soft uppercase font-bold tracking-tight">
+                  {t('notifications.empty')}
+                </p>
+                <p className="font-mono text-[11px] text-ink-soft/70 max-w-xs mx-auto leading-relaxed">
+                  {t('notifications.empty_hint')}
+                </p>
               </div>
             )}
           </div>
