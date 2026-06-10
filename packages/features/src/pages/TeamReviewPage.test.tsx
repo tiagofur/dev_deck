@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   useItems: vi.fn(),
   useUpdateItem: vi.fn(),
   usePreferences: vi.fn(),
+  useFeatureFlags: vi.fn(),
 }))
 
 vi.mock('react-router-dom', () => ({
@@ -27,6 +28,7 @@ vi.mock('@devdeck/api-client', async () => {
     useItems: mocks.useItems,
     useUpdateItem: mocks.useUpdateItem,
     usePreferences: mocks.usePreferences,
+    useFeatureFlags: mocks.useFeatureFlags,
   }
 })
 
@@ -75,6 +77,12 @@ describe('<TeamReviewPage>', () => {
     mocks.useItems.mockReset()
     mocks.usePreferences.mockReset()
     mocks.usePreferences.mockReturnValue({ activeOrgId: 'org_123' })
+    mocks.useFeatureFlags.mockReturnValue({
+      explore: false,
+      reputation: false,
+      team_review: true,
+      realtime: false,
+    })
     mocks.useUpdateItem.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
   })
 
@@ -104,6 +112,25 @@ describe('<TeamReviewPage>', () => {
     renderPage()
     await user.click(screen.getByRole('heading', { name: 'ripgrep' }))
     expect(mocks.navigate).toHaveBeenCalledWith('/items/item-1')
+  })
+
+  it('renders a feature-disabled state when team_review flag is off', () => {
+    mocks.useFeatureFlags.mockReturnValue({
+      explore: false,
+      reputation: false,
+      team_review: false,
+      realtime: false,
+    })
+    mocks.useItems.mockReturnValue({
+      data: { total: 0, items: [] },
+      isLoading: false,
+      error: null,
+    })
+
+    renderPage()
+
+    expect(screen.getByText('Team Review is not enabled')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Back to my vault' })).toBeInTheDocument()
   })
 
   it('renders guided org-required state if there is no active org configured', async () => {

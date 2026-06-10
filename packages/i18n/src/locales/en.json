@@ -130,6 +130,11 @@
     "synced": "Synced",
     "cloud_mode": "Cloud Mode"
   },
+  "features": {
+    "disabled_title": "{{feature}} is not enabled",
+    "disabled_desc": "This feature is turned off on this server while it matures. A self-hosting admin can enable it with the matching FEATURE_* environment variable.",
+    "back_to_vault": "Back to my vault"
+  },
   "profile": {
     "title": "My Profile",
     "edit_profile": "Edit Profile",
@@ -783,6 +788,7 @@
     "repos": "Repos",
     "cheatsheets": "Cheatsheets",
     "runbooks": "Runbooks",
+    "explore": "Explore",
     "tools": "Tools",
     "workbench": "Workbench",
     "discovery": "Discovery",

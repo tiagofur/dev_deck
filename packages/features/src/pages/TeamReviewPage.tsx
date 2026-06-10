@@ -1,16 +1,18 @@
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Box, CheckCircle2, Users } from 'lucide-react'
 import { Button } from '@devdeck/ui'
-import { useItems, usePreferences } from '@devdeck/api-client'
+import { useFeatureFlags, useItems, usePreferences } from '@devdeck/api-client'
 import { ItemCard } from '../components/ItemCard'
 import { detailPathForItem } from '../utils/itemRoutes'
 import { AppShell } from '../components/AppShell'
 import { OrgRequiredEmptyState } from '../components/OrgRequiredEmptyState'
+import { FeatureDisabledState } from '../components/FeatureDisabledState'
 import { useTranslation } from '@devdeck/i18n'
 
 export function TeamReviewPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const features = useFeatureFlags()
   const { activeOrgId } = usePreferences()
   const { data, isLoading, error } = useItems({
     tag: 'team-review',
@@ -18,6 +20,10 @@ export function TeamReviewPage() {
     sort: 'updated_desc',
   })
   const items = data?.items ?? []
+
+  if (!features.team_review) {
+    return <FeatureDisabledState featureName={t('review.title')} />
+  }
 
   if (!activeOrgId) {
     return <OrgRequiredEmptyState description={t('review.org_required_desc')} />

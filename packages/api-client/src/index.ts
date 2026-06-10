@@ -290,6 +290,6 @@ export type {
 } from './features/decks/api'
 
 // Feature hooks — system
-export { useSystemConfig } from './features/system/api'
-export type { SystemConfig } from './features/system/api'
+export { useSystemConfig, useFeatureFlags } from './features/system/api'
+export type { SystemConfig, SystemFeatures } from './features/system/api'
 
