@@ -106,7 +106,7 @@ describe('<TeamReviewPage>', () => {
     expect(mocks.navigate).toHaveBeenCalledWith('/items/item-1')
   })
 
-  it('renders access denied if there is no active org configured', async () => {
+  it('renders guided org-required state if there is no active org configured', async () => {
     const user = userEvent.setup()
     mocks.usePreferences.mockReturnValue({ activeOrgId: null })
     mocks.useItems.mockReturnValue({
@@ -117,12 +117,17 @@ describe('<TeamReviewPage>', () => {
 
     renderPage()
 
-    expect(screen.getByText('Access Denied')).toBeInTheDocument()
-    expect(screen.getByText('The Team Feed is only available within an organization.')).toBeInTheDocument()
+    expect(screen.getByText('No Active Team')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Team Review is a shared curation queue where your organization triages items marked for review. It needs an active team workspace.',
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Create a Team/i })).toBeInTheDocument()
 
     const backButton = screen.getByRole('button', { name: 'Back to Personal Vault' })
     expect(backButton).toBeInTheDocument()
-    
+
     await user.click(backButton)
     expect(mocks.navigate).toHaveBeenCalledWith('/')
   })
