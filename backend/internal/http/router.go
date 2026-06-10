@@ -263,6 +263,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Route("/onboarding", func(onr chi.Router) {
 				onr.Get("/kits", onboardingH.ListKits)
 				onr.Post("/install", onboardingH.InstallKit)
+				onr.Delete("/demo", onboardingH.RemoveDemo)
 			})
 
 			r.Route("/items", func(ir chi.Router) {

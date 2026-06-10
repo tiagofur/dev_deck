@@ -371,6 +371,19 @@ func (s *Store) MarkItemSeen(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+// DeleteItemsByTag removes every item of the current user that carries the
+// given manual tag. Used to bulk-remove demo data; users can keep an item
+// by removing the tag first.
+func (s *Store) DeleteItemsByTag(ctx context.Context, tag string) (int64, error) {
+	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
+	args := append([]any{tag}, scopeArgs...)
+	res, err := s.Writer().Exec(ctx, `DELETE FROM items WHERE $1 = ANY(tags) AND `+scopeSQL, args...)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected(), nil
+}
+
 func (s *Store) UpdateItemMetadata(ctx context.Context, id uuid.UUID, md *repos.Metadata) error {
 	tx, err := s.Writer().Begin(ctx)
 	if err != nil {

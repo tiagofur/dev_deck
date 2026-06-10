@@ -38,3 +38,15 @@ func (h *OnboardingHandler) InstallKit(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// DELETE /api/onboarding/demo
+// Removes every item still tagged with the demo tag. Items the user wants
+// to keep survive by removing the tag before cleanup.
+func (h *OnboardingHandler) RemoveDemo(w http.ResponseWriter, r *http.Request) {
+	removed, err := h.store.DeleteItemsByTag(r.Context(), seed.DemoTag)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"removed": removed})
+}

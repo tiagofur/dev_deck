@@ -68,6 +68,7 @@ export {
   useCompleteOnboarding,
   useOnboardingKits,
   useInstallStarterKit,
+  useRemoveDemoData,
 } from './features/users/api'
 export type { User, PublicProfile, UpdateUserInput, FeedEvent, StarterKit } from './features/users/api'
 

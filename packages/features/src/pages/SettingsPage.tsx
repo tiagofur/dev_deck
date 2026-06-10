@@ -32,6 +32,7 @@ import { WebhookManager } from '../components/WebhookManager'
 import { IntegrationsList } from '../components/IntegrationsList'
 import { ImportStarsSection } from '../components/ImportStarsSection'
 import { ExportVaultSection } from '../components/ExportVaultSection'
+import { DemoDataSection } from '../components/DemoDataSection'
 import { OrgInsights } from '../components/OrgInsights'
 
 const APP_VERSION = '1.0.0'
@@ -136,6 +137,10 @@ export function SettingsPage() {
 
         <Section title={t('settings.export_vault_title')}>
           <ExportVaultSection />
+        </Section>
+
+        <Section title={t('settings.demo_title')}>
+          <DemoDataSection />
         </Section>
 
         <Section title={`${t('settings.developer')}: ${t('settings.integrations')}`}>
