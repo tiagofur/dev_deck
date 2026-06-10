@@ -159,6 +159,37 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return readJSON<T>(res)
 }
 
+/**
+ * Like request(), but returns the raw Response for binary/file downloads.
+ * Same auth headers and error mapping; no JSON parsing.
+ */
+async function rawRequest(path: string): Promise<Response> {
+  const { baseUrl } = getConfig()
+  const { activeOrgId } = getPreferences()
+
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${getBearerToken()}`,
+  }
+  if (activeOrgId) {
+    headers['X-Org-ID'] = activeOrgId
+  }
+
+  const res = await fetch(`${baseUrl}${path}`, { headers })
+  if (!res.ok) {
+    let code = 'UNKNOWN'
+    let message = res.statusText || `HTTP ${res.status}`
+    try {
+      const body = (await res.json()) as { error?: { code?: string; message?: string } }
+      if (body?.error?.code) code = body.error.code
+      if (body?.error?.message) message = body.error.message
+    } catch {
+      /* body wasn't JSON — keep defaults */
+    }
+    throw new APIError(res.status, code, message)
+  }
+  return res
+}
+
 export const api = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, body?: unknown) =>
@@ -172,4 +203,6 @@ export const api = {
       body: body instanceof FormData ? body : (body !== undefined ? JSON.stringify(body) : undefined),
     }),
   del: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
+  /** Raw download — returns the Blob for attachment endpoints. */
+  getBlob: async (path: string) => (await rawRequest(path)).blob(),
 }

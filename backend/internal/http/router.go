@@ -97,6 +97,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	publicDeckH := handlers.NewPublicDeckHandler(st)
 	importH := handlers.NewImportHandler(st)
 	starsImportH := handlers.NewStarsImportHandler(st, en)
+	exportH := handlers.NewVaultExportHandler(st)
 	profileH := handlers.NewProfileHandler(st, deps.Cache)
 	circlesH := handlers.NewCirclesHandler(st)
 	adminH := handlers.NewAdminHandler(st)
@@ -294,6 +295,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			})
 
 			r.Post("/import/github-stars", starsImportH.Import)
+			r.Get("/export/vault", exportH.Export)
 			r.Get("/runbooks", runbooksH.ListAll)
 			r.Route("/runbooks/{id}", func(r chi.Router) {
 				r.Patch("/", runbooksH.Update)
