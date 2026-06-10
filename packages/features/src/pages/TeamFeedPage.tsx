@@ -9,9 +9,9 @@ import {
   User as UserIcon
 } from 'lucide-react'
 import { useOrgFeed, usePreferences, type ActivityEntry } from '@devdeck/api-client'
-import { Button } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
 import { AppShell } from '../components/AppShell'
+import { OrgRequiredEmptyState } from '../components/OrgRequiredEmptyState'
 
 export function TeamFeedPage() {
   const { t } = useTranslation()
@@ -21,13 +21,7 @@ export function TeamFeedPage() {
   const events = data?.events || []
 
   if (!activeOrgId) {
-    return (
-      <AppShell contentClassName="flex-1 p-12 text-center flex flex-col items-center justify-center gap-4 bg-bg-primary">
-        <h2 className="font-display font-black text-2xl uppercase">{t('feed.access_denied')}</h2>
-        <p className="text-ink-soft font-mono text-sm">{t('feed.only_org_desc')}</p>
-        <Button onClick={() => navigate('/')}>{t('feed.back_to_personal')}</Button>
-      </AppShell>
-    )
+    return <OrgRequiredEmptyState description={t('feed.only_org_desc')} />
   }
 
   return (

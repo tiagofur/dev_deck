@@ -405,7 +405,8 @@
     "empty_desc": "When you capture something important, mark it for review to bring it to this queue.",
     "waiting_count": "{{count}} items waiting for review",
     "view_all": "View all",
-    "go_to_items": "Go to items"
+    "go_to_items": "Go to items",
+    "org_required_desc": "Team Review is a shared curation queue where your organization triages items marked for review. It needs an active team workspace."
   },
   "waitlist": {
     "title": "Join the Waitlist",
@@ -425,7 +426,10 @@
     "view_more": "View more",
     "team_title": "Team Activity Feed",
     "access_denied": "Access Denied",
-    "only_org_desc": "The Team Feed is only available within an organization.",
+    "only_org_desc": "The Team Feed shows what your organization saves, updates, and curates. It needs an active team workspace.",
+    "org_required_title": "No Active Team",
+    "org_required_hint": "Create a team below, or pick one from the workspace switcher in the top bar. Your personal vault stays separate.",
+    "create_team": "Create a Team",
     "back_to_personal": "Back to Personal Vault",
     "connecting": "Connecting to activity stream...",
     "no_team_activity": "No activity in this team yet.",
