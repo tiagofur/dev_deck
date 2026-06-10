@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
+	"time"
 
 	"devdeck/internal/ai"
 	"devdeck/internal/authctx"
@@ -12,6 +14,9 @@ import (
 
 	"github.com/google/uuid"
 )
+
+// digestMaxTitles caps how many item titles appear in the digest body.
+const digestMaxTitles = 5
 
 type DigestJob struct {
 	store *store.Store
@@ -26,44 +31,49 @@ func NewDigestJob(s *store.Store, aiSvc *ai.Service) *DigestJob {
 }
 
 // Run executes the digest generation for all active users.
+//
+// The digest is provider-independent by design: it is a deterministic list
+// of what the user saved in the last week, so the notification bell works
+// for the majority of users who never configure an AI provider. AI-flavored
+// summaries can be layered on top later without changing this contract.
 func (j *DigestJob) Run(ctx context.Context) {
 	slog.Info("starting weekly digest job")
 
-	// 1. Get all users
 	users, err := j.store.ListUsersAdmin(ctx)
 	if err != nil {
 		slog.Error("failed to list users for digest", "err", err)
 		return
 	}
 
+	weekAgo := time.Now().AddDate(0, 0, -7)
+
 	for _, uMap := range users {
 		userID := uMap["id"].(uuid.UUID)
 		userCtx := authctx.WithUserID(ctx, userID)
 
-		// 2. Get up to the 10 newest items for the user
 		listRes, err := j.store.ListItems(userCtx, items.ListParams{
-			Limit: 10,
+			Limit:        10,
+			CreatedAfter: &weekAgo,
 		})
 		if err != nil {
 			slog.Error("failed to list items for user digest", "user_id", userID, "err", err)
 			continue
 		}
 
+		// Nothing new this week: stay silent instead of repeating stale digests.
 		if len(listRes.Items) == 0 {
 			continue
 		}
 
-		// 3. Generate summary with AI
-		summary, err := j.generateDigestSummary(ctx, listRes.Items)
-		if err != nil {
-			slog.Error("failed to generate digest summary", "user_id", userID, "err", err)
-			continue
+		count := listRes.Total
+		if count < len(listRes.Items) {
+			count = len(listRes.Items)
 		}
 
-		// 4. Create notification
-		title := fmt.Sprintf("Tu resumen semanal: %d descubrimientos", len(listRes.Items))
-		_, err = j.store.CreateNotification(ctx, userID, "weekly_digest", title, summary, nil)
-		if err != nil {
+		title := digestTitle(count)
+		summary := buildDigestSummary(listRes.Items, count)
+
+		if _, err := j.store.CreateNotification(ctx, userID, "weekly_digest", title, summary, nil); err != nil {
 			slog.Error("failed to create digest notification", "user_id", userID, "err", err)
 		}
 	}
@@ -71,24 +81,36 @@ func (j *DigestJob) Run(ctx context.Context) {
 	slog.Info("weekly digest job finished")
 }
 
-func (j *DigestJob) generateDigestSummary(ctx context.Context, itemNodes []*items.Item) (string, error) {
-	if !j.ai.Enabled() || len(itemNodes) == 0 {
-		return "Esta semana guardaste varios items interesantes. ¡No te olvides de revisarlos!", nil
+func digestTitle(count int) string {
+	if count == 1 {
+		return "Your weekly digest: 1 new find"
+	}
+	return fmt.Sprintf("Your weekly digest: %d new finds", count)
+}
+
+// buildDigestSummary renders the digest body without requiring any AI
+// provider: the newest item titles from the past week, plus a hint when
+// there are more than fit.
+func buildDigestSummary(itemNodes []*items.Item, total int) string {
+	var b strings.Builder
+	b.WriteString("Saved this week:\n")
+
+	shown := len(itemNodes)
+	if shown > digestMaxTitles {
+		shown = digestMaxTitles
+	}
+	for _, it := range itemNodes[:shown] {
+		title := strings.TrimSpace(it.Title)
+		if title == "" {
+			title = "(untitled)"
+		}
+		b.WriteString("• " + title + "\n")
 	}
 
-	// Build a simple text list for the AI context (simulated)
-	var list string
-	for i, it := range itemNodes {
-		desc := it.Notes
-		if it.Description != nil {
-			desc = *it.Description
-		}
-		list += fmt.Sprintf("- %s: %s\n", it.Title, desc)
-		if i >= 4 {
-			break
-		}
+	if total > shown {
+		b.WriteString(fmt.Sprintf("…and %d more in your vault.\n", total-shown))
 	}
 
-	// For Wave 8, we'll keep it simple:
-	return "Excelente semana. Guardaste herramientas clave como " + itemNodes[0].Title + ". ¡Seguí explorando!", nil
+	b.WriteString("\nRevisit them before they fade.")
+	return b.String()
 }
