@@ -955,6 +955,10 @@
     "preparing_vault": "Preparing your vault for the new discovery."
   },
   "explore": {
+    "tabs": {
+      "cheatsheets": "Cheatsheets",
+      "discovery": "Discovery"
+    },
     "title": "Explore Vaults",
     "subtitle": "Discover cheatsheets created by the community and the DevDeck official team. Copy them to your personal vault with a single click.",
     "loading_message": "Exploring collective knowledge...",
