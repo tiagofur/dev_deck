@@ -30,9 +30,11 @@ El `.ai` no debe ser decorativo. La IA en DevDeck existe para clasificar, resumi
 
 DevDeck ayuda a guardar, organizar, recuperar y reutilizar todo lo útil que un developer encuentra o construye: repos, CLIs, plugins, cheatsheets, shortcuts, snippets, agentes, prompts, requests, runbooks y workflows.
 
-El siguiente paso de producto es el **Developer Workbench**:
+El **Developer Workbench** ya materializó esta dirección (ver estado por fase en [DEV_WORKBENCH.es.md](DEV_WORKBENCH.es.md)):
 
 > Guardás conocimiento útil, lo encontrás cuando importa y lo convertís en acciones reutilizables.
+
+El paso actual de producto es la preparación para el lanzamiento: primera experiencia, documentación honesta y Circles como memoria comunitaria (ver el [ROADMAP](../ROADMAP.es.md)).
 
 ---
 

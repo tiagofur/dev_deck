@@ -136,9 +136,13 @@ R: Hoy es para uso individual o muy pequeño (allowlist de GitHub). El plan es e
 
 ---
 
-## El Futuro: Developer Workbench
+## Developer Workbench: de memoria a acción
 
-DevDeck está evolucionando más allá del almacenamiento pasivo de conocimiento para convertirse en una herramienta de **acción contextual** en el día a día. La frontera es clara: no buscamos reemplazar cada app que un developer ya usa, sino conectar memoria, búsqueda y acciones reutilizables.
+DevDeck ya evolucionó más allá del almacenamiento pasivo: el Developer Workbench (utilities locales, paleta de comandos, requests reutilizables, contexto de proyecto) está implementado en su mayor parte. La frontera sigue siendo clara: no buscamos reemplazar cada app que un developer ya usa, sino conectar memoria, búsqueda y acciones reutilizables.
 
-Para más detalles técnicos y de producto sobre esta evolución, revisar:
+Para el estado por fase de esta evolución, revisar:
 👉 **[DEV_WORKBENCH.es.md](DEV_WORKBENCH.es.md)**
+
+## Foco actual
+
+Con el Workbench implementado, el próximo paso no es más superficie: es confianza y comunidad. Primera experiencia sólida, documentación honesta y Circles como puente entre la memoria personal y la memoria compartida de ingeniería. Ver [CIRCLES_COMMUNITY.es.md](CIRCLES_COMMUNITY.es.md) y el [ROADMAP](../ROADMAP.es.md).

@@ -20,6 +20,8 @@ The priority before a stable `1.0.0` is not more hype. It is trust:
 - stable capture/search/workbench/Circles flows,
 - and a contributor path that makes small PRs easy.
 
+Offline-first sync is intentionally deferred until after `1.0.0` (see [docs/FEATURE_REVIEW_2026_06.md](docs/FEATURE_REVIEW_2026_06.md), decision A5). Today DevDeck runs in honest cloud mode; Workbench utilities work fully local, and a full vault export (#122) covers data ownership in the meantime.
+
 ---
 
 ## 0.5.x — Public beta / launch readiness
@@ -28,9 +30,9 @@ The priority before a stable `1.0.0` is not more hype. It is trust:
 
 - [x] Clarify public README and launch story.
 - [x] Position DevDeck honestly as `0.5.0 Public Beta`.
-- [ ] Add screenshots and/or a short demo GIF.
-- [ ] Add realistic demo/seed data for a first-run experience.
-- [ ] Document known limitations clearly.
+- [x] Add screenshots and/or a short demo GIF.
+- [ ] Add realistic demo/seed data for a first-run experience (#117).
+- [ ] Document known limitations clearly (#129).
 - [ ] Verify local setup on a clean machine.
 
 ### Core developer memory loop
@@ -39,14 +41,14 @@ The priority before a stable `1.0.0` is not more hype. It is trust:
 - [x] Add context such as notes, tags, source, and why it matters.
 - [x] Support fuzzy/semantic retrieval direction with Postgres search extensions.
 - [x] Share useful findings into Circles with context and attribution.
-- [ ] Tighten empty/loading/error states across core flows.
-- [ ] Improve first-run onboarding around capture → retrieve → share.
+- [ ] Tighten empty/loading/error states across core flows (#119).
+- [ ] Improve first-run onboarding around capture → retrieve → share (#118).
 
 ### Workbench
 
 - [x] Establish Developer Workbench as a daily-use surface.
 - [x] Support reusable utilities, snippets, runbooks, requests, and project context direction.
-- [ ] Improve Workbench onboarding and examples.
+- [ ] Improve Workbench onboarding and examples (#120).
 - [ ] Add more tests around save/share flows.
 
 ### Circles / community memory
@@ -64,7 +66,7 @@ The priority before a stable `1.0.0` is not more hype. It is trust:
 - [x] Add contributor call-to-action in README.
 - [x] Add best-first-contribution guidance.
 - [ ] Create at least 5 `good first issue` tasks.
-- [ ] Add a short architecture map for new contributors.
+- [ ] Add a short architecture map for new contributors (#129).
 - [ ] Keep PRs small, issue-backed, and CI-verified.
 
 ---

@@ -52,10 +52,14 @@ DevDeck aims to become the **standard repository for developer workflows**. Not 
 
 ---
 
-## 6. Next Step: Developer Workbench
+## 6. Developer Workbench: From Memory to Action
 
-DevDeck should evolve from passive storage into contextual action, without becoming a generic launcher or a clone of existing tools. The product boundary is:
+DevDeck evolved from passive storage into contextual action without becoming a generic launcher or a clone of existing tools. The Developer Workbench — local utilities, command palette, reusable requests, and project context — is largely shipped (see phase status in [DEV_WORKBENCH.md](DEV_WORKBENCH.md)). The product boundary remains:
 
 > Save useful developer knowledge, retrieve it by intent, and turn it into reusable actions.
 
-See [DEV_WORKBENCH.md](DEV_WORKBENCH.md) for the proposed roadmap.
+---
+
+## 7. Current Focus
+
+With the Workbench shipped, the next step is not more surface area. It is trust and community: a strong first-run experience, honest docs, and Circles as the bridge from personal memory to shared engineering memory. See [CIRCLES_COMMUNITY.md](CIRCLES_COMMUNITY.md) and the [ROADMAP](../ROADMAP.md).
