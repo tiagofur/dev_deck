@@ -26,6 +26,7 @@ import { useTranslation } from '@devdeck/i18n'
 // Import modular presentational components
 import { EditProfileModal } from '../components/Profile/EditProfileModal'
 import { ReputationDashboard } from '../components/Profile/ReputationDashboard'
+import { calculateReputation, buildAchievements } from '../components/Profile/reputation'
 import { TechStackSection } from '../components/Profile/TechStackSection'
 import { ActivityTimeline } from '../components/Profile/ActivityTimeline'
 import { UserAvatar } from '../components/UserAvatar'
@@ -72,45 +73,14 @@ export function ProfilePage() {
     )
   }
 
-  // Calculate Gamified Reputation Points
   const totalItemsCount = itemsRes?.total || 0
-  const reputation = (totalItemsCount * 5) + (decks.length * 15) + ((stats?.streak_days || 0) * 50)
-
-  // Achievements evaluation
-  const achievements = [
-    {
-      id: 'early_adopter',
-      title: 'Early Adopter',
-      description: t('profile.achievement_early_adopter_desc'),
-      icon: '🚀',
-      unlocked: true,
-      color: 'bg-accent-yellow'
-    },
-    {
-      id: 'curator_master',
-      title: 'Curator Master',
-      description: t('profile.achievement_curator_master_desc'),
-      icon: '🛡️',
-      unlocked: totalItemsCount >= 5,
-      color: 'bg-accent-cyan'
-    },
-    {
-      id: 'deck_builder',
-      title: 'Deck Builder',
-      description: t('profile.achievement_deck_builder_desc'),
-      icon: '🏗️',
-      unlocked: decks.length >= 1,
-      color: 'bg-accent-pink'
-    },
-    {
-      id: 'flame_keeper',
-      title: 'Flame Keeper',
-      description: t('profile.achievement_flame_keeper_desc'),
-      icon: '🔥',
-      unlocked: (stats?.streak_days || 0) >= 1,
-      color: 'bg-accent-lime'
-    }
-  ]
+  const reputationInputs = {
+    totalItems: totalItemsCount,
+    decksCount: decks.length,
+    streakDays: stats?.streak_days || 0
+  }
+  const reputation = calculateReputation(reputationInputs)
+  const achievements = buildAchievements(reputationInputs, t)
 
   const recentItems = itemsRes?.items || []
 
