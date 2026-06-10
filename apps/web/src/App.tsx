@@ -31,6 +31,7 @@ import {
   PublicProfilePage,
   ProfilePage,
   TeamReviewPage,
+  RunbooksPage,
   TeamFeedPage,
   FollowingFeedPage,
   WorkbenchPage,
@@ -256,6 +257,12 @@ function AnimatedRoutes(): ReactElement {
             path="/cheatsheets"
             element={
               <AuthGuard>{withTransition(<CheatsheetsListPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/runbooks"
+            element={
+              <AuthGuard>{withTransition(<RunbooksPage />)}</AuthGuard>
             }
           />
           <Route

@@ -38,6 +38,28 @@ func (h *RunbooksHandler) List(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// GET /api/runbooks
+func (h *RunbooksHandler) ListAll(w http.ResponseWriter, r *http.Request) {
+	userID, ok := authctx.UserID(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+		return
+	}
+
+	runbooks, err := h.store.ListRunbooksByUser(r.Context(), userID)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+	if runbooks == nil {
+		runbooks = []store.RunbookWithItem{}
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"runbooks": runbooks,
+	})
+}
+
 // POST /api/items/{id}/runbooks
 func (h *RunbooksHandler) Create(w http.ResponseWriter, r *http.Request) {
 	itemID, ok := parseItemID(w, r)

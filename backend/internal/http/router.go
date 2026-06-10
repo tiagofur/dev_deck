@@ -287,6 +287,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				ir.Post("/ask", askH.Ask)
 			})
 
+			r.Get("/runbooks", runbooksH.ListAll)
 			r.Route("/runbooks/{id}", func(r chi.Router) {
 				r.Patch("/", runbooksH.Update)
 				r.Delete("/", runbooksH.Delete)

@@ -22,6 +22,7 @@ import {
   ProfilePage,
   ShortcutsModal,
   TeamReviewPage,
+  RunbooksPage,
   TeamFeedPage,
   FollowingFeedPage,
   WorkbenchPage,
@@ -292,6 +293,12 @@ function AnimatedRoutes() {
             path="/cheatsheets"
             element={
               <AuthGuard>{withTransition(<CheatsheetsListPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/runbooks"
+            element={
+              <AuthGuard>{withTransition(<RunbooksPage />)}</AuthGuard>
             }
           />
           <Route
