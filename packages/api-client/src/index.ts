@@ -290,6 +290,9 @@ export type {
 } from './features/decks/api'
 
 // Feature hooks — system
+export { useImportGithubStars } from './features/import/api'
+export type { StarsImportInput, StarsImportResult } from './features/import/api'
+
 export { useSystemConfig, useFeatureFlags } from './features/system/api'
 export type { SystemConfig, SystemFeatures } from './features/system/api'
 
