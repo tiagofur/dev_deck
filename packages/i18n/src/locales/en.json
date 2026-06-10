@@ -229,9 +229,7 @@
     "no_tech_selected": "You haven't selected technologies in your stack yet.",
     "add_my_stack": "Add my Stack",
     "view_deck_arrow": "View deck →",
-    "no_tech_added": "No technologies added yet. Select below.",
-    "other_placeholder": "Other (e.g., Go, Swift, Astro...)",
-    "add_button": "Add"
+    "no_tech_added": "No technologies added yet. Select below."
   },
   "admin": {
     "title": "Admin Dashboard",
@@ -489,7 +487,8 @@
     "title": "Notifications",
     "mark_all_read": "Mark all as read",
     "all_clear": "All caught up",
-    "empty": "No notifications yet"
+    "empty": "No notifications yet",
+    "empty_hint": "Enrichment updates and your weekly digest will appear here."
   },
   "onboarding": {
     "title": "Next Steps",
@@ -1072,7 +1071,9 @@
       "shell": "Shell / Terminal",
       "cloud": "Cloud / DevOps",
       "other": "Other"
-    }
+    },
+    "empty_state_hint": "A cheatsheet is a curated collection of tools and commands. Create your first one to start organizing your vault.",
+    "empty_state_action": "Create your first cheatsheet"
   },
   "paste": {
     "you_pasted": "You pasted",
