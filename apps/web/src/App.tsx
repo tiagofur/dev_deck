@@ -21,7 +21,6 @@ import {
   ItemDetailPage,
   CaptureSharePage,
   ItemsPage,
-  LandingPage,
   RepoDetailPage,
   SettingsPage,
   OnboardingPage,
@@ -188,13 +187,7 @@ function AnimatedRoutes(): ReactElement {
 
           <Route
             path="/"
-            element={
-              isLoggedIn() ? (
-                <Navigate to="/items" replace />
-              ) : (
-                withTransition(<LandingPage />)
-              )
-            }
+            element={<Navigate to={isLoggedIn() ? '/items' : '/login'} replace />}
           />
           <Route
             path="/repos"
