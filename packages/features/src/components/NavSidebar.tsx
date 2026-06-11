@@ -9,6 +9,7 @@ import {
   Share2, 
   Users, 
   Activity, 
+  Compass,
   Settings as SettingsIcon, 
   User, 
   Shield 
@@ -134,6 +135,15 @@ export function NavSidebar({ isOpen, onClose, reviewCount }: NavSidebarProps) {
             active={isActive('/following')}
             onClick={onClose}
           />
+          {features.explore && (
+            <NavItem
+              to="/explore"
+              icon={Compass}
+              label={t('nav.explore')}
+              active={isActive('/explore')}
+              onClick={onClose}
+            />
+          )}
         </Section>
 
         {/* Team Section (Progressive Disclosure) */}

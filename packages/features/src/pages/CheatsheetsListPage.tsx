@@ -72,7 +72,7 @@ export function CheatsheetsListPage() {
   return (
     <AppShell contentClassName="flex-1 flex overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-56 shrink-0 border-r-3 border-ink bg-bg-elevated p-5">
+      <aside className="hidden lg:block w-56 shrink-0 border-r-3 border-ink bg-bg-elevated p-5">
         <h2 className="font-display font-black text-xs uppercase tracking-widest mb-3 text-ink">
           {t('common.categories')}
         </h2>
@@ -113,6 +113,35 @@ export function CheatsheetsListPage() {
             </span>
           </Button>
         </header>
+
+        {/* Categories Horizontal Scroll Strip (visible below lg) */}
+        <div className="lg:hidden mb-6 overflow-x-auto pb-2 -mx-4 px-4 flex gap-2 scrollbar-none">
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className={clsx(
+              'px-3 py-1 text-xs font-mono border-2 whitespace-nowrap transition-colors shrink-0',
+              selectedCategory === null
+                ? 'bg-accent-yellow border-ink shadow-hard-sm text-ink'
+                : 'bg-bg-primary border-ink text-ink-soft hover:bg-bg-elevated hover:text-ink',
+            )}
+          >
+            {t('cheatsheets.categories.all')}
+          </button>
+          {Object.entries(categoryLabels).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setSelectedCategory(selectedCategory === key ? null : key)}
+              className={clsx(
+                'px-3 py-1 text-xs font-mono border-2 whitespace-nowrap transition-colors shrink-0',
+                selectedCategory === key
+                  ? 'bg-accent-yellow border-ink shadow-hard-sm text-ink'
+                  : 'bg-bg-primary border-ink text-ink-soft hover:bg-bg-elevated hover:text-ink',
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
         {cheatsheets.length === 0 ? (
           <div className="text-center py-20 space-y-4">

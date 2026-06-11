@@ -260,7 +260,7 @@ export function ProfilePage() {
                   {decks.slice(0, 4).map((deck) => (
                     <button
                       key={deck.id}
-                      onClick={() => navigate(`/cheatsheets/${deck.id}`)}
+                      onClick={() => navigate(`/deck/${deck.slug}`)}
                       className="bg-bg-primary border-2 border-ink p-4 shadow-hard text-left group hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg transition-all"
                     >
                       <div className="flex items-center justify-between gap-2 mb-2">
