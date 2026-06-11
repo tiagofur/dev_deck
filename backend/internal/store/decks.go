@@ -259,7 +259,7 @@ func (s *Store) GetDeckItems(ctx context.Context, deckID uuid.UUID) ([]uuid.UUID
 
 func (s *Store) GetPublicDeckBySlug(ctx context.Context, slug string) (*Deck, error) {
 	row := s.Reader().QueryRow(ctx,
-		`SELECT `+deckColumns+` FROM decks WHERE slug = $1 AND is_public = true`,
+		`SELECT `+deckColumns+` FROM decks WHERE slug = $1`,
 		slug,
 	)
 	d, err := scanDeck(row)
@@ -269,6 +269,14 @@ func (s *Store) GetPublicDeckBySlug(ctx context.Context, slug string) (*Deck, er
 		}
 		return nil, err
 	}
+
+	if !d.IsPublic {
+		userID, ok := currentUserID(ctx)
+		if !ok || userID != d.UserID {
+			return nil, ErrDeckNotFound
+		}
+	}
+
 	return d, nil
 }
 

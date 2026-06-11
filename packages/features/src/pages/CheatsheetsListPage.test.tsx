@@ -96,7 +96,7 @@ describe('CheatsheetsListPage empty state', () => {
     const { CheatsheetsListPage } = await import('./CheatsheetsListPage')
     renderWithProviders(<CheatsheetsListPage />)
 
-    await user.click(screen.getByText('cheatsheets.categories.vcs'))
+    await user.click(screen.getAllByText('cheatsheets.categories.vcs')[0])
 
     expect(screen.getByText('cheatsheets.empty_state_category_title')).toBeInTheDocument()
     expect(screen.getByText('cheatsheets.empty_state_category')).toBeInTheDocument()

@@ -88,7 +88,7 @@ export function CirclesPage() {
   return (
     <AppShell contentClassName="flex-1 flex overflow-hidden">
       {/* Sidebar Navigation */}
-      <aside className="w-56 shrink-0 border-r-3 border-ink bg-bg-elevated p-5 flex flex-col justify-between">
+      <aside className="hidden lg:flex w-56 shrink-0 border-r-3 border-ink bg-bg-elevated p-5 flex-col justify-between">
         <div>
           <h2 className="font-display font-black text-xs uppercase tracking-widest mb-3 text-ink">
             {t('circles.title')}
@@ -121,6 +121,12 @@ export function CirclesPage() {
             <p className="font-mono text-sm text-ink-soft mt-2">
               {t('circles.active_count', { count: circles.length })}
             </p>
+          </div>
+          <div className="lg:hidden">
+            <Button onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto flex items-center justify-center gap-2">
+              <Plus size={14} strokeWidth={3} />
+              {t('circles.create_circle')}
+            </Button>
           </div>
         </header>
 
