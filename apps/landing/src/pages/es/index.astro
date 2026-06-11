@@ -1,0 +1,280 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout 
+  title="DevDeck.ai — Tu memoria externa para desarrollo, asistida por IA" 
+  description="Guarda repos, CLIs, plugins, atajos, prompts y workflows. La IA los organiza. Vos los encontrás cuando los necesitás."
+  lang="es"
+>
+  <!-- Navigation Header -->
+  <header class="border-b-3 border-ink bg-bg-card sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-accent-yellow border-2 border-ink p-1.5 shadow-hard-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-ink"><path d="M4 3h16a2 2 0 0 1 2 2v6a10 10 0 0 1-10 10A10 10 0 0 1 2 11V5a2 2 0 0 1 2-2z"/><polyline points="8 10 12 14 16 10"/></svg>
+        </div>
+        <span class="font-display font-black text-2xl uppercase tracking-wider text-ink">
+          DevDeck<span class="text-accent-pink">.ai</span>
+        </span>
+      </div>
+      
+      <nav class="hidden md:flex items-center gap-8 font-mono text-sm font-bold">
+        <a href="https://github.com/tiagofur/dev_deck" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">GitHub</a>
+        <a href="https://github.com/tiagofur/dev_deck#readme" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">Docs</a>
+        <a href="https://github.com/tiagofur/dev_deck/releases" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">Changelog</a>
+        <a href="/" class="border-2 border-ink px-2.5 py-0.5 bg-bg-primary hover:bg-accent-yellow shadow-hard-sm transition-all flex items-center gap-1">
+          EN <span>🇺🇸</span>
+        </a>
+      </nav>
+      
+      <div class="flex items-center gap-2">
+        <a 
+          href="https://github.com/tiagofur/dev_deck" 
+          target="_blank" 
+          rel="noopener"
+          class="border-3 border-ink bg-accent-lime px-4 py-2 font-display font-black uppercase text-sm shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg transition-all"
+        >
+          Star en GitHub
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="max-w-6xl mx-auto px-6 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+    <div class="lg:col-span-7 space-y-6">
+      <div class="inline-block border-2 border-ink bg-accent-lavender text-xs font-mono font-black uppercase px-3 py-1.5 shadow-hard-sm">
+        🚀 Open Source & Self-Hosteable
+      </div>
+      
+      <h1 class="font-display font-black text-4xl sm:text-6xl uppercase tracking-tight leading-none text-ink">
+        Tu memoria externa para desarrollo, <span class="bg-accent-yellow border-b-5 border-ink px-1">asistida por IA</span>.
+      </h1>
+      
+      <div class="space-y-4">
+        <p class="font-mono text-base sm:text-lg font-bold text-ink leading-relaxed max-w-xl">
+          Guarda repos, CLIs, plugins, atajos, prompts y workflows. La IA los organiza. Vos los encontrás cuando los necesitás.
+        </p>
+        <p class="font-mono text-xs sm:text-sm text-ink-soft leading-relaxed max-w-xl">
+          Dejá de perder herramientas útiles. DevDeck recuerda por vos — con contexto real de para qué sirve cada cosa y búsqueda por intención.
+        </p>
+      </div>
+      
+      <div class="flex flex-col sm:flex-row gap-4 pt-4">
+        <a 
+          href="https://github.com/tiagofur/dev_deck/releases" 
+          target="_blank"
+          rel="noopener"
+          class="border-3 border-ink bg-accent-pink text-center px-6 py-4 font-display font-black uppercase text-lg shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg transition-all flex items-center justify-center gap-2"
+        >
+          Descargar para Desktop
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+        <a 
+          href="https://app.devdeck.ai" 
+          target="_blank"
+          rel="noopener"
+          class="border-3 border-ink bg-bg-card text-center px-6 py-4 font-display font-black uppercase text-lg shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg transition-all flex items-center justify-center gap-2"
+        >
+          Probar en el Browser
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+        </a>
+      </div>
+      
+      <div class="pt-6 flex flex-wrap gap-4 text-xs font-mono text-ink-soft">
+        <span class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-accent-yellow"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Offline-First
+        </span>
+        <span class="text-ink/30">•</span>
+        <span class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-accent-pink"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Privacy-First
+        </span>
+        <span class="text-ink/30">•</span>
+        <span class="flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-danger"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          100% Gratis
+        </span>
+      </div>
+    </div>
+    
+    <div class="lg:col-span-5 relative">
+      <div class="bg-bg-card border-5 border-ink p-4 shadow-hard-xl rotate-1 hover:rotate-0 transition-transform duration-300">
+        <div class="border-3 border-ink bg-bg-elevated p-4 font-mono text-xs space-y-4">
+          <div class="flex items-center justify-between border-b-2 border-ink border-dashed pb-2">
+            <span class="font-bold uppercase text-[10px] bg-accent-yellow px-1.5 border border-ink text-ink">devdeck-brain-v1</span>
+            <span class="text-ink-soft">Capture: OK</span>
+          </div>
+          
+          <div class="bg-bg-primary border-2 border-ink p-3 space-y-2">
+            <div class="font-bold text-accent-pink">type: repo</div>
+            <div class="font-bold uppercase text-sm">chubin/cheat.sh</div>
+            <p class="text-[11px] text-ink-soft leading-normal">
+              Acceso unificado a los mejores repositorios de cheatsheets de la comunidad global.
+            </p>
+          </div>
+          
+          <div class="bg-bg-primary border-2 border-ink p-3 space-y-2">
+            <div class="font-bold text-accent-lime">type: cli</div>
+            <div class="font-bold uppercase text-sm">fzf</div>
+            <p class="text-[11px] text-ink-soft leading-normal">
+              Buscador difuso interactivo para la terminal. Extremadamente rápido.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- El Dolor Section -->
+  <section class="border-y-3 border-ink bg-bg-card py-16">
+    <div class="max-w-4xl mx-auto px-6 space-y-8">
+      <h2 class="font-display font-black text-3xl sm:text-4xl uppercase text-center text-ink">
+        ¿Cuántas veces te pasó esto?
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 font-mono text-sm">
+        <div class="border-2 border-ink p-4 bg-bg-primary shadow-hard-sm space-y-2">
+          <div class="text-xl">🔍</div>
+          <p class="text-ink-soft leading-relaxed">
+            Alguien te recomendó un CLI excelente. Lo guardaste "para después". Tres semanas después, no lo encontrás.
+          </p>
+        </div>
+        <div class="border-2 border-ink p-4 bg-bg-primary shadow-hard-sm space-y-2">
+          <div class="text-xl">🔌</div>
+          <p class="text-ink-soft leading-relaxed">
+            Instalaste un plugin de VS Code que te cambió la vida. No recordás cuál era ni por qué lo instalaste.
+          </p>
+        </div>
+        <div class="border-2 border-ink p-4 bg-bg-primary shadow-hard-sm space-y-2">
+          <div class="text-xl">⌨️</div>
+          <p class="text-ink-soft leading-relaxed">
+            Encontraste el atajo de macOS perfecto para algo que hacés 20 veces al día. Nunca lo internalizaste.
+          </p>
+        </div>
+        <div class="border-2 border-ink p-4 bg-bg-primary shadow-hard-sm space-y-2">
+          <div class="text-xl">🤖</div>
+          <p class="text-ink-soft leading-relaxed">
+            Generaste un prompt de AI coding que funcionó perfecto. No lo anotaste en ningún lado.
+          </p>
+        </div>
+        <div class="border-2 border-ink p-4 bg-bg-primary shadow-hard-sm md:col-span-2 space-y-2">
+          <div class="text-xl">💻</div>
+          <p class="text-ink-soft leading-relaxed">
+            Tenés el setup de tu stack preferido en algún README o Notion. Cada vez que lo necesitás, tardás 15 minutos en encontrarlo.
+          </p>
+        </div>
+      </div>
+      
+      <p class="font-display font-black text-xl text-center uppercase tracking-wider text-accent-pink pt-4">
+        DevDeck es el lugar donde esas cosas dejan de perderse.
+      </p>
+    </div>
+  </section>
+
+  <!-- Features Grid Section -->
+  <section class="max-w-6xl mx-auto px-6 py-20 space-y-12">
+    <div class="text-center space-y-4 max-w-2xl mx-auto">
+      <h2 class="font-display font-black text-4xl sm:text-5xl uppercase tracking-tight text-ink">
+        No solo repos. Todo lo útil para desarrollar.
+      </h2>
+      <p class="font-mono text-sm text-ink-soft">
+        Guardá atajos, comandos y configuraciones. Dejá que la IA indexe los detalles.
+      </p>
+    </div>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 font-mono text-xs">
+      <div class="border-2 border-ink p-4 bg-bg-card shadow-hard-sm flex gap-3 items-start">
+        <span class="text-lg bg-accent-yellow border border-ink p-1">📦</span>
+        <div>
+          <h4 class="font-display font-black text-base uppercase mb-1">Repos</h4>
+          <p class="text-ink-soft">GitHub repos de tools, libs, boilerplates</p>
+        </div>
+      </div>
+      <div class="border-2 border-ink p-4 bg-bg-card shadow-hard-sm flex gap-3 items-start">
+        <span class="text-lg bg-accent-pink border border-ink p-1">⚡</span>
+        <div>
+          <h4 class="font-display font-black text-base uppercase mb-1">CLIs</h4>
+          <p class="text-ink-soft">gh, jq, fzf, ripgrep, lazygit, comandos útiles</p>
+        </div>
+      </div>
+      <div class="border-2 border-ink p-4 bg-bg-card shadow-hard-sm flex gap-3 items-start">
+        <span class="text-lg bg-accent-lime border border-ink p-1">🔌</span>
+        <div>
+          <h4 class="font-display font-black text-base uppercase mb-1">Plugins</h4>
+          <p class="text-ink-soft">Extensiones de VS Code, JetBrains, Neovim</p>
+        </div>
+      </div>
+      <div class="border-2 border-ink p-4 bg-bg-card shadow-hard-sm flex gap-3 items-start">
+        <span class="text-lg bg-accent-lavender border border-ink p-1">⌨️</span>
+        <div>
+          <h4 class="font-display font-black text-base uppercase mb-1">Atajos</h4>
+          <p class="text-ink-soft">Atajos de teclado de tu OS, IDE o herramientas</p>
+        </div>
+      </div>
+      <div class="border-2 border-ink p-4 bg-bg-card shadow-hard-sm flex gap-3 items-start">
+        <span class="text-lg bg-accent-orange border border-ink p-1">🤖</span>
+        <div>
+          <h4 class="font-display font-black text-base uppercase mb-1">Prompts</h4>
+          <p class="text-ink-soft">Prompts de Claude, ChatGPT, Cursor, Copilot</p>
+        </div>
+      </div>
+      <div class="border-2 border-ink p-4 bg-bg-card shadow-hard-sm flex gap-3 items-start">
+        <span class="text-lg bg-accent-cyan border border-ink p-1">📝</span>
+        <div>
+          <h4 class="font-display font-black text-base uppercase mb-1">Snippets</h4>
+          <p class="text-ink-soft">Gists, fragmentos de código, configs, alias</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Support Section -->
+  <section class="bg-bg-elevated border-t-3 border-ink">
+    <div class="max-w-4xl mx-auto px-6 py-16 text-center space-y-6">
+      <h2 class="font-display font-black text-3xl sm:text-4xl uppercase tracking-tight text-ink">
+        Apoyá el proyecto
+      </h2>
+      <p class="font-mono text-sm text-ink-soft max-w-md mx-auto">
+        ¿Te sirve DevDeck? Ayudanos a mantener las tazas llenas y a seguir empujando código.
+      </p>
+      <div>
+        <a 
+          href="https://www.buymeacoffee.com/tiagofur" 
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center gap-2 border-3 border-ink bg-accent-orange px-6 py-3 font-display font-black uppercase text-md shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg transition-all"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-ink"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          Invitame un cafecito
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t-3 border-ink bg-bg-card py-12">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 font-mono text-xs text-ink-soft">
+      <div class="flex items-center gap-2">
+        <span class="font-display font-black uppercase text-sm tracking-wider text-ink">
+          DevDeck<span class="text-accent-pink">.ai</span>
+        </span>
+        <span>© {new Date().getFullYear()}</span>
+      </div>
+      
+      <div class="flex gap-6">
+        <a href="https://github.com/tiagofur/dev_deck" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">GitHub</a>
+        <a href="https://github.com/tiagofur/dev_deck#readme" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">Docs</a>
+        <a href="https://github.com/tiagofur/dev_deck/releases" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">Changelog</a>
+      </div>
+      
+      <div>
+        <a href="/" class="hover:text-accent-pink transition-colors flex items-center gap-1">
+          🇺🇸 View in English
+        </a>
+      </div>
+    </div>
+  </footer>
+</Layout>

@@ -5,8 +5,10 @@
   "scripts": {
     "dev:desktop": "pnpm -F @devdeck/desktop dev",
     "dev:web": "pnpm -F @devdeck/web dev",
+    "dev:landing": "pnpm -F @devdeck/landing dev",
     "build:desktop": "pnpm -F @devdeck/desktop build",
     "build:web": "pnpm -F @devdeck/web build",
+    "build:landing": "pnpm -F @devdeck/landing build",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
