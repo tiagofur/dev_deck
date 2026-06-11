@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
 	useCapture: vi.fn(),
 	useCircles: vi.fn(),
 	useShareToCircle: vi.fn(),
+	useFeatureFlags: vi.fn(),
 	showToast: vi.fn(),
 	confirm: vi.fn(),
 }))
@@ -53,6 +54,7 @@ vi.mock('@devdeck/api-client', async () => {
 		useCapture: mocks.useCapture,
 		useCircles: mocks.useCircles,
 		useShareToCircle: mocks.useShareToCircle,
+		useFeatureFlags: mocks.useFeatureFlags,
 	}
 })
 
@@ -112,6 +114,7 @@ describe('<ItemDetailPage>', () => {
 		mocks.useCapture.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
 		mocks.useCircles.mockReturnValue({ data: [], isLoading: false })
 		mocks.useShareToCircle.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+		mocks.useFeatureFlags.mockReturnValue({ realtime: false })
 	})
 
 	it('renders AI summary and suggested tags', () => {
