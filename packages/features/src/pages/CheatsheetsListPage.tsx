@@ -117,6 +117,9 @@ export function CheatsheetsListPage() {
         {cheatsheets.length === 0 ? (
           <div className="text-center py-20 space-y-4">
             <BookOpen size={64} strokeWidth={2} className="mx-auto mb-4 text-ink-soft" />
+            <h2 className="font-display font-black text-2xl uppercase">
+              {selectedCategory ? t('cheatsheets.empty_state_category_title') : t('cheatsheets.empty_state_title')}
+            </h2>
             <p className="font-mono text-ink-soft max-w-md mx-auto">
               {selectedCategory ? t('cheatsheets.empty_state_category') : t('cheatsheets.empty_state')}
             </p>

@@ -81,6 +81,7 @@ describe('CheatsheetsListPage empty state', () => {
     const { CheatsheetsListPage } = await import('./CheatsheetsListPage')
     renderWithProviders(<CheatsheetsListPage />)
 
+    expect(screen.getByText('cheatsheets.empty_state_title')).toBeInTheDocument()
     expect(screen.getByText('cheatsheets.empty_state')).toBeInTheDocument()
     expect(screen.getByText('cheatsheets.empty_state_hint')).toBeInTheDocument()
 
@@ -97,6 +98,7 @@ describe('CheatsheetsListPage empty state', () => {
 
     await user.click(screen.getByText('cheatsheets.categories.vcs'))
 
+    expect(screen.getByText('cheatsheets.empty_state_category_title')).toBeInTheDocument()
     expect(screen.getByText('cheatsheets.empty_state_category')).toBeInTheDocument()
   })
 })

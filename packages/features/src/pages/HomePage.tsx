@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { EmptyState } from '@devdeck/ui'
+import { Button } from '@devdeck/ui'
+import { Github, Plus } from 'lucide-react'
 import { detailPathForItem } from '../utils/itemRoutes'
 import { Mascot } from '../components/Mascot/Mascot'
 import { ItemGrid } from '../components/ItemGrid'
@@ -52,6 +53,10 @@ export function HomePage() {
   const items = data?.items ?? []
   const hasFilters = Boolean(query || tag || lang)
 
+  function openCapture() {
+    window.dispatchEvent(new CustomEvent('devdeck:open-capture'))
+  }
+
   return (
     <AppShell
       query={query}
@@ -86,7 +91,24 @@ export function HomePage() {
         )}
 
         {!isLoading && !error && items.length === 0 && !hasFilters && (
-          <EmptyState onAdd={() => window.dispatchEvent(new CustomEvent('devdeck:open-capture'))} />
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <Github size={72} strokeWidth={2} className="mb-6 text-ink-soft" />
+            <h2 className="font-display font-black text-4xl uppercase mb-3">
+              {t('repos.empty_state_title')}
+            </h2>
+            <p className="font-mono text-ink-soft mb-3 max-w-md">
+              {t('repos.empty_state_desc')}
+            </p>
+            <p className="font-mono text-xs text-ink-soft/70 mb-8 max-w-md">
+              {t('repos.empty_state_hint')}
+            </p>
+            <Button onClick={openCapture} size="lg">
+              <span className="flex items-center gap-2">
+                <Plus size={16} strokeWidth={3} />
+                {t('repos.empty_state_action')}
+              </span>
+            </Button>
+          </div>
         )}
 
         {!isLoading && !error && items.length === 0 && hasFilters && (

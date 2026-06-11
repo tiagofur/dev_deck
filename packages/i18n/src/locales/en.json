@@ -594,6 +594,10 @@
     "no_results_filters": "No results for current filters."
   },
   "repos": {
+    "empty_state_title": "No repos saved yet",
+    "empty_state_desc": "Paste a GitHub URL to capture a repo and enrich it with stars, language, topics, and description automatically.",
+    "empty_state_hint": "Want a faster start? Settings → Import GitHub Stars can fill your vault from your public starred repos.",
+    "empty_state_action": "Capture your first repo",
     "not_found_title": "Repo not found or deleted",
     "not_found_desc": "The repo no longer exists in your vault, or was deleted while this screen was open.",
     "back_to_items": "Back to items",
@@ -1058,6 +1062,8 @@
     "new_cheatsheet": "New cheatsheet",
     "create_success": "Cheatsheet created",
     "delete_success": "Cheatsheet deleted",
+    "empty_state_title": "No cheatsheets yet",
+    "empty_state_category_title": "No cheatsheets in this category",
     "empty_state": "There are no cheatsheets yet.",
     "empty_state_category": "There are no cheatsheets in this category.",
     "delete_confirm": "Are you sure you want to delete this cheatsheet?",
@@ -1091,7 +1097,7 @@
       "cloud": "Cloud / DevOps",
       "other": "Other"
     },
-    "empty_state_hint": "A cheatsheet is a curated collection of tools and commands. Create your first one to start organizing your vault.",
+    "empty_state_hint": "Explore seeded examples when they are available, or create your first cheatsheet to start organizing reusable commands.",
     "empty_state_action": "Create your first cheatsheet"
   },
   "paste": {
