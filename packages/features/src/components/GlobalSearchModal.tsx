@@ -1,4 +1,4 @@
-import { BookOpen, Boxes, Code2, Search, X } from 'lucide-react'
+import { BookOpen, Boxes, Code2, Plus, Search, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useGlobalSearch, useSystemConfig } from '@devdeck/api-client'
@@ -44,6 +44,11 @@ export function GlobalSearchModal({ open, onClose }: Props) {
     else if (r.type === 'repo') navigate(`/repo/${r.id}`)
     else if (r.type === 'cheatsheet') navigate(`/cheatsheets/${r.id}`)
     // entries navigate to their parent cheatsheet (we don't have cheatsheet id in SearchResult)
+  }
+
+  function openCaptureInstead() {
+    onClose()
+    window.dispatchEvent(new CustomEvent('devdeck:open-capture'))
   }
 
   // Group results by type.
@@ -112,8 +117,19 @@ export function GlobalSearchModal({ open, onClose }: Props) {
               {t('search.min_chars')}
             </div>
           ) : results.length === 0 && !isLoading ? (
-            <div className="p-8 text-center font-mono text-sm text-ink-soft">
-              {t('common.no_results_found')} "{query}"
+            <div className="p-8 text-center">
+              <p className="font-display text-lg font-black uppercase">{t('search.no_results_title')}</p>
+              <p className="mx-auto mt-2 max-w-md font-mono text-sm text-ink-soft">
+                {t('search.no_results_desc', { query })}
+              </p>
+              <button
+                type="button"
+                onClick={openCaptureInstead}
+                className="mt-5 border-3 border-ink bg-accent-lime px-4 py-2 font-display font-bold uppercase shadow-hard"
+              >
+                <Plus size={16} strokeWidth={3} className="mr-2 inline-block" />
+                {t('search.capture_instead')}
+              </button>
             </div>
           ) : (
             <div className="py-2">

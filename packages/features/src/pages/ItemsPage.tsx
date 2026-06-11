@@ -189,53 +189,53 @@ export function ItemsPage() {
             <p className="text-sm font-mono">{(error as Error).message}</p>
           </div>
         )}
-                {!isLoading && !error && items.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-12 text-center gap-8">
-                    <div>
-                        <Box size={64} strokeWidth={2} className="mb-4 opacity-50 mx-auto" />
-                        <p className="font-display font-bold text-xl mb-2">{t('items.empty_state_title')}</p>
-                        <p className="font-mono text-sm text-ink-soft max-w-sm">
-                        {t('items.empty_state_desc')}
-                        </p>
-                    </div>
+        {!isLoading && !error && items.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-12 text-center gap-8">
+            <div>
+              <Box size={64} strokeWidth={2} className="mb-4 opacity-50 mx-auto" />
+              <p className="font-display font-bold text-xl mb-2">{t('items.empty_state_title')}</p>
+              <p className="font-mono text-sm text-ink-soft max-w-sm">
+                {hasFilters ? t('items.no_results_filters') : t('items.empty_state_desc')}
+              </p>
+            </div>
 
-                    {!hasFilters && (
-                      <div className="w-full max-w-4xl space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-left">
-                          <UtilityAction
-                            icon={<TerminalSquare size={18} strokeWidth={3} />}
-                            title={t('items.utility_save_cmd_title')}
-                            desc={t('items.utility_save_cmd_desc')}
-                            onClick={openCapture}
-                          />
-                          <UtilityAction
-                            icon={<BookOpen size={18} strokeWidth={3} />}
-                            title={t('items.utility_cheats_title')}
-                            desc={t('items.utility_cheats_desc')}
-                            onClick={() => navigate('/cheatsheets')}
-                          />
-                          <UtilityAction
-                            icon={<Compass size={18} strokeWidth={3} />}
-                            title={t('items.utility_discover_title')}
-                            desc={t('items.utility_discover_desc')}
-                            onClick={() => navigate('/discovery')}
-                          />
-                        </div>
-                        <OnboardingChecklist />
-                      </div>
-                    )}
+            {!hasFilters && (
+              <div className="w-full max-w-4xl space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-left">
+                  <UtilityAction
+                    icon={<TerminalSquare size={18} strokeWidth={3} />}
+                    title={t('items.utility_save_cmd_title')}
+                    desc={t('items.utility_save_cmd_desc')}
+                    onClick={openCapture}
+                  />
+                  <UtilityAction
+                    icon={<BookOpen size={18} strokeWidth={3} />}
+                    title={t('items.utility_cheats_title')}
+                    desc={t('items.utility_cheats_desc')}
+                    onClick={() => navigate('/cheatsheets')}
+                  />
+                  <UtilityAction
+                    icon={<Compass size={18} strokeWidth={3} />}
+                    title={t('items.utility_discover_title')}
+                    desc={t('items.utility_discover_desc')}
+                    onClick={() => navigate('/discovery')}
+                  />
+                </div>
+                <OnboardingChecklist />
+              </div>
+            )}
 
-                    <button
-                      type="button"
-                      onClick={openCapture}
-                      className="border-3 border-ink px-4 py-2 bg-accent-lime shadow-hard
-                                 font-display font-bold uppercase"
-                    >
-                      <Plus size={16} strokeWidth={3} className="inline-block mr-2" />
-                      {t('items.capture_something')}
-                    </button>
-                  </div>
-                )}
+            <button
+              type="button"
+              onClick={openCapture}
+              className="border-3 border-ink px-4 py-2 bg-accent-lime shadow-hard
+                         font-display font-bold uppercase"
+            >
+              <Plus size={16} strokeWidth={3} className="inline-block mr-2" />
+              {hasFilters ? t('items.capture_something') : t('items.capture_first_item')}
+            </button>
+          </div>
+        )}
 
 
         {items.length > 0 && (

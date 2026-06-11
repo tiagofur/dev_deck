@@ -489,7 +489,10 @@
     "ai_semantic": "AI (Semantic)",
     "hybrid": "Hybrid",
     "min_chars": "Type at least 2 characters to search...",
-    "results_count": "{{count}} results found"
+    "results_count": "{{count}} results found",
+    "no_results_title": "No matches found",
+    "no_results_desc": "Search checks items, repos, cheatsheets, and commands. Try intent words, or capture \"{{query}}\" instead.",
+    "capture_instead": "Capture it instead"
   },
   "notifications": {
     "title": "Notifications",
@@ -571,7 +574,7 @@
   "items": {
     "all": "All",
     "empty_state_title": "Nothing here yet",
-    "empty_state_desc": "Capture a URL, command, shortcut or note with the button above.",
+    "empty_state_desc": "Capture a URL, command, shortcut, or note to start building your personal developer vault.",
     "utility_save_cmd_title": "Save command",
     "utility_save_cmd_desc": "CLI, scripts, flags and quick recipes.",
     "utility_cheats_title": "Open cheatsheets",
@@ -579,6 +582,7 @@
     "utility_discover_title": "Discover",
     "utility_discover_desc": "Find new tools and references.",
     "capture_something": "Capture something",
+    "capture_first_item": "Capture your first item",
     "items_count": "{{count}} item",
     "items_count_plural": "{{count}} items",
     "type_filter": "type",
