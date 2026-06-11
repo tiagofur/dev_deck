@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { GlobalSearchModal } from './GlobalSearchModal'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
@@ -77,5 +78,23 @@ describe('<GlobalSearchModal>', () => {
     expect(screen.queryByText('Text')).not.toBeInTheDocument()
     expect(screen.queryByText('AI (Semantic)')).not.toBeInTheDocument()
     expect(screen.queryByText('Hybrid')).not.toBeInTheDocument()
+  })
+
+  it('shows actionable guidance when a search has no matches', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    const captureListener = vi.fn()
+    window.addEventListener('devdeck:open-capture', captureListener)
+
+    renderModal(true, onClose)
+    await user.type(screen.getByPlaceholderText(/search anything/i), 'docker')
+
+    expect(screen.getByText('No matches found')).toBeInTheDocument()
+    expect(screen.getByText(/search checks items, repos, cheatsheets, and commands/i)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /capture it instead/i }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(captureListener).toHaveBeenCalledTimes(1)
+
+    window.removeEventListener('devdeck:open-capture', captureListener)
   })
 })

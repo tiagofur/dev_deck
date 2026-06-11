@@ -94,12 +94,22 @@ describe('<ItemsPage>', () => {
     expect(mocks.navigate).toHaveBeenCalledWith('/review')
   })
 
-  it('shows a useful empty state instead of staying on loading forever', () => {
+  it('shows a useful empty state instead of staying on loading forever', async () => {
+    const user = userEvent.setup()
+    const captureListener = vi.fn()
+    window.addEventListener('devdeck:open-capture', captureListener)
+
     renderPage()
+
     expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
     expect(screen.getByText('Nothing here yet')).toBeInTheDocument()
+    expect(screen.getByText(/start building your personal developer vault/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /save command/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /open cheatsheets/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /discover/i })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /capture your first item/i }))
+    expect(captureListener).toHaveBeenCalledTimes(1)
+
+    window.removeEventListener('devdeck:open-capture', captureListener)
   })
 })
