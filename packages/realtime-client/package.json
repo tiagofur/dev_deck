@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "y-websocket": "^3.0.0",
-    "yjs": "^13.6.30"
+    "yjs": "^13.6.31"
   },
   "devDependencies": {
     "typescript": "^5.6.2"
