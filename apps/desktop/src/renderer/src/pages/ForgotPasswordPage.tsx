@@ -18,8 +18,8 @@ export function ForgotPasswordPage() {
     try {
       await forgotPassword(email)
       setSuccess(true)
-    } catch (err: any) {
-      setError(err.message || t('common.error'))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('common.error'))
     } finally {
       setLoading(false)
     }

@@ -351,6 +351,11 @@
     "terms_desc": "By joining, you agree that we will send you an email (and only one) when your invitation is ready.",
     "error": "Something went wrong. Please check your email and try again."
   },
+  "not_found": {
+    "title": "Page not found",
+    "desc": "This page doesn't exist — or it went to the freezer.",
+    "back": "Back to home"
+  },
   "feed": {
     "title": "Network Feed",
     "seeing_captures": "You are seeing captures from the curators you follow",

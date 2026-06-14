@@ -15,4 +15,9 @@ describe('desktop route parity', () => {
     expect(appSource).toContain('path="/circles/:id"')
     expect(appSource).toContain('path="/circles/join/:inviteCode"')
   })
+
+  it('has a catch-all 404 route so unknown paths never render blank', () => {
+    expect(appSource).toContain('path="*"')
+    expect(appSource).toContain('NotFoundPage')
+  })
 })

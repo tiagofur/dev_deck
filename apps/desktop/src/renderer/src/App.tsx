@@ -38,6 +38,7 @@ import { RegisterPage } from './pages/RegisterPage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { AuthCallbackPage } from './pages/AuthCallbackPage'
+import { NotFoundPage } from './pages/NotFoundPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -129,11 +130,11 @@ function AuthBridge(): null {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const pending = (window as any).electronAPI?.auth.getPendingCallbackURL()
+    const pending = window.electronAPI?.auth.getPendingCallbackURL()
     if (pending) {
       navigate(desktopCallbackPath(pending), { replace: true })
     }
-    return (window as any).electronAPI?.auth.onCallbackURL((url: string) => {
+    return window.electronAPI?.auth.onCallbackURL((url: string) => {
       navigate(desktopCallbackPath(url), { replace: true })
     })
   }, [navigate])
@@ -159,9 +160,10 @@ function AnimatedRoutes() {
   })
 
   useEffect(() => {
-    const onOpenCapture = (e: any) => {
-      if (e.detail) {
-        setInitialCaptureData({ url: e.detail.url, title: e.detail.title })
+    const onOpenCapture = (e: Event) => {
+      const detail = (e as CustomEvent<{ url?: string; title?: string }>).detail
+      if (detail) {
+        setInitialCaptureData({ url: detail.url, title: detail.title })
       } else {
         setInitialCaptureData(null)
       }
@@ -179,11 +181,7 @@ function AnimatedRoutes() {
   }, [])
 
   useEffect(() => {
-    const api = (window as unknown as {
-      electronAPI?: {
-        onShortcut: (callback: (name: string) => void) => () => void
-      }
-    }).electronAPI
+    const api = window.electronAPI
     if (!api) return
 
     return api.onShortcut((name) => {
@@ -327,6 +325,7 @@ function AnimatedRoutes() {
           />
           <Route path="/deck/:slug" element={withTransition(<PublicDeckPage />)} />
           <Route path="/u/:username" element={withTransition(<PublicProfilePage />)} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AnimatePresence>
       <UnifiedCommandPalette open={globalSearchOpen} onClose={() => setGlobalSearchOpen(false)} />

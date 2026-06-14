@@ -351,6 +351,11 @@
     "terms_desc": "Al unirte, aceptas que te enviemos un email (y solo uno) cuando tu invitación esté lista.",
     "error": "Algo salió mal. Revisa tu email e inténtalo de nuevo."
   },
+  "not_found": {
+    "title": "Página no encontrada",
+    "desc": "Esta página no existe — o se fue al freezer.",
+    "back": "Volver al inicio"
+  },
   "feed": {
     "title": "Feed de la red",
     "seeing_captures": "Estás viendo capturas de los curadores que sigues",
