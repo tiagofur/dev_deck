@@ -1,18 +1,27 @@
 import React, { useState, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Sparkles, X, ExternalLink } from 'lucide-react'
+import { getBaseUrl, DEFAULT_BASE_URL } from '../lib/config'
+
+interface VaultItem {
+  id: string
+  title: string
+  notes?: string
+}
 
 function CopilotWidget() {
-  const [item, setItem] = useState<any>(null)
+  const [item, setItem] = useState<VaultItem | null>(null)
+  const [baseUrl, setBaseUrl] = useState(DEFAULT_BASE_URL)
   const [visible, setVisible] = useState(false)
   const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
+    void getBaseUrl().then(setBaseUrl)
     // Check if current URL is in DevDeck
     const url = window.location.href
     chrome.runtime.sendMessage({ type: 'CHECK_URL', url }, (response) => {
       if (response?.item) {
-        setItem(response.item)
+        setItem(response.item as VaultItem)
         setVisible(true)
         // Auto-show for a few seconds then collapse
         setExpanded(true)
@@ -47,9 +56,10 @@ function CopilotWidget() {
           )}
 
           <div className="flex gap-2">
-             <a 
-              href={`http://localhost:5173/items/${item.id}`} 
-              target="_blank" 
+             <a
+              href={`${baseUrl}/items/${item.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex-1 bg-black text-white text-[10px] font-bold uppercase py-2 text-center hover:bg-gray-800 transition-colors flex items-center justify-center gap-1"
              >
                 Abrir <ExternalLink size={10} />

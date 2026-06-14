@@ -22,7 +22,6 @@ export default tseslint.config(
       '**/vite-env.d.ts',
       '**/env.d.ts',
       // Out of frontend lint scope — these have their own pipelines.
-      'apps/extension/**',
       'apps/landing/**',
       'backend/**',
       'cli/**',

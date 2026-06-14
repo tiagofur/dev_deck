@@ -1,13 +1,28 @@
-import { useState } from 'react'
-import { Settings, ShieldCheck, LogOut, ExternalLink } from 'lucide-react'
-import { isLoggedIn, logoutCurrentSession, loginLocal } from '@devdeck/api-client'
+import { useEffect, useState } from 'react'
+import { Settings, ShieldCheck, LogOut, ExternalLink, Server } from 'lucide-react'
+import { isLoggedIn, logoutCurrentSession, loginLocal, configureApiClient } from '@devdeck/api-client'
 import { Button, showToast, Toaster } from '@devdeck/ui'
+import { getBaseUrl, setBaseUrl, DEFAULT_BASE_URL } from '../lib/config'
 
 export function Options() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [loggedIn, setLoggedIn] = useState(isLoggedIn())
+  const [serverUrl, setServerUrl] = useState(DEFAULT_BASE_URL)
+
+  useEffect(() => {
+    void getBaseUrl().then(setServerUrl)
+  }, [])
+
+  async function handleSaveServer(e: React.FormEvent) {
+    e.preventDefault()
+    const url = serverUrl.trim().replace(/\/+$/, '')
+    await setBaseUrl(url)
+    configureApiClient({ baseUrl: url, authMode: 'jwt' })
+    setServerUrl(url)
+    showToast('Servidor guardado', 'success')
+  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -16,8 +31,8 @@ export function Options() {
       await loginLocal(email, password)
       setLoggedIn(true)
       showToast('Sesión iniciada correctamente', 'success')
-    } catch (err: any) {
-      showToast(err.message || 'Error al iniciar sesión', 'error')
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Error al iniciar sesión', 'error')
     } finally {
       setLoading(false)
     }
@@ -39,6 +54,29 @@ export function Options() {
       </header>
 
       <main className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <section className="bg-bg-card border-3 border-ink shadow-hard p-6 space-y-6 md:col-span-2">
+          <h2 className="font-display font-black uppercase text-xl tracking-widest flex items-center gap-2">
+            <Server size={24} strokeWidth={3} className="text-accent-cyan" />
+            Servidor
+          </h2>
+          <form onSubmit={handleSaveServer} className="space-y-3">
+            <p className="font-mono text-xs text-ink-soft">
+              URL del servidor DevDeck (cambialo si te self-hosteás o usás un backend local).
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="url"
+                value={serverUrl}
+                onChange={(e) => setServerUrl(e.target.value)}
+                placeholder={DEFAULT_BASE_URL}
+                className="flex-1 border-2 border-ink p-2 font-mono text-xs focus:bg-accent-yellow/5 outline-none"
+                required
+              />
+              <Button type="submit" variant="secondary">Guardar</Button>
+            </div>
+          </form>
+        </section>
+
         <section className="bg-bg-card border-3 border-ink shadow-hard p-6 space-y-6">
           <h2 className="font-display font-black uppercase text-xl tracking-widest flex items-center gap-2">
             <ShieldCheck size={24} strokeWidth={3} className="text-accent-lime" />
@@ -57,8 +95,9 @@ export function Options() {
           ) : (
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-1">
-                <label className="block font-display font-bold uppercase text-[10px]">Email</label>
+                <label htmlFor="devdeck-email" className="block font-display font-bold uppercase text-[10px]">Email</label>
                 <input
+                  id="devdeck-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -67,8 +106,9 @@ export function Options() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="block font-display font-bold uppercase text-[10px]">Contraseña</label>
+                <label htmlFor="devdeck-password" className="block font-display font-bold uppercase text-[10px]">Contraseña</label>
                 <input
+                  id="devdeck-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -111,7 +151,7 @@ export function Options() {
 
       <footer className="text-center pt-12 border-t-2 border-ink/10">
         <p className="font-mono text-[10px] text-ink-soft uppercase tracking-widest">
-          DevDeck Extension v2.0.0
+          DevDeck Extension v0.5.0
         </p>
       </footer>
       
