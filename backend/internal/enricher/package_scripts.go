@@ -40,7 +40,7 @@ func (g *GitHubEnricher) FetchPackageScripts(ctx context.Context, owner, repo st
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	switch resp.StatusCode {
 	case http.StatusOK:

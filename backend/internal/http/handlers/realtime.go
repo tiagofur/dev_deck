@@ -31,7 +31,7 @@ func (r *Room) broadcast(msgType int, data []byte, sender *websocket.Conn) {
 		}
 		if err := client.WriteMessage(msgType, data); err != nil {
 			slog.Error("failed to broadcast message", "room", r.id, "err", err)
-			client.Close()
+			_ = client.Close()
 			delete(r.clients, client)
 		}
 	}
@@ -61,7 +61,7 @@ func (h *RealtimeHandler) Connect(w http.ResponseWriter, r *http.Request) {
 		slog.Error("failed to upgrade to websocket", "err", err)
 		return
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	h.mu.Lock()
 	room, ok := h.rooms[roomID]
@@ -99,6 +99,6 @@ func (h *RealtimeHandler) Connect(w http.ResponseWriter, r *http.Request) {
 	}
 	room.mu.Unlock()
 	h.mu.Unlock()
-	
+
 	slog.Info("client disconnected from room", "room", roomID)
 }

@@ -351,27 +351,27 @@ func (h *CheatsheetsHandler) Export(w http.ResponseWriter, r *http.Request) {
 	if format == "json" {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.json\"", detail.Slug))
-		json.NewEncoder(w).Encode(detail)
+		_ = json.NewEncoder(w).Encode(detail)
 		return
 	}
 
 	// Default to markdown
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("# %s\n\n", detail.Title))
+	fmt.Fprintf(&sb, "# %s\n\n", detail.Title)
 	if detail.Description != "" {
 		sb.WriteString(detail.Description + "\n\n")
 	}
 	for _, e := range detail.Entries {
-		sb.WriteString(fmt.Sprintf("## %s\n", e.Label))
+		fmt.Fprintf(&sb, "## %s\n", e.Label)
 		if e.Description != "" {
 			sb.WriteString(e.Description + "\n\n")
 		}
-		sb.WriteString(fmt.Sprintf("```bash\n%s\n```\n\n", e.Command))
+		fmt.Fprintf(&sb, "```bash\n%s\n```\n\n", e.Command)
 	}
 
 	w.Header().Set("Content-Type", "text/markdown")
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.md\"", detail.Slug))
-	w.Write([]byte(sb.String()))
+	_, _ = w.Write([]byte(sb.String()))
 }
 
 // GET /api/cheatsheets/{id}/badge
@@ -398,6 +398,7 @@ func (h *CheatsheetsHandler) Badge(w http.ResponseWriter, r *http.Request) {
 	}
 
 	badgeURL := fmt.Sprintf("https://img.shields.io/badge/%s-%s-%s?logo=book", label, title, color)
+	// #nosec G710 -- redirect target is a fixed img.shields.io URL; user data is URL-escaped into path components only.
 	http.Redirect(w, r, badgeURL, http.StatusFound)
 }
 
@@ -433,7 +434,8 @@ func (h *CheatsheetsHandler) Card(w http.ResponseWriter, r *http.Request) {
 	`, html.EscapeString(detail.Title), html.EscapeString(detail.Category), len(detail.Entries))
 
 	w.Header().Set("Content-Type", "image/svg+xml")
-	w.Write([]byte(svg))
+	// #nosec G705 -- all dynamic values are escaped via html.EscapeString before being embedded in the SVG.
+	_, _ = w.Write([]byte(svg))
 }
 
 // ───── helpers ─────

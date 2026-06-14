@@ -35,13 +35,13 @@ func (s *Store) CreateCustomEnricher(ctx context.Context, userID, orgID *uuid.UU
 func (s *Store) ListCustomEnrichers(ctx context.Context, userID uuid.UUID, orgID *uuid.UUID) ([]CustomEnricher, error) {
 	var rows pgx.Rows
 	var err error
-	
+
 	if orgID != nil {
 		rows, err = s.Reader().Query(ctx, `SELECT id, org_id, user_id, name, url_pattern, endpoint_url, auth_header, created_at, updated_at FROM custom_enrichers WHERE org_id = $1`, *orgID)
 	} else {
 		rows, err = s.Reader().Query(ctx, `SELECT id, org_id, user_id, name, url_pattern, endpoint_url, auth_header, created_at, updated_at FROM custom_enrichers WHERE user_id = $1 AND org_id IS NULL`, userID)
 	}
-	
+
 	if err != nil {
 		return nil, err
 	}

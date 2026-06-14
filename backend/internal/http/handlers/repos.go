@@ -284,7 +284,6 @@ func (h *ReposHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	}
 	md, err := h.enricher.Enrich(r.Context(), repo.URL, nil)
 
-
 	if err != nil {
 		writeError(w, http.StatusUnprocessableEntity, "ENRICH_FAILED", err.Error())
 		return

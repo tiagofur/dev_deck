@@ -3,7 +3,6 @@ package tools
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -27,7 +26,7 @@ func MigrateAll() {
 	sort.Strings(files)
 
 	for _, file := range files {
-		sqlBytes, err := ioutil.ReadFile(file)
+		sqlBytes, err := os.ReadFile(file)
 		if err != nil {
 			panic(err)
 		}

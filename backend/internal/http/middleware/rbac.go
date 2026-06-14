@@ -50,7 +50,7 @@ func RequireOrgPermission(st *store.Store, permission string) func(http.Handler)
 
 			orgID, ok := authctx.OrgID(r.Context())
 			if !ok {
-				// If no active org, we assume it's personal vault. 
+				// If no active org, we assume it's personal vault.
 				// For now, if a route requires an org permission, it MUST have an active org.
 				forbidden(w, "organization context required")
 				return

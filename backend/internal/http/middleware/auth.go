@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"crypto/subtle"
-	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -150,17 +149,6 @@ func unauthorized(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusUnauthorized)
 	_, _ = w.Write([]byte(`{"error":{"code":"UNAUTHORIZED","message":"missing or invalid bearer token"}}`))
-}
-
-func writeError(w http.ResponseWriter, status int, code, msg string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(map[string]any{
-		"error": map[string]string{
-			"code":    code,
-			"message": msg,
-		},
-	})
 }
 
 // SCIMAuth validates a SCIM bearer token for an organization.

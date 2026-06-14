@@ -26,12 +26,12 @@ type SyncResponse struct {
 
 // SyncDeltaResult describes a delta change from the server.
 type SyncDeltaResult struct {
-	OperationID uuid.UUID     `json:"operation_id"`
-	Operation  string       `json:"operation"`
-	EntityType string       `json:"entity_type"`
-	EntityID  uuid.UUID    `json:"entity_id"`
-	Payload   interface{} `json:"payload,omitempty"`
-	CreatedAt string       `json:"created_at"`
+	OperationID uuid.UUID   `json:"operation_id"`
+	Operation   string      `json:"operation"`
+	EntityType  string      `json:"entity_type"`
+	EntityID    uuid.UUID   `json:"entity_id"`
+	Payload     interface{} `json:"payload,omitempty"`
+	CreatedAt   string      `json:"created_at"`
 }
 
 // SyncHandler handles offline sync operations.
@@ -126,12 +126,12 @@ type SyncQueue struct {
 
 type PendingOperation struct {
 	OperationID uuid.UUID
-	Operation  string
-	EntityType string
-	EntityID  uuid.UUID
-	Payload   map[string]any
-	CreatedAt  int64
-	Retries   int
+	Operation   string
+	EntityType  string
+	EntityID    uuid.UUID
+	Payload     map[string]any
+	CreatedAt   int64
+	Retries     int
 }
 
 // NewSyncQueue creates a new sync queue.
@@ -177,10 +177,10 @@ func (q *SyncQueue) Count() int {
 type SyncStatus string
 
 const (
-	SyncStatusSynced   SyncStatus = "synced"
-	SyncStatusPending  SyncStatus = "pending"
+	SyncStatusSynced  SyncStatus = "synced"
+	SyncStatusPending SyncStatus = "pending"
 	SyncStatusOffline SyncStatus = "offline"
-	SyncStatusError  SyncStatus = "error"
+	SyncStatusError   SyncStatus = "error"
 )
 
 // NewSyncStatus returns initial sync status.
@@ -194,12 +194,12 @@ func NewSyncStatus() SyncStatus {
 type Device struct {
 	ID         uuid.UUID `json:"id"`
 	ClientID   uuid.UUID `json:"client_id"`
-	Name      string   `json:"name,omitempty"`
-	DeviceType string   `json:"device_type"`
-	LastSync  string   `json:"last_sync_at,omitempty"`
-	LastSeen  string   `json:"last_seen_at"`
-	CreatedAt string   `json:"created_at"`
-	IsActive  bool     `json:"is_active"`
+	Name       string    `json:"name,omitempty"`
+	DeviceType string    `json:"device_type"`
+	LastSync   string    `json:"last_sync_at,omitempty"`
+	LastSeen   string    `json:"last_seen_at"`
+	CreatedAt  string    `json:"created_at"`
+	IsActive   bool      `json:"is_active"`
 }
 
 // DevicesHandler manages user devices.
@@ -286,12 +286,4 @@ func (h *DevicesHandler) Register(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{
 		"registered": true,
 	})
-}
-
-// FormatTime formats a time for JSON response.
-func formatTime(t time.Time) string {
-	if t.IsZero() {
-		return ""
-	}
-	return t.Format(time.RFC3339)
 }

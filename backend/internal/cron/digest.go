@@ -108,7 +108,7 @@ func buildDigestSummary(itemNodes []*items.Item, total int) string {
 	}
 
 	if total > shown {
-		b.WriteString(fmt.Sprintf("…and %d more in your vault.\n", total-shown))
+		fmt.Fprintf(&b, "…and %d more in your vault.\n", total-shown)
 	}
 
 	b.WriteString("\nRevisit them before they fade.")

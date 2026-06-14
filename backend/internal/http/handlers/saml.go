@@ -73,7 +73,7 @@ func (h *SAMLHandler) Metadata(w http.ResponseWriter, r *http.Request) {
 	sp := h.makeSP(nil) // Generic metadata
 	buf, _ := xml.Marshal(sp.Metadata())
 	w.Header().Set("Content-Type", "application/samlmetadata+xml")
-	w.Write(buf)
+	_, _ = w.Write(buf)
 }
 
 // GET /api/auth/saml/login
@@ -102,10 +102,10 @@ func (h *SAMLHandler) ACS(w http.ResponseWriter, r *http.Request) {
 
 func (h *SAMLHandler) makeSP(idpMetadata *saml.EntityDescriptor) *saml.ServiceProvider {
 	return &saml.ServiceProvider{
-		EntityID:          h.config.EntityID,
-		AcsURL:            h.makeURL("/api/auth/saml/acs"),
-		MetadataURL:       h.makeURL("/api/auth/saml/metadata"),
-		IDPMetadata:       idpMetadata,
+		EntityID:    h.config.EntityID,
+		AcsURL:      h.makeURL("/api/auth/saml/acs"),
+		MetadataURL: h.makeURL("/api/auth/saml/metadata"),
+		IDPMetadata: idpMetadata,
 	}
 }
 

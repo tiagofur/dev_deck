@@ -36,7 +36,7 @@ func (g *GitHubEnricher) FetchReadme(ctx context.Context, owner, repo string) (s
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	switch resp.StatusCode {
 	case http.StatusOK:

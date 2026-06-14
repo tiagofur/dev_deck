@@ -19,7 +19,7 @@ func DefaultTools(st *store.Store) []Tool {
 	return []Tool{
 		{
 			Name:        "search_vault",
-			Description: "Busca herramientas, repositorios y comandos en el vault personal o del equipo. Usala para encontrar información antes de actuar.",
+			Description: "Busca herramientas, repositorios y comandos en el vault personal o del equipo. Usala para encontrar información antes de actuar.", //nolint:misspell // Spanish text ("comandos"), not an English typo
 			Parameters: json.RawMessage(`{
 				"type": "object",
 				"properties": {
@@ -60,7 +60,7 @@ func DefaultTools(st *store.Store) []Tool {
 				url, _ := args["url"].(string)
 				notes, _ := args["notes"].(string)
 				tagsRaw, _ := args["tags"].([]any)
-				
+
 				tags := []string{}
 				for _, t := range tagsRaw {
 					if ts, ok := t.(string); ok {
@@ -84,7 +84,7 @@ func DefaultTools(st *store.Store) []Tool {
 		},
 		{
 			Name:        "create_runbook",
-			Description: "Crea una lista de pasos operativos (runbook) vinculada a un item del vault.",
+			Description: "Crea una lista de pasos operativos (runbook) vinculada a un item del vault.", //nolint:misspell // Spanish text ("operativos"), not an English typo
 			Parameters: json.RawMessage(`{
 				"type": "object",
 				"properties": {
@@ -125,8 +125,12 @@ func DefaultTools(st *store.Store) []Tool {
 					desc, _ := sm["description"].(string)
 
 					var pCmd, pDesc *string
-					if cmd != "" { pCmd = &cmd }
-					if desc != "" { pDesc = &desc }
+					if cmd != "" {
+						pCmd = &cmd
+					}
+					if desc != "" {
+						pDesc = &desc
+					}
 
 					_, _ = st.CreateRunbookStep(ctx, rb.ID, label, pCmd, pDesc)
 				}
@@ -136,8 +140,9 @@ func DefaultTools(st *store.Store) []Tool {
 		},
 		{
 			Name:         "execute_shell_command",
-			Description:  "Ejecuta un comando en la terminal local del usuario. Solo disponible en la Desktop App. Requiere aprobación manual del usuario.",
+			Description:  "Ejecuta un comando en la terminal local del usuario. Solo disponible en la Desktop App. Requiere aprobación manual del usuario.", //nolint:misspell // Spanish text ("comando"), not an English typo
 			IsClientSide: true,
+			//nolint:misspell // Spanish text ("comando") inside the JSON schema string, not an English typo
 			Parameters: json.RawMessage(`{
 				"type": "object",
 				"properties": {
@@ -177,7 +182,7 @@ func DefaultTools(st *store.Store) []Tool {
 				if err != nil {
 					return nil, err
 				}
-				defer resp.Body.Close()
+				defer func() { _ = resp.Body.Close() }()
 
 				body, err := io.ReadAll(io.LimitReader(resp.Body, 50000))
 				if err != nil {

@@ -50,7 +50,7 @@ func (p *ollamaProvider) SuggestTags(ctx context.Context, in Input) ([]string, e
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Clean the response in case Ollama adds markdown backticks
 	resp = strings.TrimPrefix(strings.TrimSpace(resp), "```json")
 	resp = strings.TrimPrefix(resp, "```")
@@ -102,7 +102,7 @@ func (p *ollamaProvider) generate(ctx context.Context, system, prompt string) (s
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode >= 300 {
 		raw, _ := io.ReadAll(resp.Body)

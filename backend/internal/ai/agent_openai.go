@@ -42,9 +42,9 @@ func (a *AgentOpenAI) Chat(ctx context.Context, messages []agent.Message, tools 
 
 	// 1. Prepare request
 	type openAIRequest struct {
-		Model    string           `json:"model"`
-		Messages []agent.Message  `json:"messages"`
-		Tools    []any            `json:"tools,omitempty"`
+		Model    string          `json:"model"`
+		Messages []agent.Message `json:"messages"`
+		Tools    []any           `json:"tools,omitempty"`
 	}
 
 	reqBody := openAIRequest{
@@ -80,7 +80,7 @@ func (a *AgentOpenAI) Chat(ctx context.Context, messages []agent.Message, tools 
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	raw, err := io.ReadAll(resp.Body)
 	if err != nil {

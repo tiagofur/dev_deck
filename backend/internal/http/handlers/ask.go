@@ -56,12 +56,10 @@ func (h *AskHandler) Ask(w http.ResponseWriter, r *http.Request) {
 	var embedding []float32
 	if h.embeddings != nil && h.embeddings.Enabled() {
 		emb, err := h.embeddings.EmbedSearch(r.Context(), req.Question)
-		if err != nil {
-			// Log but continue with text search
-			emb = nil
-		} else {
+		if err == nil {
 			embedding = emb
 		}
+		// On error, fall back to text search with a nil embedding.
 	}
 
 	result, err := h.store.AskDevDeck(r.Context(), req.Question, embedding, 5)

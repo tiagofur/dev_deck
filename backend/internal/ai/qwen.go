@@ -86,21 +86,21 @@ type qwenInput struct {
 
 type qwenParams struct {
 	ResultFormat string  `json:"result_format"`
-	MaxTokens  int     `json:"max_tokens,omitempty"`
-	Temperature float64 `json:"temperature,omitempty"`
+	MaxTokens    int     `json:"max_tokens,omitempty"`
+	Temperature  float64 `json:"temperature,omitempty"`
 }
 
 type qwenResponse struct {
-	Code      string `json:"code"`
-	Message  string `json:"message"`
-	Output   qwenOutput `json:"output"`
-	Usage    qwenUsage `json:"usage"`
+	Code    string     `json:"code"`
+	Message string     `json:"message"`
+	Output  qwenOutput `json:"output"`
+	Usage   qwenUsage  `json:"usage"`
 }
 
 type qwenOutput struct {
 	Choices []struct {
-		FinishReason string     `json:"finish_reason"`
-		Message   qwenMessage `json:"message"`
+		FinishReason string      `json:"finish_reason"`
+		Message      qwenMessage `json:"message"`
 	} `json:"choices"`
 }
 
@@ -118,8 +118,8 @@ func (p *qwenProvider) complete(ctx context.Context, messages []qwenMessage) (st
 		Input: qwenInput{Messages: messages},
 		Parameters: qwenParams{
 			ResultFormat: "message",
-			MaxTokens:   512,
-			Temperature: 0.2,
+			MaxTokens:    512,
+			Temperature:  0.2,
 		},
 	})
 	if err != nil {
@@ -137,7 +137,7 @@ func (p *qwenProvider) complete(ctx context.Context, messages []qwenMessage) (st
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	raw, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err

@@ -10,18 +10,18 @@ import (
 )
 
 type ActivityEntry struct {
-	ID         uuid.UUID       `json:"id"`
-	OrgID      uuid.UUID       `json:"org_id"`
-	UserID     uuid.UUID       `json:"user_id"`
-	Action     string          `json:"action"`
-	EntityType string          `json:"entity_type"`
-	EntityID   uuid.UUID       `json:"entity_id"`
-	Metadata   map[string]any  `json:"metadata,omitempty"`
-	CreatedAt  time.Time       `json:"created_at"`
-	
+	ID         uuid.UUID      `json:"id"`
+	OrgID      uuid.UUID      `json:"org_id"`
+	UserID     uuid.UUID      `json:"user_id"`
+	Action     string         `json:"action"`
+	EntityType string         `json:"entity_type"`
+	EntityID   uuid.UUID      `json:"entity_id"`
+	Metadata   map[string]any `json:"metadata,omitempty"`
+	CreatedAt  time.Time      `json:"created_at"`
+
 	// JOINed data
-	UserDisplayName string  `json:"user_display_name,omitempty"`
-	UserAvatarURL   string  `json:"user_avatar_url,omitempty"`
+	UserDisplayName string `json:"user_display_name,omitempty"`
+	UserAvatarURL   string `json:"user_avatar_url,omitempty"`
 }
 
 // RecordActivity logs an event in the organization's audit log.

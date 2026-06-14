@@ -315,7 +315,7 @@ func (s *Store) ImportDeckItems(ctx context.Context, userID, sourceDeckID uuid.U
 	if err != nil {
 		return 0, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	count := 0
 	for _, it := range items {

@@ -75,8 +75,8 @@ type deepSeekMessage struct {
 
 type deepSeekRequest struct {
 	Model       string            `json:"model"`
-	Temperature float64          `json:"temperature,omitempty"`
-	MaxTokens   int              `json:"max_tokens,omitempty"`
+	Temperature float64           `json:"temperature,omitempty"`
+	MaxTokens   int               `json:"max_tokens,omitempty"`
 	Messages    []deepSeekMessage `json:"messages"`
 }
 
@@ -97,7 +97,7 @@ func (p *deepSeekProvider) complete(ctx context.Context, messages []deepSeekMess
 		Model:       p.model,
 		Temperature: 0.2,
 		MaxTokens:   512,
-		Messages:   messages,
+		Messages:    messages,
 	})
 	if err != nil {
 		return "", err
@@ -113,7 +113,7 @@ func (p *deepSeekProvider) complete(ctx context.Context, messages []deepSeekMess
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	raw, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err

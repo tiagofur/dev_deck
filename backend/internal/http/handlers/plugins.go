@@ -5,17 +5,17 @@ import (
 )
 
 type PluginTemplate struct {
-	ID          string   `json:"id"`
-	Type        string   `json:"type"` // "enricher" or "webhook"
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Author      string   `json:"author"`
-	IconURL     string   `json:"icon_url"`
+	ID          string `json:"id"`
+	Type        string `json:"type"` // "enricher" or "webhook"
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Author      string `json:"author"`
+	IconURL     string `json:"icon_url"`
 	// For Enrichers
-	URLPattern  *string  `json:"url_pattern,omitempty"`
-	EndpointURL *string  `json:"endpoint_url,omitempty"`
+	URLPattern  *string `json:"url_pattern,omitempty"`
+	EndpointURL *string `json:"endpoint_url,omitempty"`
 	// For Webhooks
-	Events      []string `json:"events,omitempty"`
+	Events []string `json:"events,omitempty"`
 }
 
 var featuredPlugins = []PluginTemplate{

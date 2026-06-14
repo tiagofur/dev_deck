@@ -71,7 +71,7 @@ func (g *GitHubEnricher) Fetch(ctx context.Context, owner, repo string) (*repos.
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	switch resp.StatusCode {
 	case http.StatusOK:

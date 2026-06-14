@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"net/http"
 	"devdeck/internal/store"
+	"net/http"
 )
 
 type HealthHandler struct {
@@ -15,7 +15,7 @@ func NewHealthHandler(s *store.Store) *HealthHandler {
 
 func (h *HealthHandler) Health(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	
+
 	if err := h.store.Ping(r.Context()); err != nil {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		_, _ = w.Write([]byte(`{"status":"error","details":"database unreachable"}`))

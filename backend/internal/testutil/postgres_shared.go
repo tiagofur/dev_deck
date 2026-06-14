@@ -61,6 +61,7 @@ func applyMigrations(ctx context.Context, pool *pgxpool.Pool) error {
 			}
 			sort.Strings(files)
 			for _, f := range files {
+				// #nosec G304 -- f is a .sql migration file discovered from a known local migrations directory, not user input.
 				data, err := os.ReadFile(f)
 				if err != nil {
 					migrationsErr = err

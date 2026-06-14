@@ -148,7 +148,7 @@ func (s *Store) GetGlobalStats(ctx context.Context) (map[string]any, error) {
 	}
 
 	return map[string]any{
-		"current_region": s.appRegion,
+		"current_region":    s.appRegion,
 		"user_distribution": userRegions,
 		"sync_distribution": opRegions,
 	}, nil

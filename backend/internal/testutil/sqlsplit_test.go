@@ -114,12 +114,12 @@ func TestSplitRealProblemMigrations(t *testing.T) {
 	}
 
 	tests := []struct {
-		file         string
+		file          string
 		minStatements int
-		mustContain  []string
+		mustContain   []string
 	}{
 		{
-			file:         "0012_semantic_search.sql",
+			file:          "0012_semantic_search.sql",
 			minStatements: 5,
 			mustContain: []string{
 				"CREATE OR REPLACE FUNCTION compute_query_embedding",
@@ -127,7 +127,7 @@ func TestSplitRealProblemMigrations(t *testing.T) {
 			},
 		},
 		{
-			file:         "0013_offline_sync.sql",
+			file:          "0013_offline_sync.sql",
 			minStatements: 10,
 			mustContain: []string{
 				"CREATE TYPE operation_type AS ENUM",

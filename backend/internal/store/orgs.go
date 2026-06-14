@@ -13,7 +13,7 @@ func (s *Store) CreateOrganization(ctx context.Context, userID uuid.UUID, name s
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	var org auth.Organization
 	err = tx.QueryRow(ctx, `
@@ -85,10 +85,10 @@ func (s *Store) AddOrgMember(ctx context.Context, orgID, userID uuid.UUID, role 
 }
 
 type OrgInsights struct {
-	TotalItems     int              `json:"total_items"`
-	TopLanguages   []LanguageStat   `json:"top_languages"`
-	TopCurators    []CuratorStat    `json:"top_curators"`
-	RecentActivity int              `json:"recent_activity"`
+	TotalItems     int            `json:"total_items"`
+	TopLanguages   []LanguageStat `json:"top_languages"`
+	TopCurators    []CuratorStat  `json:"top_curators"`
+	RecentActivity int            `json:"recent_activity"`
 }
 
 type LanguageStat struct {

@@ -19,7 +19,7 @@ func TestHandlers_SystemConfig_Get(t *testing.T) {
 	}
 
 	config := decodeJSON[systemConfig](t, rec)
-	
+
 	// ai_provider defaults to "heuristic" in newTestServer because it uses ai.NewHeuristic()
 	// actually, the config endpoint is wired up in router.go using:
 	// systemH := handlers.NewSystemConfigHandler(cfg.AIProvider, false)

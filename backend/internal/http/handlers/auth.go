@@ -103,10 +103,13 @@ func (h *AuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 
 	// Clear the cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:   "oauth_state",
-		Value:  "",
-		Path:   "/",
-		MaxAge: -1,
+		Name:     "oauth_state",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
 	})
 
 	code := r.FormValue("code")
@@ -184,7 +187,7 @@ func (h *AuthHandler) fetchGitHubUser(code string) (*auth.GitHubUser, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var tokenResp struct {
 		AccessToken string `json:"access_token"`
@@ -205,7 +208,7 @@ func (h *AuthHandler) fetchGitHubUser(code string) (*auth.GitHubUser, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var ghUser auth.GitHubUser
 	if err := json.NewDecoder(resp.Body).Decode(&ghUser); err != nil {
@@ -301,7 +304,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		writeInternal(w, err)
 		return
 	}
-	defer tx.Rollback(r.Context())
+	defer func() { _ = tx.Rollback(r.Context()) }()
 
 	user, err := h.store.CreateUserLocalTx(r.Context(), tx, body.Email, string(hash))
 	if err != nil {
@@ -428,6 +431,7 @@ func (h *AuthHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 
 	// Limit request size to 5MB
 	r.Body = http.MaxBytesReader(w, r.Body, 5*1024*1024)
+	// #nosec G120 -- request body is already bounded by MaxBytesReader above.
 	if err := r.ParseMultipartForm(5 * 1024 * 1024); err != nil {
 		writeError(w, http.StatusBadRequest, "FILE_TOO_LARGE", "file is too large (max 5MB)")
 		return
@@ -438,7 +442,7 @@ func (h *AuthHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "MISSING_FILE", "missing avatar file field")
 		return
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	// Read first 512 bytes to validate content type
 	buffer := make([]byte, 512)
@@ -461,7 +465,7 @@ func (h *AuthHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 
 	// Ensure uploads directory exists
 	uploadsDir := "./uploads"
-	if err := os.MkdirAll(uploadsDir, 0755); err != nil {
+	if err := os.MkdirAll(uploadsDir, 0750); err != nil {
 		writeInternal(w, err)
 		return
 	}
@@ -470,12 +474,13 @@ func (h *AuthHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 	filename := fmt.Sprintf("%s-%d.png", userID, time.Now().Unix())
 	filepath := filepath.Join(uploadsDir, filename)
 
+	// #nosec G304 -- filepath is built from a server-generated UUID and timestamp under a fixed uploads dir; not user-controlled.
 	out, err := os.Create(filepath)
 	if err != nil {
 		writeInternal(w, err)
 		return
 	}
-	defer out.Close()
+	defer func() { _ = out.Close() }()
 
 	if _, err = io.Copy(out, file); err != nil {
 		writeInternal(w, err)
@@ -492,7 +497,6 @@ func (h *AuthHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, http.StatusOK, map[string]string{"avatar_url": avatarURL})
 }
-
 
 // PATCH /api/auth/me/onboarding/complete
 func (h *AuthHandler) CompleteOnboarding(w http.ResponseWriter, r *http.Request) {
