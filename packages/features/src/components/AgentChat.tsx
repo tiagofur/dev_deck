@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Send, Bot, User, Sparkles, Loader2, Play, Terminal, Shield, Check, X } from 'lucide-react'
+import { Send, Bot, User, Loader2, Play, Terminal, Shield, X } from 'lucide-react'
 import { Button, showToast } from '@devdeck/ui'
 import { getAccessToken, getConfig } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'

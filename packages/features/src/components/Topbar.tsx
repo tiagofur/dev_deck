@@ -23,7 +23,6 @@ export function Topbar({
   onAdd,
   onGlobalSearch,
   onMenuToggle,
-  reviewCount,
 }: TopbarProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()

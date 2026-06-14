@@ -14,7 +14,7 @@ export function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [step, setStep] = useState<1 | 2>(1)
-  const [loginType, setLoginType] = useState<'password' | 'saml'>('password')
+  const [_loginType, setLoginType] = useState<'password' | 'saml'>('password')
   const [loginError, setLoginError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 

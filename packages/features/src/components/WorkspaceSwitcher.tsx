@@ -13,7 +13,7 @@ import { showToast } from '@devdeck/ui'
 export function WorkspaceSwitcher() {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
-  const { data: orgsRes, isLoading } = useUserOrgs()
+  const { data: orgsRes } = useUserOrgs()
   const createOrg = useCreateOrg()
   const { activeOrgId } = usePreferences()
   const qc = useQueryClient()

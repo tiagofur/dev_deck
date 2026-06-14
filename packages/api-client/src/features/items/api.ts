@@ -97,7 +97,7 @@ export function useItems(params: ListItemsParams = {}) {
 				// Populate local DB
 				res.items.forEach(it => upsertLocalItem(it).catch(console.error))
 				return res
-			} catch (err) {
+			} catch {
 				// Offline fallback
 				const rows = await queryLocal<any>('SELECT * FROM items WHERE archived = 0 ORDER BY created_at DESC')
 				return {
@@ -161,7 +161,7 @@ export function useUpdateItem() {
 			// 3. Try to hit the API, but ignore failure (sync engine will retry)
 			try {
 				return await api.patch<Item>(`/api/items/${id}`, input)
-			} catch (err) {
+			} catch {
 				// Return local representation if offline
 				return { id, ...input } as unknown as Item
 			}

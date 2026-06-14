@@ -2,14 +2,7 @@ import * as React from 'react'
 import { Command } from 'cmdk'
 import {
   Search,
-  Plus,
-  Box,
   Brain,
-  X,
-  Sparkles,
-  BookOpen,
-  Settings,
-  History,
   ArrowRight,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'

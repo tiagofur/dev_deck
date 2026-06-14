@@ -19,9 +19,6 @@ import {
   useCustomEnrichers,
   useCreateCustomEnricher,
   useDeleteCustomEnricher,
-  useWebhooks,
-  useCreateWebhook,
-  useDeleteWebhook,
   useOrgSAML,
   useUpdateOrgSAML,
   useGenerateSCIMToken,
@@ -388,7 +385,7 @@ function PushPermissionRequest() {
 
 function APIKeyManager() {
   const { t } = useTranslation()
-  const { data: keysRes, isLoading } = useAPIKeys()
+  const { data: keysRes } = useAPIKeys()
   const createKey = useCreateAPIKey()
   const deleteKey = useDeleteAPIKey()
   const [newToken, setNewToken] = useState<string | null>(null)
@@ -454,7 +451,7 @@ function APIKeyManager() {
 
 function CustomEnricherManager() {
   const { t } = useTranslation()
-  const { data: encRes, isLoading } = useCustomEnrichers()
+  const { data: encRes } = useCustomEnrichers()
   const createEnc = useCreateCustomEnricher()
   const deleteEnc = useDeleteCustomEnricher()
 

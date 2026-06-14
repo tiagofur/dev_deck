@@ -78,7 +78,7 @@ export function useItemRunbooks(itemId: string | undefined) {
 				// Sync to local DB
 				res.runbooks.forEach(rb => upsertLocalRunbook(rb).catch(console.error))
 				return res.runbooks
-			} catch (err) {
+			} catch {
 				// Offline fallback
 				const rows = await queryLocal<any>('SELECT * FROM runbooks WHERE item_id = ? ORDER BY created_at ASC', [itemId])
 				const runbooks: Runbook[] = []
@@ -111,7 +111,7 @@ export function useCreateRunbook() {
 
 			try {
 				return await api.post<Runbook>(`/api/items/${itemId}/runbooks`, { title, description })
-			} catch (err) {
+			} catch {
 				return { id, item_id: itemId, title, description, steps: [] } as unknown as Runbook
 			}
 		},
@@ -139,7 +139,7 @@ export function useAddRunbookStep() {
 
 			try {
 				return await api.post<RunbookStep>(`/api/runbooks/${runbookId}/steps`, { label, command, description })
-			} catch (err) {
+			} catch {
 				return { id, runbook_id: runbookId, label, command, description, position: nextPos, is_completed: false } as unknown as RunbookStep
 			}
 		},
@@ -168,7 +168,7 @@ export function useUpdateRunbookStep() {
 
 			try {
 				return await api.patch<RunbookStep>(`/api/runbook-steps/${id}`, input)
-			} catch (err) {
+			} catch {
 				return { id, ...input } as unknown as RunbookStep
 			}
 		},
@@ -182,14 +182,14 @@ export function useUpdateRunbookStep() {
 export function useDeleteRunbook() {
 	const qc = useQueryClient()
 	return useMutation({
-		mutationFn: async ({ id, itemId }: { id: string; itemId: string }) => {
+		mutationFn: async ({ id, itemId: _itemId }: { id: string; itemId: string }) => {
 			await execLocal('DELETE FROM runbooks WHERE id = ?', [id])
 			await execLocal('DELETE FROM runbook_steps WHERE runbook_id = ?', [id])
 			await enqueueSync('runbook', id, 'delete', {})
 
 			try {
 				await api.del(`/api/runbooks/${id}`)
-			} catch (err) {
+			} catch {
 				// handled by sync engine
 			}
 		},

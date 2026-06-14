@@ -4,7 +4,6 @@ import { Plus, Users, Copy, Check, ChevronLeft, LogOut } from 'lucide-react'
 import { Button, showToast } from '@devdeck/ui'
 import { useCircles, useCreateCircle, useJoinCircle, useLeaveCircle } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'
-import clsx from 'clsx'
 import { AppShell } from '../components/AppShell'
 
 export function CirclesPage() {

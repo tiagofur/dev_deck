@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Sparkles, Flame, Trophy, Layers, Users } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Button } from '@devdeck/ui'
 import { SwipeCard, type SwipeDirection } from './SwipeCard'
 import { TrendingFeed } from './TrendingFeed'
@@ -20,10 +19,9 @@ type Tab = 'swipe' | 'trending' | 'leaderboard' | 'team'
 
 export function DiscoverySurface() {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const { activeOrgId } = usePreferences()
   const [activeTab, setActiveTab] = useState<Tab>(activeOrgId ? 'team' : 'swipe')
-  const { data: repo, isLoading, error, refetch } = useDiscoveryNext()
+  const { data: repo, isLoading, refetch } = useDiscoveryNext()
   const markSeen = useMarkSeen()
   const updateRepo = useUpdateRepo()
 

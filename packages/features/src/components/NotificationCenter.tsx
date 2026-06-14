@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Bell, ExternalLink, Mail, ShieldCheck, Sparkles, X } from 'lucide-react'
+import { Bell, Mail, ShieldCheck, Sparkles } from 'lucide-react'
 import { 
   useNotifications, 
   useUnreadNotificationsCount, 
@@ -8,7 +8,6 @@ import {
   type Notification
 } from '@devdeck/api-client'
 import { useNavigate } from 'react-router-dom'
-import { Button } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
 
 export function NotificationCenter() {

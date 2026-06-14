@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import {
 	ArrowLeft,
 	Brain,
-	CheckCircle2,
 	Clipboard,
 	ExternalLink,
 	FileText,
@@ -15,7 +14,7 @@ import {
 	Trash2,
 	Users,
 } from 'lucide-react'
-import { Button, TagChip, confirm, hashIndex, showToast } from '@devdeck/ui'
+import { Button, confirm, showToast } from '@devdeck/ui'
 import {
 	useAIEnrichItem,
 	useDeleteItem,

@@ -1,6 +1,6 @@
 import clsx from 'clsx'
-import { BookOpen, ChevronLeft, Plus, Trash2, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { BookOpen, Plus, Trash2, X } from 'lucide-react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@devdeck/ui'
 import { useCheatsheets, useCreateCheatsheet, useDeleteCheatsheet } from '@devdeck/api-client'
@@ -53,13 +53,6 @@ export function CheatsheetsListPage() {
     }
   }
 
-  // Extract unique categories from data when no filter is active.
-  const categories = useMemo(() => {
-    if (selectedCategory) return [selectedCategory]
-    const cats = new Set<string>()
-    for (const c of cheatsheets) cats.add(c.category)
-    return [...cats].sort()
-  }, [cheatsheets, selectedCategory])
 
   if (isLoading) {
     return (

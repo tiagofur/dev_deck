@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { BookOpen, ChevronLeft, Search, Sparkles, Star } from 'lucide-react'
+import { BookOpen, Search, Sparkles, Star } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useExploreCheatsheets, useFeatureFlags } from '@devdeck/api-client'

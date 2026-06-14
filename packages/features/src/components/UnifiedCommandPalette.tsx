@@ -2,16 +2,13 @@ import * as React from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   CommandPalette,
-  hashIndex,
   showToast,
 } from '@devdeck/ui'
 import {
   useGlobalSearch,
-  useAsk,
   useCapture,
   useSystemConfig,
   type SearchResult,
-  type AskResponse,
 } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'
 import {
@@ -19,10 +16,7 @@ import {
   Plus,
   Box,
   Brain,
-  Sparkles,
   BookOpen,
-  Settings,
-  History,
   MessageSquare,
   Wrench,
 } from 'lucide-react'
@@ -129,8 +123,6 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
   const isAiDisabled = !systemConfig?.ai_provider || ['disabled', 'heuristic', 'local'].includes(systemConfig.ai_provider)
   
   const { data: searchResults = [], isLoading: searchLoading } = useGlobalSearch(query)
-
-  const inputRef = React.useRef<HTMLInputElement>(null)
 
   React.useEffect(() => {
     if (open) {
