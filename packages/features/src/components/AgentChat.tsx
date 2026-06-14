@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Send, Bot, User, Sparkles, Loader2, Play, Terminal, Shield, Check, X } from 'lucide-react'
+import { Send, Bot, User, Loader2, Play, Terminal, Shield, X } from 'lucide-react'
 import { Button, showToast } from '@devdeck/ui'
 import { getAccessToken, getConfig } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'
@@ -34,12 +34,16 @@ export function AgentChat({ initialQuery }: Props) {
   const [loading, setLoading] = useState(false)
   const [executingToolId, setExecutingToolId] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- window.electronAPI is an untyped external bridge injected by the desktop preload script
   const isDesktop = typeof (window as any).electronAPI !== 'undefined'
 
   useEffect(() => {
     if (initialQuery) {
       sendMessage(initialQuery)
     }
+    // Run once on mount: kick off the initial query. sendMessage is recreated
+    // each render and re-running would resend the message.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -56,7 +60,7 @@ export function AgentChat({ initialQuery }: Props) {
     if (!text.trim() && !currentHistory) return
     setLoading(true)
 
-    let nextHistory = currentHistory || [...messages]
+    const nextHistory = currentHistory || [...messages]
     if (!currentHistory && text !== initialQuery) {
         nextHistory.push({ role: 'user', content: text })
         setMessages(nextHistory)
@@ -117,6 +121,7 @@ export function AgentChat({ initialQuery }: Props) {
 
     setExecutingToolId(tc.id)
     try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- window.electronAPI is an untyped external bridge injected by the desktop preload script
         const output = await (window as any).electronAPI.shell.runCommand(cmd)
         const toolMessage: Message = {
             role: 'tool',

@@ -19,15 +19,12 @@ import {
   useCustomEnrichers,
   useCreateCustomEnricher,
   useDeleteCustomEnricher,
-  useWebhooks,
-  useCreateWebhook,
-  useDeleteWebhook,
   useOrgSAML,
   useUpdateOrgSAML,
   useGenerateSCIMToken,
 } from '@devdeck/api-client'
 import { showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+import { useTranslation, setLanguage, type AppLanguage } from '@devdeck/i18n'
 import { WebhookManager } from '../components/WebhookManager'
 import { IntegrationsList } from '../components/IntegrationsList'
 import { ImportStarsSection } from '../components/ImportStarsSection'
@@ -38,7 +35,7 @@ import { OrgInsights } from '../components/OrgInsights'
 const APP_VERSION = '1.0.0'
 
 export function SettingsPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const prefs = usePreferences()
   const { data: me } = useMe()
@@ -100,6 +97,34 @@ export function SettingsPage() {
               showToast(v ? t('settings.mascot_enabled') : t('settings.mascot_disabled'))
             }}
           />
+        </Section>
+
+        {/* Idioma */}
+        <Section title={t('settings.language')}>
+          <Field label={t('settings.language_desc')}>
+            <div className="flex gap-2">
+              {(['en', 'es'] as AppLanguage[]).map((lng) => {
+                const active = i18n.language?.startsWith(lng)
+                return (
+                  <button
+                    key={lng}
+                    type="button"
+                    onClick={() => {
+                      void setLanguage(lng)
+                      showToast(t('settings.language_changed'))
+                    }}
+                    aria-pressed={active}
+                    className={`flex items-center gap-2 border-3 border-ink px-4 py-2 font-display font-bold uppercase text-sm shadow-hard-sm transition-colors ${
+                      active ? 'bg-accent-lime' : 'bg-bg-primary hover:bg-bg-card'
+                    }`}
+                  >
+                    {active && <Check size={16} strokeWidth={3} />}
+                    {lng === 'en' ? 'English' : 'Español'}
+                  </button>
+                )
+              })}
+            </div>
+          </Field>
         </Section>
 
         {/* Notificaciones */}
@@ -360,7 +385,7 @@ function PushPermissionRequest() {
 
 function APIKeyManager() {
   const { t } = useTranslation()
-  const { data: keysRes, isLoading } = useAPIKeys()
+  const { data: keysRes } = useAPIKeys()
   const createKey = useCreateAPIKey()
   const deleteKey = useDeleteAPIKey()
   const [newToken, setNewToken] = useState<string | null>(null)
@@ -426,7 +451,7 @@ function APIKeyManager() {
 
 function CustomEnricherManager() {
   const { t } = useTranslation()
-  const { data: encRes, isLoading } = useCustomEnrichers()
+  const { data: encRes } = useCustomEnrichers()
   const createEnc = useCreateCustomEnricher()
   const deleteEnc = useDeleteCustomEnricher()
 

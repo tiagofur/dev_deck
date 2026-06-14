@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import {
 	ArrowLeft,
 	Brain,
-	CheckCircle2,
 	Clipboard,
 	ExternalLink,
 	FileText,
@@ -15,7 +14,7 @@ import {
 	Trash2,
 	Users,
 } from 'lucide-react'
-import { Button, TagChip, confirm, hashIndex, showToast } from '@devdeck/ui'
+import { Button, confirm, showToast } from '@devdeck/ui'
 import {
 	useAIEnrichItem,
 	useDeleteItem,
@@ -40,7 +39,7 @@ import { TagsEditor } from '../components/TagsEditor'
 import { TeamReviewCard } from '../components/TeamReviewCard'
 import { AppShell } from '../components/AppShell'
 import { ShareToCirclePanel } from '../components/ShareToCirclePanel'
-import { useTranslation } from '@devdeck/i18n'
+import { useTranslation, type TFunction } from '@devdeck/i18n'
 
 export function ItemDetailPage() {
 	const { t } = useTranslation()
@@ -477,15 +476,16 @@ function RunbookStepItem({ step }: { step: RunbookStep }) {
 	const { t } = useTranslation()
 	const updateStep = useUpdateRunbookStep()
 	const [running, setRunning] = useState(false)
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- window.electronAPI is an untyped external bridge injected by the desktop preload script
 	const isDesktop = typeof (window as any).electronAPI !== 'undefined'
 
 	async function handleRun() {
 		if (!step.command || !isDesktop) return
 		setRunning(true)
 		try {
-			const output = await (window as any).electronAPI.shell.runCommand(step.command)
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- window.electronAPI is an untyped external bridge injected by the desktop preload script
+			await (window as any).electronAPI.shell.runCommand(step.command)
 			showToast(t('item_detail.runbook.execution_success'))
-			if (output) console.log('[shell output]', output)
 		} catch (err) {
 			showToast(`${t('common.error')}: ${err}`, 'error')
 		} finally {
@@ -739,7 +739,7 @@ function AITagsReviewCard({
 	)
 }
 
-function buildShareSummary(item: Item, t: any): string {
+function buildShareSummary(item: Item, t: TFunction): string {
 	let s = `# ${item.title}\n`
 	if (item.url) s += `${item.url}\n`
 	if (item.why_saved) s += `\n${t('item_detail.summary_why_label')}${item.why_saved}\n`

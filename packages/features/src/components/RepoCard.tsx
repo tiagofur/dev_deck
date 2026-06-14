@@ -16,8 +16,16 @@ export function RepoCard({ repo, onClick }: Props) {
   const title = repo.owner ? `${repo.owner}/${repo.name}` : repo.name
 
   return (
-    <article
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick?.()
+        }
+      }}
       className="group bg-bg-card border-3 border-ink shadow-hard p-5 cursor-pointer
                  transition-all duration-150 ease-out
                  hover:-translate-x-1 hover:-translate-y-1 hover:shadow-hard-lg
@@ -26,6 +34,7 @@ export function RepoCard({ repo, onClick }: Props) {
     >
       <header className="flex items-start gap-3 mb-3">
         {repo.avatar_url && !imgError ? (
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- onError is a media event, not a user interaction
           <img
             src={repo.avatar_url}
             alt=""
@@ -86,6 +95,6 @@ export function RepoCard({ repo, onClick }: Props) {
           ))}
         </div>
       )}
-    </article>
+    </div>
   )
 }

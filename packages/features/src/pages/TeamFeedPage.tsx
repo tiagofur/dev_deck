@@ -9,7 +9,7 @@ import {
   User as UserIcon
 } from 'lucide-react'
 import { useOrgFeed, usePreferences, type ActivityEntry } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { useTranslation, type TFunction } from '@devdeck/i18n'
 import { AppShell } from '../components/AppShell'
 import { OrgRequiredEmptyState } from '../components/OrgRequiredEmptyState'
 
@@ -71,7 +71,7 @@ export function TeamFeedPage() {
                             onClick={() => navigate(`/items/${e.entity_id}`)}
                             className="font-black uppercase text-accent-pink hover:underline"
                           >
-                            {e.metadata?.title || t('feed.this_item')}
+                            {(typeof e.metadata?.title === 'string' ? e.metadata.title : '') || t('feed.this_item')}
                           </button>
                        </p>
                     </div>
@@ -100,7 +100,7 @@ function ActivityIcon({ action }: { action: string }) {
   return <Sparkles size={14} className="text-accent-yellow" strokeWidth={3} />
 }
 
-function formatAction(action: string, t: any) {
+function formatAction(action: string, t: TFunction) {
   switch (action) {
     case 'item.created': return t('feed.actions.item_created')
     case 'item.updated_notes': return t('feed.actions.item_updated_notes')

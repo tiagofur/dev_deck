@@ -1,7 +1,6 @@
 import {
   BookOpen,
   Code2,
-  FileText,
   Github,
   Keyboard,
   Lightbulb,

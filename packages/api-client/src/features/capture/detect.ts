@@ -290,7 +290,7 @@ function isWorkflowText(text: string): boolean {
   const lines = text.split('\n').map((line) => line.trim()).filter(Boolean)
   if (lines.length < 2) return false
   const stepLines = lines.filter((line) =>
-    /^(\d+[\).\s-]|[-*]\s+|\[\s?\]\s+)/.test(line) ||
+    /^(\d+[).\s-]|[-*]\s+|\[\s?\]\s+)/.test(line) ||
     /^(step|paso)\s+\d+/i.test(line),
   )
   if (stepLines.length >= 2) return true

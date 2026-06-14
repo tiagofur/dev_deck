@@ -169,6 +169,7 @@ export function EditProfileModal({ isOpen, onClose, user }: EditProfileModalProp
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         {/* Glassmorphic Backdrop */}
+        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- backdrop click-to-close overlay; closing is also reachable via the Close button and Escape */}
         <div
           className="absolute inset-0 bg-ink/75 backdrop-blur-sm cursor-pointer"
           onClick={onClose}
@@ -198,8 +199,17 @@ export function EditProfileModal({ isOpen, onClose, user }: EditProfileModalProp
                 {t('profile.avatar_label', 'Imagen de Perfil')}
               </label>
               <div className="flex flex-col sm:flex-row items-center gap-6 w-full">
-                <div 
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-label={t('profile.avatar_label', 'Imagen de Perfil')}
                   onClick={triggerFileSelect}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      triggerFileSelect()
+                    }
+                  }}
                   className="w-24 h-24 border-4 border-ink shadow-hard overflow-hidden bg-accent-yellow rounded-none shrink-0 relative cursor-pointer hover:scale-105 active:scale-95 transition-all group"
                 >
                   <UserAvatar
@@ -284,7 +294,15 @@ export function EditProfileModal({ isOpen, onClose, user }: EditProfileModalProp
                   stackTags.map((tag) => (
                     <span
                       key={tag}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => handleRemoveTag(tag)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          handleRemoveTag(tag)
+                        }
+                      }}
                       className="border-2 border-ink bg-accent-lavender text-xs font-mono font-bold px-2 py-0.5 flex items-center gap-1.5 cursor-pointer hover:bg-accent-pink hover:text-white transition-colors"
                       title={t('profile.click_to_remove')}
                     >

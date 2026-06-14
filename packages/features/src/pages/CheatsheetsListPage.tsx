@@ -1,6 +1,6 @@
 import clsx from 'clsx'
-import { BookOpen, ChevronLeft, Plus, Trash2, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { BookOpen, Plus, Trash2, X } from 'lucide-react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@devdeck/ui'
 import { useCheatsheets, useCreateCheatsheet, useDeleteCheatsheet } from '@devdeck/api-client'
@@ -53,13 +53,6 @@ export function CheatsheetsListPage() {
     }
   }
 
-  // Extract unique categories from data when no filter is active.
-  const categories = useMemo(() => {
-    if (selectedCategory) return [selectedCategory]
-    const cats = new Set<string>()
-    for (const c of cheatsheets) cats.add(c.category)
-    return [...cats].sort()
-  }, [cheatsheets, selectedCategory])
 
   if (isLoading) {
     return (
@@ -223,7 +216,15 @@ function CheatsheetCard({
   const color = cheatsheet.color ?? '#888'
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick()
+        }
+      }}
       className="bg-bg-card border-3 border-ink shadow-hard p-5 text-left cursor-pointer
                  hover:-translate-x-1 hover:-translate-y-1 hover:shadow-hard-lg
                  active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard-sm
@@ -327,12 +328,14 @@ function CreateCheatsheetModal({
   }
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- backdrop click-to-close overlay; closing is also reachable via the Close button and Escape
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-ink/40"
       onClick={onClose}
     >
       <form
         onSubmit={handleSubmit}
+        role="presentation"
         onClick={(e) => e.stopPropagation()}
         className="bg-bg-card border-5 border-ink shadow-hard-xl p-7 w-full max-w-lg"
       >

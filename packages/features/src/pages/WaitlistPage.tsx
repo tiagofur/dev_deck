@@ -17,8 +17,8 @@ export function WaitlistPage() {
     try {
       await join.mutateAsync(email)
       setDone(true)
-    } catch (err) {
-      // handled by global error toast if any, but we'll stay simple
+    } catch {
+      // Surfaced to the user via join.isError / join.error below.
     }
   }
 
@@ -58,12 +58,13 @@ export function WaitlistPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4 mb-8 text-left">
           <div>
-            <label className="block font-display font-bold uppercase text-xs mb-1 ml-1">Email</label>
+            <label htmlFor="waitlist-email" className="block font-display font-bold uppercase text-xs mb-1 ml-1">Email</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-ink-soft">
                 <Mail size={16} />
               </div>
               <input
+                id="waitlist-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -81,6 +82,15 @@ export function WaitlistPage() {
           >
             {join.isPending ? <Loader2 className="animate-spin" /> : t('waitlist.join_button')}
           </Button>
+
+          {join.isError && (
+            <p
+              role="alert"
+              className="border-3 border-ink bg-accent-pink/20 px-3 py-2 font-mono text-xs font-bold text-ink"
+            >
+              {(join.error as Error)?.message || t('waitlist.error')}
+            </p>
+          )}
         </form>
 
         <div className="font-mono text-[10px] text-ink-soft leading-tight">

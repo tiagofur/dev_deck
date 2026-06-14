@@ -125,6 +125,7 @@ export function Sidebar({
       {MobileToggle}
       {/* Backdrop */}
       {isOpen && (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- backdrop click-to-close overlay; the drawer is also dismissible via its toggle button and Escape
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setIsOpen(false)}

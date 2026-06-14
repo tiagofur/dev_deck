@@ -78,7 +78,6 @@ describe('<CaptureModal>', () => {
   })
 
   it('auto-detects a GitHub repo and activates the Repo lane', async () => {
-    const user = userEvent.setup()
     renderCaptureModal(vi.fn(), { initialUrl: 'https://github.com/paperclipai/paperclip' })
 
     await waitFor(() => {

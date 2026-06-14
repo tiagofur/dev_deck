@@ -8,11 +8,12 @@ import {
 } from '@devdeck/api-client'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from '@devdeck/i18n'
+import { showToast } from '@devdeck/ui'
 
 export function WorkspaceSwitcher() {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
-  const { data: orgsRes, isLoading } = useUserOrgs()
+  const { data: orgsRes } = useUserOrgs()
   const createOrg = useCreateOrg()
   const { activeOrgId } = usePreferences()
   const qc = useQueryClient()
@@ -45,7 +46,7 @@ export function WorkspaceSwitcher() {
       const newOrg = await createOrg.mutateAsync(name)
       handleSwitch(newOrg.id)
     } catch (err) {
-      alert((err as Error).message)
+      showToast((err as Error).message || t('common.error'), 'error')
     }
   }
 

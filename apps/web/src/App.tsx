@@ -36,9 +36,9 @@ import {
   WorkbenchPage,
   UnifiedCommandPalette,
   useGlobalShortcuts,
+  ExplorePage,
 } from '@devdeck/features'
 import { CaptureModal, ShortcutsModal } from '@devdeck/features'
-import { ExplorePage } from '../../../packages/features/src/pages/ExplorePage'
 import { ConfirmHost, PageTransition, Toaster } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
 import { isLoggedIn, useMe } from '@devdeck/api-client'
@@ -146,9 +146,10 @@ function AnimatedRoutes(): ReactElement {
   })
 
   useEffect(() => {
-    const onOpenCapture = (e: any) => {
-      if (e.detail) {
-        setInitialCaptureData({ url: e.detail.url, title: e.detail.title })
+    const onOpenCapture = (e: Event) => {
+      const detail = (e as CustomEvent<{ url?: string; title?: string }>).detail
+      if (detail) {
+        setInitialCaptureData({ url: detail.url, title: detail.title })
       } else {
         setInitialCaptureData(null)
       }

@@ -57,6 +57,9 @@
     "mascot_desc": "Snarkel appears in the bottom right corner and reacts to your usage.",
     "mascot_enabled": "Mascot enabled",
     "mascot_disabled": "Mascot hidden",
+    "language": "Language",
+    "language_desc": "Choose the interface language",
+    "language_changed": "Language updated",
     "notifications": "Notifications",
     "system_notifications": "System Notifications",
     "notifications_enabled_desc": "Enabled. You will receive alerts even with the app closed.",
@@ -345,7 +348,8 @@
     "join_button": "Join the list",
     "success_title": "You're in!",
     "success_desc": "You are now on the waitlist. We will notify you at {{email}} as soon as we have a spot for you.",
-    "terms_desc": "By joining, you agree that we will send you an email (and only one) when your invitation is ready."
+    "terms_desc": "By joining, you agree that we will send you an email (and only one) when your invitation is ready.",
+    "error": "Something went wrong. Please check your email and try again."
   },
   "feed": {
     "title": "Network Feed",

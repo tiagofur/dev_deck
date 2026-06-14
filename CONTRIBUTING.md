@@ -80,12 +80,17 @@ pnpm dev:web
 # The dev server listens on http://localhost:5173 and proxies /api to :8080
 ```
 
-### Tests and Typechecking
+### Lint, Tests and Typechecking
 ```bash
+pnpm lint                         # ESLint over the web frontend (apps/web + packages)
+pnpm format                       # Prettier --write across the repo
 pnpm typecheck                    # Runs tsc --noEmit across all packages
 pnpm test                         # Runs vitest in packages with unit tests
 pnpm -F @devdeck/desktop test:e2e # Runs Playwright flows for the desktop app
 ```
+
+`pnpm lint` must report **0 errors** to merge (warnings are an accepted, shrinking
+backlog — picking one off is a great first contribution).
 
 ---
 

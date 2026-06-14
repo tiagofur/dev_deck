@@ -92,4 +92,31 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    // Split heavy third-party libraries out of the main app chunk so the
+    // browser can cache them independently and download them in parallel.
+    // The biggest offender is the markdown/syntax-highlight stack.
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined
+          if (
+            /react-markdown|rehype|remark|lowlight|highlight\.js|hast|mdast|micromark|unist|property-information|character-entities|space-separated-tokens|comma-separated-tokens|trim-lines|vfile|bail|trough|decode-named-character|ccount|markdown-table|html-url-attributes|web-namespaces|zwitch|longest-streak|estree|devlop|is-plain-obj/.test(
+              id,
+            )
+          ) {
+            return 'markdown'
+          }
+          if (id.includes('framer-motion')) return 'motion'
+          if (id.includes('@tanstack')) return 'query'
+          if (id.includes('@dnd-kit')) return 'dnd'
+          if (id.includes('react-router')) return 'router'
+          if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) {
+            return 'react'
+          }
+          return 'vendor'
+        },
+      },
+    },
+  },
 })

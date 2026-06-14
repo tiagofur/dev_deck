@@ -27,7 +27,7 @@ export function useDiscoveryNext() {
       try {
         const r = await api.get<Repo | undefined>('/api/discovery/next')
         return r
-      } catch (err) {
+      } catch {
         return undefined
       }
     },

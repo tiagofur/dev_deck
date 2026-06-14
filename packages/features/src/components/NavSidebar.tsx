@@ -53,12 +53,20 @@ export function NavSidebar({ isOpen, onClose, reviewCount }: NavSidebarProps) {
     <div className="flex flex-col h-full bg-bg-card">
       {/* Header Logo */}
       <div className="p-4 border-b-3 border-ink flex items-center justify-between shrink-0">
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- heading doubles as a clickable logo; primary navigation is provided by the nav links below */}
         <h1
           aria-label="DevDeck"
           className="cursor-pointer font-display text-2xl font-black uppercase tracking-tight"
           onClick={() => {
             navigate('/items')
             onClose()
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              navigate('/items')
+              onClose()
+            }
           }}
         >
           Dev<span className="border-2 border-ink bg-accent-pink px-1.5 ml-1 select-none">Deck</span>
@@ -236,6 +244,7 @@ export function NavSidebar({ isOpen, onClose, reviewCount }: NavSidebarProps) {
         className={clsx('lg:hidden fixed inset-0 z-45', isOpen ? 'visible' : 'invisible')}
       >
         {/* Backdrop */}
+        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- backdrop click-to-close overlay; the drawer is also dismissible via its Close button and Escape */}
         <div
           className={clsx(
             'absolute inset-0 bg-black/50 transition-opacity duration-300',

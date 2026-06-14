@@ -107,6 +107,7 @@ dev_deck/
 
 ```bash
 pnpm install
+pnpm lint
 pnpm typecheck
 pnpm test
 ```

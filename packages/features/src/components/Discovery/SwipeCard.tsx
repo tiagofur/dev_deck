@@ -81,6 +81,7 @@ export function SwipeCard({ repo, onSwipe }: Props) {
 
       <header className="flex items-start gap-4 mb-6">
         {repo.avatar_url && !imgError ? (
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- onError is a media event, not a user interaction
           <img
             src={repo.avatar_url}
             alt=""

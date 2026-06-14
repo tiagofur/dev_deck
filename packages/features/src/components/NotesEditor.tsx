@@ -7,6 +7,9 @@ import { createRoom } from '@devdeck/realtime-client'
 import { useFeatureFlags } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'
 
+type Room = ReturnType<typeof createRoom>
+type YText = ReturnType<Room['getText']>
+
 interface Props {
   value: string
   onSave: (next: string) => Promise<void> | void
@@ -25,8 +28,8 @@ export function NotesEditor({ value, onSave, saving, roomID }: Props) {
   const [mode, setMode] = useState<'view' | 'edit'>('view')
   const [draft, setDraft] = useState(value)
   const [others, setOthers] = useState<number>(0)
-  const yTextRef = useRef<any>(null)
-  const roomRef = useRef<any>(null)
+  const yTextRef = useRef<YText | null>(null)
+  const roomRef = useRef<Room | null>(null)
 
   // Sync draft when external value changes (e.g., refetch)
   useEffect(() => {
@@ -66,6 +69,9 @@ export function NotesEditor({ value, onSave, saving, roomID }: Props) {
       awareness.off('change', handleAwareness)
       room.destroy()
     }
+    // Collaboration room lifecycle: connect/teardown only when the room
+    // identity or realtime mode changes, not on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomID, mode, features.realtime])
 
   function handleDraftChange(val: string) {

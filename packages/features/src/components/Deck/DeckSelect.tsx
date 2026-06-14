@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronDown, Plus, Search, X } from 'lucide-react'
 import { Button } from '@devdeck/ui'
 import {
@@ -126,6 +126,9 @@ export function DeckSelect({ value, onChange }: DeckSelectProps) {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
+    // handleSelect is intentionally not memoized; the listener re-binds on the
+    // state deps that actually affect key handling.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, selectedIndex, filteredDecks, showCreate, newDeckTitle])
 
   async function handleSelect(deck: Deck) {

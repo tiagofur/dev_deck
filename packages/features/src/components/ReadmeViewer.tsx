@@ -1,6 +1,7 @@
 import ReactMarkdown from 'react-markdown'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeRaw from 'rehype-raw'
+import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import { FileText } from 'lucide-react'
 import { useReadme } from '@devdeck/api-client'
@@ -56,7 +57,12 @@ export function ReadmeViewer({ repoId, source, repoUrl }: Props) {
       <div className="markdown">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeRaw, rehypeHighlight]}
+          // rehypeRaw re-enables raw HTML embedded in the README markdown, which
+          // is remote/untrusted (e.g. GitHub content). rehypeSanitize MUST run
+          // immediately after it to strip script/event-handler/iframe vectors
+          // before anything else processes the tree (XSS hardening). Highlight
+          // runs last so its added <span> classes survive sanitization.
+          rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeHighlight]}
           urlTransform={(url) => resolveUrl(rawBase, url)}
         >
           {data.content}

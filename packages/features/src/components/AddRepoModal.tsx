@@ -44,6 +44,7 @@ export function AddRepoModal({ open, onClose }: Props) {
   }
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- backdrop click-to-close overlay; closing is also reachable via the Close button and Escape
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-6
                  bg-accent-yellow/40 backdrop-blur-sm"
@@ -51,6 +52,7 @@ export function AddRepoModal({ open, onClose }: Props) {
     >
       <form
         onSubmit={onSubmit}
+        role="presentation"
         onClick={(e) => e.stopPropagation()}
         className="bg-bg-card border-5 border-ink shadow-hard-xl p-8 w-full max-w-xl"
       >

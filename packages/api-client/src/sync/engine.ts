@@ -4,8 +4,21 @@ import { getPendingOps, markSynced } from './queue';
 import { execLocal } from '../local-db/client';
 import { isLoggedIn } from '../auth/auth';
 
+/**
+ * A single change pulled from the backend delta feed. The payload is an
+ * arbitrary JSON blob whose shape depends on entity_type, so we read it
+ * defensively as a record of unknown values.
+ */
+interface RemoteDelta {
+    operation_id?: string;
+    operation: string;
+    entity_type: string;
+    entity_id: string;
+    payload?: Record<string, unknown> | null;
+}
+
 let syncInProgress = false;
-let syncTimeout: any = null;
+let syncTimeout: ReturnType<typeof setTimeout> | null = null;
 let backoffMs = 1000;
 const MAX_BACKOFF = 30000;
 const BASE_INTERVAL = 10000;
@@ -94,7 +107,7 @@ export async function syncNow() {
 
         // 2. PULL remote changes (Delta)
         const sinceParam = lastSyncAt ? `&since=${encodeURIComponent(lastSyncAt)}` : '';
-        const deltaRes = await api.get<{ operations: any[], now: string }>(
+        const deltaRes = await api.get<{ operations: RemoteDelta[], now: string }>(
             `/api/sync/delta?client_id=${clientId}${sinceParam}`
         );
 
@@ -131,7 +144,7 @@ export async function syncNow() {
     }
 }
 
-async function applyRemoteDeltas(ops: any[]) {
+async function applyRemoteDeltas(ops: RemoteDelta[]) {
     for (const op of ops) {
         try {
             if (op.entity_type === 'item') {
@@ -169,6 +182,7 @@ async function applyRemoteDeltas(ops: any[]) {
                     await execLocal('DELETE FROM runbook_steps WHERE runbook_id = ?', [op.entity_id]);
                 } else {
                     const rb = op.payload;
+                    if (!rb) continue;
                     await execLocal(
                         `INSERT INTO runbooks (id, user_id, org_id, item_id, title, description, created_at, updated_at)
                          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -181,6 +195,7 @@ async function applyRemoteDeltas(ops: any[]) {
                     await execLocal('DELETE FROM runbook_steps WHERE id = ?', [op.entity_id]);
                 } else {
                     const st = op.payload;
+                    if (!st) continue;
                     await execLocal(
                         `INSERT INTO runbook_steps (id, runbook_id, label, command, description, position, is_completed, created_at, updated_at)
                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -204,6 +219,7 @@ export async function registerCurrentDevice() {
     if (!isLoggedIn()) return;
 
     const { clientId } = getPreferences();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- window.electronAPI is an untyped external bridge injected by the desktop preload script
     const isElectron = typeof (window as any).electronAPI !== 'undefined';
     
     try {

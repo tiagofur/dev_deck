@@ -4,6 +4,7 @@ import { useTranslation } from '@devdeck/i18n'
 
 export function OnboardingChecklist() {
   const { t } = useTranslation()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- window.electronAPI is an untyped external bridge injected by the desktop preload script
   const isDesktop = typeof (window as any).electronAPI !== 'undefined'
 
   return (

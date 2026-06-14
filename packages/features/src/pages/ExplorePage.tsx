@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { BookOpen, ChevronLeft, Search, Sparkles, Star } from 'lucide-react'
+import { BookOpen, Search, Sparkles, Star } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useExploreCheatsheets, useFeatureFlags } from '@devdeck/api-client'
@@ -256,7 +256,15 @@ function ExploreCard({
   const color = cheatsheet.color ?? '#888'
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick()
+        }
+      }}
       className="bg-bg-card border-3 border-ink shadow-hard p-6 text-left cursor-pointer
                  hover:-translate-x-1 hover:-translate-y-1 hover:shadow-hard-lg
                  active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard-sm

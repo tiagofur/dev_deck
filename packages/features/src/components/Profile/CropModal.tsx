@@ -25,6 +25,9 @@ export function CropModal({ imageSrc, onClose, onCrop, isSubmitting }: CropModal
       setOffset({ x: 0, y: 0 })
       draw()
     }
+    // Re-init the canvas only when the source image changes; draw() is a
+    // stable-enough local helper recreated each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imageSrc])
 
   // Draw on canvas whenever zoom, offset, or image changes
@@ -47,8 +50,8 @@ export function CropModal({ imageSrc, onClose, onCrop, isSubmitting }: CropModal
     ctx.translate(offset.x, offset.y)
 
     const imgRatio = img.width / img.height
-    let drawWidth = canvas.width
-    let drawHeight = canvas.height
+    let drawWidth: number
+    let drawHeight: number
 
     if (imgRatio > 1) {
       drawHeight = canvas.height
@@ -69,6 +72,8 @@ export function CropModal({ imageSrc, onClose, onCrop, isSubmitting }: CropModal
 
   useEffect(() => {
     draw()
+    // Redraw when zoom/offset change; draw() reads the latest refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [zoom, offset])
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {

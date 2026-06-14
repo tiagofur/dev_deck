@@ -132,8 +132,17 @@ export function ItemCard({ item, onClick }: Props) {
       : null
 
   return (
-    <article
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={item.title || t('common.untitled')}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault()
+          onClick?.()
+        }
+      }}
       className="group bg-bg-card border-3 border-ink shadow-hard cursor-pointer
                  transition-all duration-150 ease-out
                  hover:-translate-x-1 hover:-translate-y-1 hover:shadow-hard-lg
@@ -177,6 +186,7 @@ export function ItemCard({ item, onClick }: Props) {
 
           {shareMenuOpen && (
             <div
+              role="presentation"
               onClick={(e) => e.stopPropagation()}
               className="absolute right-0 top-6 z-30 w-72 font-mono text-[11px]"
             >
@@ -298,7 +308,7 @@ export function ItemCard({ item, onClick }: Props) {
           </div>
         )}
       </div>
-    </article>
+    </div>
   )
 }
 
