@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": ["vite/client"],
+    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
     "paths": {
       "@devdeck/ui": ["../../packages/ui/src/index.ts"],
       "@devdeck/ui/*": ["../../packages/ui/*"],

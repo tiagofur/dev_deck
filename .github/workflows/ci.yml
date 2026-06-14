@@ -131,6 +131,9 @@ jobs:
       - name: Unit tests (ui)
         run: pnpm -F @devdeck/ui test
 
+      - name: Unit tests (web)
+        run: pnpm -F @devdeck/web test
+
       - name: Build web
         run: pnpm -F @devdeck/web build
 
