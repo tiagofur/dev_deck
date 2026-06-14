@@ -30,7 +30,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push API image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: ./backend
           push: true
@@ -39,7 +39,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_API }}:${{ github.sha }}
 
       - name: Build and push Web image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./apps/web/Dockerfile
