@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { registerUser } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'
 
 export function RegisterPage() {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -31,8 +30,8 @@ export function RegisterPage() {
     try {
       await registerUser(email, password, inviteCode)
       setSuccess(true)
-    } catch (err: any) {
-      setError(err.message || t('auth.register_error'))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('auth.register_error'))
     } finally {
       setLoading(false)
     }

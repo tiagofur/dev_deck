@@ -38,6 +38,17 @@ interface ApiTesterResponse {
   body: string
 }
 
+// Only ever hand http(s) URLs to the OS browser. Blocks file://, and other
+// schemes that could be abused if a malicious URL reaches the open handler.
+function isSafeExternalURL(rawURL: string): boolean {
+  try {
+    const { protocol } = new URL(rawURL)
+    return protocol === 'http:' || protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 let mainWindow: BrowserWindow | null = null
 let pendingAuthCallbackURL: string | null = null
 let shortcutStatus: Record<string, { accelerator: string; registered: boolean }> = {}
@@ -117,7 +128,7 @@ function registerIpcHandlers(): void {
   })
 
   ipcMain.on('auth:open-external', (_event, url: string) => {
-    void shell.openExternal(url)
+    if (isSafeExternalURL(url)) void shell.openExternal(url)
   })
 
   ipcMain.on('auth:get-pending-url', (event) => {
@@ -296,10 +307,23 @@ function createWindow(): void {
     }
   })
 
-  // External links → system browser, never inside the app.
+  // External links → system browser, never inside the app. Validate the
+  // scheme so only http(s) is handed to the OS.
   win.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url)
+    if (isSafeExternalURL(url)) shell.openExternal(url)
     return { action: 'deny' }
+  })
+
+  // Block the renderer from navigating the top frame away from the app
+  // (defense-in-depth against any injected content). In-app routing uses a
+  // HashRouter, so legitimate navigation never triggers this.
+  win.webContents.on('will-navigate', (event, url) => {
+    const devURL = process.env.ELECTRON_RENDERER_URL
+    const isAppURL = url.startsWith('file://') || (devURL ? url.startsWith(devURL) : false)
+    if (!isAppURL) {
+      event.preventDefault()
+      if (isSafeExternalURL(url)) void shell.openExternal(url)
+    }
   })
 
   if (process.env.ELECTRON_RENDERER_URL) {

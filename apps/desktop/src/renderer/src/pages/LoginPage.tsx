@@ -14,7 +14,7 @@ export function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [step, setStep] = useState<1 | 2>(1)
-  const [loginType, setLoginType] = useState<'password' | 'saml'>('password')
+  const [, setLoginType] = useState<'password' | 'saml'>('password')
   const [loginError, setLoginError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -52,8 +52,8 @@ export function LoginPage() {
       }
       setLoginType(res.type)
       setStep(2)
-    } catch (err: any) {
-      setLoginError(err.message || t('auth.validate_email_error'))
+    } catch (err) {
+      setLoginError(err instanceof Error ? err.message : t('auth.validate_email_error'))
     } finally {
       setLoading(false)
     }
@@ -66,8 +66,8 @@ export function LoginPage() {
     try {
       await loginLocal(email, password)
       navigate('/', { replace: true })
-    } catch (err: any) {
-      setLoginError(err.message || t('auth.login_error'))
+    } catch (err) {
+      setLoginError(err instanceof Error ? err.message : t('auth.login_error'))
     } finally {
       setLoading(false)
     }

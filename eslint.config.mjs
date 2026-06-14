@@ -20,8 +20,7 @@ export default tseslint.config(
       '**/*.cjs',
       '**/vite-env.d.ts',
       '**/env.d.ts',
-      // Out of web scope — these have their own pipelines.
-      'apps/desktop/**',
+      // Out of frontend lint scope — these have their own pipelines.
       'apps/extension/**',
       'apps/landing/**',
       'backend/**',
