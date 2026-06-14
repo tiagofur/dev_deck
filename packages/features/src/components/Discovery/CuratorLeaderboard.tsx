@@ -26,9 +26,17 @@ export function CuratorLeaderboard() {
       ) : rankings.length > 0 ? (
         <div className="space-y-3">
            {rankings.map((curator, idx) => (
-             <div 
-                key={curator.id} 
+             <div
+                key={curator.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => navigate(`/u/${curator.username}`)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    navigate(`/u/${curator.username}`)
+                  }
+                }}
                 className="bg-bg-card border-3 border-ink p-4 shadow-hard flex items-center gap-4 group cursor-pointer hover:-translate-y-1 transition-all"
               >
                 <div className={`w-10 h-10 flex items-center justify-center border-2 border-ink font-display font-black text-sm shadow-hard-sm

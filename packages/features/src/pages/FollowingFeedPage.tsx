@@ -42,7 +42,16 @@ export function FollowingFeedPage() {
             {events.map((e: FeedEvent) => (
               <div key={e.item.id} className="bg-bg-card border-3 border-ink p-5 shadow-hard flex gap-5 group hover:-translate-y-0.5 transition-all">
                 <div className="w-12 h-12 rounded-full border-3 border-ink bg-white p-1 overflow-hidden shrink-0 shadow-hard-sm cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={e.curator_name}
                   onClick={() => navigate(`/u/${e.curator_name}`)}
+                  onKeyDown={(ev) => {
+                    if (ev.key === 'Enter' || ev.key === ' ') {
+                      ev.preventDefault()
+                      navigate(`/u/${e.curator_name}`)
+                    }
+                  }}
                 >
                   {e.curator_avatar_url ? (
                     <img src={e.curator_avatar_url} alt={e.curator_name} className="w-full h-full object-cover" />
@@ -55,8 +64,16 @@ export function FollowingFeedPage() {
 
                 <div className="flex-1 min-w-0">
                    <div className="flex items-center justify-between mb-2">
-                      <span 
+                      <span
+                        role="button"
+                        tabIndex={0}
                         onClick={() => navigate(`/u/${e.curator_name}`)}
+                        onKeyDown={(ev) => {
+                          if (ev.key === 'Enter' || ev.key === ' ') {
+                            ev.preventDefault()
+                            navigate(`/u/${e.curator_name}`)
+                          }
+                        }}
                         className="font-display font-black text-[10px] uppercase tracking-wider text-accent-pink hover:underline cursor-pointer"
                       >
                         @{e.curator_name}

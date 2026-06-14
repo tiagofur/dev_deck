@@ -124,7 +124,16 @@ export function ProfilePage() {
           <div className="lg:col-span-1 space-y-8">
             <section className="bg-bg-card border-3 border-ink p-6 shadow-hard flex flex-col items-center text-center relative group">
               <div
+                role="button"
+                tabIndex={0}
+                aria-label={t('profile.edit_profile', 'Editar Perfil')}
                 onClick={() => setIsModalOpen(true)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    setIsModalOpen(true)
+                  }
+                }}
                 className="w-28 h-28 border-4 border-ink shadow-hard overflow-hidden bg-accent-yellow rounded-none shrink-0 relative cursor-pointer group-hover:scale-105 transition-transform"
               >
                 <UserAvatar

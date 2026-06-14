@@ -51,6 +51,7 @@ export function UserAvatar({
 
   if (activeSrc) {
     return (
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- onError is a media event, not a user interaction
       <img
         src={activeSrc}
         alt={alt}

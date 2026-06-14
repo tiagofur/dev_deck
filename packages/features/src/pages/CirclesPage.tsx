@@ -157,7 +157,15 @@ export function CirclesPage() {
                 {circles.map((c) => (
                   <div
                     key={c.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => navigate(`/circles/${c.id}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        navigate(`/circles/${c.id}`)
+                      }
+                    }}
                     className="bg-bg-card border-3 border-ink shadow-hard p-5 flex flex-col justify-between cursor-pointer
                                hover:-translate-x-1 hover:-translate-y-1 hover:shadow-hard-lg
                                active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard-sm
@@ -251,12 +259,14 @@ export function CirclesPage() {
 
       {/* Create Circle Modal */}
       {showCreateModal && (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- backdrop click-to-close overlay; closing is also reachable via the Close button and Escape
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-ink/40"
           onClick={() => setShowCreateModal(false)}
         >
           <form
             onSubmit={handleCreate}
+            role="presentation"
             onClick={(e) => e.stopPropagation()}
             className="bg-bg-card border-5 border-ink shadow-hard-xl p-7 w-full max-w-lg"
           >

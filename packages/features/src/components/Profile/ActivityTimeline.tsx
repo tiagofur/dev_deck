@@ -34,9 +34,16 @@ export function ActivityTimeline({ items, onNavigate }: ActivityTimelineProps) {
                     {new Date(item.created_at).toLocaleDateString()}
                   </span>
                 </div>
+                {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- heading doubles as a navigation trigger; the entry below also links to the destination */}
                 <h4
                   className="font-display font-bold text-sm uppercase mt-2 hover:text-accent-pink cursor-pointer"
                   onClick={() => onNavigate(item.item_type === 'repo' ? `/repo/${item.id}` : `/items/${item.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      onNavigate(item.item_type === 'repo' ? `/repo/${item.id}` : `/items/${item.id}`)
+                    }
+                  }}
                 >
                   {item.title}
                 </h4>

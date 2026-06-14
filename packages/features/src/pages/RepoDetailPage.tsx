@@ -258,6 +258,7 @@ export function RepoDetailPage() {
           <section className="bg-bg-card border-3 border-ink shadow-hard p-6">
             <div className="flex items-start gap-4">
               {repo.avatar_url && !heroImgError ? (
+                // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- onError is a media event, not a user interaction
                 <img
                   src={repo.avatar_url}
                   alt=""

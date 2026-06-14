@@ -46,10 +46,17 @@ export function Topbar({
             <WorkspaceSwitcher />
           </div>
 
+          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- heading doubles as a clickable logo; primary navigation is provided elsewhere */}
           <h1
             aria-label="DevDeck"
             className="lg:hidden shrink-0 cursor-pointer whitespace-nowrap font-display text-lg font-black uppercase tracking-tight sm:text-xl"
             onClick={() => navigate('/items')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                navigate('/items')
+              }
+            }}
           >
             Dev<span className="border-2 border-ink bg-accent-pink px-1 ml-1 select-none">Deck</span>
           </h1>

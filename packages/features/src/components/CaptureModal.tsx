@@ -275,6 +275,7 @@ export function CaptureModal({
   const laneKey = `capture.lanes.${activeLaneId}` as const
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- backdrop click-to-close overlay; closing is also reachable via the Close button and Escape
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-accent-cyan/40 backdrop-blur-sm"
       onClick={onClose}
@@ -282,6 +283,7 @@ export function CaptureModal({
       <form
         ref={formRef}
         onSubmit={onSubmit}
+        role="presentation"
         onKeyDown={submitFromShortcut}
         onClick={(e) => e.stopPropagation()}
         className="bg-bg-card border-5 border-ink shadow-hard-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col"
@@ -348,6 +350,7 @@ export function CaptureModal({
                       />
                     </label>
 
+                    {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- drag-and-drop drop zone; the nested input/textarea provides keyboard access */}
                     <label
                       className={`block md:col-span-2 ${isDragging ? 'bg-accent-yellow/30' : ''}`}
                       onDragOver={(e) => {
