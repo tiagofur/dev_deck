@@ -55,10 +55,9 @@ export function Mascot() {
     return raw
   }
 
-  // Allow opting out from Settings
-  if (!prefs.mascotEnabled) return null
-
   // Auto-show a bubble briefly when mood changes to a "noisy" state.
+  // NOTE: this effect must run on every render (hooks can't be called
+  // conditionally), so the opt-out early return lives *after* it below.
   useEffect(() => {
     if (mood === 'celebrating' || mood === 'sleeping') {
       setBubble(pickMessage(mood))
@@ -67,6 +66,9 @@ export function Mascot() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mood, topLang])
+
+  // Allow opting out from Settings (after hooks, per rules-of-hooks).
+  if (!prefs.mascotEnabled) return null
 
   function speak() {
     setBubble(pickMessage(mood))

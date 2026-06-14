@@ -89,7 +89,7 @@ jobs:
         run: /tmp/devdeck --help
 
   workspace:
-    name: Workspace (pnpm typecheck)
+    name: Workspace (lint + typecheck + unit tests)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -107,6 +107,9 @@ jobs:
       - name: Install workspace
         run: pnpm install --frozen-lockfile
 
+      - name: Lint (ESLint)
+        run: pnpm lint
+
       - name: Typecheck api-client
         run: pnpm -F @devdeck/api-client typecheck
 
@@ -118,6 +121,18 @@ jobs:
 
       - name: Typecheck web
         run: pnpm -F @devdeck/web typecheck
+
+      - name: Unit tests (api-client)
+        run: pnpm -F @devdeck/api-client test
+
+      - name: Unit tests (features)
+        run: pnpm -F @devdeck/features test
+
+      - name: Unit tests (ui)
+        run: pnpm -F @devdeck/ui test
+
+      - name: Build web
+        run: pnpm -F @devdeck/web build
 
   desktop:
     name: Desktop (Vitest + typecheck + build)

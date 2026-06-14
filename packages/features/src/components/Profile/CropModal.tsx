@@ -47,8 +47,8 @@ export function CropModal({ imageSrc, onClose, onCrop, isSubmitting }: CropModal
     ctx.translate(offset.x, offset.y)
 
     const imgRatio = img.width / img.height
-    let drawWidth = canvas.width
-    let drawHeight = canvas.height
+    let drawWidth: number
+    let drawHeight: number
 
     if (imgRatio > 1) {
       drawHeight = canvas.height

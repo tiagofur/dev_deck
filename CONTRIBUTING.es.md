@@ -39,13 +39,18 @@ pnpm dev:web                      # atajo desde la raíz
 # el dev server escucha en http://localhost:5173 y proxea /api → :8080
 ```
 
-### Tests y typecheck
+### Lint, tests y typecheck
 
 ```bash
+pnpm lint                         # ESLint sobre el frontend web (apps/web + packages)
+pnpm format                       # Prettier --write en todo el repo
 pnpm typecheck                    # tsc --noEmit en los 5 packages
 pnpm test                         # vitest run en los 4 que tienen tests
 pnpm -F @devdeck/desktop test:e2e # Playwright flows del Electron
 ```
+
+`pnpm lint` debe reportar **0 errores** para mergear (los warnings son un backlog
+aceptado y decreciente — resolver uno es una gran primera contribución).
 
 ### Monorepo: cómo agregar código
 
@@ -69,7 +74,7 @@ Ver [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-work
 - Tests al lado del código (`foo_test.go`).
 
 ### TypeScript
-- ESLint + Prettier (configs en cada app). `pnpm lint` limpio.
+- ESLint + Prettier (config flat compartida en la raíz: `eslint.config.mjs`, `.prettierrc.json`). `pnpm lint` debe quedar con 0 errores.
 - `strict: true` en `tsconfig.base.json` (heredado por todos los packages).
 - Components funcionales, hooks. Nada de class components nuevos.
 - Imports absolutos via `@devdeck/ui`, `@devdeck/api-client`, `@devdeck/features` cuando cruzan package; `@/` solo para paths internos del app (`apps/desktop/src/renderer/src/`).

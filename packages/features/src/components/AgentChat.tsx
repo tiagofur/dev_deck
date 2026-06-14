@@ -56,7 +56,7 @@ export function AgentChat({ initialQuery }: Props) {
     if (!text.trim() && !currentHistory) return
     setLoading(true)
 
-    let nextHistory = currentHistory || [...messages]
+    const nextHistory = currentHistory || [...messages]
     if (!currentHistory && text !== initialQuery) {
         nextHistory.push({ role: 'user', content: text })
         setMessages(nextHistory)

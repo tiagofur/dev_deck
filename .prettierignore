@@ -1,0 +1,9 @@
+**/dist/**
+**/build/**
+**/node_modules/**
+**/coverage/**
+pnpm-lock.yaml
+*.md
+backend/**
+cli/**
+**/*.wasm
