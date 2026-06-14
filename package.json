@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@commitlint/cli": "^19.6.0",
-    "@commitlint/config-conventional": "^19.6.0",
+    "@commitlint/config-conventional": "^21.0.2",
     "@eslint/js": "^10.0.1",
     "bumpp": "^9.4.0",
     "conventional-changelog-cli": "^2.2.2",
