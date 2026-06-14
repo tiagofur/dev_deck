@@ -36,6 +36,10 @@ type Config struct {
 	// hit it in normal use.
 	RateLimitPerMinute int  `env:"RATE_LIMIT_PER_MINUTE" envDefault:"120"`
 	RateLimitDisabled  bool `env:"RATE_LIMIT_DISABLED" envDefault:"false"`
+	// AuthRateLimitPerMinute caps requests per IP on the unauthenticated
+	// /auth endpoints (login, register, refresh). Kept low to blunt
+	// brute-force / credential-stuffing without affecting normal users.
+	AuthRateLimitPerMinute int `env:"AUTH_RATE_LIMIT_PER_MINUTE" envDefault:"15"`
 
 	// ─── Feature flags (June 2026 review, issue #123) ───
 	// Premature social/enterprise surfaces ship default-off so solo users

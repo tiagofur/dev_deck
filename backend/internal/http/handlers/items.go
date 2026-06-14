@@ -53,9 +53,18 @@ func (h *ItemsHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 	if v := q.Get("limit"); v != "" {
 		p.Limit, _ = strconv.Atoi(v)
+		if p.Limit > maxListLimit {
+			p.Limit = maxListLimit
+		}
+		if p.Limit < 0 {
+			p.Limit = 0
+		}
 	}
 	if v := q.Get("offset"); v != "" {
 		p.Offset, _ = strconv.Atoi(v)
+		if p.Offset < 0 {
+			p.Offset = 0
+		}
 	}
 
 	res, err := h.store.ListItems(r.Context(), p)

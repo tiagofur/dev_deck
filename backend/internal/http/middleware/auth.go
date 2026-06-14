@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"bytes"
 	"crypto/subtle"
 	"encoding/json"
 	"net/http"
@@ -93,7 +92,7 @@ func OptionalTokenAuth(cfg config.Config, authService *authservice.Service, st *
 				// Static token mode
 				if strings.HasPrefix(h, prefix) {
 					got := []byte(strings.TrimPrefix(h, prefix))
-					if bytes.Equal(got, expected) {
+					if subtle.ConstantTimeCompare(got, expected) == 1 {
 						testUserID := uuid.MustParse("00000000-0000-0000-0000-000000000001")
 						ctx := authctx.WithUserID(r.Context(), testUserID)
 						next.ServeHTTP(w, r.WithContext(ctx))

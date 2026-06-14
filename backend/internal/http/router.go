@@ -169,23 +169,40 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				r.Patch("/me/onboarding/complete", authH.CompleteOnboarding)
 			})
 
-			// OAuth/JWT only endpoints
+			// OAuth/JWT only endpoints. These are unauthenticated and must be
+			// rate-limited (per IP) to blunt brute-force / credential-stuffing
+			// against login/register/refresh.
 			if cfg.AuthMode == "jwt" {
-				r.Get("/providers", authH.Providers)
-				r.Post("/register", authH.Register)
-				r.Post("/login", authH.LoginLocal)
-				r.Post("/login-step1", samlH.LoginStep1)
-				r.Get("/github/login", authH.Login)
-				r.Get("/github/callback", authH.Callback)
+				r.Group(func(r chi.Router) {
+					if !cfg.RateLimitDisabled {
+						r.Use(httprate.Limit(
+							cfg.AuthRateLimitPerMinute,
+							1*time.Minute,
+							httprate.WithKeyFuncs(httprate.KeyByIP),
+							httprate.WithLimitHandler(func(w http.ResponseWriter, _ *http.Request) {
+								w.Header().Set("Content-Type", "application/json")
+								w.WriteHeader(http.StatusTooManyRequests)
+								_, _ = w.Write([]byte(`{"error":{"code":"RATE_LIMITED","message":"too many requests, slow down"}}`))
+							}),
+						))
+					}
 
-				r.Route("/saml", func(r chi.Router) {
-					r.Get("/metadata", samlH.Metadata)
-					r.Get("/login", samlH.Login)
-					r.Post("/acs", samlH.ACS)
+					r.Get("/providers", authH.Providers)
+					r.Post("/register", authH.Register)
+					r.Post("/login", authH.LoginLocal)
+					r.Post("/login-step1", samlH.LoginStep1)
+					r.Get("/github/login", authH.Login)
+					r.Get("/github/callback", authH.Callback)
+
+					r.Route("/saml", func(r chi.Router) {
+						r.Get("/metadata", samlH.Metadata)
+						r.Get("/login", samlH.Login)
+						r.Post("/acs", samlH.ACS)
+					})
+
+					r.Post("/refresh", authH.Refresh)
+					r.Post("/logout", authH.Logout)
 				})
-
-				r.Post("/refresh", authH.Refresh)
-				r.Post("/logout", authH.Logout)
 			}
 		})
 
