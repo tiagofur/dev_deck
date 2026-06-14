@@ -3,7 +3,7 @@ module devdeck-cli
 go 1.23
 
 require (
-	github.com/BurntSushi/toml v1.4.0
+	github.com/BurntSushi/toml v1.6.0
 	github.com/spf13/cobra v1.10.2
 	github.com/zalando/go-keyring v0.2.6
 )
