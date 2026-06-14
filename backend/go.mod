@@ -5,7 +5,7 @@ go 1.24
 toolchain go1.24.7
 
 require (
-	github.com/caarlos0/env/v11 v11.2.2
+	github.com/caarlos0/env/v11 v11.4.1
 	github.com/crewjam/saml v0.5.1
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-chi/cors v1.2.1
