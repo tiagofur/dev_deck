@@ -32,7 +32,7 @@ func (s *Store) ProcessSyncBatch(ctx context.Context, userID, clientID uuid.UUID
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	for _, op := range ops {
 		res := SyncOperationResult{OperationID: op.OperationID, Status: "success"}
@@ -72,7 +72,8 @@ func (s *Store) ProcessSyncBatch(ctx context.Context, userID, clientID uuid.UUID
 
 		// 4. Apply to entity (LWW)
 		if op.EntityType == "item" {
-			if op.Operation == "create" {
+			switch op.Operation {
+			case "create":
 				// Simplified create from payload
 				itRaw, _ := json.Marshal(op.Payload)
 				var it struct {
@@ -95,7 +96,7 @@ func (s *Store) ProcessSyncBatch(ctx context.Context, userID, clientID uuid.UUID
 					res.Status = "error"
 					res.Error = fmt.Sprintf("create item: %v", err)
 				}
-			} else if op.Operation == "update" {
+			case "update":
 				// LWW: Update only if client_updated_at > current updated_at
 				// We use a single query with a WHERE clause for atomic LWW
 				_, err = tx.Exec(ctx, `
@@ -115,7 +116,7 @@ func (s *Store) ProcessSyncBatch(ctx context.Context, userID, clientID uuid.UUID
 					res.Status = "error"
 					res.Error = fmt.Sprintf("update item: %v", err)
 				}
-			} else if op.Operation == "delete" {
+			case "delete":
 				_, err = tx.Exec(ctx, `
 					UPDATE items SET archived = true, updated_at = $3 WHERE id = $1 AND user_id = $2 AND updated_at < $3
 				`, op.EntityID, userID, op.ClientUpdatedAt)
@@ -232,4 +233,3 @@ func (s *Store) GetSyncDelta(ctx context.Context, userID, excludeClientID uuid.U
 	}
 	return out, rows.Err()
 }
-

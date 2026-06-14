@@ -93,7 +93,7 @@ func (s *Service) send(hook WebhookData, body []byte) {
 		slog.Warn("webhooks: delivery failed", "hook_id", hook.ID, "url", hook.URL, "err", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		slog.Warn("webhooks: target returned error", "hook_id", hook.ID, "status", resp.StatusCode)

@@ -21,11 +21,11 @@ type PreviewInput struct {
 }
 
 type PreviewResponse struct {
-	URL         string  `json:"url,omitempty"`
-	Title       string  `json:"title,omitempty"`
-	Description string  `json:"description,omitempty"`
-	Image       string  `json:"image,omitempty"`
-	Type        string  `json:"type"`
+	URL         string `json:"url,omitempty"`
+	Title       string `json:"title,omitempty"`
+	Description string `json:"description,omitempty"`
+	Image       string `json:"image,omitempty"`
+	Type        string `json:"type"`
 }
 
 func NewPreviewHandler(en *enricher.Service) *PreviewHandler {

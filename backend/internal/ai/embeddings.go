@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	openAIEmbeddingsURL = "https://api.openai.com/v1/embeddings"
+	openAIEmbeddingsURL    = "https://api.openai.com/v1/embeddings"
 	dashScopeEmbeddingsURL = "https://dashscope.aliyuncs.com/api/v1/services/embeddings/text-embedding"
 )
 
@@ -41,7 +41,7 @@ func NewOpenAIEmbedder(apiKey string) *openAIEmbedder {
 	return &openAIEmbedder{
 		apiKey: strings.TrimSpace(apiKey),
 		dim:    1536, // text-embedding-3-small
-		httpc: &http.Client{Timeout: 30 * time.Second},
+		httpc:  &http.Client{Timeout: 30 * time.Second},
 	}
 }
 
@@ -77,7 +77,7 @@ func (e *openAIEmbedder) Embed(ctx context.Context, text string) ([]float32, err
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	raw, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -117,7 +117,7 @@ func NewQwenEmbedder(apiKey string) *qwenEmbedder {
 	return &qwenEmbedder{
 		apiKey: strings.TrimSpace(apiKey),
 		dim:    1024, // qwen-text-embedding
-		httpc: &http.Client{Timeout: 30 * time.Second},
+		httpc:  &http.Client{Timeout: 30 * time.Second},
 	}
 }
 
@@ -130,15 +130,15 @@ func (e *qwenEmbedder) Dim() int {
 }
 
 type qwenEmbedRequest struct {
-	Model   string `json:"model"`
-	Input   string `json:"input"`
+	Model    string `json:"model"`
+	Input    string `json:"input"`
 	TextType string `json:"text_type"` // "query" or "document"
 }
 
 type qwenEmbedResponse struct {
-	Code     string `json:"code"`
-	Message  string `json:"message"`
-	Output   struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+	Output  struct {
 		Embeddings []struct {
 			TextIndex int       `json:"text_index"`
 			Embedding []float32 `json:"embedding"`
@@ -152,8 +152,8 @@ func (e *qwenEmbedder) Embed(ctx context.Context, text string) ([]float32, error
 	}
 
 	body, err := json.Marshal(qwenEmbedRequest{
-		Model:   "text-embedding-3",
-		Input:   text,
+		Model:    "text-embedding-3",
+		Input:    text,
 		TextType: "document",
 	})
 	if err != nil {
@@ -172,7 +172,7 @@ func (e *qwenEmbedder) Embed(ctx context.Context, text string) ([]float32, error
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	raw, err := io.ReadAll(resp.Body)
 	if err != nil {

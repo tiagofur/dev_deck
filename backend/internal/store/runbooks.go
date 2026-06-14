@@ -8,14 +8,14 @@ import (
 )
 
 type Runbook struct {
-	ID          uuid.UUID      `json:"id"`
-	UserID      uuid.UUID      `json:"user_id"`
-	ItemID      uuid.UUID      `json:"item_id"`
-	Title       string         `json:"title"`
-	Description *string        `json:"description,omitempty"`
-	Steps       []RunbookStep  `json:"steps,omitempty"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
+	ID          uuid.UUID     `json:"id"`
+	UserID      uuid.UUID     `json:"user_id"`
+	ItemID      uuid.UUID     `json:"item_id"`
+	Title       string        `json:"title"`
+	Description *string       `json:"description,omitempty"`
+	Steps       []RunbookStep `json:"steps,omitempty"`
+	CreatedAt   time.Time     `json:"created_at"`
+	UpdatedAt   time.Time     `json:"updated_at"`
 }
 
 type RunbookStep struct {
@@ -90,14 +90,14 @@ func (s *Store) ListRunbooksByItem(ctx context.Context, itemID uuid.UUID) ([]Run
 		if err := rows.Scan(&rb.ID, &rb.UserID, &rb.ItemID, &rb.Title, &rb.Description, &rb.CreatedAt, &rb.UpdatedAt); err != nil {
 			return nil, err
 		}
-		
+
 		// Load steps for each runbook
 		steps, err := s.listRunbookSteps(ctx, rb.ID)
 		if err != nil {
 			return nil, err
 		}
 		rb.Steps = steps
-		
+
 		runbooks = append(runbooks, rb)
 	}
 	return runbooks, rows.Err()
@@ -210,7 +210,7 @@ func (s *Store) ReorderRunbookSteps(ctx context.Context, runbookID uuid.UUID, st
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	for i, id := range stepIDs {
 		_, err := tx.Exec(ctx, "UPDATE runbook_steps SET position = $1 WHERE id = $2 AND runbook_id = $3", i, id, runbookID)

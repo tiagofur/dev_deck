@@ -69,6 +69,8 @@ Ver [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-work
 ### Go
 - `gofmt` + `goimports`. El CI falla si el diff no está formateado.
 - `go vet ./...` limpio.
+- `golangci-lint run ./...` en `backend/` con **0 issues** (config en
+  `backend/.golangci.yml`: linters estándar + `gosec`). El CI lo corre.
 - Packages por dominio, no por capa. Ya está así, seguí el patrón.
 - Errors: `fmt.Errorf("contexto: %w", err)`. Nada de `errors.New` sin wrap cuando hay un error previo.
 - Tests al lado del código (`foo_test.go`).

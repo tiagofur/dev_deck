@@ -125,6 +125,6 @@ func (h *SCIMHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	// We need a Store method to remove org member.
 	_ = orgID
 	_ = userID
-	
+
 	w.WriteHeader(http.StatusNoContent)
 }

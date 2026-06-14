@@ -101,14 +101,10 @@ func (heuristicProvider) SuggestTags(_ context.Context, in Input) ([]string, err
 	}
 
 	// 2. Ecosistema por URL
-	for _, tag := range hostAndEcosystemTags(in.URL) {
-		tags = append(tags, tag)
-	}
+	tags = append(tags, hostAndEcosystemTags(in.URL)...)
 
 	// 3. Mapeo dinámico de palabras clave tecnológicas
-	for _, tag := range techKeywordTags(in.Title, in.Description) {
-		tags = append(tags, tag)
-	}
+	tags = append(tags, techKeywordTags(in.Title, in.Description)...)
 
 	// 4. Mapeos tradicionales basados en tipo de item
 	switch in.Type {
@@ -147,9 +143,7 @@ func (heuristicProvider) SuggestTags(_ context.Context, in Input) ([]string, err
 	}
 
 	// 5. Palabras clave adicionales del título
-	for _, word := range keywordTags(in.Type, in.Title) {
-		tags = append(tags, word)
-	}
+	tags = append(tags, keywordTags(in.Type, in.Title)...)
 
 	return uniqueTags(tags), nil
 }
@@ -196,24 +190,24 @@ func hostAndEcosystemTags(rawURL *string) []string {
 	var tags []string
 	host := strings.ToLower(strings.TrimPrefix(u.Hostname(), "www."))
 
-	switch {
-	case host == "github.com":
+	switch host {
+	case "github.com":
 		tags = append(tags, "github")
-	case host == "npmjs.com" || host == "yarnpkg.com":
+	case "npmjs.com", "yarnpkg.com":
 		tags = append(tags, "npm", "node", "javascript")
-	case host == "crates.io":
+	case "crates.io":
 		tags = append(tags, "rust", "cargo")
-	case host == "pypi.org" || host == "pypi.python.org":
+	case "pypi.org", "pypi.python.org":
 		tags = append(tags, "python", "pip")
-	case host == "pkg.go.dev":
+	case "pkg.go.dev":
 		tags = append(tags, "go", "golang")
-	case host == "hub.docker.com":
+	case "hub.docker.com":
 		tags = append(tags, "docker", "containers")
-	case host == "aws.amazon.com":
+	case "aws.amazon.com":
 		tags = append(tags, "aws", "cloud")
-	case host == "cloud.google.com":
+	case "cloud.google.com":
 		tags = append(tags, "gcp", "cloud")
-	case host == "kubernetes.io":
+	case "kubernetes.io":
 		tags = append(tags, "kubernetes", "k8s")
 	default:
 		parts := strings.Split(host, ".")
@@ -359,7 +353,7 @@ func keywordTags(itemType items.Type, title string) []string {
 		return nil
 	}
 	words := strings.FieldsFunc(strings.ToLower(title), func(r rune) bool {
-		return !(r >= 'a' && r <= 'z') && !(r >= '0' && r <= '9')
+		return (r < 'a' || r > 'z') && (r < '0' || r > '9')
 	})
 	stop := map[string]bool{
 		"the": true, "and": true, "for": true, "with": true, "from": true,

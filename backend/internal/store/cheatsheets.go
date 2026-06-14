@@ -2,12 +2,11 @@ package store
 
 import (
 	"context"
+	"devdeck/internal/domain/cheatsheets"
 	"errors"
 	"fmt"
 	"strings"
 	"time"
-	"devdeck/internal/domain/cheatsheets"
-	domainitems "devdeck/internal/domain/items"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -218,13 +217,12 @@ func (s *Store) ExploreCheatsheets(ctx context.Context, category string, officia
 	idx := 1
 
 	if officialOnly {
-		q += fmt.Sprintf(` AND is_official = TRUE`)
+		q += ` AND is_official = TRUE`
 	}
 
 	if category != "" {
 		q += fmt.Sprintf(` AND category = $%d`, idx)
 		args = append(args, category)
-		idx++
 	}
 
 	q += ` ORDER BY is_official DESC, fork_count DESC, title ASC LIMIT 50`
@@ -309,7 +307,7 @@ func (s *Store) StarCheatsheet(ctx context.Context, id uuid.UUID) error {
 		return errors.New("unauthorized")
 	}
 
-	_, err := s.Writer().Exec(ctx, `
+	_, _ = s.Writer().Exec(ctx, `
 		INSERT INTO cheatsheet_stars (user_id, cheatsheet_id)
 		VALUES ($1, $2)
 		ON CONFLICT (user_id, cheatsheet_id) DO DELETE
@@ -317,6 +315,7 @@ func (s *Store) StarCheatsheet(ctx context.Context, id uuid.UUID) error {
 	// Wait, ON CONFLICT DO DELETE is not standard PG.
 
 	// Better toggle logic:
+	var err error
 	var exists bool
 	_ = s.Reader().QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM cheatsheet_stars WHERE user_id = $1 AND cheatsheet_id = $2)`, userID, id).Scan(&exists)
 
@@ -566,8 +565,8 @@ func (s *Store) Search(ctx context.Context, mode SearchMode, query string, query
 	}
 	for _, r := range itemResults {
 		out = append(out, SearchResult{
-			Type:        "item",
-			ID:          r.ID.String(),
+			Type:     "item",
+			ID:       r.ID.String(),
 			Title:    r.Title,
 			Subtitle: string(r.Type) + " · " + r.WhySaved,
 			Extra:    derefStr(r.URL),
@@ -683,25 +682,6 @@ func (s *Store) Search(ctx context.Context, mode SearchMode, query string, query
 	rows.Close()
 
 	return out, nil
-}
-
-func itemSearchSubtitle(itemType domainitems.Type, why, summary, desc string) string {
-	parts := []string{string(itemType)}
-	if why != "" {
-		parts = append(parts, why)
-	} else if summary != "" {
-		parts = append(parts, summary)
-	} else if desc != "" {
-		parts = append(parts, desc)
-	}
-	return strings.Join(parts, " · ")
-}
-
-func itemSearchExtra(url *string, notes string) string {
-	if url != nil && *url != "" {
-		return *url
-	}
-	return notes
 }
 
 // ───── Seed helpers ─────

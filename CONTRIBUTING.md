@@ -110,6 +110,9 @@ We use internal aliases: `@devdeck/ui`, `@devdeck/api-client`, and `@devdeck/fea
 
 ### Go
 - Use `gofmt` and `goimports`. The CI will fail if formatting is off.
+- Run `golangci-lint run ./...` in `backend/` before pushing — CI runs it
+  (config in `backend/.golangci.yml`; standard linters + `gosec`). It must
+  report **0 issues**.
 - Packages should be organized by **Domain**, not by layer.
 - Errors: Always wrap errors with context using `fmt.Errorf("context: %w", err)`.
 

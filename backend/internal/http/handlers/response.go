@@ -6,6 +6,10 @@ import (
 	"net/http"
 )
 
+// maxListLimit caps user-supplied pagination "limit" values so a single
+// request can't ask for an unbounded number of rows (memory-exhaustion DoS).
+const maxListLimit = 500
+
 type errBody struct {
 	Error errPayload `json:"error"`
 }
@@ -28,18 +32,8 @@ func writeError(w http.ResponseWriter, status int, code, msg string) {
 }
 
 func writeInternal(w http.ResponseWriter, err error) {
+	// Log the real error server-side; never leak internal/DB error text
+	// (constraint names, query fragments) to the client.
 	slog.Error("internal error", "err", err)
-	// Include actual error for debugging
-	writeJSON(w, http.StatusInternalServerError, map[string]any{
-		"error": map[string]string{
-			"code":    "INTERNAL",
-			"message": "internal server error: " + err.Error(),
-			"detail":  err.Error(),
-		},
-	})
-}
-
-func decodeJSON(r *http.Request, v any) error {
-	defer r.Body.Close()
-	return json.NewDecoder(r.Body).Decode(v)
+	writeError(w, http.StatusInternalServerError, "INTERNAL", "internal server error")
 }

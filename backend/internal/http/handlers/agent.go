@@ -48,7 +48,7 @@ func (h *AgentHandler) Chat(w http.ResponseWriter, r *http.Request) {
 
 	sendEvent := func(data any) {
 		buf, _ := json.Marshal(data)
-		fmt.Fprintf(w, "data: %s\n\n", buf)
+		_, _ = fmt.Fprintf(w, "data: %s\n\n", buf)
 		flusher.Flush()
 	}
 

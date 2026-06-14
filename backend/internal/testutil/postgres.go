@@ -136,8 +136,10 @@ func preflightDocker(_ context.Context) error {
 		}
 	}
 	for _, p := range candidates {
+		// #nosec G703 -- p comes from a fixed candidate list of well-known docker socket paths, not external input.
 		if _, err := os.Stat(p); err == nil {
 			// Try a quick connect to make sure the daemon is actually up.
+			// #nosec G704 -- p is a fixed local unix socket path, not a user/network-controlled address.
 			conn, derr := net.DialTimeout("unix", p, 2*time.Second)
 			if derr == nil {
 				_ = conn.Close()

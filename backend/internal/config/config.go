@@ -11,16 +11,16 @@ import (
 // Config holds all environment-driven configuration for the API.
 // Wave 1 only uses the `token` AuthMode. JWT/OAuth fields land in Wave 4.
 type Config struct {
-	Port           string `env:"PORT" envDefault:"8080"`
-	DBURL          string `env:"DB_URL,required"`
-	DBURLReadOnly  string `env:"DB_READ_ONLY_URL"`
-	RedisURL       string `env:"REDIS_URL"`
-	AppRegion      string `env:"APP_REGION" envDefault:"us-east"`
-	AuthMode       string `env:"AUTH_MODE" envDefault:"token"`
-	APIToken    string `env:"API_TOKEN"`
-	GithubToken string `env:"GITHUB_TOKEN"`
-	LogLevel    string `env:"LOG_LEVEL" envDefault:"info"`
-	CORSOrigins string `env:"CORS_ORIGINS" envDefault:"app://.,http://localhost:5173"`
+	Port          string `env:"PORT" envDefault:"8080"`
+	DBURL         string `env:"DB_URL,required"`
+	DBURLReadOnly string `env:"DB_READ_ONLY_URL"`
+	RedisURL      string `env:"REDIS_URL"`
+	AppRegion     string `env:"APP_REGION" envDefault:"us-east"`
+	AuthMode      string `env:"AUTH_MODE" envDefault:"token"`
+	APIToken      string `env:"API_TOKEN"`
+	GithubToken   string `env:"GITHUB_TOKEN"`
+	LogLevel      string `env:"LOG_LEVEL" envDefault:"info"`
+	CORSOrigins   string `env:"CORS_ORIGINS" envDefault:"app://.,http://localhost:5173"`
 
 	// RefreshIntervalHours: a repo whose last_fetched_at is older than this
 	// gets re-enriched by the cron worker. Default 168h = 7 days.
@@ -36,6 +36,10 @@ type Config struct {
 	// hit it in normal use.
 	RateLimitPerMinute int  `env:"RATE_LIMIT_PER_MINUTE" envDefault:"120"`
 	RateLimitDisabled  bool `env:"RATE_LIMIT_DISABLED" envDefault:"false"`
+	// AuthRateLimitPerMinute caps requests per IP on the unauthenticated
+	// /auth endpoints (login, register, refresh). Kept low to blunt
+	// brute-force / credential-stuffing without affecting normal users.
+	AuthRateLimitPerMinute int `env:"AUTH_RATE_LIMIT_PER_MINUTE" envDefault:"15"`
 
 	// ─── Feature flags (June 2026 review, issue #123) ───
 	// Premature social/enterprise surfaces ship default-off so solo users
@@ -69,18 +73,18 @@ type Config struct {
 	FrontendURL      string `env:"FRONTEND_URL" envDefault:"http://localhost:5173"`
 
 	// ─── Wave 5 Fase 18: local AI enrichment ───
-	AIProvider       string `env:"AI_PROVIDER" envDefault:"heuristic"`
+	AIProvider      string `env:"AI_PROVIDER" envDefault:"heuristic"`
 	OpenAIAPIKey    string `env:"OPENAI_API_KEY"`
-	OpenAIModel    string `env:"OPENAI_MODEL" envDefault:"gpt-4o-mini"`
-	OllamaBaseURL  string `env:"OLLAMA_BASE_URL" envDefault:"http://localhost:11434"`
-	OllamaModel    string `env:"OLLAMA_MODEL" envDefault:"llama3"`
-	QwenAPIKey     string `env:"QWEN_API_KEY"`     // Alibaba DashScope
-	QwenModel      string `env:"QWEN_MODEL" envDefault:"qwen-turbo"`
-	DeepSeekAPIKey string `env:"DEEPSEEK_API_KEY"`
-	DeepSeekModel  string `env:"DEEPSEEK_MODEL" envDefault:"deepseek-chat"`
+	OpenAIModel     string `env:"OPENAI_MODEL" envDefault:"gpt-4o-mini"`
+	OllamaBaseURL   string `env:"OLLAMA_BASE_URL" envDefault:"http://localhost:11434"`
+	OllamaModel     string `env:"OLLAMA_MODEL" envDefault:"llama3"`
+	QwenAPIKey      string `env:"QWEN_API_KEY"` // Alibaba DashScope
+	QwenModel       string `env:"QWEN_MODEL" envDefault:"qwen-turbo"`
+	DeepSeekAPIKey  string `env:"DEEPSEEK_API_KEY"`
+	DeepSeekModel   string `env:"DEEPSEEK_MODEL" envDefault:"deepseek-chat"`
 	LMStudioBaseURL string `env:"LM_STUDIO_BASE_URL" envDefault:"http://localhost:1234"`
 	LMStudioModel   string `env:"LM_STUDIO_MODEL" envDefault:""`
-	AIExternalOptIn bool  `env:"AI_EXTERNAL_OPT_IN" envDefault:"false"`
+	AIExternalOptIn bool   `env:"AI_EXTERNAL_OPT_IN" envDefault:"false"`
 }
 
 func (c Config) CORSOriginList() []string {

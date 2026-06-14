@@ -15,17 +15,17 @@ const (
 )
 
 type Message struct {
-	Role    Role    `json:"role"`
-	Content string  `json:"content"`
-	Name    string  `json:"name,omitempty"` // For tool messages
-	ToolID  string  `json:"tool_call_id,omitempty"`
+	Role    Role   `json:"role"`
+	Content string `json:"content"`
+	Name    string `json:"name,omitempty"` // For tool messages
+	ToolID  string `json:"tool_call_id,omitempty"`
 }
 
 type Tool struct {
-	Name         string                                                              `json:"name"`
-	Description  string                                                              `json:"description"`
-	Parameters   json.RawMessage                                                     `json:"parameters"` // JSON Schema
-	IsClientSide bool                                                                `json:"is_client_side"`
+	Name         string                                                                  `json:"name"`
+	Description  string                                                                  `json:"description"`
+	Parameters   json.RawMessage                                                         `json:"parameters"` // JSON Schema
+	IsClientSide bool                                                                    `json:"is_client_side"`
 	Execute      func(ctx context.Context, args map[string]any) (json.RawMessage, error) `json:"-"`
 }
 
@@ -40,9 +40,9 @@ type Response struct {
 }
 
 type ToolCall struct {
-	ID        string          `json:"id"`
-	Type      string          `json:"type"` // always "function"
-	Function  FunctionCall    `json:"function"`
+	ID       string       `json:"id"`
+	Type     string       `json:"type"` // always "function"
+	Function FunctionCall `json:"function"`
 }
 
 type FunctionCall struct {

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"devdeck/internal/domain/circles"
+
 	"github.com/google/uuid"
 )
 

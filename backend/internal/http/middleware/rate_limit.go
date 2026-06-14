@@ -9,44 +9,38 @@ import (
 	"github.com/go-chi/httprate"
 )
 
-// IARateLimit implements a multi-tier rate limit based on the user's plan.
+// IARateLimit implements a multi-tier per-hour rate limit based on the user's
+// plan. The two underlying limiters are constructed ONCE (when the middleware
+// is built) so their counters persist across requests; each request is then
+// dispatched to the pro or free limiter based on the plan in the context.
+// Keying is by user ID when authenticated, falling back to IP.
 func IARateLimit(proLimit, freeLimit int) func(http.Handler) http.Handler {
+	keyFunc := func(r *http.Request) (string, error) {
+		if userID, ok := authctx.UserID(r.Context()); ok {
+			return userID.String(), nil
+		}
+		return httprate.KeyByIP(r)
+	}
+
+	limitHandler := httprate.WithLimitHandler(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusTooManyRequests)
+		_, _ = w.Write([]byte(`{"error":{"code":"AI_RATE_LIMITED","message":"cuota de IA agotada por esta hora"}}`))
+	})
+
+	proLimiter := httprate.Limit(proLimit, 1*time.Hour, httprate.WithKeyFuncs(keyFunc), limitHandler)
+	freeLimiter := httprate.Limit(freeLimit, 1*time.Hour, httprate.WithKeyFuncs(keyFunc), limitHandler)
+
 	return func(next http.Handler) http.Handler {
-		// We use httprate internally but with a custom key function
-		// and a limit handler that checks the user's plan from the context.
-		// Since chi middlewares are static, we'll implement a dynamic one here.
-		
+		proHandler := proLimiter(next)
+		freeHandler := freeLimiter(next)
+
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			plan, _ := authctx.UserPlan(r.Context())
-			
-			limit := freeLimit
-			if plan == "pro" {
-				limit = proLimit
+			if plan, _ := authctx.UserPlan(r.Context()); plan == "pro" {
+				proHandler.ServeHTTP(w, r)
+				return
 			}
-
-			// For Wave 7 / Phase 24, we'll keep it simple: 
-			// use httprate with UserID as key if logged in, IP otherwise.
-			keyFunc := func(r *http.Request) (string, error) {
-				if userID, ok := authctx.UserID(r.Context()); ok {
-					return userID.String(), nil
-				}
-				return httprate.KeyByIP(r)
-			}
-
-			// We need a way to apply the limit dynamically.
-			// Httprate doesn't easily support dynamic limits in one middleware instance.
-			// So we'll use a fixed conservative limit for now and improve in next waves.
-			
-			httprate.Limit(
-				limit,
-				1*time.Hour,
-				httprate.WithKeyFuncs(keyFunc),
-				httprate.WithLimitHandler(func(w http.ResponseWriter, _ *http.Request) {
-					w.Header().Set("Content-Type", "application/json")
-					w.WriteHeader(http.StatusTooManyRequests)
-					_, _ = w.Write([]byte(`{"error":{"code":"AI_RATE_LIMITED","message":"cuota de IA agotada por esta hora"}}`))
-				}),
-			)(next).ServeHTTP(w, r)
+			freeHandler.ServeHTTP(w, r)
 		})
 	}
 }

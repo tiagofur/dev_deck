@@ -53,7 +53,7 @@ func (o *Orchestrator) Chat(ctx context.Context, history []Message, tools []Tool
 		hasClientSide := false
 		for _, tc := range resp.ToolCalls {
 			slog.Info("agent calling tool", "name", tc.Function.Name, "args", tc.Function.Arguments)
-			
+
 			var tool *Tool
 			for _, t := range tools {
 				if t.Name == tc.Function.Name {

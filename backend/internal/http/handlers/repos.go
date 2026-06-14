@@ -94,12 +94,15 @@ func (h *ReposHandler) List(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if v := q.Get("limit"); v != "" {
-		if n, err := strconv.Atoi(v); err == nil {
+		if n, err := strconv.Atoi(v); err == nil && n >= 0 {
+			if n > maxListLimit {
+				n = maxListLimit
+			}
 			p.Limit = n
 		}
 	}
 	if v := q.Get("offset"); v != "" {
-		if n, err := strconv.Atoi(v); err == nil {
+		if n, err := strconv.Atoi(v); err == nil && n >= 0 {
 			p.Offset = n
 		}
 	}
@@ -280,7 +283,6 @@ func (h *ReposHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	md, err := h.enricher.Enrich(r.Context(), repo.URL, nil)
-
 
 	if err != nil {
 		writeError(w, http.StatusUnprocessableEntity, "ENRICH_FAILED", err.Error())

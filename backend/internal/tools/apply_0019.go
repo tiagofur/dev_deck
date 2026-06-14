@@ -3,7 +3,6 @@ package tools
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/jackc/pgx/v5"
@@ -18,7 +17,7 @@ func Apply0019() {
 	}
 	defer conn.Close(context.Background())
 
-	sqlBytes, err := ioutil.ReadFile("migrations/0019_fix_local_auth.sql")
+	sqlBytes, err := os.ReadFile("migrations/0019_fix_local_auth.sql")
 	if err != nil {
 		panic(err)
 	}

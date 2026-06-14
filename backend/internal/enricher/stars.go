@@ -60,17 +60,17 @@ func (g *GitHubEnricher) listStarred(ctx context.Context, username string, maxRe
 		}
 
 		if resp.StatusCode == http.StatusNotFound {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			return nil, fmt.Errorf("github user %q not found", username)
 		}
 		if resp.StatusCode != http.StatusOK {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			return nil, fmt.Errorf("github starred request failed with status %d", resp.StatusCode)
 		}
 
 		var pageRepos []StarredRepo
 		err = json.NewDecoder(resp.Body).Decode(&pageRepos)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		if err != nil {
 			return nil, err
 		}
