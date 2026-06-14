@@ -58,12 +58,13 @@ export function WaitlistPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4 mb-8 text-left">
           <div>
-            <label className="block font-display font-bold uppercase text-xs mb-1 ml-1">Email</label>
+            <label htmlFor="waitlist-email" className="block font-display font-bold uppercase text-xs mb-1 ml-1">Email</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-ink-soft">
                 <Mail size={16} />
               </div>
               <input
+                id="waitlist-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

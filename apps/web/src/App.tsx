@@ -146,9 +146,10 @@ function AnimatedRoutes(): ReactElement {
   })
 
   useEffect(() => {
-    const onOpenCapture = (e: any) => {
-      if (e.detail) {
-        setInitialCaptureData({ url: e.detail.url, title: e.detail.title })
+    const onOpenCapture = (e: Event) => {
+      const detail = (e as CustomEvent<{ url?: string; title?: string }>).detail
+      if (detail) {
+        setInitialCaptureData({ url: detail.url, title: detail.title })
       } else {
         setInitialCaptureData(null)
       }

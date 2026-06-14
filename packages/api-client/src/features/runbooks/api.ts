@@ -28,6 +28,12 @@ export interface RunbookStep {
 
 const RUNBOOKS_KEY = ['runbooks'] as const
 
+/** Runbook row as stored in the local SQLite mirror (no joined steps). */
+type LocalRunbookRow = Omit<Runbook, 'steps'>
+
+/** Runbook step row as stored locally (is_completed persisted as 0/1). */
+type LocalRunbookStepRow = Omit<RunbookStep, 'is_completed'> & { is_completed: number }
+
 async function upsertLocalRunbook(rb: Runbook) {
 	await execLocal(
 		`INSERT INTO runbooks (id, user_id, item_id, title, description, created_at, updated_at, local_updated_at)
@@ -80,10 +86,10 @@ export function useItemRunbooks(itemId: string | undefined) {
 				return res.runbooks
 			} catch {
 				// Offline fallback
-				const rows = await queryLocal<any>('SELECT * FROM runbooks WHERE item_id = ? ORDER BY created_at ASC', [itemId])
+				const rows = await queryLocal<LocalRunbookRow>('SELECT * FROM runbooks WHERE item_id = ? ORDER BY created_at ASC', [itemId])
 				const runbooks: Runbook[] = []
 				for (const row of rows) {
-					const steps = await queryLocal<any>('SELECT * FROM runbook_steps WHERE runbook_id = ? ORDER BY position ASC', [row.id])
+					const steps = await queryLocal<LocalRunbookStepRow>('SELECT * FROM runbook_steps WHERE runbook_id = ? ORDER BY position ASC', [row.id])
 					runbooks.push({
 						...row,
 						steps: steps.map(s => ({ ...s, is_completed: !!s.is_completed }))
@@ -128,7 +134,7 @@ export function useAddRunbookStep() {
 		mutationFn: async ({ runbookId, label, command, description }: { runbookId: string; label: string; command?: string; description?: string }) => {
 			const id = crypto.randomUUID()
 			// Find max position
-			const [maxRow] = await queryLocal<any>('SELECT MAX(position) as max_pos FROM runbook_steps WHERE runbook_id = ?', [runbookId])
+			const [maxRow] = await queryLocal<{ max_pos: number | null }>('SELECT MAX(position) as max_pos FROM runbook_steps WHERE runbook_id = ?', [runbookId])
 			const nextPos = (maxRow?.max_pos ?? -1) + 1
 			
 			await execLocal(
@@ -156,7 +162,7 @@ export function useUpdateRunbookStep() {
 		mutationFn: async ({ id, input }: { id: string; input: Partial<RunbookStep> }) => {
 			// Update local
 			const sets: string[] = []
-			const args: any[] = []
+			const args: unknown[] = []
 			Object.entries(input).forEach(([key, val]) => {
 				sets.push(`${key} = ?`)
 				args.push(key === 'is_completed' ? (val ? 1 : 0) : val)

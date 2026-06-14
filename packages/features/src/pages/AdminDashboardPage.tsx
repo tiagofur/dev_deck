@@ -115,7 +115,7 @@ function UsersTab() {
           </tr>
         </thead>
         <tbody className="divide-y-2 divide-ink/10">
-          {users.map((u: any) => (
+          {users.map((u) => (
             <tr key={u.id} className="hover:bg-accent-yellow/5">
               <td className="p-4">
                 <div className="font-bold text-xs uppercase">{u.login}</div>
@@ -167,7 +167,7 @@ function WaitlistTab() {
           </tr>
         </thead>
         <tbody className="divide-y-2 divide-ink/10">
-          {entries.map((e: any) => (
+          {entries.map((e) => (
             <tr key={e.id} className="hover:bg-accent-yellow/5">
               <td className="p-4 font-bold text-xs">{e.email}</td>
               <td className="p-4 text-center">
@@ -222,7 +222,7 @@ function InvitesTab() {
             </tr>
           </thead>
           <tbody className="divide-y-2 divide-ink/10">
-            {invites.map((i: any) => (
+            {invites.map((i) => (
               <tr key={i.id} className="hover:bg-accent-yellow/5">
                 <td className="p-4 font-mono text-sm font-black tracking-tighter">{i.code}</td>
                 <td className="p-4 text-center">

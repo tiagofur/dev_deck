@@ -6,8 +6,8 @@ import { LOCAL_SCHEMA } from './schema';
  * Allows switching between OPFS (Web), IPC (Electron), or Native (Mobile).
  */
 export interface DatabaseAdapter {
-    exec(sql: string, params?: any[]): Promise<void>;
-    query<T extends Record<string, any>>(sql: string, params?: any[]): Promise<T[]>;
+    exec(sql: string, params?: unknown[]): Promise<void>;
+    query<T extends Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T[]>;
 }
 
 /**
@@ -15,7 +15,7 @@ export interface DatabaseAdapter {
  * Standard for Web and current Desktop implementation.
  */
 class OPFSAdapter implements DatabaseAdapter {
-    private client: SQLocal;
+    readonly client: SQLocal;
     private initialized = false;
 
     constructor(dbName: string) {
@@ -33,12 +33,12 @@ class OPFSAdapter implements DatabaseAdapter {
         }
     }
 
-    async exec(sql: string, params: any[] = []): Promise<void> {
+    async exec(sql: string, params: unknown[] = []): Promise<void> {
         await this.init();
         await this.client.exec(sql, params);
     }
 
-    async query<T extends Record<string, any>>(sql: string, params: any[] = []): Promise<T[]> {
+    async query<T extends Record<string, unknown>>(sql: string, params: unknown[] = []): Promise<T[]> {
         await this.init();
         return this.client.sql<T>(sql, ...params);
     }
@@ -67,14 +67,14 @@ export function getAdapter(): DatabaseAdapter {
 /**
  * High-level helper for query operations.
  */
-export async function queryLocal<T extends Record<string, any>>(sql: string, params: any[] = []): Promise<T[]> {
+export async function queryLocal<T extends Record<string, unknown>>(sql: string, params: unknown[] = []): Promise<T[]> {
     return getAdapter().query<T>(sql, params);
 }
 
 /**
  * High-level helper for write operations.
  */
-export async function execLocal(sql: string, params: any[] = []): Promise<void> {
+export async function execLocal(sql: string, params: unknown[] = []): Promise<void> {
     return getAdapter().exec(sql, params);
 }
 
@@ -82,10 +82,10 @@ export async function execLocal(sql: string, params: any[] = []): Promise<void> 
  * Legacy export for backward compatibility where direct access is needed.
  * @deprecated Use queryLocal or execLocal instead.
  */
-export async function getLocalDB(): Promise<any> {
+export async function getLocalDB(): Promise<SQLocal> {
     const a = getAdapter();
     if (a instanceof OPFSAdapter) {
-        return (a as any).client;
+        return a.client;
     }
     throw new Error('LocalDB direct access only available in OPFS mode');
 }

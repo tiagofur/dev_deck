@@ -73,3 +73,4 @@ export function setLanguage(lng: AppLanguage): Promise<unknown> {
 
 export default i18n;
 export { useTranslation, Trans } from 'react-i18next';
+export type { TFunction } from 'i18next';

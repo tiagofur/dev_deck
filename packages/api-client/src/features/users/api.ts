@@ -61,6 +61,27 @@ export interface UpdateUserInput {
   avatar_url?: string
 }
 
+export interface AdminUser {
+  id: string
+  login: string
+  plan: string
+  item_count: number
+  created_at: string
+}
+
+export interface WaitlistEntry {
+  id: string
+  email: string
+  status: string
+}
+
+export interface AdminInvite {
+  id: string
+  code: string
+  used_by_id: string | null
+  created_at: string
+}
+
 const USERS_KEY = ['users'] as const
 
 /** GET /api/auth/me — get current user profile. */
@@ -191,7 +212,7 @@ export function useFollowingFeed(limit = 50) {
 export function useAdminUsers() {
   return useQuery({
     queryKey: [...USERS_KEY, 'admin', 'list'],
-    queryFn: () => api.get<{ users: any[] }>('/api/admin/users'),
+    queryFn: () => api.get<{ users: AdminUser[] }>('/api/admin/users'),
   })
 }
 
@@ -206,7 +227,7 @@ export function useJoinWaitlist() {
 export function useAdminWaitlist() {
 	return useQuery({
 		queryKey: [...USERS_KEY, 'admin', 'waitlist'],
-		queryFn: () => api.get<{ entries: any[] }>('/api/admin/waitlist'),
+		queryFn: () => api.get<{ entries: WaitlistEntry[] }>('/api/admin/waitlist'),
 	})
 }
 
@@ -214,7 +235,7 @@ export function useAdminWaitlist() {
 export function useAdminInvites() {
 	return useQuery({
 		queryKey: [...USERS_KEY, 'admin', 'invites'],
-		queryFn: () => api.get<{ invites: any[] }>('/api/admin/invites'),
+		queryFn: () => api.get<{ invites: AdminInvite[] }>('/api/admin/invites'),
 	})
 }
 
@@ -222,7 +243,7 @@ export function useAdminInvites() {
 export function useCreateInvite() {
 	const qc = useQueryClient()
 	return useMutation({
-		mutationFn: (input: { code?: string; email?: string }) => api.post<any>('/api/admin/invites', input),
+		mutationFn: (input: { code?: string; email?: string }) => api.post<AdminInvite>('/api/admin/invites', input),
 		onSuccess: () => {
 			qc.invalidateQueries({ queryKey: [...USERS_KEY, 'admin', 'invites'] })
 		},

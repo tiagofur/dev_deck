@@ -34,6 +34,7 @@ export function AgentChat({ initialQuery }: Props) {
   const [loading, setLoading] = useState(false)
   const [executingToolId, setExecutingToolId] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- window.electronAPI is an untyped external bridge injected by the desktop preload script
   const isDesktop = typeof (window as any).electronAPI !== 'undefined'
 
   useEffect(() => {
@@ -117,6 +118,7 @@ export function AgentChat({ initialQuery }: Props) {
 
     setExecutingToolId(tc.id)
     try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- window.electronAPI is an untyped external bridge injected by the desktop preload script
         const output = await (window as any).electronAPI.shell.runCommand(cmd)
         const toolMessage: Message = {
             role: 'tool',

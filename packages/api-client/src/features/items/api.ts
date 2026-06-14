@@ -11,6 +11,30 @@ export type { Item, ItemType }
 
 export const ITEMS_KEY = ['items'] as const
 
+/**
+ * Shape of an item as persisted in the local SQLite mirror. Differs from
+ * {@link Item}: arrays are stored as JSON strings and booleans as 0/1.
+ */
+type LocalItemRow = {
+  id: string
+  item_type: string
+  title: string
+  url: string | null
+  description: string | null
+  notes: string
+  why_saved: string
+  when_to_use: string
+  ai_summary: string
+  enrichment_status: string
+  created_at: string
+  updated_at: string
+  local_updated_at: string
+  tags: string
+  ai_tags: string
+  is_favorite: number
+  archived: number
+}
+
 function isNotFound(error: unknown): boolean {
   return error instanceof APIError && error.status === 404
 }
@@ -99,7 +123,7 @@ export function useItems(params: ListItemsParams = {}) {
 				return res
 			} catch {
 				// Offline fallback
-				const rows = await queryLocal<any>('SELECT * FROM items WHERE archived = 0 ORDER BY created_at DESC')
+				const rows = await queryLocal<LocalItemRow>('SELECT * FROM items WHERE archived = 0 ORDER BY created_at DESC')
 				return {
 					total: rows.length,
 					items: rows.map(r => ({
@@ -108,7 +132,7 @@ export function useItems(params: ListItemsParams = {}) {
 						ai_tags: JSON.parse(r.ai_tags),
 						is_favorite: !!r.is_favorite,
 						archived: !!r.archived,
-					})) as Item[]
+					})) as unknown as Item[]
 				}
 			}
 		},
@@ -133,7 +157,7 @@ export function useUpdateItem() {
     mutationFn: async ({ id, input }: { id: string; input: UpdateItemInput }) => {
 			// 1. Update local DB (optimistic)
 			// For Phase 21, we fetch the current item to merge the update
-			const [current] = await queryLocal<any>('SELECT * FROM items WHERE id = ?', [id])
+			const [current] = await queryLocal<LocalItemRow>('SELECT * FROM items WHERE id = ?', [id])
 			if (current) {
 				const updated = {
 					...current,

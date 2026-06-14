@@ -55,7 +55,7 @@ export interface ActivityEntry {
 	action: string
 	entity_type: string
 	entity_id: string
-	metadata?: Record<string, any>
+	metadata?: Record<string, unknown>
 	created_at: string
 	user_display_name?: string
 	user_avatar_url?: string
