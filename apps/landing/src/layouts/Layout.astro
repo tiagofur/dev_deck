@@ -8,31 +8,44 @@ interface Props {
 }
 
 const { title, description, lang = 'en' } = Astro.props;
+
+// Absolute URLs (Open Graph / canonical require absolute URLs to work on
+// social platforms and search engines). Astro.site is set in astro.config.
+const siteUrl = Astro.site ?? new URL('https://devdeck.ai');
+const canonical = new URL(Astro.url.pathname, siteUrl);
+const ogImage = new URL('/og-image.svg', siteUrl);
+const enUrl = new URL('/', siteUrl);
+const esUrl = new URL('/es', siteUrl);
 ---
 
 <!doctype html>
 <html lang={lang} class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    
+
     <!-- SEO Meta Tags -->
     <title>{title}</title>
     <meta name="description" content={description} />
-    
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="es" href={esUrl} />
+    <link rel="alternate" hreflang="x-default" href={enUrl} />
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image" content={ogImage} />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content="/og-image.png" />
+    <meta property="twitter:image" content={ogImage} />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -143,6 +143,9 @@ jobs:
       - name: Build web
         run: pnpm -F @devdeck/web build
 
+      - name: Build landing
+        run: pnpm -F @devdeck/landing build
+
   desktop:
     name: Desktop (Vitest + typecheck + build)
     runs-on: ubuntu-latest
