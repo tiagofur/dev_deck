@@ -483,9 +483,8 @@ function RunbookStepItem({ step }: { step: RunbookStep }) {
 		if (!step.command || !isDesktop) return
 		setRunning(true)
 		try {
-			const output = await (window as any).electronAPI.shell.runCommand(step.command)
+			await (window as any).electronAPI.shell.runCommand(step.command)
 			showToast(t('item_detail.runbook.execution_success'))
-			if (output) console.log('[shell output]', output)
 		} catch (err) {
 			showToast(`${t('common.error')}: ${err}`, 'error')
 		} finally {

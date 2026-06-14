@@ -345,7 +345,8 @@
     "join_button": "Join the list",
     "success_title": "You're in!",
     "success_desc": "You are now on the waitlist. We will notify you at {{email}} as soon as we have a spot for you.",
-    "terms_desc": "By joining, you agree that we will send you an email (and only one) when your invitation is ready."
+    "terms_desc": "By joining, you agree that we will send you an email (and only one) when your invitation is ready.",
+    "error": "Something went wrong. Please check your email and try again."
   },
   "feed": {
     "title": "Network Feed",

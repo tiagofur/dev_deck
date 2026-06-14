@@ -1,0 +1,15 @@
+# Default owner for everything in the repo.
+# Ordered by precedence — the last matching pattern wins.
+* @tiagofur
+
+# Web frontend & shared packages.
+/apps/web/ @tiagofur
+/packages/ @tiagofur
+
+# Backend & CLI (Go).
+/backend/ @tiagofur
+/cli/ @tiagofur
+
+# CI, deploy and project meta.
+/.github/ @tiagofur
+/deploy/ @tiagofur
