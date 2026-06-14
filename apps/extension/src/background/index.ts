@@ -1,10 +1,9 @@
 /**
  * DevDeck Extension Background Script (MV3)
  */
+import { getBaseUrl } from '../lib/config'
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('DevDeck Extension installed');
-  
   // Register context menus
   chrome.contextMenus.create({
     id: 'save-link',
@@ -32,7 +31,8 @@ async function handleCheckURL(url: string) {
     const { access } = await chrome.storage.local.get('access')
     if (!access) return { item: null }
 
-    const resp = await fetch('http://localhost:8080/api/items/check', {
+    const baseUrl = await getBaseUrl()
+    const resp = await fetch(`${baseUrl}/api/items/check`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -75,7 +75,15 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 })
 
-async function handleCapture(payload: any) {
+interface CapturePayload {
+  url?: string
+  title_hint?: string
+  item_type?: string
+  notes?: string
+  source?: string
+}
+
+async function handleCapture(payload: CapturePayload) {
   try {
     const { access } = await chrome.storage.local.get('access')
     if (!access) {
@@ -83,7 +91,8 @@ async function handleCapture(payload: any) {
       return
     }
 
-    const resp = await fetch('http://localhost:8080/api/items/capture', {
+    const baseUrl = await getBaseUrl()
+    const resp = await fetch(`${baseUrl}/api/items/capture`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
