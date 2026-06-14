@@ -12,7 +12,7 @@ It turns scattered discoveries into a searchable engineering memory: capture use
 
 Domain: **[devdeck.ai](https://devdeck.ai)**
 
-Current version: **0.5.0 Public Beta** — functional, useful, and actively being polished before a stable 1.0 release.
+Current version: **0.6.0 Public Beta** — functional, useful, and actively being polished before a stable 1.0 release.
 
 ---
 
@@ -181,7 +181,7 @@ Possible future sustainability paths include hosted community Circles, paid setu
 | Doc | Content |
 |-----|---------|
 | [docs/CIRCLES_COMMUNITY.md](docs/CIRCLES_COMMUNITY.md) | Circles as private collective memory for developer communities |
-| [docs/LIMITATIONS.md](docs/LIMITATIONS.md) | Known limitations of the 0.5.0 Public Beta, stated honestly |
+| [docs/LIMITATIONS.md](docs/LIMITATIONS.md) | Known limitations of the 0.6.0 Public Beta, stated honestly |
 | [docs/FIRST_CONTRIBUTION.md](docs/FIRST_CONTRIBUTION.md) | Short path for a first issue-backed PR |
 | [docs/ARCHITECTURE_MAP.md](docs/ARCHITECTURE_MAP.md) | One-page architecture orientation for new contributors |
 | [docs/DEV_WORKBENCH.md](docs/DEV_WORKBENCH.md) | Developer Workbench direction and workflows |
