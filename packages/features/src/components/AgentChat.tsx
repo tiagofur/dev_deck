@@ -41,6 +41,9 @@ export function AgentChat({ initialQuery }: Props) {
     if (initialQuery) {
       sendMessage(initialQuery)
     }
+    // Run once on mount: kick off the initial query. sendMessage is recreated
+    // each render and re-running would resend the message.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {

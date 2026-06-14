@@ -145,6 +145,9 @@ export function CaptureModal({
     }, 300)
 
     return () => clearTimeout(timer)
+    // Debounced URL preview. previewFetch (react-query mutation) changes
+    // identity while in-flight; adding it would retrigger mid-fetch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forcedType, lastPreviewUrl, url])
 
   const canSubmit = Boolean(primaryValue.trim()) && !capture.isPending

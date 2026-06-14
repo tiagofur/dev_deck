@@ -73,8 +73,11 @@ export default tseslint.config(
       'jsx-a11y/click-events-have-key-events': 'warn',
       'jsx-a11y/no-static-element-interactions': 'warn',
       'jsx-a11y/no-noninteractive-element-interactions': 'warn',
-      'jsx-a11y/no-autofocus': 'warn',
       'jsx-a11y/label-has-associated-control': 'warn',
+      // Off by design: the app uses autoFocus deliberately for focus management
+      // in modals, command palettes and dedicated auth forms, where moving
+      // focus into the dialog/first field is the accessible behavior.
+      'jsx-a11y/no-autofocus': 'off',
 
       // Noise on this codebase's existing patterns; off for now.
       'react-refresh/only-export-components': 'off',

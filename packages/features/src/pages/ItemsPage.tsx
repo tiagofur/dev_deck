@@ -54,7 +54,7 @@ export function ItemsPage() {
     sort: 'updated_desc',
   })
 
-  const items = data?.items ?? []
+  const items = useMemo(() => data?.items ?? [], [data])
   const reviewCount = reviewData?.total ?? 0
 
   // Handler: toggle a stack in the filter

@@ -69,6 +69,9 @@ export function NotesEditor({ value, onSave, saving, roomID }: Props) {
       awareness.off('change', handleAwareness)
       room.destroy()
     }
+    // Collaboration room lifecycle: connect/teardown only when the room
+    // identity or realtime mode changes, not on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomID, mode, features.realtime])
 
   function handleDraftChange(val: string) {
