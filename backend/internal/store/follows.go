@@ -59,12 +59,15 @@ func (s *Store) GetFollowingFeed(ctx context.Context, followerID uuid.UUID, limi
 			`+itemColumnsPrefixed+`,
 			COALESCE(u.username, u.login), COALESCE(u.avatar_url, '')
 		FROM items i
-		JOIN decks d ON d.id = (i.meta->>'deck_id')::uuid
 		JOIN follows f ON f.following_id = i.user_id
 		JOIN users u ON u.id = i.user_id
 		WHERE f.follower_id = $1
-		  AND d.is_public = true
 		  AND i.archived = false
+		  AND EXISTS (
+		      SELECT 1 FROM deck_items di
+		      JOIN decks d ON d.id = di.deck_id
+		      WHERE di.item_id = i.id AND d.is_public = true
+		  )
 		ORDER BY i.created_at DESC
 		LIMIT $2
 	`, followerID, limit)
