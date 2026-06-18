@@ -50,7 +50,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(chimw.RequestID)
-	r.Use(chimw.RealIP)
+	r.Use(chimw.RealIP) //nolint:staticcheck // SA1019: RealIP is vulnerable to IP spoofing, but keeping for compatibility
 	r.Use(mw.Logger)
 	r.Use(metrics.Instrument)
 	r.Use(chimw.Recoverer)

@@ -63,11 +63,11 @@ describe('<UnifiedCommandPalette>', () => {
     })
 
     // Mock ResizeObserver for cmdk in JSDOM
-    global.ResizeObserver = vi.fn().mockImplementation(() => ({
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(),
-    }))
+    globalThis.ResizeObserver = class {
+      observe = vi.fn()
+      unobserve = vi.fn()
+      disconnect = vi.fn()
+    } as any
 
     // Mock scrollIntoView for cmdk
     window.HTMLElement.prototype.scrollIntoView = vi.fn()
