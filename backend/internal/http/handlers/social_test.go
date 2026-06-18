@@ -92,7 +92,7 @@ func TestSocial_FollowUnfollowAndFeed(t *testing.T) {
 		t.Fatalf("CreateItem failed: %v", err)
 	}
 
-	err = ts.store.AddItemsToDeck(context.Background(), deck.ID, []uuid.UUID{item.ID})
+	err = ts.store.AddItemsToDeck(curatorCtx, deck.ID, []uuid.UUID{item.ID})
 	if err != nil {
 		t.Fatalf("AddItemsToDeck failed: %v", err)
 	}

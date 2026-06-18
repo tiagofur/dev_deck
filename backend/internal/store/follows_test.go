@@ -149,12 +149,12 @@ func TestStore_GetFollowingFeed(t *testing.T) {
 	}
 
 	// Add items to decks
-	err = st.AddItemsToDeck(ctx, publicDeck.ID, []uuid.UUID{itemPublic.ID})
+	err = st.AddItemsToDeck(curatorCtx, publicDeck.ID, []uuid.UUID{itemPublic.ID})
 	if err != nil {
 		t.Fatalf("failed to add item to public deck: %v", err)
 	}
 
-	err = st.AddItemsToDeck(ctx, privateDeck.ID, []uuid.UUID{itemPrivate.ID})
+	err = st.AddItemsToDeck(curatorCtx, privateDeck.ID, []uuid.UUID{itemPrivate.ID})
 	if err != nil {
 		t.Fatalf("failed to add item to private deck: %v", err)
 	}
