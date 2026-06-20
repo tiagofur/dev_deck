@@ -35,7 +35,19 @@ type AuthConfig struct {
 	WebOAuthRedirectURL     string
 	DesktopOAuthRedirectURL string
 	RequireInvite           bool
+
+	// ADR 0004: HttpOnly cookie refresh tokens (web).
+	AuthCookieMode   bool     // gates all cookie behavior; false → legacy body/Bearer
+	AuthCookieSecure bool     // Secure attribute on the refresh cookie (off for http dev)
+	AllowedOrigins   []string // CORS origin allowlist, used for the refresh Origin check
 }
+
+// refreshCookieName is the HttpOnly cookie that carries the refresh token in
+// cookie mode. Scoped to /api/auth so it is only sent to the auth endpoints.
+const refreshCookieName = "devdeck_refresh"
+
+// refreshCookiePath scopes the cookie to the auth subtree.
+const refreshCookiePath = "/api/auth"
 
 func NewAuthHandler(s *store.Store, as *authservice.Service, cfg AuthConfig) *AuthHandler {
 	return &AuthHandler{store: s, authService: as, config: cfg}
@@ -169,6 +181,18 @@ func (h *AuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 		redirectBase = h.config.DesktopOAuthRedirectURL
 	}
 
+	// ADR 0004: in cookie mode, set the refresh token as an HttpOnly cookie on
+	// this top-level navigation (SameSite=Lax permits it) and keep the refresh
+	// token OUT of the redirect URL so it never lands in browser history. The
+	// desktop redirect (custom scheme) is unaffected — desktop still gets the
+	// full pair in the URL. Cookie mode is requested only by the web client.
+	if h.config.AuthCookieMode && device != "desktop" {
+		h.setRefreshCookie(w, pair.RefreshToken)
+		redirectTo, _ := appendAccessTokenOnly(redirectBase, pair)
+		http.Redirect(w, r, redirectTo, http.StatusTemporaryRedirect)
+		return
+	}
+
 	redirectTo, _ := appendTokenPair(redirectBase, pair)
 	http.Redirect(w, r, redirectTo, http.StatusTemporaryRedirect)
 }
@@ -219,15 +243,39 @@ func (h *AuthHandler) fetchGitHubUser(code string) (*auth.GitHubUser, error) {
 
 // POST /api/auth/refresh
 func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
+	refreshToken := ""
+
+	if h.config.AuthCookieMode {
+		// ADR 0004: cookie-authenticated refresh is a CSRF target. SameSite=Lax
+		// already blocks cross-site POSTs; additionally verify the Origin/Referer
+		// matches an allowed origin.
+		if !h.originAllowed(r) {
+			writeError(w, http.StatusForbidden, "ORIGIN_NOT_ALLOWED", "request origin is not allowed")
+			return
+		}
+		// Cookie-first: read the refresh token from the HttpOnly cookie.
+		if c, err := r.Cookie(refreshCookieName); err == nil {
+			refreshToken = c.Value
+		}
+	}
+
+	// Body fallback (always for flag-off; for cookie mode only when the cookie
+	// is absent, so desktop/extension keep working). The body is optional in
+	// cookie mode, so an empty/EOF body is not an error there.
 	var body struct {
 		RefreshToken string `json:"refresh_token"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
-		return
+		if !h.config.AuthCookieMode || !errors.Is(err, io.EOF) {
+			writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
+			return
+		}
+	}
+	if refreshToken == "" {
+		refreshToken = body.RefreshToken
 	}
 
-	tokenHash := h.authService.HashRefreshToken(body.RefreshToken)
+	tokenHash := h.authService.HashRefreshToken(refreshToken)
 	userID, err := h.store.GetRefreshSession(r.Context(), tokenHash)
 	if err != nil {
 		writeError(w, http.StatusUnauthorized, "INVALID_TOKEN", "expired or invalid session")
@@ -245,6 +293,10 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		writeInternal(w, err)
 		return
 	}
+	// Rotate the cookie with the freshly-minted refresh token.
+	if h.config.AuthCookieMode {
+		h.setRefreshCookie(w, pair.RefreshToken)
+	}
 	writeJSON(w, http.StatusOK, pair)
 }
 
@@ -254,8 +306,25 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		RefreshToken string `json:"refresh_token"`
 	}
 	_ = json.NewDecoder(r.Body).Decode(&body)
-	if body.RefreshToken != "" {
-		tokenHash := h.authService.HashRefreshToken(body.RefreshToken)
+
+	refreshToken := body.RefreshToken
+	// ADR 0004: in cookie mode, resolve the token from the cookie when the body
+	// has none, and clear the cookie regardless.
+	if h.config.AuthCookieMode {
+		if refreshToken == "" {
+			if c, err := r.Cookie(refreshCookieName); err == nil {
+				refreshToken = c.Value
+			}
+		}
+		h.clearRefreshCookie(w)
+	}
+
+	// When a refresh token is provided, the server-side session MUST be
+	// invalidated. GetRefreshSession is delete-on-read by hash, so calling it
+	// consumes the single-use session. (Previously the result was discarded but
+	// the call already deletes the row; we keep that behavior explicit here.)
+	if refreshToken != "" {
+		tokenHash := h.authService.HashRefreshToken(refreshToken)
 		_, _ = h.store.GetRefreshSession(r.Context(), tokenHash)
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -367,6 +436,12 @@ func (h *AuthHandler) LoginLocal(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeInternal(w, err)
 		return
+	}
+	// ADR 0004: in cookie mode also set the refresh token as an HttpOnly cookie.
+	// The body still carries the full pair (additive) so desktop/extension and
+	// the flag-off path are unchanged.
+	if h.config.AuthCookieMode {
+		h.setRefreshCookie(w, pair.RefreshToken)
 	}
 	writeJSON(w, http.StatusOK, pair)
 }
@@ -552,4 +627,77 @@ func appendTokenPair(redirectURI string, pair *auth.TokenPair) (string, error) {
 	q.Set("expires_in", strconv.FormatInt(pair.ExpiresIn, 10))
 	parsed.RawQuery = q.Encode()
 	return parsed.String(), nil
+}
+
+// appendAccessTokenOnly is the cookie-mode variant of appendTokenPair: it adds
+// only the access token + expiry to the redirect URL and OMITS the refresh
+// token (which is delivered via the HttpOnly cookie, never in browser history).
+func appendAccessTokenOnly(redirectURI string, pair *auth.TokenPair) (string, error) {
+	parsed, _ := url.Parse(redirectURI)
+	q := parsed.Query()
+	q.Set("token", pair.AccessToken)
+	q.Set("expires_in", strconv.FormatInt(pair.ExpiresIn, 10))
+	parsed.RawQuery = q.Encode()
+	return parsed.String(), nil
+}
+
+// setRefreshCookie writes the refresh token as an HttpOnly cookie scoped to the
+// auth path. MaxAge mirrors the refresh-token TTL so the cookie and the
+// server-side session expire together.
+func (h *AuthHandler) setRefreshCookie(w http.ResponseWriter, token string) {
+	maxAge := int(time.Until(h.authService.RefreshExpiry()).Seconds())
+	if maxAge < 1 {
+		maxAge = 1
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     refreshCookieName,
+		Value:    token,
+		Path:     refreshCookiePath,
+		MaxAge:   maxAge,
+		HttpOnly: true,
+		Secure:   h.config.AuthCookieSecure,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+// clearRefreshCookie expires the refresh cookie using the same attributes so
+// the browser drops it.
+func (h *AuthHandler) clearRefreshCookie(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     refreshCookieName,
+		Value:    "",
+		Path:     refreshCookiePath,
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   h.config.AuthCookieSecure,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+// originAllowed checks the request Origin (falling back to Referer) against the
+// configured CORS allowlist. Used as a lightweight CSRF defense on the
+// cookie-authenticated refresh endpoint. An empty allowlist allows all (the
+// caller only invokes this in cookie mode, where an allowlist is expected).
+func (h *AuthHandler) originAllowed(r *http.Request) bool {
+	if len(h.config.AllowedOrigins) == 0 {
+		return true
+	}
+	origin := strings.TrimSpace(r.Header.Get("Origin"))
+	if origin == "" {
+		// Fall back to Referer's origin (scheme://host[:port]).
+		if ref := r.Header.Get("Referer"); ref != "" {
+			if u, err := url.Parse(ref); err == nil && u.Scheme != "" && u.Host != "" {
+				origin = u.Scheme + "://" + u.Host
+			}
+		}
+	}
+	if origin == "" {
+		return false
+	}
+	for _, allowed := range h.config.AllowedOrigins {
+		if strings.EqualFold(strings.TrimSpace(allowed), origin) {
+			return true
+		}
+	}
+	return false
 }

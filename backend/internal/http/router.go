@@ -78,6 +78,9 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		WebOAuthRedirectURL:     cfg.WebOAuthRedirectURL,
 		DesktopOAuthRedirectURL: cfg.DesktopOAuthRedirectURL,
 		RequireInvite:           cfg.RequireInvite,
+		AuthCookieMode:          cfg.AuthCookieMode,
+		AuthCookieSecure:        cfg.AuthCookieSecure,
+		AllowedOrigins:          cfg.CORSOriginList(),
 	})
 
 	reposH := handlers.NewReposHandler(st, en)

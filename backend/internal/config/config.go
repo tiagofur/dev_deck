@@ -72,6 +72,19 @@ type Config struct {
 	ResendAPIKey     string `env:"RESEND_API_KEY"`
 	FrontendURL      string `env:"FRONTEND_URL" envDefault:"http://localhost:5173"`
 
+	// ─── ADR 0004: HttpOnly cookie refresh tokens (web) ───
+	// AuthCookieMode, when true, makes login/refresh/callback additionally set
+	// the refresh token as an HttpOnly cookie (and refresh reads it cookie-first,
+	// body-fallback). Default false → byte-identical to the legacy body/Bearer
+	// flow. Desktop/extension keep using the JSON body regardless of this flag.
+	AuthCookieMode bool `env:"AUTH_COOKIE_MODE" envDefault:"false"`
+	// AuthCookieSecure controls the Secure attribute on the refresh cookie.
+	// Browsers refuse Secure cookies over plain http://, so local/dev over
+	// http needs this off; production over https keeps it on (the default).
+	// An explicit flag is cleaner than deriving "dev" from CORS origins, since
+	// the config has no dedicated environment/debug indicator.
+	AuthCookieSecure bool `env:"AUTH_COOKIE_SECURE" envDefault:"true"`
+
 	// ─── Wave 5 Fase 18: local AI enrichment ───
 	AIProvider      string `env:"AI_PROVIDER" envDefault:"heuristic"`
 	OpenAIAPIKey    string `env:"OPENAI_API_KEY"`
@@ -138,6 +151,12 @@ func Load() (Config, error) {
 	}
 	if c.AuthMode == "token" && c.APIToken == "" {
 		return c, errors.New("API_TOKEN is required when AUTH_MODE=token")
+	}
+	// CORS runs with AllowCredentials=true (see router.go). A wildcard origin
+	// combined with credentials is invalid per the Fetch spec and leaks
+	// cookies cross-origin, so refuse to boot with "*" in the origin list.
+	if slices.Contains(c.CORSOriginList(), "*") {
+		return c, errors.New(`CORS_ORIGINS must not contain "*" because credentials are allowed; list explicit origins`)
 	}
 	if c.AuthMode != "token" && c.AuthMode != "jwt" {
 		return c, errors.New("AUTH_MODE must be 'token' or 'jwt'")
