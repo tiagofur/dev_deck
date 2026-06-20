@@ -649,6 +649,7 @@ func (h *AuthHandler) setRefreshCookie(w http.ResponseWriter, token string) {
 	if maxAge < 1 {
 		maxAge = 1
 	}
+	// #nosec G124 -- Secure attribute is configured dynamically based on environment (disabled in local dev, enabled in prod).
 	http.SetCookie(w, &http.Cookie{
 		Name:     refreshCookieName,
 		Value:    token,
@@ -663,6 +664,7 @@ func (h *AuthHandler) setRefreshCookie(w http.ResponseWriter, token string) {
 // clearRefreshCookie expires the refresh cookie using the same attributes so
 // the browser drops it.
 func (h *AuthHandler) clearRefreshCookie(w http.ResponseWriter) {
+	// #nosec G124 -- Secure attribute is configured dynamically based on environment (disabled in local dev, enabled in prod).
 	http.SetCookie(w, &http.Cookie{
 		Name:     refreshCookieName,
 		Value:    "",
