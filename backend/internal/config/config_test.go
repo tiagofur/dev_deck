@@ -231,6 +231,48 @@ func TestLoad(t *testing.T) {
 		}
 	})
 
+	t.Run("Rejects wildcard CORS origin with credentials on", func(t *testing.T) {
+		setenv(t, "DB_URL", "postgres://localhost:5432/db")
+		setenv(t, "AUTH_MODE", "token")
+		setenv(t, "API_TOKEN", "test-token")
+		setenv(t, "CORS_ORIGINS", "http://localhost:5173,*")
+
+		_, err := Load()
+		if err == nil {
+			t.Fatal("expected error for wildcard CORS origin, got nil")
+		}
+	})
+
+	t.Run("Allows explicit CORS origins", func(t *testing.T) {
+		setenv(t, "DB_URL", "postgres://localhost:5432/db")
+		setenv(t, "AUTH_MODE", "token")
+		setenv(t, "API_TOKEN", "test-token")
+		setenv(t, "CORS_ORIGINS", "https://app.devdeck.io,http://localhost:5173")
+
+		if _, err := Load(); err != nil {
+			t.Fatalf("expected no error for explicit origins, got %v", err)
+		}
+	})
+
+	t.Run("AuthCookieMode defaults off and Secure defaults on", func(t *testing.T) {
+		setenv(t, "DB_URL", "postgres://localhost:5432/db")
+		setenv(t, "AUTH_MODE", "token")
+		setenv(t, "API_TOKEN", "test-token")
+		os.Unsetenv("AUTH_COOKIE_MODE")
+		os.Unsetenv("AUTH_COOKIE_SECURE")
+
+		cfg, err := Load()
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		if cfg.AuthCookieMode {
+			t.Errorf("AuthCookieMode should default to false")
+		}
+		if !cfg.AuthCookieSecure {
+			t.Errorf("AuthCookieSecure should default to true")
+		}
+	})
+
 	t.Run("LMStudio loads with custom base URL and model", func(t *testing.T) {
 		setenv(t, "DB_URL", "postgres://localhost:5432/db")
 		setenv(t, "AUTH_MODE", "token")
