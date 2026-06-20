@@ -30,16 +30,10 @@ type feedResp struct {
 func TestSocial_FollowUnfollowAndFeed(t *testing.T) {
 	ts := newTestServer(t)
 
-	// Create a well-known test user in the DB (matching middleware's testUserID)
+	// The test user (UUID 00000000-0000-0000-0000-000000000001, login "devdeck-test") is
+	// inserted by truncateAll and matches the UUID that the static-token middleware
+	// hard-codes into the request context.
 	testUserID := uuid.MustParse("00000000-0000-0000-0000-000000000001")
-	_, err := ts.store.UpsertUser(context.Background(), auth.GitHubUser{
-		ID:    1,
-		Login: "testuser",
-		Name:  "Test User",
-	})
-	if err != nil {
-		t.Fatalf("failed to create test user: %v", err)
-	}
 
 	// Create a curator user that we will follow
 	curator, err := ts.store.UpsertUser(context.Background(), auth.GitHubUser{
@@ -67,8 +61,10 @@ func TestSocial_FollowUnfollowAndFeed(t *testing.T) {
 		t.Errorf("expected testUserID to follow curator")
 	}
 
-	// 2. Try to follow yourself -> should return 400 Bad Request
-	selfFollowRec := ts.do(t, http.MethodPost, "/api/users/testuser/follow", nil)
+	// 2. Try to follow yourself -> should return 400 Bad Request.
+	// The authenticated user is "devdeck-test" (UUID 00000000-0000-0000-0000-000000000001)
+	// as injected by the static-token middleware. Following that same username must be rejected.
+	selfFollowRec := ts.do(t, http.MethodPost, "/api/users/devdeck-test/follow", nil)
 	if selfFollowRec.Code != http.StatusBadRequest {
 		t.Errorf("expected 400 on self-follow, got %d, body: %s", selfFollowRec.Code, selfFollowRec.Body.String())
 	}
