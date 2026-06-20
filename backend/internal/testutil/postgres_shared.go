@@ -118,8 +118,8 @@ func truncateAll(ctx context.Context, pool *pgxpool.Pool) error {
 	}
 
 	_, err := pool.Exec(ctx, `
-		INSERT INTO users (id, github_id, login, display_name)
-		VALUES ('00000000-0000-0000-0000-000000000001', -1, 'devdeck-test', 'Test User')
+		INSERT INTO users (id, github_id, login, username, display_name)
+		VALUES ('00000000-0000-0000-0000-000000000001', -1, 'devdeck-test', 'devdeck-test', 'Test User')
 		ON CONFLICT DO NOTHING
 	`)
 	return err
