@@ -35,7 +35,7 @@ export function ResetPasswordPage() {
     try {
       await resetPassword(token, password)
       navigate('/login?reset=success', { replace: true })
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t('common.error'))
     } finally {
       setLoading(false)

@@ -18,7 +18,7 @@ export function ForgotPasswordPage() {
     try {
       await forgotPassword(email)
       setSuccess(true)
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t('common.error'))
     } finally {
       setLoading(false)
