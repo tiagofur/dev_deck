@@ -241,7 +241,7 @@ export function NavSidebar({ isOpen, onClose, reviewCount }: NavSidebarProps) {
       {/* Mobile Drawer */}
       <div
         data-testid="mobile-drawer"
-        className={clsx('lg:hidden fixed inset-0 z-45', isOpen ? 'visible' : 'invisible')}
+        className={clsx('lg:hidden fixed inset-0 z-[60]', isOpen ? 'visible' : 'invisible')}
       >
         {/* Backdrop */}
         {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- backdrop click-to-close overlay; the drawer is also dismissible via its Close button and Escape */}
