@@ -195,3 +195,66 @@ func TestStore_CreateItem_WithoutOrg_SetsNullOrgID(t *testing.T) {
 		t.Fatalf("expected org_id to be nil, got %s", *it.OrgID)
 	}
 }
+
+func TestStore_ListItems_Security(t *testing.T) {
+	st, ctx := newStore(t)
+
+	userID := mustUUID(t, "00000000-0000-0000-0000-000000000001")
+	ctx = authctx.WithUserID(ctx, userID)
+
+	// Create a legitimate item
+	_, err := st.CreateItem(ctx, store.CreateItemInput{
+		Type:  items.TypeArticle,
+		Title: "Legit Item",
+		Tags:  []string{"secure"},
+	})
+	if err != nil {
+		t.Fatalf("failed to create item: %v", err)
+	}
+
+	// Attempt SQL injection via Tag filter
+	// If vulnerable, this could potentially bypass the WHERE clause or cause an error
+	maliciousTag := "secure') OR '1'='1"
+	res, err := st.ListItems(ctx, items.ListParams{
+		Tag: maliciousTag,
+	})
+
+	if err != nil {
+		// An error is actually a good sign if the driver rejects malformed input,
+		// but we expect it to just return 0 items because the tag doesn't match.
+		t.Logf("ListItems with malicious tag returned error (possibly safe): %v", err)
+	} else if res.Total > 0 {
+		// If res.Total > 0, it might mean the OR '1'='1' worked.
+		// However, in this case, ListItems adds archived=false by default.
+		// Let's check if it matched the legit item.
+		for _, it := range res.Items {
+			found := false
+			for _, tag := range it.Tags {
+				if tag == maliciousTag {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("SQL Injection successful? Found item %q which does not have tag %q", it.Title, maliciousTag)
+			}
+		}
+	}
+
+	// Attempt SQL injection via Q (search) filter
+	maliciousQuery := "') OR 1=1 --"
+	res, err = st.ListItems(ctx, items.ListParams{
+		Q: maliciousQuery,
+	})
+	if err != nil {
+		t.Logf("ListItems with malicious query returned error (possibly safe): %v", err)
+	} else if res.Total > 0 {
+		for _, it := range res.Items {
+			// If it matches "Legit Item" but the query is clearly not in any searchable field,
+			// it's an injection.
+			if it.Title != maliciousQuery && it.Description == nil {
+				t.Errorf("SQL Injection successful in Q? Found item %q which does not match query %q", it.Title, maliciousQuery)
+			}
+		}
+	}
+}
