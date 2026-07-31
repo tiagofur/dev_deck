@@ -409,6 +409,9 @@ func TestCookie_Refresh_SingleUse_SecondUseFails(t *testing.T) {
 		"password": cookieTestPassword,
 	}, nil)
 	loginCookie := findCookie(login, "devdeck_refresh")
+	if loginCookie == nil {
+		t.Fatal("login did not set cookie — likely DB connection issue")
+	}
 
 	// First refresh consumes the original token.
 	req := httptest.NewRequest(http.MethodPost, "/api/auth/refresh", nil)
