@@ -15,8 +15,6 @@ func (s *Service) ExchangeGitHubCode(ctx context.Context, clientID, clientSecret
 	// Build the request body with json.Marshal instead of raw fmt.Sprintf
 	// interpolation: a quote/backslash in code would otherwise break or inject
 	// into the JSON payload.
-	// #nosec G117 -- ClientSecret must be sent to GitHub's token endpoint; the
-	// field is not logged or exposed beyond this outbound request.
 	reqBody := struct {
 		ClientID     string `json:"client_id"`
 		ClientSecret string `json:"client_secret"`
@@ -26,6 +24,8 @@ func (s *Service) ExchangeGitHubCode(ctx context.Context, clientID, clientSecret
 		ClientSecret: clientSecret,
 		Code:         code,
 	}
+	// #nosec G117 -- ClientSecret must be sent to GitHub's token endpoint; the
+	// field is not logged or exposed beyond this outbound request.
 	body, err := json.Marshal(reqBody)
 	if err != nil {
 		return "", fmt.Errorf("marshal request body: %w", err)
