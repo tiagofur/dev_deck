@@ -41,13 +41,15 @@ type CommandSuggestion struct {
 }
 
 func (h *SuggestionsHandler) getCommandSuggestions(ctx context.Context, query string) ([]CommandSuggestion, error) {
-	// This uses a global query across ALL cheatsheet entries to find common labels/descriptions for a command.
+	// This uses a global query across public/official cheatsheet entries to find common labels/descriptions for a command.
 	// It's "collaborative" because it learns from what everyone else is writing.
 	q := `
-		SELECT label, command, description, tags, COUNT(*) as usage_count
-		FROM cheatsheet_entries
-		WHERE command ILIKE $1 OR label ILIKE $1
-		GROUP BY label, command, description, tags
+		SELECT ce.label, ce.command, ce.description, ce.tags, COUNT(*) as usage_count
+		FROM cheatsheet_entries ce
+		JOIN cheatsheets c ON c.id = ce.cheatsheet_id
+		WHERE (ce.command ILIKE $1 OR ce.label ILIKE $1)
+		  AND (c.visibility = 'public' OR c.is_official = TRUE)
+		GROUP BY ce.label, ce.command, ce.description, ce.tags
 		ORDER BY usage_count DESC
 		LIMIT 5
 	`
