@@ -180,36 +180,30 @@ func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListR
 		p.Offset = 0
 	}
 
-	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 1)
-	where := []string{scopeSQL}
-	args := append([]any{}, scopeArgs...)
-	idx := len(args) + 1
+	b := &sqlBuilder{}
+	where := []string{b.ownerClause(ctx, "user_id")}
 
 	if p.Type != "" {
-		where = append(where, fmt.Sprintf("item_type = $%d", idx))
-		args = append(args, p.Type)
-		idx++
+		where = append(where, fmt.Sprintf("item_type = %s", b.arg(p.Type)))
 	}
 
 	if p.Tag != "" {
-		where = append(where, fmt.Sprintf("($%d = ANY(tags) OR $%d = ANY(ai_tags))", idx, idx))
-		args = append(args, p.Tag)
-		idx++
+		tagP := b.arg(p.Tag)
+		where = append(where, fmt.Sprintf("(%[1]s = ANY(tags) OR %[1]s = ANY(ai_tags))", tagP))
 	}
 
 	if len(p.Stack) > 0 {
+		stackP := b.arg(p.Stack)
 		where = append(where, fmt.Sprintf(`(
-			EXISTS (SELECT 1 FROM unnest(tags) AS t WHERE lower(t) = ANY($%d::text[]))
-			OR EXISTS (SELECT 1 FROM unnest(ai_tags) AS t WHERE lower(t) = ANY($%d::text[]))
-			OR lower(COALESCE(meta->>'language','')) = ANY($%d::text[])
+			EXISTS (SELECT 1 FROM unnest(tags) AS t WHERE lower(t) = ANY(%[1]s::text[]))
+			OR EXISTS (SELECT 1 FROM unnest(ai_tags) AS t WHERE lower(t) = ANY(%[1]s::text[]))
+			OR lower(COALESCE(meta->>'language','')) = ANY(%[1]s::text[])
 			OR EXISTS (
 				SELECT 1
 				FROM jsonb_array_elements_text(COALESCE(meta->'topics','[]'::jsonb)) AS topic
-				WHERE lower(topic) = ANY($%d::text[])
+				WHERE lower(topic) = ANY(%[1]s::text[])
 			)
-		)`, idx, idx, idx, idx))
-		args = append(args, p.Stack)
-		idx++
+		)`, stackP))
 	}
 
 	if p.Favorites {
@@ -217,33 +211,27 @@ func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListR
 	}
 
 	if p.Archived != nil {
-		where = append(where, fmt.Sprintf("archived = $%d", idx))
-		args = append(args, *p.Archived)
-		idx++
+		where = append(where, fmt.Sprintf("archived = %s", b.arg(*p.Archived)))
 	} else {
 		where = append(where, "archived = false")
 	}
 
 	if p.Q != "" {
 		where = append(where, fmt.Sprintf(
-			"(title || ' ' || COALESCE(description,'') || ' ' || COALESCE(immutable_array_to_string(tags,' '),'')) %% $%d",
-			idx,
+			"(title || ' ' || COALESCE(description,'') || ' ' || COALESCE(immutable_array_to_string(tags,' '),'')) %% %s",
+			b.arg(p.Q),
 		))
-		args = append(args, p.Q)
-		idx++
 	}
 
 	if p.CreatedAfter != nil {
-		where = append(where, fmt.Sprintf("created_at > $%d", idx))
-		args = append(args, *p.CreatedAfter)
-		idx++
+		where = append(where, fmt.Sprintf("created_at > %s", b.arg(*p.CreatedAfter)))
 	}
 
 	whereSQL := strings.Join(where, " AND ")
 
 	var total int
-	countSQL := "SELECT COUNT(*) FROM items WHERE " + whereSQL
-	if err := s.Reader().QueryRow(ctx, countSQL, args...).Scan(&total); err != nil {
+	countSQL := fmt.Sprintf("SELECT COUNT(*) FROM items WHERE %s", whereSQL)
+	if err := s.Reader().QueryRow(ctx, countSQL, b.args...).Scan(&total); err != nil {
 		return nil, err
 	}
 
@@ -257,12 +245,11 @@ func (s *Store) ListItems(ctx context.Context, p items.ListParams) (*items.ListR
 		orderBy = "title ASC"
 	}
 
-	listArgs := append(args, p.Limit, p.Offset)
 	listSQL := fmt.Sprintf(
-		"SELECT %s FROM items WHERE %s ORDER BY %s LIMIT $%d OFFSET $%d",
-		itemColumns, whereSQL, orderBy, idx, idx+1,
+		"SELECT %s FROM items WHERE %s ORDER BY %s LIMIT %s OFFSET %s",
+		itemColumns, whereSQL, orderBy, b.arg(p.Limit), b.arg(p.Offset),
 	)
-	rows, err := s.Reader().Query(ctx, listSQL, listArgs...)
+	rows, err := s.Reader().Query(ctx, listSQL, b.args...)
 	if err != nil {
 		return nil, err
 	}
@@ -324,10 +311,9 @@ func (s *Store) UpdateItem(ctx context.Context, id uuid.UUID, in items.UpdateInp
 		it.Type = items.Type(*in.ItemType)
 	}
 
-	updateScopeSQL, updateScopeArgs := ownerClause(ctx, "user_id", 10)
-	updateArgs := append([]any{
-		it.Title, it.Notes, it.Tags, it.Archived, it.IsFavorite, it.WhySaved, it.WhenToUse, string(it.Type), id,
-	}, updateScopeArgs...)
+	ub := &sqlBuilder{}
+	ub.addAll(it.Title, it.Notes, it.Tags, it.Archived, it.IsFavorite, it.WhySaved, it.WhenToUse, string(it.Type), id)
+	updateScopeSQL := ub.ownerClause(ctx, "user_id")
 	updatedRow := tx.QueryRow(ctx, `
 		UPDATE items
 		SET title = $1,
@@ -341,7 +327,7 @@ func (s *Store) UpdateItem(ctx context.Context, id uuid.UUID, in items.UpdateInp
 		    updated_at = NOW()
 		WHERE id = $9 AND `+updateScopeSQL+`
 		RETURNING `+itemColumns,
-		updateArgs...)
+		ub.args...)
 
 	updated, err := scanItem(updatedRow)
 	if err != nil {

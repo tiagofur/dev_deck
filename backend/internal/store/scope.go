@@ -47,3 +47,24 @@ func ownerClause(ctx context.Context, column string, startIndex int) (string, []
 
 	return fmt.Sprintf("%s IS NULL", column), nil
 }
+
+// ownerClause builds the ownership filter for the current context using the
+// builder's positional placeholder tracking, so callers don't need to compute
+// start indexes manually.
+func (b *sqlBuilder) ownerClause(ctx context.Context, column string) string {
+	// If the column name contains a prefix (e.g. "i.user_id"), we need it for org_id too.
+	prefix := ""
+	if idx := strings.LastIndex(column, "."); idx != -1 {
+		prefix = column[:idx+1]
+	}
+
+	if orgID, ok := authctx.OrgID(ctx); ok {
+		return fmt.Sprintf("%sorg_id = %s", prefix, b.arg(orgID))
+	}
+
+	if userID, ok := currentUserID(ctx); ok {
+		return fmt.Sprintf("%s = %s AND %sorg_id IS NULL", column, b.arg(userID), prefix)
+	}
+
+	return fmt.Sprintf("%s IS NULL", column)
+}

@@ -121,24 +121,17 @@ func (s *Store) GetDeck(ctx context.Context, id uuid.UUID) (*Deck, error) {
 }
 
 func (s *Store) UpdateDeck(ctx context.Context, id uuid.UUID, in UpdateDeckInput) (*Deck, error) {
+	b := &sqlBuilder{}
 	sets := []string{}
-	args := []any{}
-	idx := 1
 
 	if in.Title != nil {
-		sets = append(sets, fmt.Sprintf("title = $%d", idx))
-		args = append(args, *in.Title)
-		idx++
+		sets = append(sets, fmt.Sprintf("title = %s", b.arg(*in.Title)))
 	}
 	if in.Description != nil {
-		sets = append(sets, fmt.Sprintf("description = $%d", idx))
-		args = append(args, *in.Description)
-		idx++
+		sets = append(sets, fmt.Sprintf("description = %s", b.arg(*in.Description)))
 	}
 	if in.IsPublic != nil {
-		sets = append(sets, fmt.Sprintf("is_public = $%d", idx))
-		args = append(args, *in.IsPublic)
-		idx++
+		sets = append(sets, fmt.Sprintf("is_public = %s", b.arg(*in.IsPublic)))
 	}
 
 	if len(sets) == 0 {
@@ -146,17 +139,15 @@ func (s *Store) UpdateDeck(ctx context.Context, id uuid.UUID, in UpdateDeckInput
 	}
 
 	sets = append(sets, "updated_at = NOW()")
-	idxID := idx
-	args = append(args, id)
-	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", idxID+1)
-	args = append(args, scopeArgs...)
+	idP := b.arg(id)
+	scopeSQL := b.ownerClause(ctx, "user_id")
 
 	q := fmt.Sprintf(
-		"UPDATE decks SET %s WHERE id = $%d AND %s RETURNING %s",
-		joinComma(sets), idxID, scopeSQL, deckColumns,
+		"UPDATE decks SET %s WHERE id = %s AND %s RETURNING %s",
+		joinComma(sets), idP, scopeSQL, deckColumns,
 	)
 
-	d, err := scanDeck(s.Reader().QueryRow(ctx, q, args...))
+	d, err := scanDeck(s.Reader().QueryRow(ctx, q, b.args...))
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrDeckNotFound

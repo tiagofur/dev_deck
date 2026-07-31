@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -90,4 +91,25 @@ func derefStr(s *string) string {
 		return ""
 	}
 	return *s
+}
+
+// sqlBuilder is a simple helper to build dynamic SQL queries with positional
+// placeholders. It prevents manual indexing errors and ensures all dynamic
+// values are passed as parameters.
+type sqlBuilder struct {
+	args []any
+}
+
+func (b *sqlBuilder) nextPlaceholder() string {
+	return fmt.Sprintf("$%d", len(b.args)+1)
+}
+
+func (b *sqlBuilder) arg(v any) string {
+	p := b.nextPlaceholder()
+	b.args = append(b.args, v)
+	return p
+}
+
+func (b *sqlBuilder) addAll(args ...any) {
+	b.args = append(b.args, args...)
 }
