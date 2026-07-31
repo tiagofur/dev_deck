@@ -740,7 +740,8 @@
     "system": "System",
     "settings": "Settings",
     "profile": "Profile",
-    "admin": "Admin"
+    "admin": "Admin",
+    "guide": "User Guide"
   },
   "topbar": {
     "search_placeholder": "Search items, commands, prompts... (press / )",

@@ -37,6 +37,7 @@ import {
   UnifiedCommandPalette,
   useGlobalShortcuts,
   ExplorePage,
+  UserGuidePage,
 } from '@devdeck/features'
 import { CaptureModal, ShortcutsModal } from '@devdeck/features'
 import { ConfirmHost, PageTransition, Toaster } from '@devdeck/ui'
@@ -238,10 +239,11 @@ function AnimatedRoutes(): ReactElement {
           <Route
             path="/settings"
             element={<AuthGuard>{withTransition(<SettingsPage />)}</AuthGuard>}
-          />
-          <Route
-            path="/workbench"
+          />          <Route path="/workbench"
             element={<AuthGuard>{withTransition(<WorkbenchPage />)}</AuthGuard>}
+          />
+          <Route path="/guide"
+            element={<AuthGuard>{withTransition(<UserGuidePage />)}</AuthGuard>}
           />
           <Route
             path="/admin"
