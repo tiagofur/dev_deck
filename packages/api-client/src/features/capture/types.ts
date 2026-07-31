@@ -57,6 +57,7 @@ export interface Item {
   enrichment_status: EnrichmentStatus
   archived: boolean
   is_favorite: boolean
+  org_id: string | null
   created_at: string
   updated_at: string
   last_seen_at: string | null

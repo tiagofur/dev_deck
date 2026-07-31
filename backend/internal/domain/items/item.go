@@ -92,17 +92,20 @@ type Item struct {
 // optional; nil / unset = unchanged. Mirrors the "edit the item you
 // just saved" flow in the desktop detail view.
 type UpdateInput struct {
-	Title      *string  `json:"title"`
-	Notes      *string  `json:"notes"`
-	Tags       []string `json:"tags"`
-	WhySaved   *string  `json:"why_saved"`
-	WhenToUse  *string  `json:"when_to_use"`
-	Archived   *bool    `json:"archived"`
-	IsFavorite *bool    `json:"is_favorite"`
+	Title      *string     `json:"title"`
+	Notes      *string     `json:"notes"`
+	Tags       []string    `json:"tags"`
+	WhySaved   *string     `json:"why_saved"`
+	WhenToUse  *string     `json:"when_to_use"`
+	Archived   *bool       `json:"archived"`
+	IsFavorite *bool       `json:"is_favorite"`
 	// ItemType lets the user reclassify an item (e.g. a snippet that
 	// was mis-detected as a note). It's optional and validated against
 	// IsValid before hitting the store.
 	ItemType *string `json:"item_type"`
+	// OrgID moves the item to a different workspace. Set to a UUID to
+	// move to an org workspace, or nil to move back to personal vault.
+	OrgID *uuid.UUID `json:"org_id"`
 }
 
 // ReviewAITagsInput is the PATCH /api/items/:id/ai-tags body.

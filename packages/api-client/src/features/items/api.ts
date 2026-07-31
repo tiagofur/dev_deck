@@ -65,6 +65,7 @@ export interface UpdateItemInput {
   archived?: boolean
   is_favorite?: boolean
   item_type?: ItemType
+  org_id?: string | null
 }
 
 export interface ReviewAITagsInput {

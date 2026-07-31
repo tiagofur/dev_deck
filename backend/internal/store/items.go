@@ -310,9 +310,12 @@ func (s *Store) UpdateItem(ctx context.Context, id uuid.UUID, in items.UpdateInp
 	if in.ItemType != nil {
 		it.Type = items.Type(*in.ItemType)
 	}
+	if in.OrgID != nil {
+		it.OrgID = in.OrgID
+	}
 
 	ub := &sqlBuilder{}
-	ub.addAll(it.Title, it.Notes, it.Tags, it.Archived, it.IsFavorite, it.WhySaved, it.WhenToUse, string(it.Type), id)
+	ub.addAll(it.Title, it.Notes, it.Tags, it.Archived, it.IsFavorite, it.WhySaved, it.WhenToUse, string(it.Type), it.OrgID, id)
 	updateScopeSQL := ub.ownerClause(ctx, "user_id")
 	updatedRow := tx.QueryRow(ctx, `
 		UPDATE items
@@ -324,8 +327,9 @@ func (s *Store) UpdateItem(ctx context.Context, id uuid.UUID, in items.UpdateInp
 		    why_saved = $6,
 		    when_to_use = $7,
 		    item_type = $8,
+		    org_id = $9,
 		    updated_at = NOW()
-		WHERE id = $9 AND `+updateScopeSQL+`
+		WHERE id = $10 AND `+updateScopeSQL+`
 		RETURNING `+itemColumns,
 		ub.args...)
 
