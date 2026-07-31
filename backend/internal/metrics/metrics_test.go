@@ -8,7 +8,9 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
+	dto "github.com/prometheus/client_model/go"
 )
 
 func TestInstrument(t *testing.T) {
@@ -93,14 +95,26 @@ func TestInstrument(t *testing.T) {
 		req := httptest.NewRequest("GET", "/duration-test", nil)
 		rec := httptest.NewRecorder()
 
-		// We can't easily check the histogram value directly without more complex testutil usage,
-		// but we can check if it exists in the registry.
 		handler.ServeHTTP(rec, req)
 
-		count := testutil.ToFloat64(HTTPRequestDuration.WithLabelValues("GET", "/duration-test", strconv.Itoa(http.StatusOK)))
-		// The histogram count should be at least 1 now
+		// Histograms return an Observer (not a Collector), so fetch the metric
+		// and inspect its sample count via the DTO representation instead of
+		// using testutil.ToFloat64.
+		obs, err := HTTPRequestDuration.GetMetricWithLabelValues("GET", "/duration-test", strconv.Itoa(http.StatusOK))
+		if err != nil {
+			t.Fatalf("failed to fetch histogram metric: %v", err)
+		}
+		metric, ok := obs.(prometheus.Metric)
+		if !ok {
+			t.Fatalf("expected prometheus.Metric, got %T", obs)
+		}
+		var dtoMetric dto.Metric
+		if err := metric.Write(&dtoMetric); err != nil {
+			t.Fatalf("failed to write metric: %v", err)
+		}
+		count := dtoMetric.GetHistogram().GetSampleCount()
 		if count < 1 {
-			t.Errorf("expected histogram count to be at least 1, got %f", count)
+			t.Errorf("expected histogram count to be at least 1, got %d", count)
 		}
 	})
 }
