@@ -63,7 +63,7 @@ export function Sidebar({
     <button
       type="button"
       onClick={() => setIsOpen(!isOpen)}
-      className="fixed top-4 left-4 z-50 p-2 bg-bg-card border-3 border-ink shadow-hard lg:hidden"
+      className="fixed top-4 left-4 z-[56] p-2 bg-bg-card border-3 border-ink shadow-hard lg:hidden"
       aria-label={isOpen ? t('nav.close_menu') : t('nav.open_menu')}
     >
       {isOpen ? <X size={20} strokeWidth={3} /> : <Menu size={20} strokeWidth={3} />}
@@ -127,13 +127,13 @@ export function Sidebar({
       {isOpen && (
         // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- backdrop click-to-close overlay; the drawer is also dismissible via its toggle button and Escape
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-[55] lg:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
       <aside
         className={clsx(
-          'fixed lg:hidden inset-y-0 left-0 w-72 z-40 bg-bg-elevated border-r-3 border-ink p-5 overflow-y-auto transition-transform duration-200',
+          'fixed lg:hidden inset-y-0 left-0 w-72 z-[55] bg-bg-elevated border-r-3 border-ink p-5 overflow-y-auto transition-transform duration-200',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
