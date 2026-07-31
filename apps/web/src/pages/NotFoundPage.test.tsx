@@ -6,7 +6,7 @@ import { NotFoundPage } from './NotFoundPage'
 describe('<NotFoundPage>', () => {
   it('renders the 404 heading and a link back home', () => {
     render(
-      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <MemoryRouter>
         <NotFoundPage />
       </MemoryRouter>,
     )
