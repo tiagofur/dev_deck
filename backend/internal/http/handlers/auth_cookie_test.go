@@ -345,6 +345,9 @@ func TestCookie_Refresh_FlagOn_RejectsDisallowedOrigin(t *testing.T) {
 		"password": cookieTestPassword,
 	}, nil)
 	loginCookie := findCookie(login, "devdeck_refresh")
+	if loginCookie == nil {
+		t.Fatal("login did not set cookie — likely DB connection issue")
+	}
 
 	req := httptest.NewRequest(http.MethodPost, "/api/auth/refresh", nil)
 	req.Header.Set("Origin", "https://evil.example.com")

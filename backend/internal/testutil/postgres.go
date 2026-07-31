@@ -80,6 +80,22 @@ func acquirePool(t *testing.T) (*pgxpool.Pool, error) {
 	defer sharedMu.Unlock()
 
 	ctx := context.Background()
+
+	// Liveness check: if we have a cached container, make sure it's still
+	// running (e.g. not OOM-killed on a resource-constrained CI runner).
+	if sharedContainer != nil {
+		alive := false
+		if state, err := sharedContainer.State(ctx); err == nil {
+			alive = state.Running
+		}
+		if !alive {
+			// Container died — clean up so we spin up a fresh one below.
+			_ = sharedContainer.Terminate(ctx)
+			sharedContainer = nil
+			sharedDSN = ""
+		}
+	}
+
 	if sharedContainer == nil {
 		if err := preflightDocker(ctx); err != nil {
 			return nil, err
