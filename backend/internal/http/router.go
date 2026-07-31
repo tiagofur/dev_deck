@@ -178,16 +178,16 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			if cfg.AuthMode == "jwt" {
 				r.Group(func(r chi.Router) {
 					if !cfg.RateLimitDisabled {
-					r.Use(httprate.LimitBy(
-						cfg.AuthRateLimitPerMinute,
-						1*time.Minute,
-						func(r *http.Request) (string, error) { return r.RemoteAddr, nil },
-						httprate.WithLimitHandler(func(w http.ResponseWriter, _ *http.Request) {
-							w.Header().Set("Content-Type", "application/json")
-							w.WriteHeader(http.StatusTooManyRequests)
-							_, _ = w.Write([]byte(`{"error":{"code":"RATE_LIMITED","message":"too many requests, slow down"}}`))
-						}),
-					))
+						r.Use(httprate.LimitBy(
+							cfg.AuthRateLimitPerMinute,
+							1*time.Minute,
+							func(r *http.Request) (string, error) { return r.RemoteAddr, nil },
+							httprate.WithLimitHandler(func(w http.ResponseWriter, _ *http.Request) {
+								w.Header().Set("Content-Type", "application/json")
+								w.WriteHeader(http.StatusTooManyRequests)
+								_, _ = w.Write([]byte(`{"error":{"code":"RATE_LIMITED","message":"too many requests, slow down"}}`))
+							}),
+						))
 					}
 
 					r.Get("/providers", authH.Providers)
