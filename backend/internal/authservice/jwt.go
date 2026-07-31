@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"devdeck/internal/domain/auth"
@@ -22,6 +23,7 @@ type Service struct {
 	accessSecret []byte
 	accessTTL    time.Duration
 	refreshTTL   time.Duration
+	httpClient   *http.Client
 }
 
 func New(secret string, accessTTL, refreshTTL time.Duration) *Service {
@@ -29,6 +31,7 @@ func New(secret string, accessTTL, refreshTTL time.Duration) *Service {
 		accessSecret: []byte(secret),
 		accessTTL:    accessTTL,
 		refreshTTL:   refreshTTL,
+		httpClient:   &http.Client{Timeout: 10 * time.Second},
 	}
 }
 
