@@ -28,6 +28,7 @@ import {
   WorkbenchPage,
   UnifiedCommandPalette,
   useGlobalShortcuts,
+  UserGuidePage,
 } from '@devdeck/features'
 import { ConfirmHost, PageTransition, Toaster } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
@@ -279,6 +280,12 @@ function AnimatedRoutes() {
             path="/workbench"
             element={
               <AuthGuard>{withTransition(<WorkbenchPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/guide"
+            element={
+              <AuthGuard>{withTransition(<UserGuidePage />)}</AuthGuard>
             }
           />
           <Route

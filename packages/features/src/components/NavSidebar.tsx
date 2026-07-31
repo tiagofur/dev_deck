@@ -12,7 +12,8 @@ import {
   Compass,
   Settings as SettingsIcon, 
   User, 
-  Shield 
+  Shield,
+  BookMarked
 } from 'lucide-react'
 import { useLocation, Link, useNavigate } from 'react-router-dom'
 import { usePreferences, useMe, useFeatureFlags } from '@devdeck/api-client'
@@ -191,6 +192,13 @@ export function NavSidebar({ isOpen, onClose, reviewCount }: NavSidebarProps) {
             icon={User}
             label={t('nav.profile')}
             active={isActive('/profile')}
+            onClick={onClose}
+          />
+          <NavItem
+            to="/guide"
+            icon={BookMarked}
+            label={t('nav.guide')}
+            active={isActive('/guide')}
             onClick={onClose}
           />
           {user?.role === 'admin' && (
