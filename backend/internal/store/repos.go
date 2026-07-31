@@ -156,35 +156,25 @@ func (s *Store) ListRepos(ctx context.Context, p repos.ListParams) (*repos.ListR
 		p.Offset = 0
 	}
 
-	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 1)
-	where := []string{scopeSQL, "item_type = 'repo'"}
-	args := append([]any{}, scopeArgs...)
-	idx := len(args) + 1
+	b := &sqlBuilder{}
+	where := []string{b.ownerClause(ctx, "user_id"), "item_type = 'repo'"}
 
 	if p.Archived != nil {
-		where = append(where, fmt.Sprintf("archived = $%d", idx))
-		args = append(args, *p.Archived)
-		idx++
+		where = append(where, fmt.Sprintf("archived = %s", b.arg(*p.Archived)))
 	} else {
 		where = append(where, "archived = false")
 	}
 	if p.Lang != "" {
-		where = append(where, fmt.Sprintf("meta->>'language' = $%d", idx))
-		args = append(args, p.Lang)
-		idx++
+		where = append(where, fmt.Sprintf("meta->>'language' = %s", b.arg(p.Lang)))
 	}
 	if p.Tag != "" {
-		where = append(where, fmt.Sprintf("$%d = ANY(tags)", idx))
-		args = append(args, p.Tag)
-		idx++
+		where = append(where, fmt.Sprintf("%s = ANY(tags)", b.arg(p.Tag)))
 	}
 	if p.Q != "" {
 		where = append(where, fmt.Sprintf(
-			"(title || ' ' || COALESCE(description,'') || ' ' || COALESCE(immutable_array_to_string(tags,' '),'')) %% $%d",
-			idx,
+			"(title || ' ' || COALESCE(description,'') || ' ' || COALESCE(immutable_array_to_string(tags,' '),'')) %% %s",
+			b.arg(p.Q),
 		))
-		args = append(args, p.Q)
-		idx++
 	}
 
 	orderBy := "created_at DESC"
@@ -200,17 +190,16 @@ func (s *Store) ListRepos(ctx context.Context, p repos.ListParams) (*repos.ListR
 	whereSQL := strings.Join(where, " AND ")
 
 	var total int
-	countSQL := "SELECT COUNT(*) FROM items WHERE " + whereSQL
-	if err := s.Reader().QueryRow(ctx, countSQL, args...).Scan(&total); err != nil {
+	countSQL := fmt.Sprintf("SELECT COUNT(*) FROM items WHERE %s", whereSQL)
+	if err := s.Reader().QueryRow(ctx, countSQL, b.args...).Scan(&total); err != nil {
 		return nil, err
 	}
 
-	listArgs := append(args, p.Limit, p.Offset)
 	listSQL := fmt.Sprintf(
-		"SELECT %s FROM items WHERE %s ORDER BY %s LIMIT $%d OFFSET $%d",
-		itemColumns, whereSQL, orderBy, idx, idx+1,
+		"SELECT %s FROM items WHERE %s ORDER BY %s LIMIT %s OFFSET %s",
+		itemColumns, whereSQL, orderBy, b.arg(p.Limit), b.arg(p.Offset),
 	)
-	rows, err := s.Reader().Query(ctx, listSQL, listArgs...)
+	rows, err := s.Reader().Query(ctx, listSQL, b.args...)
 	if err != nil {
 		return nil, err
 	}

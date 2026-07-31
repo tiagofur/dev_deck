@@ -46,17 +46,14 @@ func scanEntry(row pgx.Row) (*cheatsheets.Entry, error) {
 // ───── Cheatsheets CRUD ─────
 
 func (s *Store) ListCheatsheets(ctx context.Context, category string) ([]*cheatsheets.Cheatsheet, error) {
-	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 1)
-	q := `SELECT ` + cheatColumns + ` FROM cheatsheets WHERE ` + scopeSQL
-	args := append([]any{}, scopeArgs...)
-	idx := len(args) + 1
+	b := &sqlBuilder{}
+	q := `SELECT ` + cheatColumns + ` FROM cheatsheets WHERE ` + b.ownerClause(ctx, "user_id")
 	if category != "" {
-		q += fmt.Sprintf(` AND category = $%d`, idx)
-		args = append(args, category)
+		q += fmt.Sprintf(` AND category = %s`, b.arg(category))
 	}
 	q += ` ORDER BY title ASC`
 
-	rows, err := s.Reader().Query(ctx, q, args...)
+	rows, err := s.Reader().Query(ctx, q, b.args...)
 	if err != nil {
 		return nil, err
 	}
@@ -135,39 +132,26 @@ func (s *Store) CreateCheatsheet(ctx context.Context, in cheatsheets.CreateCheat
 }
 
 func (s *Store) UpdateCheatsheet(ctx context.Context, id uuid.UUID, in cheatsheets.UpdateCheatsheetInput) (*cheatsheets.Cheatsheet, error) {
+	b := &sqlBuilder{}
 	sets := []string{}
-	args := []any{}
-	idx := 1
 
 	if in.Slug != nil {
-		sets = append(sets, fmt.Sprintf("slug = $%d", idx))
-		args = append(args, *in.Slug)
-		idx++
+		sets = append(sets, fmt.Sprintf("slug = %s", b.arg(*in.Slug)))
 	}
 	if in.Title != nil {
-		sets = append(sets, fmt.Sprintf("title = $%d", idx))
-		args = append(args, *in.Title)
-		idx++
+		sets = append(sets, fmt.Sprintf("title = %s", b.arg(*in.Title)))
 	}
 	if in.Category != nil {
-		sets = append(sets, fmt.Sprintf("category = $%d", idx))
-		args = append(args, *in.Category)
-		idx++
+		sets = append(sets, fmt.Sprintf("category = %s", b.arg(*in.Category)))
 	}
 	if in.Icon != nil {
-		sets = append(sets, fmt.Sprintf("icon = $%d", idx))
-		args = append(args, *in.Icon)
-		idx++
+		sets = append(sets, fmt.Sprintf("icon = %s", b.arg(*in.Icon)))
 	}
 	if in.Color != nil {
-		sets = append(sets, fmt.Sprintf("color = $%d", idx))
-		args = append(args, *in.Color)
-		idx++
+		sets = append(sets, fmt.Sprintf("color = %s", b.arg(*in.Color)))
 	}
 	if in.Description != nil {
-		sets = append(sets, fmt.Sprintf("description = $%d", idx))
-		args = append(args, *in.Description)
-		idx++
+		sets = append(sets, fmt.Sprintf("description = %s", b.arg(*in.Description)))
 	}
 
 	if len(sets) == 0 {
@@ -175,14 +159,13 @@ func (s *Store) UpdateCheatsheet(ctx context.Context, id uuid.UUID, in cheatshee
 	}
 
 	sets = append(sets, "updated_at = NOW()")
-	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", idx+1)
-	args = append(args, id)
-	args = append(args, scopeArgs...)
+	idP := b.arg(id)
+	scopeSQL := b.ownerClause(ctx, "user_id")
 	q := fmt.Sprintf(
-		"UPDATE cheatsheets SET %s WHERE id = $%d AND %s RETURNING %s",
-		strings.Join(sets, ", "), idx, scopeSQL, cheatColumns,
+		"UPDATE cheatsheets SET %s WHERE id = %s AND %s RETURNING %s",
+		strings.Join(sets, ", "), idP, scopeSQL, cheatColumns,
 	)
-	row := s.Reader().QueryRow(ctx, q, args...)
+	row := s.Reader().QueryRow(ctx, q, b.args...)
 	c, err := scanCheatsheet(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -212,22 +195,20 @@ func (s *Store) DeleteCheatsheet(ctx context.Context, id uuid.UUID) error {
 // ───── Discovery & Social ─────
 
 func (s *Store) ExploreCheatsheets(ctx context.Context, category string, officialOnly bool) ([]*cheatsheets.Cheatsheet, error) {
+	b := &sqlBuilder{}
 	q := `SELECT ` + cheatColumns + ` FROM cheatsheets WHERE (visibility = 'public' OR is_official = TRUE)`
-	args := []any{}
-	idx := 1
 
 	if officialOnly {
 		q += ` AND is_official = TRUE`
 	}
 
 	if category != "" {
-		q += fmt.Sprintf(` AND category = $%d`, idx)
-		args = append(args, category)
+		q += fmt.Sprintf(` AND category = %s`, b.arg(category))
 	}
 
 	q += ` ORDER BY is_official DESC, fork_count DESC, title ASC LIMIT 50`
 
-	rows, err := s.Reader().Query(ctx, q, args...)
+	rows, err := s.Reader().Query(ctx, q, b.args...)
 	if err != nil {
 		return nil, err
 	}
@@ -407,43 +388,33 @@ func (s *Store) GetEntry(ctx context.Context, id uuid.UUID) (*cheatsheets.Entry,
 }
 
 func (s *Store) UpdateEntry(ctx context.Context, id uuid.UUID, in cheatsheets.UpdateEntryInput) (*cheatsheets.Entry, error) {
+	b := &sqlBuilder{}
 	sets := []string{}
-	args := []any{}
-	idx := 1
 
 	if in.Label != nil {
-		sets = append(sets, fmt.Sprintf("label = $%d", idx))
-		args = append(args, *in.Label)
-		idx++
+		sets = append(sets, fmt.Sprintf("label = %s", b.arg(*in.Label)))
 	}
 	if in.Command != nil {
-		sets = append(sets, fmt.Sprintf("command = $%d", idx))
-		args = append(args, *in.Command)
-		idx++
+		sets = append(sets, fmt.Sprintf("command = %s", b.arg(*in.Command)))
 	}
 	if in.Description != nil {
-		sets = append(sets, fmt.Sprintf("description = $%d", idx))
-		args = append(args, *in.Description)
-		idx++
+		sets = append(sets, fmt.Sprintf("description = %s", b.arg(*in.Description)))
 	}
 	if in.Tags != nil {
-		sets = append(sets, fmt.Sprintf("tags = $%d", idx))
-		args = append(args, in.Tags)
-		idx++
+		sets = append(sets, fmt.Sprintf("tags = %s", b.arg(in.Tags)))
 	}
 
 	if len(sets) == 0 {
 		return s.GetEntry(ctx, id)
 	}
 
-	scopeSQL, scopeArgs := ownerClause(ctx, "c.user_id", idx+1)
-	args = append(args, id)
-	args = append(args, scopeArgs...)
+	idP := b.arg(id)
+	scopeSQL := b.ownerClause(ctx, "c.user_id")
 	q := fmt.Sprintf(
-		"UPDATE cheatsheet_entries ce SET %s FROM cheatsheets c WHERE ce.cheatsheet_id = c.id AND ce.id = $%d AND %s RETURNING %s",
-		strings.Join(sets, ", "), idx, scopeSQL, entryColumnsPrefixed,
+		"UPDATE cheatsheet_entries ce SET %s FROM cheatsheets c WHERE ce.cheatsheet_id = c.id AND ce.id = %s AND %s RETURNING %s",
+		strings.Join(sets, ", "), idP, scopeSQL, entryColumnsPrefixed,
 	)
-	row := s.Reader().QueryRow(ctx, q, args...)
+	row := s.Reader().QueryRow(ctx, q, b.args...)
 	e, err := scanEntry(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
