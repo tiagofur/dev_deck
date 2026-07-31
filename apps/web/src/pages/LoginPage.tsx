@@ -66,7 +66,7 @@ export function LoginPage() {
     try {
       await loginLocal(email, password)
       navigate('/', { replace: true })
-    } catch (err) {
+    } catch (err: unknown) {
       setLoginError(err instanceof Error ? err.message : t('auth.login_error'))
     } finally {
       setLoading(false)

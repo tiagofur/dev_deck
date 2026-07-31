@@ -30,7 +30,7 @@ export function RegisterPage() {
     try {
       await registerUser(email, password, inviteCode)
       setSuccess(true)
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t('auth.register_error'))
     } finally {
       setLoading(false)
