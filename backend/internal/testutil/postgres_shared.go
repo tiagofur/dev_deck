@@ -15,9 +15,9 @@ import (
 )
 
 var (
-	migrationsSQL  []string
-	migrationsOnce sync.Once
-	migrationsErr  error
+	migrationsSQL   []string
+	migrationsOnce  = new(sync.Once)
+	migrationsErr   error
 )
 
 func waitReady(ctx context.Context, pool *pgxpool.Pool) error {

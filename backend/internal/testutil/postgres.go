@@ -93,6 +93,10 @@ func acquirePool(t *testing.T) (*pgxpool.Pool, error) {
 			_ = sharedContainer.Terminate(ctx)
 			sharedContainer = nil
 			sharedDSN = ""
+			// Reset migrations sync.Once so they re-apply on the new container.
+			// The SQL strings are already cached in memory, so we only reset
+			// the Once — no need to clear migrationsSQL.
+			migrationsOnce = new(sync.Once)
 		}
 	}
 
