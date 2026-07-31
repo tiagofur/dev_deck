@@ -19,7 +19,8 @@ func IARateLimit(proLimit, freeLimit int) func(http.Handler) http.Handler {
 		if userID, ok := authctx.UserID(r.Context()); ok {
 			return userID.String(), nil
 		}
-		return httprate.KeyByIP(r)
+		// Use RemoteAddr directly (httprate.KeyByIP is deprecated in v0.16)
+		return r.RemoteAddr, nil
 	}
 
 	limitHandler := httprate.WithLimitHandler(func(w http.ResponseWriter, _ *http.Request) {
@@ -28,8 +29,8 @@ func IARateLimit(proLimit, freeLimit int) func(http.Handler) http.Handler {
 		_, _ = w.Write([]byte(`{"error":{"code":"AI_RATE_LIMITED","message":"cuota de IA agotada por esta hora"}}`))
 	})
 
-	proLimiter := httprate.Limit(proLimit, 1*time.Hour, httprate.WithKeyFuncs(keyFunc), limitHandler)
-	freeLimiter := httprate.Limit(freeLimit, 1*time.Hour, httprate.WithKeyFuncs(keyFunc), limitHandler)
+	proLimiter := httprate.LimitBy(proLimit, 1*time.Hour, keyFunc, limitHandler)
+	freeLimiter := httprate.LimitBy(freeLimit, 1*time.Hour, keyFunc, limitHandler)
 
 	return func(next http.Handler) http.Handler {
 		proHandler := proLimiter(next)
