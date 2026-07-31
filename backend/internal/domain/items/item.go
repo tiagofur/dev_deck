@@ -103,6 +103,9 @@ type UpdateInput struct {
 	// was mis-detected as a note). It's optional and validated against
 	// IsValid before hitting the store.
 	ItemType *string `json:"item_type"`
+	// OrgID moves the item to a different workspace. Set to a UUID to
+	// move to an org workspace, or nil to move back to personal vault.
+	OrgID *uuid.UUID `json:"org_id"`
 }
 
 // ReviewAITagsInput is the PATCH /api/items/:id/ai-tags body.

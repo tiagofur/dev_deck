@@ -60,6 +60,7 @@ function makeItem(patch: Partial<Item> = {}): Item {
     enrichment_status: 'ok',
     archived: false,
     is_favorite: false,
+    org_id: null,
     created_at: '2026-04-08T00:00:00Z',
     updated_at: '2026-04-08T00:00:00Z',
     last_seen_at: null,

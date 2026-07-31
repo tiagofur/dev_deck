@@ -642,7 +642,10 @@
       "add_step": "+ Add step",
       "execution_success": "Executed successfully",
       "copy_command_toast": "Command copied"
-    }
+    },
+    "workspace_title": "Workspace",
+    "move_to_workspace": "Move to workspace",
+    "currently_here": "Currently here"
   },
   "circles": {
     "title": "Circles",
@@ -1065,6 +1068,7 @@
     "personal_vault": "Personal Vault",
     "workspaces_title": "Workspaces",
     "create_team": "Create Team",
-    "team_name_prompt": "Enter the name for your new team:"
+    "team_name_prompt": "Enter the name for your new team:",
+    "unknown": "Unknown workspace"
   }
 }

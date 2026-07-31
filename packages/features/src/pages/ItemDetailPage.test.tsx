@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
 	useCapture: vi.fn(),
 	useCircles: vi.fn(),
 	useShareToCircle: vi.fn(),
+	useUserOrgs: vi.fn(),
 	useFeatureFlags: vi.fn(),
 	showToast: vi.fn(),
 	confirm: vi.fn(),
@@ -54,6 +55,7 @@ vi.mock('@devdeck/api-client', async () => {
 		useCapture: mocks.useCapture,
 		useCircles: mocks.useCircles,
 		useShareToCircle: mocks.useShareToCircle,
+		useUserOrgs: mocks.useUserOrgs,
 		useFeatureFlags: mocks.useFeatureFlags,
 	}
 })
@@ -85,6 +87,7 @@ const item = {
 	enrichment_status: 'ok',
 	archived: false,
 	is_favorite: false,
+	org_id: null,
 	created_at: '2026-04-30T00:00:00Z',
 	updated_at: '2026-04-30T00:00:00Z',
 	last_seen_at: null,
@@ -114,6 +117,7 @@ describe('<ItemDetailPage>', () => {
 		mocks.useCapture.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
 		mocks.useCircles.mockReturnValue({ data: [], isLoading: false })
 		mocks.useShareToCircle.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+		mocks.useUserOrgs.mockReturnValue({ data: { orgs: [] }, isLoading: false })
 		mocks.useFeatureFlags.mockReturnValue({ realtime: false })
 	})
 

@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
 	ArrowLeft,
+	ArrowRightLeft,
 	Brain,
 	Clipboard,
 	ExternalLink,
 	FileText,
+	Globe,
 	Library,
 	Plus,
 	Play,
@@ -30,6 +32,7 @@ import {
 	useCapture,
 	useCircles,
 	useShareToCircle,
+	useUserOrgs,
 	type Item,
 	type Runbook,
 	type RunbookStep,
@@ -40,6 +43,7 @@ import { TeamReviewCard } from '../components/TeamReviewCard'
 import { AppShell } from '../components/AppShell'
 import { ShareToCirclePanel } from '../components/ShareToCirclePanel'
 import { useTranslation, type TFunction } from '@devdeck/i18n'
+
 
 export function ItemDetailPage() {
 	const { t } = useTranslation()
@@ -262,20 +266,25 @@ export function ItemDetailPage() {
 						onApply={applyAITags}
 						saving={reviewAITags.isPending}
 					/>
-				</div>
-
-				<aside>
-					<div className="lg:sticky lg:top-24 space-y-4">
-						<RelatedItemsCard id={id} />
-						<TeamReviewCard
-							item={currentItem}
-							saving={updateItem.isPending}
-							onMark={markForTeamReview}
-							onApprove={approveTeamReview}
-							onRemove={removeFromTeamReview}
-							onCopy={copyShareSummary}
-						/>
-						<div className="bg-bg-card border-3 border-ink shadow-hard p-5">
+				</div>					<aside>
+						<div className="lg:sticky lg:top-24 space-y-4">
+							<RelatedItemsCard id={id} />
+							<TeamReviewCard
+								item={currentItem}
+								saving={updateItem.isPending}
+								onMark={markForTeamReview}
+								onApprove={approveTeamReview}
+								onRemove={removeFromTeamReview}
+								onCopy={copyShareSummary}
+							/>
+							<MoveToWorkspacePanel
+								item={currentItem}
+								saving={updateItem.isPending}
+								onMove={async (orgId) => {
+									await updateItem.mutateAsync({ id: currentItem.id, input: { org_id: orgId } })
+								}}
+							/>
+							<div className="bg-bg-card border-3 border-ink shadow-hard p-5">
 							<h3 className="font-display font-black uppercase text-sm tracking-widest mb-3">{t('item_detail.actions_title')}</h3>
 							<div className="flex flex-col gap-3">
 							{currentItem.url && (
@@ -735,6 +744,112 @@ function AITagsReviewCard({
 					{t('item_detail.save_draft')}
 				</Button>
 			</div>
+		</div>
+	)
+}
+
+function MoveToWorkspacePanel({
+	item,
+	saving,
+	onMove,
+}: {
+	item: Item
+	saving: boolean
+	onMove: (orgId: string | null) => Promise<void>
+}) {
+	const { t } = useTranslation()
+	const { data: orgsRes } = useUserOrgs()
+	const [showPicker, setShowPicker] = useState(false)
+	const orgs = orgsRes?.orgs || []
+	const currentOrg = orgs.find(o => o.id === item.org_id)
+	const isPersonal = !item.org_id
+
+	return (
+		<div className="bg-bg-card border-3 border-ink shadow-hard p-5">
+			<h3 className="font-display font-black uppercase text-sm tracking-widest mb-3 flex items-center gap-2">
+				<ArrowRightLeft size={16} strokeWidth={3} />
+				{t('item_detail.workspace_title')}
+			</h3>
+
+			<div className="flex items-center gap-2 mb-3">
+				<div className="p-1 border-2 border-ink">
+					{isPersonal ? <Globe size={14} /> : <Users size={14} />}
+				</div>
+				<span className="font-mono text-[10px] text-ink-soft">
+					{isPersonal ? t('workspace.personal_vault') : currentOrg?.name || t('workspace.unknown')}
+				</span>
+			</div>
+
+			{!showPicker ? (
+				orgs.length > 0 || !isPersonal ? (
+					<Button
+						variant="secondary"
+						size="sm"
+						onClick={() => setShowPicker(true)}
+					>
+						<span className="flex items-center gap-2">
+							<ArrowRightLeft size={14} strokeWidth={3} />
+							{t('item_detail.move_to_workspace')}
+						</span>
+					</Button>
+				) : null
+			) : (
+				<div className="space-y-2">
+					<button
+						onClick={async () => {
+							try {
+								await onMove(null)
+								setShowPicker(false)
+							} catch (err) {
+								showToast((err as Error).message || t('common.error'), 'error')
+							}
+						}}
+						disabled={saving || isPersonal}
+						className={`w-full flex items-center gap-3 p-3 border-2 border-ink text-left transition-all
+							${isPersonal ? 'bg-accent-yellow/10 opacity-60' : 'bg-bg-card hover:bg-accent-yellow/20'}`}
+					>
+						<div className="p-1 border-2 border-ink bg-bg-card">
+							<Globe size={14} />
+						</div>
+						<div>
+							<p className="font-display font-black uppercase text-[10px] tracking-wider">{t('workspace.personal_vault')}</p>
+							{isPersonal && <p className="font-mono text-[9px] text-ink-soft">{t('item_detail.currently_here')}</p>}
+						</div>
+					</button>
+
+					{orgs.map(org => (
+						<button
+							key={org.id}
+							onClick={async () => {
+								try {
+									await onMove(org.id)
+									setShowPicker(false)
+								} catch (err) {
+									showToast((err as Error).message || t('common.error'), 'error')
+								}
+							}}
+							disabled={saving || item.org_id === org.id}
+							className={`w-full flex items-center gap-3 p-3 border-2 border-ink text-left transition-all
+								${item.org_id === org.id ? 'bg-accent-yellow/10 opacity-60' : 'bg-bg-card hover:bg-accent-yellow/20'}`}
+						>
+							<div className="p-1 border-2 border-ink bg-bg-card">
+								<Users size={14} />
+							</div>
+							<div>
+								<p className="font-display font-black uppercase text-[10px] tracking-wider">{org.name}</p>
+								{item.org_id === org.id && <p className="font-mono text-[9px] text-ink-soft">{t('item_detail.currently_here')}</p>}
+							</div>
+						</button>
+					))}
+
+					<button
+						onClick={() => setShowPicker(false)}
+						className="w-full py-2 text-center font-mono text-[10px] uppercase font-bold text-ink-soft hover:text-ink hover:bg-bg-primary transition-all"
+					>
+						{t('common.cancel')}
+					</button>
+				</div>
+			)}
 		</div>
 	)
 }

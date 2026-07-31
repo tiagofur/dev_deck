@@ -642,7 +642,10 @@
       "add_step": "+ Agregar paso",
       "execution_success": "Ejecutado con éxito",
       "copy_command_toast": "Comando copiado"
-    }
+    },
+    "workspace_title": "Espacio de trabajo",
+    "move_to_workspace": "Mover a espacio de trabajo",
+    "currently_here": "Estás aquí"
   },
   "circles": {
     "title": "Círculos",
@@ -1065,6 +1068,7 @@
     "personal_vault": "Bóveda personal",
     "workspaces_title": "Espacios de trabajo",
     "create_team": "Crear equipo",
-    "team_name_prompt": "Ingresa el nombre de tu nuevo equipo:"
+    "team_name_prompt": "Ingresa el nombre de tu nuevo equipo:",
+    "unknown": "Espacio de trabajo desconocido"
   }
 }
