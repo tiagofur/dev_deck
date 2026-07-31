@@ -228,17 +228,32 @@ func (s *Store) ReorderCommands(ctx context.Context, itemID uuid.UUID, ids []uui
 		return ErrNotFound
 	}
 
-	for i, id := range ids {
-		tag, err := tx.Exec(ctx, `
-			UPDATE item_commands
-			SET position = $1
-			WHERE id = $2 AND item_id = $3
-		`, i, id, itemID)
-		if err != nil {
-			return err
-		}
-		if tag.RowsAffected() == 0 {
-			return fmt.Errorf("command %s not found in item %s", id, itemID)
+	positions := make([]int, len(ids))
+	for i := range ids {
+		positions[i] = i
+	}
+
+	tag, err := tx.Exec(ctx, `
+		UPDATE item_commands ic
+		SET position = t.pos
+		FROM unnest($1::uuid[], $2::int[]) AS t(id, pos)
+		WHERE ic.id = t.id AND ic.item_id = $3
+	`, ids, positions, itemID)
+	if err != nil {
+		return err
+	}
+
+	if tag.RowsAffected() != int64(len(ids)) {
+		// On error, find which ID is missing to maintain exact error behavior.
+		for _, id := range ids {
+			var exists bool
+			err := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM item_commands WHERE id = $1 AND item_id = $2)`, id, itemID).Scan(&exists)
+			if err != nil {
+				return err
+			}
+			if !exists {
+				return fmt.Errorf("command %s not found in item %s", id, itemID)
+			}
 		}
 	}
 	return tx.Commit(ctx)
