@@ -130,9 +130,17 @@ func (h *AuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ghUser, err := h.fetchGitHubUser(code)
+	// Exchange code for access token.
+	ghToken, err := h.authService.ExchangeGitHubCode(r.Context(), h.config.GitHubClientID, h.config.GitHubClientSecret, code)
 	if err != nil {
-		writeError(w, http.StatusBadGateway, "OAUTH_ERROR", err.Error())
+		writeError(w, http.StatusBadGateway, "GITHUB_ERROR", "failed to exchange code: "+err.Error())
+		return
+	}
+
+	// Fetch GitHub user profile.
+	ghUser, err := h.authService.FetchGitHubUser(r.Context(), ghToken)
+	if err != nil {
+		writeError(w, http.StatusBadGateway, "GITHUB_ERROR", "failed to fetch github user: "+err.Error())
 		return
 	}
 
@@ -195,50 +203,6 @@ func (h *AuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 
 	redirectTo, _ := appendTokenPair(redirectBase, pair)
 	http.Redirect(w, r, redirectTo, http.StatusTemporaryRedirect)
-}
-
-func (h *AuthHandler) fetchGitHubUser(code string) (*auth.GitHubUser, error) {
-	// 1. Exchange code for token
-	data := url.Values{}
-	data.Set("client_id", h.config.GitHubClientID)
-	data.Set("client_secret", h.config.GitHubClientSecret)
-	data.Set("code", code)
-
-	req, _ := http.NewRequest("POST", "https://github.com/login/oauth/access_token", strings.NewReader(data.Encode()))
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	var tokenResp struct {
-		AccessToken string `json:"access_token"`
-		Error       string `json:"error"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
-		return nil, err
-	}
-	if tokenResp.Error != "" {
-		return nil, errors.New(tokenResp.Error)
-	}
-
-	// 2. Fetch user profile
-	req, _ = http.NewRequest("GET", "https://api.github.com/user", nil)
-	req.Header.Set("Authorization", "Bearer "+tokenResp.AccessToken)
-
-	resp, err = http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	var ghUser auth.GitHubUser
-	if err := json.NewDecoder(resp.Body).Decode(&ghUser); err != nil {
-		return nil, err
-	}
-	return &ghUser, nil
 }
 
 // POST /api/auth/refresh
