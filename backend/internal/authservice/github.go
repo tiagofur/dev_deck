@@ -1,23 +1,36 @@
 package authservice
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"devdeck/internal/domain/auth"
 )
 
 // ExchangeGitHubCode exchanges an authorization code for an access token.
 func (s *Service) ExchangeGitHubCode(ctx context.Context, clientID, clientSecret, code string) (string, error) {
-	body := fmt.Sprintf(
-		`{"client_id":"%s","client_secret":"%s","code":"%s"}`,
-		clientID, clientSecret, code,
-	)
+	// Build the request body with json.Marshal instead of raw fmt.Sprintf
+	// interpolation: a quote/backslash in code would otherwise break or inject
+	// into the JSON payload.
+	reqBody := struct {
+		ClientID     string `json:"client_id"`
+		ClientSecret string `json:"client_secret"`
+		Code         string `json:"code"`
+	}{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		Code:         code,
+	}
+	body, err := json.Marshal(reqBody)
+	if err != nil {
+		return "", fmt.Errorf("marshal request body: %w", err)
+	}
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost,
-		"https://github.com/login/oauth/access_token", strings.NewReader(body))
+		"https://github.com/login/oauth/access_token", bytes.NewReader(body))
 	if err != nil {
 		return "", err
 	}
