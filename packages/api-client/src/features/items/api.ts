@@ -5,6 +5,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { APIError, api } from '../../api-client'
 import { queryLocal, execLocal } from '../../local-db/client'
+import { getPreferences } from '../../preferences'
 import { enqueueSync } from '../../sync/queue'
 import type { Item, ItemType } from '../capture/types'
 export type { Item, ItemType }
@@ -33,6 +34,7 @@ type LocalItemRow = {
   ai_tags: string
   is_favorite: number
   archived: number
+  org_id: string | null
 }
 
 function isNotFound(error: unknown): boolean {
@@ -93,21 +95,22 @@ async function upsertLocalItem(item: Item) {
 		`INSERT INTO items (
 			id, item_type, title, url, description, notes, tags, 
 			ai_summary, ai_tags, why_saved, when_to_use, 
-			enrichment_status, is_favorite, archived, created_at, updated_at, local_updated_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			enrichment_status, is_favorite, archived, created_at, updated_at, local_updated_at, org_id
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(id) DO UPDATE SET
 			item_type=excluded.item_type, title=excluded.title, url=excluded.url,
 			description=excluded.description, notes=excluded.notes, tags=excluded.tags,
 			ai_summary=excluded.ai_summary, ai_tags=excluded.ai_tags, why_saved=excluded.why_saved,
 			when_to_use=excluded.when_to_use, enrichment_status=excluded.enrichment_status,
 			is_favorite=excluded.is_favorite, archived=excluded.archived,
-			updated_at=excluded.updated_at, local_updated_at=excluded.local_updated_at`,
+			updated_at=excluded.updated_at, local_updated_at=excluded.local_updated_at, org_id=excluded.org_id`,
 		[
 			item.id, item.item_type, item.title, item.url, item.description, item.notes,
 			JSON.stringify(item.tags), item.ai_summary, JSON.stringify(item.ai_tags),
 			item.why_saved, item.when_to_use, item.enrichment_status,
 			item.is_favorite ? 1 : 0, item.archived ? 1 : 0,
-			item.created_at, item.updated_at, new Date().toISOString()
+			item.created_at, item.updated_at, new Date().toISOString(),
+			item.org_id ?? null
 		]
 	)
 }
@@ -123,8 +126,19 @@ export function useItems(params: ListItemsParams = {}) {
 				res.items.forEach(it => upsertLocalItem(it).catch(console.error))
 				return res
 			} catch {
-				// Offline fallback
-				const rows = await queryLocal<LocalItemRow>('SELECT * FROM items WHERE archived = 0 ORDER BY created_at DESC')
+				// Offline fallback — respect workspace scope
+				const { activeOrgId } = getPreferences()
+				let rows: LocalItemRow[]
+				if (activeOrgId) {
+					rows = await queryLocal<LocalItemRow>(
+						'SELECT * FROM items WHERE archived = 0 AND org_id = ? ORDER BY created_at DESC',
+						[activeOrgId]
+					)
+				} else {
+					rows = await queryLocal<LocalItemRow>(
+						'SELECT * FROM items WHERE archived = 0 AND org_id IS NULL ORDER BY created_at DESC'
+					)
+				}
 				return {
 					total: rows.length,
 					items: rows.map(r => ({
