@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS items (
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL,
     last_seen_at TEXT,
+    org_id TEXT,
     -- Sync metadata
     server_version INTEGER DEFAULT 0,
     local_updated_at TEXT NOT NULL
@@ -78,3 +79,12 @@ CREATE TABLE IF NOT EXISTS runbook_steps (
     local_updated_at TEXT
 );
 `;
+
+/**
+ * Migrations for existing databases.
+ * Applied in order on startup; each migration is idempotent.
+ */
+export const LOCAL_MIGRATIONS = [
+  // Add org_id column to items if missing (2026-07-31)
+  `ALTER TABLE items ADD COLUMN org_id TEXT`,
+];

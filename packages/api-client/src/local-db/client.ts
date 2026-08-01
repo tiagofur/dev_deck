@@ -1,5 +1,5 @@
 import { SQLocal } from 'sqlocal';
-import { LOCAL_SCHEMA } from './schema';
+import { LOCAL_SCHEMA, LOCAL_MIGRATIONS } from './schema';
 
 /**
  * Universal interface for local database access.
@@ -26,6 +26,14 @@ class OPFSAdapter implements DatabaseAdapter {
         if (this.initialized) return;
         try {
             await this.client.exec(LOCAL_SCHEMA, []);
+            // Apply idempotent migrations for existing databases.
+            for (const migration of LOCAL_MIGRATIONS) {
+                try {
+                    await this.client.exec(migration, []);
+                } catch {
+                    // Column already exists — ignore duplicate-column errors.
+                }
+            }
             this.initialized = true;
         } catch (err) {
             console.error('Failed to initialize local DB schema:', err);

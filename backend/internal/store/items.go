@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"devdeck/internal/authctx"
 	"devdeck/internal/domain/items"
 	"devdeck/internal/domain/repos"
 
@@ -141,10 +142,22 @@ func (s *Store) CreateItem(ctx context.Context, in CreateItemInput) (*items.Item
 	return it, nil
 }
 
+// itemAccessScope builds a WHERE clause that allows access to items in the
+// active org OR personal items owned by the current user.
+func itemAccessScope(ctx context.Context, id uuid.UUID) (string, []any) {
+	if orgID, ok := authctx.OrgID(ctx); ok {
+		userID, _ := currentUserID(ctx)
+		return `(org_id = $2 OR (user_id = $3 AND org_id IS NULL))`, []any{id, orgID, userID}
+	}
+	if userID, ok := currentUserID(ctx); ok {
+		return `user_id = $2 AND org_id IS NULL`, []any{id, userID}
+	}
+	return `id = $1 AND FALSE`, []any{id} // unreachable with auth middleware
+}
+
 func (s *Store) GetItem(ctx context.Context, id uuid.UUID) (*items.Item, error) {
-	scopeSQL, scopeArgs := ownerClause(ctx, "user_id", 2)
-	args := append([]any{id}, scopeArgs...)
-	row := s.Reader().QueryRow(ctx, `SELECT `+itemColumns+` FROM items WHERE id = $1 AND `+scopeSQL, args...)
+	scopeSQL, args := itemAccessScope(ctx, id)
+	row := s.Reader().QueryRow(ctx, `SELECT `+itemColumns+` FROM items WHERE `+scopeSQL, args...)
 	it, err := scanItem(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
