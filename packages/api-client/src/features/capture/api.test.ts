@@ -49,9 +49,10 @@ describe('api.post — X-Org-ID header', () => {
     })
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
-    const [, options] = fetchMock.mock.calls[0]
-    expect(options.headers['X-Org-ID']).toBe('org-123-abc')
-    expect(options.headers['Content-Type']).toBe('application/json')
+    const [, options] = fetchMock.mock.calls[0]!
+    const headers = options!.headers as Record<string, string>
+    expect(headers['X-Org-ID']).toBe('org-123-abc')
+    expect(headers['Content-Type']).toBe('application/json')
   })
 
   it('does NOT send X-Org-ID header when activeOrgId is null', async () => {
@@ -74,8 +75,9 @@ describe('api.post — X-Org-ID header', () => {
     })
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
-    const [, options] = fetchMock.mock.calls[0]
-    expect(options.headers['X-Org-ID']).toBeUndefined()
+    const [, options] = fetchMock.mock.calls[0]!
+    const headers = options!.headers as Record<string, string | undefined>
+    expect(headers['X-Org-ID']).toBeUndefined()
   })
 
   it('sends correct X-Org-ID when switching workspaces', async () => {
@@ -98,8 +100,9 @@ describe('api.post — X-Org-ID header', () => {
       type_hint: 'repo',
     })
 
-    const [, options1] = fetchMock.mock.calls[0]
-    expect(options1.headers['X-Org-ID']).toBe('workspace-alpha')
+    const [, options1] = fetchMock.mock.calls[0]!
+    const headers1 = options1!.headers as Record<string, string>
+    expect(headers1['X-Org-ID']).toBe('workspace-alpha')
 
     // Switch to workspace B
     mockGetPreferences.mockReturnValue({
@@ -118,7 +121,8 @@ describe('api.post — X-Org-ID header', () => {
       type_hint: 'repo',
     })
 
-    const [, options2] = fetchMock.mock.calls[1]
-    expect(options2.headers['X-Org-ID']).toBe('workspace-beta')
+    const [, options2] = fetchMock.mock.calls[1]!
+    const headers2 = options2!.headers as Record<string, string>
+    expect(headers2['X-Org-ID']).toBe('workspace-beta')
   })
 })
