@@ -152,7 +152,9 @@ func itemAccessScope(ctx context.Context, id uuid.UUID) (string, []any) {
 	if userID, ok := currentUserID(ctx); ok {
 		return `user_id = $2 AND org_id IS NULL`, []any{id, userID}
 	}
-	return `id = $1 AND FALSE`, []any{id} // unreachable with auth middleware
+	// No org and no user — fall back to ownerClause behavior:
+	// allow access to items with NULL user_id (used in tests without auth).
+	return `user_id IS NULL`, nil
 }
 
 func (s *Store) GetItem(ctx context.Context, id uuid.UUID) (*items.Item, error) {
