@@ -112,6 +112,10 @@ func (h *ItemsHandler) Update(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusNotFound, "ITEM_NOT_FOUND", "item not found")
 			return
 		}
+		if errors.Is(err, store.ErrForbidden) {
+			writeError(w, http.StatusForbidden, "FORBIDDEN", "you are not a member of the target workspace")
+			return
+		}
 		writeInternal(w, err)
 		return
 	}
