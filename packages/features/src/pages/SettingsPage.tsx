@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, Eye, EyeOff, Globe, Laptop, Settings as SettingsIcon, Smartphone, Trash2 } from 'lucide-react'
+import { ArrowLeft, Check, Coffee, Eye, EyeOff, Globe, Laptop, Settings as SettingsIcon, Smartphone, Trash2 } from 'lucide-react'
 
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -263,6 +263,20 @@ export function SettingsPage() {
             <p className="text-sm mt-3">
               {t('settings.about_desc')}
             </p>
+          </div>
+          <div className="mt-5 pt-4 border-t-2 border-ink">
+            <a
+              href="https://www.buymeacoffee.com/tiagofur"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 border-3 border-ink px-4 py-2.5 bg-[#FFDD00] font-display font-black text-sm uppercase tracking-wide shadow-hard
+                         hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg
+                         active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
+                         transition-all duration-150"
+            >
+              <Coffee size={20} strokeWidth={2.5} />
+              {t('settings.buy_me_a_coffee')}
+            </a>
           </div>
         </Section>
       </main>

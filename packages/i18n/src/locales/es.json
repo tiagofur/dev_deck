@@ -132,6 +132,7 @@
     "env_configured": "Configurado mediante VITE_API_URL y VITE_API_TOKEN.",
     "about": "Acerca de",
     "about_desc": "Tu directorio personal de repos y herramientas favoritas. Bonito, divertido y siempre a la mano.",
+    "buy_me_a_coffee": "Invítame un café ☕",
     "plan_free": "Gratis",
     "plan_label": "Plan:",
     "scim_token_generated": "¡Token SCIM generado!",

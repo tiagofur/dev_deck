@@ -146,8 +146,7 @@ export function ItemCard({ item, onClick }: Props) {
       className="group bg-bg-card border-3 border-ink shadow-hard cursor-pointer
                  transition-all duration-150 ease-out
                  hover:-translate-x-1 hover:-translate-y-1 hover:shadow-hard-lg
-                 active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm
-                 overflow-hidden"
+                 active:translate-x-0.5 active:translate-y-0.5 active:shadow-hard-sm"
       style={{ transform: `rotate(${rotation}deg)` }}
     >
       <header className={`${hue} border-b-3 border-ink px-3 py-1.5 flex items-center justify-between`}>
