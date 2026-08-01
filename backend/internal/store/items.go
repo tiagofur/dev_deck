@@ -324,6 +324,14 @@ func (s *Store) UpdateItem(ctx context.Context, id uuid.UUID, in items.UpdateInp
 		it.Type = items.Type(*in.ItemType)
 	}
 	if in.OrgID != nil {
+		// Validate that the user is a member of the target org before allowing the move.
+		userID, ok := currentUserID(ctx)
+		if !ok {
+			return nil, ErrForbidden
+		}
+		if _, isMember := s.IsOrgMember(ctx, userID, *in.OrgID); !isMember {
+			return nil, ErrForbidden
+		}
 		it.OrgID = in.OrgID
 	}
 

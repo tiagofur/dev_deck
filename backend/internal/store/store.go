@@ -69,6 +69,7 @@ func (s *Store) Ping(ctx context.Context) error {
 var (
 	ErrNotFound      = errors.New("not found")
 	ErrAlreadyExists = errors.New("already exists")
+	ErrForbidden     = errors.New("forbidden")
 )
 
 func isUniqueViolation(err error) bool {
