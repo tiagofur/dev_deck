@@ -205,6 +205,22 @@ async function applyRemoteDeltas(ops: RemoteDelta[]) {
                         [st.id, st.runbook_id, st.label, st.command, st.description, st.position, st.is_completed ? 1 : 0, st.created_at, st.updated_at]
                     );
                 }
+            } else if (op.entity_type === 'command') {
+                if (op.operation === 'delete') {
+                    await execLocal('DELETE FROM item_commands WHERE id = ?', [op.entity_id]);
+                } else {
+                    const cmd = op.payload;
+                    if (!cmd) continue;
+                    await execLocal(
+                        `INSERT INTO item_commands (id, item_id, label, command, description, category, position, created_at, local_updated_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                         ON CONFLICT(id) DO UPDATE SET
+                            label=excluded.label, command=excluded.command, description=excluded.description,
+                            category=excluded.category, position=excluded.position, local_updated_at=excluded.local_updated_at`,
+                        [cmd.id, cmd.repo_id, cmd.label, cmd.command, cmd.description || '',
+                         cmd.category || null, cmd.position || 0, cmd.created_at, new Date().toISOString()]
+                    );
+                }
             }
         } catch (err) {
             console.error(`Failed to apply delta ${op.operation_id}:`, err);

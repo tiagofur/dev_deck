@@ -78,6 +78,21 @@ CREATE TABLE IF NOT EXISTS runbook_steps (
     updated_at TEXT NOT NULL,
     local_updated_at TEXT
 );
+
+-- Item Commands (per-repo quick commands)
+CREATE TABLE IF NOT EXISTS item_commands (
+    id TEXT PRIMARY KEY,
+    item_id TEXT NOT NULL,
+    label TEXT NOT NULL,
+    command TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    category TEXT,
+    position INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    local_updated_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_item_commands_item_id ON item_commands(item_id);
 `;
 
 /**
