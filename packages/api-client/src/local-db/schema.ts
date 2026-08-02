@@ -131,6 +131,45 @@ CREATE TABLE IF NOT EXISTS cheatsheet_entries (
 );
 
 CREATE INDEX IF NOT EXISTS idx_cheatsheet_entries_cheatsheet_id ON cheatsheet_entries(cheatsheet_id);
+
+-- Circles (lightweight groups)
+CREATE TABLE IF NOT EXISTS circles (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    invite_code TEXT,
+    created_by TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    local_updated_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_circles_created_by ON circles(created_by);
+
+-- Circle Members
+CREATE TABLE IF NOT EXISTS circle_members (
+    circle_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'member',
+    created_at TEXT NOT NULL,
+    local_updated_at TEXT,
+    PRIMARY KEY (circle_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_circle_members_user ON circle_members(user_id);
+
+-- Circle Items (shared items within a circle)
+CREATE TABLE IF NOT EXISTS circle_items (
+    circle_id TEXT NOT NULL,
+    item_id TEXT NOT NULL,
+    shared_by TEXT NOT NULL,
+    share_context TEXT NOT NULL DEFAULT '',
+    shared_at TEXT NOT NULL,
+    local_updated_at TEXT,
+    PRIMARY KEY (circle_id, item_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_circle_items_item ON circle_items(item_id);
 `;
 
 /**
@@ -140,4 +179,8 @@ CREATE INDEX IF NOT EXISTS idx_cheatsheet_entries_cheatsheet_id ON cheatsheet_en
 export const LOCAL_MIGRATIONS = [
   // Add org_id column to items if missing (2026-07-31)
   `ALTER TABLE items ADD COLUMN org_id TEXT`,
+  // Add circles tables (2026-08-01)
+  `CREATE TABLE IF NOT EXISTS circles (id TEXT PRIMARY KEY, name TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', invite_code TEXT, created_by TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, local_updated_at TEXT)`,
+  `CREATE TABLE IF NOT EXISTS circle_members (circle_id TEXT NOT NULL, user_id TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'member', created_at TEXT NOT NULL, local_updated_at TEXT, PRIMARY KEY (circle_id, user_id))`,
+  `CREATE TABLE IF NOT EXISTS circle_items (circle_id TEXT NOT NULL, item_id TEXT NOT NULL, shared_by TEXT NOT NULL, share_context TEXT NOT NULL DEFAULT '', shared_at TEXT NOT NULL, local_updated_at TEXT, PRIMARY KEY (circle_id, item_id))`,
 ];
