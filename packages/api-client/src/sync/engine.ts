@@ -272,6 +272,60 @@ async function applyRemoteDeltas(ops: RemoteDelta[]) {
                         ]
                     );
                 }
+            } else if (op.entity_type === 'circle') {
+                if (op.operation === 'delete') {
+                    // Cascade: remove members and items first
+                    await execLocal('DELETE FROM circle_members WHERE circle_id = ?', [op.entity_id]);
+                    await execLocal('DELETE FROM circle_items WHERE circle_id = ?', [op.entity_id]);
+                    await execLocal('DELETE FROM circles WHERE id = ?', [op.entity_id]);
+                } else {
+                    const c = op.payload;
+                    if (!c) continue;
+                    await execLocal(
+                        `INSERT INTO circles (id, name, description, invite_code, created_by, created_at, updated_at, local_updated_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                         ON CONFLICT(id) DO UPDATE SET
+                            name=excluded.name, description=excluded.description,
+                            invite_code=excluded.invite_code, updated_at=excluded.updated_at,
+                            local_updated_at=excluded.local_updated_at`,
+                        [
+                            c.id, c.name, c.description || '', c.invite_code || null,
+                            c.created_by, c.created_at, c.updated_at, new Date().toISOString()
+                        ]
+                    );
+                }
+            } else if (op.entity_type === 'circle_member') {
+                if (op.operation === 'delete') {
+                    const m = op.payload;
+                    if (!m) continue;
+                    await execLocal('DELETE FROM circle_members WHERE circle_id = ? AND user_id = ?', [m.circle_id, m.user_id]);
+                } else {
+                    const m = op.payload;
+                    if (!m) continue;
+                    await execLocal(
+                        `INSERT INTO circle_members (circle_id, user_id, role, created_at, local_updated_at)
+                         VALUES (?, ?, ?, ?, ?)
+                         ON CONFLICT(circle_id, user_id) DO UPDATE SET
+                            role=excluded.role, local_updated_at=excluded.local_updated_at`,
+                        [m.circle_id, m.user_id, m.role || 'member', m.created_at, new Date().toISOString()]
+                    );
+                }
+            } else if (op.entity_type === 'circle_item') {
+                if (op.operation === 'delete') {
+                    const ci = op.payload;
+                    if (!ci) continue;
+                    await execLocal('DELETE FROM circle_items WHERE circle_id = ? AND item_id = ?', [ci.circle_id, ci.item_id]);
+                } else {
+                    const ci = op.payload;
+                    if (!ci) continue;
+                    await execLocal(
+                        `INSERT INTO circle_items (circle_id, item_id, shared_by, share_context, shared_at, local_updated_at)
+                         VALUES (?, ?, ?, ?, ?, ?)
+                         ON CONFLICT(circle_id, item_id) DO UPDATE SET
+                            share_context=excluded.share_context, local_updated_at=excluded.local_updated_at`,
+                        [ci.circle_id, ci.item_id, ci.shared_by, ci.share_context || '', ci.shared_at, new Date().toISOString()]
+                    );
+                }
             }
         } catch (err) {
             console.error(`Failed to apply delta ${op.operation_id}:`, err);
