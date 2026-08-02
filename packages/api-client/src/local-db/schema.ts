@@ -93,6 +93,44 @@ CREATE TABLE IF NOT EXISTS item_commands (
 );
 
 CREATE INDEX IF NOT EXISTS idx_item_commands_item_id ON item_commands(item_id);
+
+-- Cheatsheets (themed command collections)
+CREATE TABLE IF NOT EXISTS cheatsheets (
+    id TEXT PRIMARY KEY,
+    user_id TEXT,
+    slug TEXT NOT NULL,
+    title TEXT NOT NULL,
+    category TEXT NOT NULL,
+    icon TEXT,
+    color TEXT,
+    description TEXT NOT NULL DEFAULT '',
+    visibility TEXT NOT NULL DEFAULT 'private',
+    parent_id TEXT,
+    is_official INTEGER NOT NULL DEFAULT 0,
+    fork_count INTEGER NOT NULL DEFAULT 0,
+    stars_count INTEGER NOT NULL DEFAULT 0,
+    is_seed INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    local_updated_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_cheatsheets_slug ON cheatsheets(slug);
+CREATE INDEX IF NOT EXISTS idx_cheatsheets_user_id ON cheatsheets(user_id);
+
+-- Cheatsheet Entries (commands within a cheatsheet)
+CREATE TABLE IF NOT EXISTS cheatsheet_entries (
+    id TEXT PRIMARY KEY,
+    cheatsheet_id TEXT NOT NULL,
+    label TEXT NOT NULL,
+    command TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    tags TEXT NOT NULL DEFAULT '[]',
+    position INTEGER NOT NULL DEFAULT 0,
+    local_updated_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_cheatsheet_entries_cheatsheet_id ON cheatsheet_entries(cheatsheet_id);
 `;
 
 /**

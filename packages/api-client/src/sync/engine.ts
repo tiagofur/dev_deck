@@ -221,6 +221,51 @@ async function applyRemoteDeltas(ops: RemoteDelta[]) {
                          cmd.category || null, cmd.position || 0, cmd.created_at, new Date().toISOString()]
                     );
                 }
+            } else if (op.entity_type === 'cheatsheet') {
+                if (op.operation === 'delete') {
+                    await execLocal('DELETE FROM cheatsheet_entries WHERE cheatsheet_id = ?', [op.entity_id]);
+                    await execLocal('DELETE FROM cheatsheets WHERE id = ?', [op.entity_id]);
+                } else {
+                    const cs = op.payload;
+                    if (!cs) continue;
+                    await execLocal(
+                        `INSERT INTO cheatsheets (id, user_id, slug, title, category, icon, color, description, visibility, parent_id, is_official, fork_count, stars_count, is_seed, created_at, updated_at, local_updated_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                         ON CONFLICT(id) DO UPDATE SET
+                            slug=excluded.slug, title=excluded.title, category=excluded.category,
+                            icon=excluded.icon, color=excluded.color, description=excluded.description,
+                            visibility=excluded.visibility, parent_id=excluded.parent_id,
+                            is_official=excluded.is_official, fork_count=excluded.fork_count,
+                            stars_count=excluded.stars_count, is_seed=excluded.is_seed,
+                            updated_at=excluded.updated_at, local_updated_at=excluded.local_updated_at`,
+                        [
+                            cs.id, cs.user_id || null, cs.slug, cs.title, cs.category,
+                            cs.icon || null, cs.color || null, cs.description || '',
+                            cs.visibility || 'private', cs.parent_id || null,
+                            cs.is_official ? 1 : 0, cs.fork_count || 0, cs.stars_count || 0,
+                            cs.is_seed ? 1 : 0, cs.created_at, cs.updated_at, new Date().toISOString()
+                        ]
+                    );
+                }
+            } else if (op.entity_type === 'cheatsheet_entry') {
+                if (op.operation === 'delete') {
+                    await execLocal('DELETE FROM cheatsheet_entries WHERE id = ?', [op.entity_id]);
+                } else {
+                    const entry = op.payload;
+                    if (!entry) continue;
+                    await execLocal(
+                        `INSERT INTO cheatsheet_entries (id, cheatsheet_id, label, command, description, tags, position, local_updated_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                         ON CONFLICT(id) DO UPDATE SET
+                            label=excluded.label, command=excluded.command, description=excluded.description,
+                            tags=excluded.tags, position=excluded.position, local_updated_at=excluded.local_updated_at`,
+                        [
+                            entry.id, entry.cheatsheet_id, entry.label, entry.command,
+                            entry.description || '', JSON.stringify(entry.tags || []),
+                            entry.position || 0, new Date().toISOString()
+                        ]
+                    );
+                }
             }
         } catch (err) {
             console.error(`Failed to apply delta ${op.operation_id}:`, err);
