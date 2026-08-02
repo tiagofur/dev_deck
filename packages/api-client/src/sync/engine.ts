@@ -253,6 +253,12 @@ async function applyRemoteDeltas(ops: RemoteDelta[]) {
                 } else {
                     const entry = op.payload;
                     if (!entry) continue;
+                    // Normalize tags: handle array, JSON string, or null
+                    const tags = Array.isArray(entry.tags)
+                        ? entry.tags
+                        : typeof entry.tags === 'string'
+                            ? (() => { try { return JSON.parse(entry.tags); } catch { return []; } })()
+                            : [];
                     await execLocal(
                         `INSERT INTO cheatsheet_entries (id, cheatsheet_id, label, command, description, tags, position, local_updated_at)
                          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -261,7 +267,7 @@ async function applyRemoteDeltas(ops: RemoteDelta[]) {
                             tags=excluded.tags, position=excluded.position, local_updated_at=excluded.local_updated_at`,
                         [
                             entry.id, entry.cheatsheet_id, entry.label, entry.command,
-                            entry.description || '', JSON.stringify(entry.tags || []),
+                            entry.description || '', JSON.stringify(tags),
                             entry.position || 0, new Date().toISOString()
                         ]
                     );
