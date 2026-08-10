@@ -147,14 +147,14 @@ func (s *Store) CreateItem(ctx context.Context, in CreateItemInput) (*items.Item
 func itemAccessScope(ctx context.Context, id uuid.UUID) (string, []any) {
 	if orgID, ok := authctx.OrgID(ctx); ok {
 		userID, _ := currentUserID(ctx)
-		return `(org_id = $2 OR (user_id = $3 AND org_id IS NULL))`, []any{id, orgID, userID}
+		return `id = $1 AND (org_id = $2 OR (user_id = $3 AND org_id IS NULL))`, []any{id, orgID, userID}
 	}
 	if userID, ok := currentUserID(ctx); ok {
-		return `user_id = $2 AND org_id IS NULL`, []any{id, userID}
+		return `id = $1 AND user_id = $2 AND org_id IS NULL`, []any{id, userID}
 	}
 	// No org and no user — fall back to ownerClause behavior:
 	// allow access to items with NULL user_id (used in tests without auth).
-	return `user_id IS NULL`, nil
+	return `id = $1 AND user_id IS NULL`, []any{id}
 }
 
 func (s *Store) GetItem(ctx context.Context, id uuid.UUID) (*items.Item, error) {
