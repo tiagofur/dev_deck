@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { v4 as uuidv4 } from 'uuid'
 import { api } from '../../api-client'
+import { enqueueSync } from '../../sync/queue'
 import type {
   Cheatsheet,
   CheatsheetDetail,
@@ -48,8 +50,16 @@ export function useExploreCheatsheets(category?: string) {
 export function useCreateCheatsheet() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (input: CreateCheatsheetInput) =>
-      api.post<Cheatsheet>('/api/cheatsheets', input),
+    mutationFn: async (input: CreateCheatsheetInput) => {
+      const id = uuidv4()
+      await enqueueSync('cheatsheet', id, 'create', input)
+      try {
+        return await api.post<Cheatsheet>('/api/cheatsheets', input)
+      } catch {
+        // Offline: return local representation, sync engine will retry
+        return { id, ...input, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as unknown as Cheatsheet
+      }
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cheatsheets'] }),
   })
 }
@@ -57,8 +67,14 @@ export function useCreateCheatsheet() {
 export function useUpdateCheatsheet(id: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (input: UpdateCheatsheetInput) =>
-      api.patch<Cheatsheet>(`/api/cheatsheets/${id}`, input),
+    mutationFn: async (input: UpdateCheatsheetInput) => {
+      await enqueueSync('cheatsheet', id, 'update', input)
+      try {
+        return await api.patch<Cheatsheet>(`/api/cheatsheets/${id}`, input)
+      } catch {
+        return { id, ...input } as unknown as Cheatsheet
+      }
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['cheatsheets'] })
       qc.invalidateQueries({ queryKey: cheatDetailKey(id) })
@@ -69,7 +85,14 @@ export function useUpdateCheatsheet(id: string) {
 export function useDeleteCheatsheet() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => api.del<void>(`/api/cheatsheets/${id}`),
+    mutationFn: async (id: string) => {
+      await enqueueSync('cheatsheet', id, 'delete', {})
+      try {
+        return await api.del<void>(`/api/cheatsheets/${id}`)
+      } catch {
+        // Offline: sync engine will retry
+      }
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cheatsheets'] }),
   })
 }
@@ -79,8 +102,15 @@ export function useDeleteCheatsheet() {
 export function useCreateEntry(cheatsheetId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (input: CreateEntryInput) =>
-      api.post<Entry>(`/api/cheatsheets/${cheatsheetId}/entries`, input),
+    mutationFn: async (input: CreateEntryInput) => {
+      const id = uuidv4()
+      await enqueueSync('cheatsheet_entry', id, 'create', { ...input, cheatsheet_id: cheatsheetId })
+      try {
+        return await api.post<Entry>(`/api/cheatsheets/${cheatsheetId}/entries`, input)
+      } catch {
+        return { id, cheatsheet_id: cheatsheetId, ...input } as unknown as Entry
+      }
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: cheatDetailKey(cheatsheetId) }),
   })
 }
@@ -88,8 +118,14 @@ export function useCreateEntry(cheatsheetId: string) {
 export function useUpdateEntry(cheatsheetId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ entryId, input }: { entryId: string; input: UpdateEntryInput }) =>
-      api.patch<Entry>(`/api/cheatsheets/${cheatsheetId}/entries/${entryId}`, input),
+    mutationFn: async ({ entryId, input }: { entryId: string; input: UpdateEntryInput }) => {
+      await enqueueSync('cheatsheet_entry', entryId, 'update', input)
+      try {
+        return await api.patch<Entry>(`/api/cheatsheets/${cheatsheetId}/entries/${entryId}`, input)
+      } catch {
+        return { id: entryId, cheatsheet_id: cheatsheetId, ...input } as unknown as Entry
+      }
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: cheatDetailKey(cheatsheetId) }),
   })
 }
@@ -97,8 +133,14 @@ export function useUpdateEntry(cheatsheetId: string) {
 export function useDeleteEntry(cheatsheetId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (entryId: string) =>
-      api.del<void>(`/api/cheatsheets/${cheatsheetId}/entries/${entryId}`),
+    mutationFn: async (entryId: string) => {
+      await enqueueSync('cheatsheet_entry', entryId, 'delete', {})
+      try {
+        return await api.del<void>(`/api/cheatsheets/${cheatsheetId}/entries/${entryId}`)
+      } catch {
+        // Offline: sync engine will retry
+      }
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: cheatDetailKey(cheatsheetId) }),
   })
 }
