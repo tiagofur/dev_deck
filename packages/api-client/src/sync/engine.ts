@@ -341,6 +341,37 @@ async function applyRemoteDeltas(ops: RemoteDelta[]) {
                         [n.id, n.user_id, n.type, n.title, n.body, n.action_url || null, n.read_at || null, n.created_at]
                     );
                 }
+            } else if (op.entity_type === 'org') {
+                if (op.operation === 'delete') {
+                    await execLocal('DELETE FROM orgs WHERE id = ?', [op.entity_id]);
+                } else {
+                    const org = op.payload;
+                    if (!org) continue;
+                    await execLocal(
+                        `INSERT INTO orgs (id, name, slug, plan, created_at, updated_at, local_updated_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?)
+                         ON CONFLICT(id) DO UPDATE SET
+                            name=excluded.name, slug=excluded.slug, plan=excluded.plan,
+                            updated_at=excluded.updated_at, local_updated_at=excluded.local_updated_at`,
+                        [org.id, org.name, org.slug, org.plan || 'free', org.created_at, org.updated_at, new Date().toISOString()]
+                    );
+                }
+            } else if (op.entity_type === 'org_member') {
+                if (op.operation === 'delete') {
+                    const m = op.payload;
+                    if (!m) continue;
+                    await execLocal('DELETE FROM org_members WHERE org_id = ? AND user_id = ?', [m.org_id, m.user_id]);
+                } else {
+                    const m = op.payload;
+                    if (!m) continue;
+                    await execLocal(
+                        `INSERT INTO org_members (org_id, user_id, role, created_at, local_updated_at)
+                         VALUES (?, ?, ?, ?, ?)
+                         ON CONFLICT(org_id, user_id) DO UPDATE SET
+                            role=excluded.role, local_updated_at=excluded.local_updated_at`,
+                        [m.org_id, m.user_id, m.role || 'member', m.created_at, new Date().toISOString()]
+                    );
+                }
             }
         } catch (err) {
             console.error(`Failed to apply delta ${op.operation_id}:`, err);
