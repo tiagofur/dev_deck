@@ -326,6 +326,67 @@ async function applyRemoteDeltas(ops: RemoteDelta[]) {
                         [ci.circle_id, ci.item_id, ci.shared_by, ci.share_context || '', ci.shared_at, new Date().toISOString()]
                     );
                 }
+            } else if (op.entity_type === 'notification') {
+                if (op.operation === 'delete') {
+                    await execLocal('DELETE FROM notifications WHERE id = ?', [op.entity_id]);
+                } else {
+                    const n = op.payload;
+                    if (!n) continue;
+                    await execLocal(
+                        `INSERT INTO notifications (id, user_id, type, title, body, action_url, read_at, created_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                         ON CONFLICT(id) DO UPDATE SET
+                            type=excluded.type, title=excluded.title, body=excluded.body,
+                            action_url=excluded.action_url, read_at=excluded.read_at`,
+                        [n.id, n.user_id, n.type, n.title, n.body, n.action_url || null, n.read_at || null, n.created_at]
+                    );
+                }
+            } else if (op.entity_type === 'org') {
+                if (op.operation === 'delete') {
+                    await execLocal('DELETE FROM orgs WHERE id = ?', [op.entity_id]);
+                } else {
+                    const org = op.payload;
+                    if (!org) continue;
+                    await execLocal(
+                        `INSERT INTO orgs (id, name, slug, plan, created_at, updated_at, local_updated_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?)
+                         ON CONFLICT(id) DO UPDATE SET
+                            name=excluded.name, slug=excluded.slug, plan=excluded.plan,
+                            updated_at=excluded.updated_at, local_updated_at=excluded.local_updated_at`,
+                        [org.id, org.name, org.slug, org.plan || 'free', org.created_at, org.updated_at, new Date().toISOString()]
+                    );
+                }
+            } else if (op.entity_type === 'org_member') {
+                if (op.operation === 'delete') {
+                    const m = op.payload;
+                    if (!m) continue;
+                    await execLocal('DELETE FROM org_members WHERE org_id = ? AND user_id = ?', [m.org_id, m.user_id]);
+                } else {
+                    const m = op.payload;
+                    if (!m) continue;
+                    await execLocal(
+                        `INSERT INTO org_members (org_id, user_id, role, created_at, local_updated_at)
+                         VALUES (?, ?, ?, ?, ?)
+                         ON CONFLICT(org_id, user_id) DO UPDATE SET
+                            role=excluded.role, local_updated_at=excluded.local_updated_at`,
+                        [m.org_id, m.user_id, m.role || 'member', m.created_at, new Date().toISOString()]
+                    );
+                }
+            } else if (op.entity_type === 'follow') {
+                if (op.operation === 'delete') {
+                    const f = op.payload;
+                    if (!f) continue;
+                    await execLocal('DELETE FROM follows WHERE follower_id = ? AND following_id = ?', [f.follower_id, f.following_id]);
+                } else {
+                    const f = op.payload;
+                    if (!f) continue;
+                    await execLocal(
+                        `INSERT INTO follows (follower_id, following_id, created_at)
+                         VALUES (?, ?, ?)
+                         ON CONFLICT(follower_id, following_id) DO NOTHING`,
+                        [f.follower_id, f.following_id, f.created_at]
+                    );
+                }
             }
         } catch (err) {
             console.error(`Failed to apply delta ${op.operation_id}:`, err);

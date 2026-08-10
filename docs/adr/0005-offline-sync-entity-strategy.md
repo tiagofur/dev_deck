@@ -30,8 +30,9 @@ This ADR documents the **concrete entity-level strategy** as shipped, including:
 | P1       | `command`             | `item_commands`        | `item` (FK `item_id`)  | Pull-only      |
 | P1       | `cheatsheet`          | `cheatsheets`          | — (root, global)       | Pull-only      |
 | P1       | `cheatsheet_entry`    | `cheatsheet_entries`   | `cheatsheet` (FK)      | Pull-only      |
-
-**Future (P2):** `circle`, `circle_member`, `item_circle_link`.
+| P1       | `circle`              | `circles`              | — (root)               | Bidirectional  |
+| P1       | `circle_member`       | `circle_members`       | `circle` (composite PK)| Bidirectional  |
+| P1       | `circle_item`         | `circle_items`         | `circle` (composite PK)| Bidirectional  |
 
 ## Conflict Resolution: Field-Level LWW
 
@@ -98,9 +99,12 @@ Parent entities that own child entities use **explicit cascade deletes** in the 
 | `item`           | (soft delete)      | `UPDATE items SET archived = 1` — never hard-deleted locally  |
 | `runbook`        | `runbook_steps`    | `DELETE FROM runbook_steps WHERE runbook_id = ?` then `DELETE FROM runbooks WHERE id = ?` |
 | `cheatsheet`     | `cheatsheet_entries` | `DELETE FROM cheatsheet_entries WHERE cheatsheet_id = ?` then `DELETE FROM cheatsheets WHERE id = ?` |
+| `circle`         | `circle_members`, `circle_items` | `DELETE FROM circle_members WHERE circle_id = ?`, `DELETE FROM circle_items WHERE circle_id = ?`, then `DELETE FROM circles WHERE id = ?` |
 | `command`        | — (leaf)           | `DELETE FROM item_commands WHERE id = ?`                      |
 | `runbook_step`   | — (leaf)           | `DELETE FROM runbook_steps WHERE id = ?`                      |
 | `cheatsheet_entry` | — (leaf)         | `DELETE FROM cheatsheet_entries WHERE id = ?`                 |
+| `circle_member`  | — (leaf)           | `DELETE FROM circle_members WHERE circle_id = ? AND user_id = ?` |
+| `circle_item`    | — (leaf)           | `DELETE FROM circle_items WHERE circle_id = ? AND item_id = ?` |
 
 ### Why explicit cascades instead of FK constraints?
 
@@ -202,9 +206,41 @@ runbook_steps           (10 columns, PK: id)
 item_commands           (9 columns, PK: id)
 cheatsheets             (17 columns, PK: id)
 cheatsheet_entries      (8 columns, PK: id)
+circles                 (8 columns, PK: id)
+circle_members          (5 columns, composite PK: circle_id + user_id)
+circle_items            (6 columns, composite PK: circle_id + item_id)
 ```
 
-All tables include `local_updated_at` for tracking when the row was last modified by sync. Indexes are created on foreign keys (`item_id`, `runbook_id`, `cheatsheet_id`) and lookup fields (`slug`).
+### Composite Primary Keys
+
+Circles use composite primary keys for member and item relationships:
+
+```sql
+-- Circle Members: unique membership per circle-user pair
+CREATE TABLE circle_members (
+    circle_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'member',
+    created_at TEXT NOT NULL,
+    local_updated_at TEXT,
+    PRIMARY KEY (circle_id, user_id)
+);
+
+-- Circle Items: unique sharing per circle-item pair
+CREATE TABLE circle_items (
+    circle_id TEXT NOT NULL,
+    item_id TEXT NOT NULL,
+    shared_by TEXT NOT NULL,
+    share_context TEXT NOT NULL DEFAULT '',
+    shared_at TEXT NOT NULL,
+    local_updated_at TEXT,
+    PRIMARY KEY (circle_id, item_id)
+);
+```
+
+The sync engine uses `ON CONFLICT(circle_id, user_id) DO UPDATE` for upserts, and extracts composite keys from `op.payload` (not from the top-level delta object) for deletes.
+
+All tables include `local_updated_at` for tracking when the row was last modified by sync. Indexes are created on foreign keys (`item_id`, `runbook_id`, `cheatsheet_id`) and lookup fields (`slug`, `user_id`, `created_by`).
 
 ## Consequences
 

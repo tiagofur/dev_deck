@@ -170,6 +170,56 @@ CREATE TABLE IF NOT EXISTS circle_items (
 );
 
 CREATE INDEX IF NOT EXISTS idx_circle_items_item ON circle_items(item_id);
+
+-- Notifications (pull-only from server)
+CREATE TABLE IF NOT EXISTS notifications (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    action_url TEXT,
+    read_at TEXT,
+    created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON notifications(user_id) WHERE read_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_notifications_user_created ON notifications(user_id, created_at DESC);
+
+-- Organizations (teams/workspaces)
+CREATE TABLE IF NOT EXISTS orgs (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    slug TEXT NOT NULL UNIQUE,
+    plan TEXT NOT NULL DEFAULT 'free',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    local_updated_at TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_orgs_slug ON orgs(slug);
+
+-- Organization Members (composite PK)
+CREATE TABLE IF NOT EXISTS org_members (
+    org_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'member',
+    created_at TEXT NOT NULL,
+    local_updated_at TEXT,
+    PRIMARY KEY (org_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_org_members_user ON org_members(user_id);
+
+-- Follows (social connections)
+CREATE TABLE IF NOT EXISTS follows (
+    follower_id TEXT NOT NULL,
+    following_id TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (follower_id, following_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_follows_following ON follows(following_id);
 `;
 
 /**
@@ -187,4 +237,16 @@ export const LOCAL_MIGRATIONS = [
   `CREATE INDEX IF NOT EXISTS idx_circles_created_by ON circles(created_by)`,
   `CREATE INDEX IF NOT EXISTS idx_circle_members_user ON circle_members(user_id)`,
   `CREATE INDEX IF NOT EXISTS idx_circle_items_item ON circle_items(item_id)`,
+  // Add notifications table (2026-08-10)
+  `CREATE TABLE IF NOT EXISTS notifications (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, type TEXT NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL, action_url TEXT, read_at TEXT, created_at TEXT NOT NULL)`,
+  `CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON notifications(user_id) WHERE read_at IS NULL`,
+  `CREATE INDEX IF NOT EXISTS idx_notifications_user_created ON notifications(user_id, created_at DESC)`,
+  // Add orgs and org_members tables (2026-08-10)
+  `CREATE TABLE IF NOT EXISTS orgs (id TEXT PRIMARY KEY, name TEXT NOT NULL, slug TEXT NOT NULL UNIQUE, plan TEXT NOT NULL DEFAULT 'free', created_at TEXT NOT NULL, updated_at TEXT NOT NULL, local_updated_at TEXT)`,
+  `CREATE TABLE IF NOT EXISTS org_members (org_id TEXT NOT NULL, user_id TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'member', created_at TEXT NOT NULL, local_updated_at TEXT, PRIMARY KEY (org_id, user_id))`,
+  `CREATE INDEX IF NOT EXISTS idx_orgs_slug ON orgs(slug)`,
+  `CREATE INDEX IF NOT EXISTS idx_org_members_user ON org_members(user_id)`,
+  // Add follows table (2026-08-10)
+  `CREATE TABLE IF NOT EXISTS follows (follower_id TEXT NOT NULL, following_id TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY (follower_id, following_id))`,
+  `CREATE INDEX IF NOT EXISTS idx_follows_following ON follows(following_id)`,
 ];

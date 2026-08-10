@@ -1,4 +1,4 @@
-import { Check, Chrome, Monitor, MessageSquare } from 'lucide-react'
+import { Check, Globe, Monitor, MessageSquare } from 'lucide-react'
 import { Button } from '@devdeck/ui'
 import { useTranslation } from '@devdeck/i18n'
 
@@ -29,7 +29,7 @@ export function OnboardingChecklist() {
               variant="secondary"
               onClick={() => window.open('https://chrome.google.com/webstore', '_blank')}
             >
-              <Chrome size={12} className="mr-1" /> {t('settings.enable_button')}
+              <Globe size={12} className="mr-1" /> {t('settings.enable_button')}
             </Button>
           }
         />
