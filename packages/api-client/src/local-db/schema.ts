@@ -210,6 +210,16 @@ CREATE TABLE IF NOT EXISTS org_members (
 );
 
 CREATE INDEX IF NOT EXISTS idx_org_members_user ON org_members(user_id);
+
+-- Follows (social connections)
+CREATE TABLE IF NOT EXISTS follows (
+    follower_id TEXT NOT NULL,
+    following_id TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (follower_id, following_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_follows_following ON follows(following_id);
 `;
 
 /**
@@ -236,4 +246,7 @@ export const LOCAL_MIGRATIONS = [
   `CREATE TABLE IF NOT EXISTS org_members (org_id TEXT NOT NULL, user_id TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'member', created_at TEXT NOT NULL, local_updated_at TEXT, PRIMARY KEY (org_id, user_id))`,
   `CREATE INDEX IF NOT EXISTS idx_orgs_slug ON orgs(slug)`,
   `CREATE INDEX IF NOT EXISTS idx_org_members_user ON org_members(user_id)`,
+  // Add follows table (2026-08-10)
+  `CREATE TABLE IF NOT EXISTS follows (follower_id TEXT NOT NULL, following_id TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY (follower_id, following_id))`,
+  `CREATE INDEX IF NOT EXISTS idx_follows_following ON follows(following_id)`,
 ];
