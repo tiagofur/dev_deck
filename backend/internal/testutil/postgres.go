@@ -12,6 +12,7 @@ package testutil
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
 	"os"
 	"path/filepath"
@@ -127,13 +128,26 @@ func acquirePool(t *testing.T) (*pgxpool.Pool, error) {
 		sharedDSN = dsn
 	}
 
-	pool, err := pgxpool.New(ctx, sharedDSN)
-	if err != nil {
-		return nil, err
+	// Retry pool creation with backoff — after a container restart Postgres
+	// may take a moment to accept connections even though the log says ready.
+	var pool *pgxpool.Pool
+	var lastErr error
+	for attempt := 0; attempt < 5; attempt++ {
+		if attempt > 0 {
+			time.Sleep(time.Duration(200*(1<<uint(attempt-1))) * time.Millisecond) // 200ms, 400ms, 800ms, 1600ms
+		}
+		pool, lastErr = pgxpool.New(ctx, sharedDSN)
+		if lastErr != nil {
+			continue
+		}
+		if lastErr = waitReady(ctx, pool); lastErr != nil {
+			pool.Close()
+			continue
+		}
+		break
 	}
-	if err := waitReady(ctx, pool); err != nil {
-		pool.Close()
-		return nil, err
+	if lastErr != nil {
+		return nil, fmt.Errorf("pool creation failed after retries: %w", lastErr)
 	}
 	if err := applyMigrations(ctx, pool); err != nil {
 		pool.Close()
