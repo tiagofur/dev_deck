@@ -19,7 +19,7 @@
     "@devdeck/ui": "workspace:*",
     "@tanstack/react-query": "^5.101.4",
     "framer-motion": "^12.42.2",
-    "lucide-react": "^0.451.0",
+    "lucide-react": "^1.28.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.1"

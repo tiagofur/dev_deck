@@ -4,13 +4,13 @@ import {
   User as UserIcon,
   Globe,
   MapPin,
-  Github,
   Edit3,
   Calendar,
   Eye,
   EyeOff,
   LogOut
 } from 'lucide-react'
+import { GithubIcon as Github } from '../components/icons/GithubIcon'
 import { useNavigate } from 'react-router-dom'
 import { AppShell } from '../components/AppShell'
 import {

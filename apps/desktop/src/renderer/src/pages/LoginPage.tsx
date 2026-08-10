@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
-import { Apple, Chrome, Github, Loader2, ArrowRight } from 'lucide-react'
+import { Apple, Globe, Loader2, ArrowRight } from 'lucide-react'
+import { GithubIcon as Github } from '../components/icons/GithubIcon'
 import { fetchAuthProviders, loginLocal, loginStep1, setTokens, type AuthProviderInfo } from '@devdeck/api-client'
 import { useTranslation } from '@devdeck/i18n'
 
@@ -83,7 +84,7 @@ export function LoginPage() {
       case 'github':
         return <Github size={20} strokeWidth={2.5} />
       case 'google':
-        return <Chrome size={20} strokeWidth={2.5} />
+        return <Globe size={20} strokeWidth={2.5} />
       case 'apple':
         return <Apple size={20} strokeWidth={2.5} />
     }

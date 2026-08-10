@@ -1,7 +1,6 @@
 import {
   BookOpen,
   Code2,
-  Github,
   Keyboard,
   Lightbulb,
   MessageSquareText,
@@ -10,6 +9,7 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react'
+import { GithubIcon as Github } from '../icons/GithubIcon'
 import type { ItemType } from '@devdeck/api-client'
 
 export type CaptureLaneId =
