@@ -372,6 +372,21 @@ async function applyRemoteDeltas(ops: RemoteDelta[]) {
                         [m.org_id, m.user_id, m.role || 'member', m.created_at, new Date().toISOString()]
                     );
                 }
+            } else if (op.entity_type === 'follow') {
+                if (op.operation === 'delete') {
+                    const f = op.payload;
+                    if (!f) continue;
+                    await execLocal('DELETE FROM follows WHERE follower_id = ? AND following_id = ?', [f.follower_id, f.following_id]);
+                } else {
+                    const f = op.payload;
+                    if (!f) continue;
+                    await execLocal(
+                        `INSERT INTO follows (follower_id, following_id, created_at)
+                         VALUES (?, ?, ?)
+                         ON CONFLICT(follower_id, following_id) DO NOTHING`,
+                        [f.follower_id, f.following_id, f.created_at]
+                    );
+                }
             }
         } catch (err) {
             console.error(`Failed to apply delta ${op.operation_id}:`, err);
