@@ -3,7 +3,6 @@ import {
   BookOpen,
   Box,
   FileText,
-  Github,
   Keyboard,
   Link as LinkIcon,
   Play,
@@ -20,6 +19,7 @@ import {
   Share2,
   type LucideIcon,
 } from 'lucide-react'
+import { GithubIcon as Github } from './icons/GithubIcon'
 import type { Item, ItemType } from '@devdeck/api-client'
 import {
   formatCount,
