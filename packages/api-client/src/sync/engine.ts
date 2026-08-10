@@ -326,6 +326,21 @@ async function applyRemoteDeltas(ops: RemoteDelta[]) {
                         [ci.circle_id, ci.item_id, ci.shared_by, ci.share_context || '', ci.shared_at, new Date().toISOString()]
                     );
                 }
+            } else if (op.entity_type === 'notification') {
+                if (op.operation === 'delete') {
+                    await execLocal('DELETE FROM notifications WHERE id = ?', [op.entity_id]);
+                } else {
+                    const n = op.payload;
+                    if (!n) continue;
+                    await execLocal(
+                        `INSERT INTO notifications (id, user_id, type, title, body, action_url, read_at, created_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                         ON CONFLICT(id) DO UPDATE SET
+                            type=excluded.type, title=excluded.title, body=excluded.body,
+                            action_url=excluded.action_url, read_at=excluded.read_at`,
+                        [n.id, n.user_id, n.type, n.title, n.body, n.action_url || null, n.read_at || null, n.created_at]
+                    );
+                }
             }
         } catch (err) {
             console.error(`Failed to apply delta ${op.operation_id}:`, err);

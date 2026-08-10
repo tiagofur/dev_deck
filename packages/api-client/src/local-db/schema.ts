@@ -170,6 +170,21 @@ CREATE TABLE IF NOT EXISTS circle_items (
 );
 
 CREATE INDEX IF NOT EXISTS idx_circle_items_item ON circle_items(item_id);
+
+-- Notifications (pull-only from server)
+CREATE TABLE IF NOT EXISTS notifications (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    action_url TEXT,
+    read_at TEXT,
+    created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON notifications(user_id) WHERE read_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_notifications_user_created ON notifications(user_id, created_at DESC);
 `;
 
 /**
@@ -187,4 +202,8 @@ export const LOCAL_MIGRATIONS = [
   `CREATE INDEX IF NOT EXISTS idx_circles_created_by ON circles(created_by)`,
   `CREATE INDEX IF NOT EXISTS idx_circle_members_user ON circle_members(user_id)`,
   `CREATE INDEX IF NOT EXISTS idx_circle_items_item ON circle_items(item_id)`,
+  // Add notifications table (2026-08-10)
+  `CREATE TABLE IF NOT EXISTS notifications (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, type TEXT NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL, action_url TEXT, read_at TEXT, created_at TEXT NOT NULL)`,
+  `CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON notifications(user_id) WHERE read_at IS NULL`,
+  `CREATE INDEX IF NOT EXISTS idx_notifications_user_created ON notifications(user_id, created_at DESC)`,
 ];
