@@ -18,7 +18,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "framer-motion": "^12.42.2",
-    "lucide-react": "^1.28.0"
+    "lucide-react": "^1.33.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.5.0",

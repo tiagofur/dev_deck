@@ -16,7 +16,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.101.4",
     "sqlocal": "^0.18.0",
-    "uuid": "^14.0.1"
+    "uuid": "^14.0.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.5.0",
