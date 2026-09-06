@@ -14,9 +14,9 @@
     "@devdeck/api-client": "workspace:*",
     "@devdeck/features": "workspace:*",
     "@devdeck/ui": "workspace:*",
-    "@tanstack/react-query": "^5.101.4",
+    "@tanstack/react-query": "^5.102.8",
     "framer-motion": "^12.42.2",
-    "lucide-react": "^1.28.0",
+    "lucide-react": "^1.40.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
