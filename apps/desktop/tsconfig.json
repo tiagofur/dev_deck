@@ -16,9 +16,8 @@
     "forceConsistentCasingInFileNames": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/renderer/src/*"],
+      "@/*": ["./src/renderer/src/*"],
       "@devdeck/ui": ["../../packages/ui/src/index.ts"],
       "@devdeck/ui/*": ["../../packages/ui/*"],
       "@devdeck/api-client": ["../../packages/api-client/src/index.ts"],
