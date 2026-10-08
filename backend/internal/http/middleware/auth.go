@@ -33,8 +33,10 @@ func TokenAuth(cfg config.Config, authService *authservice.Service, st *store.St
 				return
 			}
 
-			// Static token mode
-			if !strings.HasPrefix(h, prefix) {
+			// Static token mode. config.Load refuses to boot with an empty
+			// API_TOKEN, but guard here too: an empty expected token would
+			// otherwise authenticate any "Bearer " request.
+			if len(expected) == 0 || !strings.HasPrefix(h, prefix) {
 				unauthorized(w)
 				return
 			}
@@ -88,8 +90,9 @@ func OptionalTokenAuth(cfg config.Config, authService *authservice.Service, st *
 					}
 				}
 			} else {
-				// Static token mode
-				if strings.HasPrefix(h, prefix) {
+				// Static token mode. An empty API_TOKEN must not authenticate
+				// anything (same guard as TokenAuth); proceed anonymously.
+				if len(expected) > 0 && strings.HasPrefix(h, prefix) {
 					got := []byte(strings.TrimPrefix(h, prefix))
 					if subtle.ConstantTimeCompare(got, expected) == 1 {
 						testUserID := uuid.MustParse("00000000-0000-0000-0000-000000000001")

@@ -15,7 +15,20 @@ interface ElectronAPI {
 
 function api(): ElectronAPI | null {
   if (typeof window === 'undefined') return null
-  return (window as unknown as { electronAPI?: ElectronAPI }).electronAPI ?? null
+  const candidate = (window as unknown as { electronAPI?: Partial<ElectronAPI> }).electronAPI
+  const store = candidate?.store
+  // Degrade to "no storage" instead of throwing if the preload script
+  // ever exposes an incomplete bridge.
+  if (
+    !store ||
+    typeof store.getToken !== 'function' ||
+    typeof store.getRefreshToken !== 'function' ||
+    typeof store.setTokens !== 'function' ||
+    typeof store.clearTokens !== 'function'
+  ) {
+    return null
+  }
+  return candidate as ElectronAPI
 }
 
 export const electronSafeStorageAdapter: TokenStorage = {

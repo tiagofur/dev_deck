@@ -91,9 +91,12 @@ func TestRefresh_FlagOff_SkipsOriginGuard(t *testing.T) {
 	rec := httptest.NewRecorder()
 
 	defer func() {
-		// Reaching the store with nil deps panics; that is expected and proves
-		// the flag-off path did NOT return 403 from the origin guard.
-		_ = recover()
+		// Reaching the store with nil deps panics; requiring that panic proves
+		// the flag-off path did NOT return 403 from the origin guard (and that
+		// a future refactor which changes the flow cannot pass vacuously).
+		if recover() == nil {
+			t.Fatal("expected handler to reach the nil store and panic; it returned without panicking")
+		}
 		if rec.Code == http.StatusForbidden {
 			t.Errorf("flag off must not run the origin guard (no 403)")
 		}
