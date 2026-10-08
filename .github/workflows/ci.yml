@@ -50,7 +50,11 @@ jobs:
         env:
           DEVDECK_REQUIRE_DB: '1'
         run: |
-          go test -race -timeout=10m -coverprofile=coverage.out -covermode=atomic ./...
+          # -p 2 caps concurrent test packages: each DB-backed package holds a
+          # pgvector testcontainer, and -race + atomic coverage on a 4-core
+          # runner OOM-kills containers mid-suite (~50% of runs on 2026-10-08),
+          # surfacing as random "unexpected EOF" failures in DB-backed tests.
+          go test -race -timeout=10m -p 2 -coverprofile=coverage.out -covermode=atomic ./...
 
       - name: Print coverage summary
         run: go tool cover -func=coverage.out | tail -n 20

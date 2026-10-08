@@ -2,7 +2,7 @@
   "name": "@devdeck/desktop",
   "version": "0.6.0",
   "private": true,
-  "description": "DevDeck \u2014 your personal dev multi-tool. Desktop app.",
+  "description": "DevDeck — your personal dev multi-tool. Desktop app.",
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
@@ -55,7 +55,7 @@
     "jsdom": "^25.0.1",
     "postcss": "^8.5.23",
     "tailwindcss": "^3.4.13",
-    "typescript": "^5.6.2",
+    "typescript": "^6.0.3",
     "vite": "^6.0.0",
     "vitest": "^4.1.10"
   }
