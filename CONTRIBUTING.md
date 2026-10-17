@@ -1,6 +1,6 @@
-# Contributing to DevDeck
+# Contributing to HeapDeck
 
-Thank you for your interest in contributing to DevDeck! This is an indie project with a strong vision, so please read this guide before opening a Pull Request.
+Thank you for your interest in contributing to HeapDeck! This is an indie project with a strong vision, so please read this guide before opening a Pull Request.
 
 [Leer en español](CONTRIBUTING.es.md)
 
@@ -24,12 +24,12 @@ The short version:
 
 1.  **Read the vision**: Check `docs/VISION.md` and `docs/PRD.md`. If your proposal doesn't align with the project's direction, we might decline it. Save yourself some time!
 2.  **Issue first**: For code or docs changes, open or claim an issue and wait for `status:approved` before opening a PR.
-3.  **Shape unclear ideas carefully**: If the idea is still rough, start in [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions) to ask questions, share context, and narrow the first useful step before opening an issue.
+3.  **Shape unclear ideas carefully**: If the idea is still rough, start in [GitHub Discussions](https://github.com/tiagofur/heapdeck/discussions) to ask questions, share context, and narrow the first useful step before opening an issue.
 4.  **Reporting bugs**: Use the bug report template with clear reproduction steps, version, OS, and logs if applicable.
 
 ## Best First Contributions
 
-DevDeck is currently preparing for a community launch. The most useful contributions are small, visible improvements that make the app easier to try, understand, and trust:
+HeapDeck is currently preparing for a community launch. The most useful contributions are small, visible improvements that make the app easier to try, understand, and trust:
 
 - Polish one empty/loading/error state.
 - Improve one onboarding or README section.
@@ -38,7 +38,7 @@ DevDeck is currently preparing for a community launch. The most useful contribut
 - Improve one Circle sharing or community-memory flow.
 - Make local setup or self-hosting easier to follow.
 
-If you are new here, look for issues labeled `good first issue` or ask for a small launch-readiness task in [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions). See [docs/DISCUSSIONS.md](docs/DISCUSSIONS.md) before opening rough proposals.
+If you are new here, look for issues labeled `good first issue` or ask for a small launch-readiness task in [GitHub Discussions](https://github.com/tiagofur/heapdeck/discussions). See [docs/DISCUSSIONS.md](docs/DISCUSSIONS.md) before opening rough proposals.
 
 The best first issues are already scoped to fit a small PR. If a change starts growing, split it before opening the PR.
 
@@ -46,7 +46,7 @@ The best first issues are already scoped to fit a small PR. If a change starts g
 
 ## Local Setup
 
-DevDeck is a **pnpm workspaces monorepo**. A single `pnpm install` in the root installs all dependencies for all packages (`apps/desktop`, `apps/web`, `apps/extension`, `packages/ui`, `packages/api-client`, `packages/features`, `packages/realtime-client`).
+HeapDeck is a **pnpm workspaces monorepo**. A single `pnpm install` in the root installs all dependencies for all packages (`apps/desktop`, `apps/web`, `apps/extension`, `packages/ui`, `packages/api-client`, `packages/features`, `packages/realtime-client`).
 
 ```bash
 # Run this once from the project root
@@ -65,18 +65,18 @@ go run ./cmd/api
 ## Questions & Answers
 
 **Can I use this commercially?**
-Yes. DevDeck is released under the Apache 2.0 License. See the `LICENSE` file for details.
+Yes. HeapDeck is released under the Apache 2.0 License. See the `LICENSE` file for details.
 
 ### Desktop App (Electron + React)
 ```bash
 pnpm dev:desktop
-# Equivalent to: pnpm -F @devdeck/desktop dev
+# Equivalent to: pnpm -F @heapdeck/desktop dev
 ```
 
 ### Web App (React)
 ```bash
 pnpm dev:web
-# Equivalent to: pnpm -F @devdeck/web dev
+# Equivalent to: pnpm -F @heapdeck/web dev
 # The dev server listens on http://localhost:5173 and proxies /api to :8080
 ```
 
@@ -86,7 +86,7 @@ pnpm lint                         # ESLint over the web frontend (apps/web + pac
 pnpm format                       # Prettier --write across the repo
 pnpm typecheck                    # Runs tsc --noEmit across all packages
 pnpm test                         # Runs vitest in packages with unit tests
-pnpm -F @devdeck/desktop test:e2e # Runs Playwright flows for the desktop app
+pnpm -F @heapdeck/desktop test:e2e # Runs Playwright flows for the desktop app
 ```
 
 `pnpm lint` must report **0 errors** to merge (warnings are an accepted, shrinking
@@ -102,7 +102,7 @@ backlog — picking one off is a great first contribution).
 - **Desktop-only logic** (Electron main process, global shortcuts): `apps/desktop/src/`.
 - **Web-only logic** (Routing shell, Web-specific guards): `apps/web/src/`.
 
-We use internal aliases: `@devdeck/ui`, `@devdeck/api-client`, and `@devdeck/features`.
+We use internal aliases: `@heapdeck/ui`, `@heapdeck/api-client`, and `@heapdeck/features`.
 
 ---
 
@@ -132,7 +132,7 @@ We follow **Conventional Commits**: `feat:`, `fix:`, `docs:`, `test:`, `refactor
 - Branch from `main` with a descriptive name: `feat/capture-endpoint`.
 - One PR = One concern.
 - Link an approved issue with `Closes #...`.
-- Use [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions) for questions or rough proposals before opening a large PR.
+- Use [GitHub Discussions](https://github.com/tiagofur/heapdeck/discussions) for questions or rough proposals before opening a large PR.
 - Add exactly one `type:*` label.
 - Ensure the CI is green before requesting a review.
 - A minimum of one maintainer approval is required for merging.
@@ -147,4 +147,4 @@ Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Be respectful, direct, and
 
 ---
 
-*Part of the DevDeck Open Source Guidelines*
+*Part of the HeapDeck Open Source Guidelines*

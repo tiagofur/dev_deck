@@ -1,6 +1,6 @@
-# DevDeck — Estrategia de captura sin fricción
+# HeapDeck — Estrategia de captura sin fricción
 
-> **Tesis:** si agregar algo a DevDeck toma más de 3 segundos, el usuario no lo va a usar. La calidad de la captura define el éxito del producto.
+> **Tesis:** si agregar algo a HeapDeck toma más de 3 segundos, el usuario no lo va a usar. La calidad de la captura define el éxito del producto.
 >
 > Este doc especifica los 4 canales de captura prioritarios y cómo se integran con el backend existente.
 
@@ -81,8 +81,8 @@ Entrada polimórfica, detección de tipo automática en el servidor.
 - **Manifest v3**, compatible Chrome 100+ y Firefox 109+.
 - Icono en toolbar con contador de "items capturados hoy".
 - Atajo por defecto: `Cmd/Ctrl + Shift + D` → captura tab activa.
-- Right-click en selección: "Guardar en DevDeck como snippet".
-- Right-click en link: "Guardar link en DevDeck".
+- Right-click en selección: "Guardar en HeapDeck como snippet".
+- Right-click en link: "Guardar link en HeapDeck".
 - Popup con:
   - Preview de lo que se va a capturar (título, URL, favicon, tipo detectado).
   - Textarea `why_saved` (autofocus).
@@ -117,42 +117,42 @@ Estado actual: Chrome/Chromium con captura de tab activa por shortcut o popup, c
 
 ---
 
-## Canal 2 — CLI `devdeck`
+## Canal 2 — CLI `heapdeck`
 
 ### Spec
 Binario Go único. El estado actual del repo soporta `go install`/`go build`; Homebrew y Scoop siguen como objetivo de release, no como distribución ya cerrada.
 
 ```bash
-devdeck login --token <api-token>          # guarda token en OS keychain
-devdeck config set api-url https://api.devdeck.ai
-devdeck config set api-url http://localhost:8080   # self-hosters
+heapdeck login --token <api-token>          # guarda token en OS keychain
+heapdeck config set api-url https://api.heapdeck.com
+heapdeck config set api-url http://localhost:8080   # self-hosters
 
-devdeck add https://github.com/foo/bar     # repo
-devdeck add https://rg.dev --type=cli      # forzar tipo
-devdeck add "Cmd+Shift+P" --type=shortcut --tags=vscode,productivity
-echo 'rg --glob "*.go" "TODO"' | devdeck add --type=snippet --lang=bash
+heapdeck add https://github.com/foo/bar     # repo
+heapdeck add https://rg.dev --type=cli      # forzar tipo
+heapdeck add "Cmd+Shift+P" --type=shortcut --tags=vscode,productivity
+echo 'rg --glob "*.go" "TODO"' | heapdeck add --type=snippet --lang=bash
 
-devdeck search "debugging go"              # devuelve top 10
-devdeck open <id>                           # abre la URL fuente del repo/item en el browser
-# devdeck run <alias>                      # futuro, no implementado
-# devdeck run deploy --env=staging         # futuro, no implementado
+heapdeck search "debugging go"              # devuelve top 10
+heapdeck open <id>                           # abre la URL fuente del repo/item en el browser
+# heapdeck run <alias>                      # futuro, no implementado
+# heapdeck run deploy --env=staging         # futuro, no implementado
 
-devdeck list --type=cli
-devdeck import github-stars                # importa GitHub Stars del user
-# devdeck import pocket ~/exports/pocket.html  # futuro, no implementado
+heapdeck list --type=cli
+heapdeck import github-stars                # importa GitHub Stars del user
+# heapdeck import pocket ~/exports/pocket.html  # futuro, no implementado
 
-# devdeck sync                             # futuro, no implementado
-devdeck status                             # config, token y health del backend
+# heapdeck sync                             # futuro, no implementado
+heapdeck status                             # config, token y health del backend
 ```
 
 ### Implementación
-- `cobra` para CLI. Bubbletea/TUI sigue como opción futura (`devdeck ui`), no implementada.
+- `cobra` para CLI. Bubbletea/TUI sigue como opción futura (`heapdeck ui`), no implementada.
 - Token guardado en OS keychain via `zalando/go-keyring`.
-- Config en `~/.config/devdeck/config.toml`.
+- Config en `~/.config/heapdeck/config.toml`.
 - Hoy no hay SQLite local ni cola offline en el CLI; eso queda para una etapa posterior si el canal terminal demuestra suficiente uso.
 - Hoy el CLI opera online contra la API: una request por comando, sin sync local.
 
-### `devdeck run <alias>` — ejecutor de comandos
+### `heapdeck run <alias>` — ejecutor de comandos
 - Busca el comando por alias/título en el vault.
 - Substituye variables: `{{env}}`, `{{branch}}`, etc.
 - **Dry-run por default**: muestra el comando y pide confirmación con `y/N`.
@@ -164,7 +164,7 @@ devdeck status                             # config, token y health del backend
 ```
 cli/
   cmd/
-    devdeck/
+    heapdeck/
       main.go
   internal/
     commands/
@@ -186,14 +186,14 @@ cli/
 ### Primer milestone (P0)
 Implementado hoy: `login`, `logout`, `config`, `add <url|text>`, `search`, `list`, `open <id>`, `status`, `import github-stars`.
 
-**Nota de alcance:** el `open <id>` actual abre la **URL fuente** del repo/item cuando existe. No intenta deducir rutas internas de la app (`app.devdeck...`) desde `api_url`; si el recurso no tiene `url`, falla con error claro.
+**Nota de alcance:** el `open <id>` actual abre la **URL fuente** del repo/item cuando existe. No intenta deducir rutas internas de la app (`app.heapdeck...`) desde `api_url`; si el recurso no tiene `url`, falla con error claro.
 
 ---
 
 ## Canal 3 — Paste inteligente en la app
 
 ### Spec
-En `PasteInterceptor` (mounted globally en `apps/desktop/src/renderer/src/App.tsx`), escuchar `paste` global (no dentro de inputs). Este componente es **Electron-only por diseño** — el web client no monta `PasteInterceptor` porque el comportamiento global-paste no encaja bien en browser. El `CaptureModal` en sí vive en `@devdeck/features` y sí se usa en ambas apps (web lo dispara desde un botón en Topbar / `ItemsPage`).
+En `PasteInterceptor` (mounted globally en `apps/desktop/src/renderer/src/App.tsx`), escuchar `paste` global (no dentro de inputs). Este componente es **Electron-only por diseño** — el web client no monta `PasteInterceptor` porque el comportamiento global-paste no encaja bien en browser. El `CaptureModal` en sí vive en `@heapdeck/features` y sí se usa en ambas apps (web lo dispara desde un botón en Topbar / `ItemsPage`).
 
 - Si clipboard es URL → abrir `AddItemModal` con URL pre-rellenada y tipo detectado.
 - Si clipboard es texto que parece comando → modal con `type=cli` y el comando en el body.
@@ -209,7 +209,7 @@ En `PasteInterceptor` (mounted globally en `apps/desktop/src/renderer/src/App.ts
 Si el user no hace nada en 5 segundos, desaparece. Esto respeta el flujo sin ser intrusivo.
 
 ### Shortcut dedicado
-`Cmd/Ctrl + Shift + V` → "Pegar y guardar en DevDeck", siempre abre modal con el contenido del clipboard.
+`Cmd/Ctrl + Shift + V` → "Pegar y guardar en HeapDeck", siempre abre modal con el contenido del clipboard.
 
 ---
 
@@ -233,7 +233,7 @@ Cuando el web client sea PWA (post-Ola 6), registrar share target en el `manifes
 }
 ```
 
-En móvil, aparece "DevDeck" en el menú nativo de Share. La ruta `/share` del React web app recibe los params y llama a `/api/items/capture` (vía `useCapture()` de `@devdeck/api-client`).
+En móvil, aparece "HeapDeck" en el menú nativo de Share. La ruta `/share` del React web app recibe los params y llama a `/api/items/capture` (vía `useCapture()` de `@heapdeck/api-client`).
 
 Esto evita tener que construir una app nativa iOS/Android para el caso más común (compartir link desde browser móvil).
 
@@ -254,7 +254,7 @@ Al capturar un item (desde cualquier canal), el backend puede devolver 3 sugeren
 }
 ```
 
-El cliente muestra las 3 como chips clickeables + opción "otro". Un click y el campo está lleno. Esto convierte un campo opcional en default rellenado, que es lo que hace que DevDeck sea encontrable meses después.
+El cliente muestra las 3 como chips clickeables + opción "otro". Un click y el campo está lleno. Esto convierte un campo opcional en default rellenado, que es lo que hace que HeapDeck sea encontrable meses después.
 
 ---
 
@@ -295,8 +295,8 @@ Chrome/Firefox exportan HTML bookmarks. Mismo parser que Pocket.
 4. **Extensión Chrome P0:** tab activa → save.
 5. **Importador GitHub Stars** en el CLI.
 6. **Extensión Firefox** + selección + right-click.
-7. **Botón "Capturar" en web** (React — el `CaptureModal` ya vive en `@devdeck/features`, solo hay que disparar desde Topbar / ItemsPage; no se implementa `PasteInterceptor` en web por decisión de alcance — ver nota en Canal 3).
+7. **Botón "Capturar" en web** (React — el `CaptureModal` ya vive en `@heapdeck/features`, solo hay que disparar desde Topbar / ItemsPage; no se implementa `PasteInterceptor` en web por decisión de alcance — ver nota en Canal 3).
 8. **PWA share target.**
 9. **Sugerencias de `why_saved` con IA** (requiere Ola 6 en pie).
 
-Los pasos 1–5 se pueden hacer en 2 semanas si hay foco. Son lo que convierte a DevDeck de "la abrís a veces" a "es parte del flujo".
+Los pasos 1–5 se pueden hacer en 2 semanas si hay foco. Son lo que convierte a HeapDeck de "la abrís a veces" a "es parte del flujo".

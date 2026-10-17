@@ -53,6 +53,6 @@ El cálculo matemático de reputación y las insignias de logros se mantendrán 
 
 ## 3. Manejo de Traducciones y Dependencias
 
-- **Localización (`i18n`):** Cada componente hijo importará `useTranslation` de `@devdeck/i18n` de forma local. Esto evita pasar docenas de strings traducidas como props, manteniendo las firmas de props ultra-limpias.
+- **Localización (`i18n`):** Cada componente hijo importará `useTranslation` de `@heapdeck/i18n` de forma local. Esto evita pasar docenas de strings traducidas como props, manteniendo las firmas de props ultra-limpias.
 - **Iconos (`lucide-react`):** Cada subcomponente importará solo los iconos necesarios que renderiza, optimizando el bundle general.
-- **Componentes UI Comunes:** Se importará el componente `Button` y la función `showToast` de `@devdeck/ui` de forma directa tal como se hace hoy.
+- **Componentes UI Comunes:** Se importará el componente `Button` y la función `showToast` de `@heapdeck/ui` de forma directa tal como se hace hoy.

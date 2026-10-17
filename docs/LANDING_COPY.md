@@ -1,6 +1,6 @@
 # Landing Page Copy (English)
 
-This file contains the final English copy for the **devdeck.ai** website.
+This file contains the final English copy for the **heapdeck.com** website.
 
 [Leer en español](LANDING_COPY.es.md)
 
@@ -8,8 +8,8 @@ This file contains the final English copy for the **devdeck.ai** website.
 
 ## Hero
 - **Headline:** Your AI-assisted external memory for development work.
-- **Subheadline:** Stop losing track of the tools you discover. DevDeck captures repos, CLIs, snippets, and shortcuts—organizing them automatically with AI.
-- **Primary CTA:** Get DevDeck for Desktop
+- **Subheadline:** Stop losing track of the tools you discover. HeapDeck captures repos, CLIs, snippets, and shortcuts—organizing them automatically with AI.
+- **Primary CTA:** Get HeapDeck for Desktop
 - **Secondary CTA:** Try Web Version
 
 ---
@@ -18,7 +18,7 @@ This file contains the final English copy for the **devdeck.ai** website.
 
 ### Capture
 - **Title:** Capture from anywhere.
-- **Body:** Whether you're in the browser, the terminal, or just copied a URL, DevDeck is ready to save it. No friction, no manual tagging.
+- **Body:** Whether you're in the browser, the terminal, or just copied a URL, HeapDeck is ready to save it. No friction, no manual tagging.
 
 ### Search
 - **Title:** Find by intent, not just tags.
@@ -26,7 +26,7 @@ This file contains the final English copy for the **devdeck.ai** website.
 
 ### Privacy
 - **Title:** Offline-First & Open Source.
-- **Body:** Your data belongs to you. Run DevDeck locally on your machine or host it yourself. It works without internet and respects your privacy.
+- **Body:** Your data belongs to you. Run HeapDeck locally on your machine or host it yourself. It works without internet and respects your privacy.
 
 ---
 
@@ -38,5 +38,5 @@ This file contains the final English copy for the **devdeck.ai** website.
 ---
 
 ## Support
-- **Text:** Love DevDeck? Help us keep the coffee flowing and the code shipping.
+- **Text:** Love HeapDeck? Help us keep the coffee flowing and the code shipping.
 - **Link:** [Buy us a coffee](https://www.buymeacoffee.com/tiagofur)

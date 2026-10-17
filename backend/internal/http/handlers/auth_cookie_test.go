@@ -10,14 +10,14 @@ import (
 	"testing"
 	"time"
 
-	"devdeck/internal/ai"
-	"devdeck/internal/authservice"
-	"devdeck/internal/config"
-	"devdeck/internal/domain/auth"
-	"devdeck/internal/email"
-	httpapi "devdeck/internal/http"
-	"devdeck/internal/store"
-	"devdeck/internal/testutil"
+	"heapdeck/internal/ai"
+	"heapdeck/internal/authservice"
+	"heapdeck/internal/config"
+	"heapdeck/internal/domain/auth"
+	"heapdeck/internal/email"
+	httpapi "heapdeck/internal/http"
+	"heapdeck/internal/store"
+	"heapdeck/internal/testutil"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -51,13 +51,13 @@ func newAuthTestServer(t *testing.T, cookieMode bool) *authTestServer {
 		JWTSecret:         "test-jwt-secret",
 		LocalAuthEnabled:  true,
 		RateLimitDisabled: true,
-		CORSOrigins:       cookieTestOrigin + ",https://app.devdeck.io",
+		CORSOrigins:       cookieTestOrigin + ",https://app.heapdeck.io",
 		AuthCookieMode:    cookieMode,
 		// Secure off so the test cookie is readable without an https transport;
 		// the attribute itself is asserted separately via a dedicated case.
 		AuthCookieSecure:        false,
 		WebOAuthRedirectURL:     "http://localhost:5173/auth/callback",
-		DesktopOAuthRedirectURL: "devdeck://auth/callback",
+		DesktopOAuthRedirectURL: "heapdeck://auth/callback",
 	}
 
 	router := httpapi.NewRouterWithDeps(cfg, httpapi.Deps{
@@ -142,7 +142,7 @@ func TestCookie_LoginLocal_FlagOff_NoCookie_BodyTokens(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d, body: %s", rec.Code, rec.Body.String())
 	}
-	if c := findCookie(rec, "devdeck_refresh"); c != nil {
+	if c := findCookie(rec, "heapdeck_refresh"); c != nil {
 		t.Errorf("flag off must not set the refresh cookie, got %+v", c)
 	}
 	pair := decodePair(t, rec)
@@ -169,7 +169,7 @@ func TestCookie_Refresh_FlagOff_BodyOnly_NoOriginCheck(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d, body: %s", rec.Code, rec.Body.String())
 	}
-	if c := findCookie(rec, "devdeck_refresh"); c != nil {
+	if c := findCookie(rec, "heapdeck_refresh"); c != nil {
 		t.Errorf("flag off refresh must not set a cookie, got %+v", c)
 	}
 	got := decodePair(t, rec)
@@ -194,7 +194,7 @@ func TestCookie_Logout_FlagOff_NoCookieCleared(t *testing.T) {
 	if rec.Code != http.StatusNoContent {
 		t.Fatalf("expected 204, got %d", rec.Code)
 	}
-	if c := findCookie(rec, "devdeck_refresh"); c != nil {
+	if c := findCookie(rec, "heapdeck_refresh"); c != nil {
 		t.Errorf("flag off logout must not emit a Set-Cookie, got %+v", c)
 	}
 }
@@ -213,9 +213,9 @@ func TestCookie_LoginLocal_FlagOn_SetsCookieAndBody(t *testing.T) {
 		t.Fatalf("expected 200, got %d, body: %s", rec.Code, rec.Body.String())
 	}
 
-	c := findCookie(rec, "devdeck_refresh")
+	c := findCookie(rec, "heapdeck_refresh")
 	if c == nil {
-		t.Fatal("flag on login must set devdeck_refresh cookie")
+		t.Fatal("flag on login must set heapdeck_refresh cookie")
 	}
 	if !c.HttpOnly {
 		t.Errorf("cookie must be HttpOnly")
@@ -267,7 +267,7 @@ func TestCookie_LoginLocal_FlagOn_SecureAttribute(t *testing.T) {
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
-	c := findCookie(rec, "devdeck_refresh")
+	c := findCookie(rec, "heapdeck_refresh")
 	if c == nil {
 		t.Fatal("expected cookie")
 	}
@@ -284,7 +284,7 @@ func TestCookie_Refresh_FlagOn_CookieFirst_NoBody(t *testing.T) {
 		"email":    "on-cookie-refresh@example.com",
 		"password": cookieTestPassword,
 	}, nil)
-	loginCookie := findCookie(login, "devdeck_refresh")
+	loginCookie := findCookie(login, "heapdeck_refresh")
 	if loginCookie == nil {
 		t.Fatal("login did not set cookie")
 	}
@@ -292,14 +292,14 @@ func TestCookie_Refresh_FlagOn_CookieFirst_NoBody(t *testing.T) {
 	// Refresh with cookie + valid Origin, NO body.
 	req := httptest.NewRequest(http.MethodPost, "/api/auth/refresh", nil)
 	req.Header.Set("Origin", cookieTestOrigin)
-	req.AddCookie(&http.Cookie{Name: "devdeck_refresh", Value: loginCookie.Value})
+	req.AddCookie(&http.Cookie{Name: "heapdeck_refresh", Value: loginCookie.Value})
 	rec := httptest.NewRecorder()
 	ts.router.ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d, body: %s", rec.Code, rec.Body.String())
 	}
-	newCookie := findCookie(rec, "devdeck_refresh")
+	newCookie := findCookie(rec, "heapdeck_refresh")
 	if newCookie == nil {
 		t.Fatal("refresh must rotate and set a new cookie")
 	}
@@ -331,7 +331,7 @@ func TestCookie_Refresh_FlagOn_BodyFallback_NoCookie(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200 via body fallback, got %d, body: %s", rec.Code, rec.Body.String())
 	}
-	if findCookie(rec, "devdeck_refresh") == nil {
+	if findCookie(rec, "heapdeck_refresh") == nil {
 		t.Errorf("cookie-mode refresh should still rotate the cookie on body fallback")
 	}
 }
@@ -344,14 +344,14 @@ func TestCookie_Refresh_FlagOn_RejectsDisallowedOrigin(t *testing.T) {
 		"email":    "on-bad-origin@example.com",
 		"password": cookieTestPassword,
 	}, nil)
-	loginCookie := findCookie(login, "devdeck_refresh")
+	loginCookie := findCookie(login, "heapdeck_refresh")
 	if loginCookie == nil {
 		t.Fatal("login did not set cookie — likely DB connection issue")
 	}
 
 	req := httptest.NewRequest(http.MethodPost, "/api/auth/refresh", nil)
 	req.Header.Set("Origin", "https://evil.example.com")
-	req.AddCookie(&http.Cookie{Name: "devdeck_refresh", Value: loginCookie.Value})
+	req.AddCookie(&http.Cookie{Name: "heapdeck_refresh", Value: loginCookie.Value})
 	rec := httptest.NewRecorder()
 	ts.router.ServeHTTP(rec, req)
 
@@ -368,7 +368,7 @@ func TestCookie_Logout_FlagOn_ClearsCookieAndInvalidates(t *testing.T) {
 		"email":    "on-logout@example.com",
 		"password": cookieTestPassword,
 	}, nil)
-	loginCookie := findCookie(login, "devdeck_refresh")
+	loginCookie := findCookie(login, "heapdeck_refresh")
 	if loginCookie == nil {
 		t.Fatal("login did not set cookie")
 	}
@@ -376,14 +376,14 @@ func TestCookie_Logout_FlagOn_ClearsCookieAndInvalidates(t *testing.T) {
 	// Logout sends the cookie, no body.
 	req := httptest.NewRequest(http.MethodPost, "/api/auth/logout", nil)
 	req.Header.Set("Origin", cookieTestOrigin)
-	req.AddCookie(&http.Cookie{Name: "devdeck_refresh", Value: loginCookie.Value})
+	req.AddCookie(&http.Cookie{Name: "heapdeck_refresh", Value: loginCookie.Value})
 	rec := httptest.NewRecorder()
 	ts.router.ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusNoContent {
 		t.Fatalf("expected 204, got %d", rec.Code)
 	}
-	cleared := findCookie(rec, "devdeck_refresh")
+	cleared := findCookie(rec, "heapdeck_refresh")
 	if cleared == nil {
 		t.Fatal("logout must emit a clearing Set-Cookie")
 	}
@@ -408,7 +408,7 @@ func TestCookie_Refresh_SingleUse_SecondUseFails(t *testing.T) {
 		"email":    "on-rotate@example.com",
 		"password": cookieTestPassword,
 	}, nil)
-	loginCookie := findCookie(login, "devdeck_refresh")
+	loginCookie := findCookie(login, "heapdeck_refresh")
 	if loginCookie == nil {
 		t.Fatal("login did not set cookie — likely DB connection issue")
 	}
@@ -416,7 +416,7 @@ func TestCookie_Refresh_SingleUse_SecondUseFails(t *testing.T) {
 	// First refresh consumes the original token.
 	req := httptest.NewRequest(http.MethodPost, "/api/auth/refresh", nil)
 	req.Header.Set("Origin", cookieTestOrigin)
-	req.AddCookie(&http.Cookie{Name: "devdeck_refresh", Value: loginCookie.Value})
+	req.AddCookie(&http.Cookie{Name: "heapdeck_refresh", Value: loginCookie.Value})
 	rec := httptest.NewRecorder()
 	ts.router.ServeHTTP(rec, req)
 	if rec.Code != http.StatusOK {

@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"devdeck/internal/ai/agent"
+	"heapdeck/internal/ai/agent"
 )
 
 // AgentOpenAI implements the agent.Agent interface using OpenAI's chat completions.

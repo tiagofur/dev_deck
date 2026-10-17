@@ -3,8 +3,8 @@ package middleware
 import (
 	"net/http"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/store"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/store"
 )
 
 // OrgRole represents the role a user has in an organization.

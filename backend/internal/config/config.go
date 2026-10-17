@@ -63,7 +63,7 @@ type Config struct {
 	ApplePrivateKey         string `env:"APPLE_PRIVATE_KEY"`
 	AppleOAuthCallbackURL   string `env:"APPLE_OAUTH_CALLBACK_URL" envDefault:"http://localhost:8080/api/auth/apple/callback"`
 	WebOAuthRedirectURL     string `env:"WEB_OAUTH_REDIRECT_URL" envDefault:"http://localhost:5173/auth/callback"`
-	DesktopOAuthRedirectURL string `env:"DESKTOP_OAUTH_REDIRECT_URL" envDefault:"devdeck://auth/callback"`
+	DesktopOAuthRedirectURL string `env:"DESKTOP_OAUTH_REDIRECT_URL" envDefault:"heapdeck://auth/callback"`
 	AllowedGitHubLogins     string `env:"ALLOWED_GITHUB_LOGINS"` // legacy single-user option
 
 	// ─── Wave 7: Local Auth & Email ───

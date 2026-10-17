@@ -1,12 +1,12 @@
 # Versioning & Release Strategy
 
-> This document describes DevDeck's versioning system, release strategy, and commit conventions.
+> This document describes HeapDeck's versioning system, release strategy, and commit conventions.
 
 ---
 
 ## 1. Semantic Versioning
 
-DevDeck uses [Semantic Versioning](https://semver.org/) with the format `MAJOR.MINOR.PATCH`:
+HeapDeck uses [Semantic Versioning](https://semver.org/) with the format `MAJOR.MINOR.PATCH`:
 
 | Component | When to bump | Example |
 |-----------|-------------|---------|
@@ -16,11 +16,11 @@ DevDeck uses [Semantic Versioning](https://semver.org/) with the format `MAJOR.M
 
 **Current state:** `0.5.0` — public beta / launch-readiness milestone.
 
-> DevDeck is not yet a stable `1.0.0` product. The honest public position is: functional open-source beta with a clear developer-memory direction, active polish, and a contributor/community launch in progress.
+> HeapDeck is not yet a stable `1.0.0` product. The honest public position is: functional open-source beta with a clear developer-memory direction, active polish, and a contributor/community launch in progress.
 
-### When DevDeck can become 1.0.0
+### When HeapDeck can become 1.0.0
 
-DevDeck should not be tagged as `1.0.0` until these are true:
+HeapDeck should not be tagged as `1.0.0` until these are true:
 
 - Clean onboarding/demo flow works for a new user in minutes.
 - Local setup and self-hosting instructions are verified on a clean machine.

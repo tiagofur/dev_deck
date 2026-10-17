@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/store"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -121,7 +121,7 @@ func (h *SCIMHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// In SCIM delete often means removing from the app or disabling.
-	// For DevDeck, we remove them from the organization.
+	// For HeapDeck, we remove them from the organization.
 	// We need a Store method to remove org member.
 	_ = orgID
 	_ = userID

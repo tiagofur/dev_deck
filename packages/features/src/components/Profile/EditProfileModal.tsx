@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Edit3, Plus, X, Globe, MapPin } from 'lucide-react'
 import { GithubIcon as Github } from '../icons/GithubIcon'
-import { Button, showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
-import { useUpdateMe, useUploadAvatar, User } from '@devdeck/api-client'
+import { Button, showToast } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
+import { useUpdateMe, useUploadAvatar, User } from '@heapdeck/api-client'
 import { CropModal } from './CropModal'
 import { UserAvatar } from '../UserAvatar'
 

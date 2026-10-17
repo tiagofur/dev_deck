@@ -10,7 +10,7 @@ Today the **web** client stores both the access token and the refresh token in
 `localStorage`:
 
 - `packages/api-client/src/auth/storage/localStorage.ts` keeps
-  `devdeck_access_token` and `devdeck_refresh_token`.
+  `heapdeck_access_token` and `heapdeck_refresh_token`.
 - `packages/api-client/src/api-client.ts` reads the access token
   (`getBearerToken()`) and sends it as `Authorization: Bearer <jwt>`.
 - The Go backend authenticates `/api` via the `TokenAuth` middleware reading

@@ -27,7 +27,7 @@ func (s *Store) CreateAPIKey(ctx context.Context, userID uuid.UUID, name string)
 	if _, err := rand.Read(bytes); err != nil {
 		return "", nil, err
 	}
-	raw := "devdeck_" + hex.EncodeToString(bytes)
+	raw := "heapdeck_" + hex.EncodeToString(bytes)
 	hash := hashToken(raw)
 
 	var k APIKey

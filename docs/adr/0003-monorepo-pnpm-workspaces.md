@@ -10,7 +10,7 @@
 
 ## Context and Problem Statement
 
-Originally, DevDeck had two separate repositories for the frontend:
+Originally, HeapDeck had two separate repositories for the frontend:
 1.  **Desktop App**: Built with Electron + React 18.
 2.  **Web App**: Built with Vue 3 + Vite.
 
@@ -38,7 +38,7 @@ We chose **Option 3**. We unified the stack on **React 18** and moved everything
 ### New Structure
 
 ```
-dev_deck/
+heapdeck/
 ├── apps/
 │   ├── desktop/      # Electron (React)
 │   └── web/          # Vite (React)
@@ -51,8 +51,8 @@ dev_deck/
 ## Consequences
 
 - **Pros**:
-    - **100% Feature Parity**: A change in `@devdeck/features` immediately updates both the Web and Desktop apps.
-    - **Single Source of Truth**: The design system (`@devdeck/ui`) and API logic (`@devdeck/api-client`) are centralized.
+    - **100% Feature Parity**: A change in `@heapdeck/features` immediately updates both the Web and Desktop apps.
+    - **Single Source of Truth**: The design system (`@heapdeck/ui`) and API logic (`@heapdeck/api-client`) are centralized.
     - **Developer Velocity**: No more double implementation. Testing is unified.
 - **Cons**:
     - **Migration Cost**: The Vue 3 codebase was abandoned (archived).
@@ -60,4 +60,4 @@ dev_deck/
 
 ---
 
-*Part of the DevDeck Architecture Decision Records*
+*Part of the HeapDeck Architecture Decision Records*

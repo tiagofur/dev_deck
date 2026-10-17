@@ -6,9 +6,9 @@ import {
   useMarkNotificationRead, 
   useMarkAllNotificationsRead,
   type Notification
-} from '@devdeck/api-client'
+} from '@heapdeck/api-client'
 import { useNavigate } from 'react-router-dom'
-import { useTranslation } from '@devdeck/i18n'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function NotificationCenter() {
   const { t } = useTranslation()

@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { showToast } from '@devdeck/ui'
+import { showToast } from '@heapdeck/ui'
 import { Loader2 } from 'lucide-react'
-import { useTranslation } from '@devdeck/i18n'
+import { useTranslation } from '@heapdeck/i18n'
 
 /**
  * Handle incoming links from the Web Share Target API.

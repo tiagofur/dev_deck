@@ -11,8 +11,8 @@ import { defineConfig, devices } from '@playwright/test'
 // the Go API in a sidecar before running these.
 //
 // To run locally:
-//   pnpm -F @devdeck/desktop test:e2e:install   # one-time browser install
-//   pnpm -F @devdeck/desktop test:e2e
+//   pnpm -F @heapdeck/desktop test:e2e:install   # one-time browser install
+//   pnpm -F @heapdeck/desktop test:e2e
 //
 // The five flows tracked here mirror the criteria in ROADMAP.md §16.6:
 //   1. Login (token-mode bypass)
@@ -42,7 +42,7 @@ export default defineConfig({
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
         env: {
-          DEVDECK_E2E: 'true',
+          HEAPDECK_E2E: 'true',
           VITE_API_URL: '',
           VITE_API_TOKEN: process.env.VITE_API_TOKEN || 'test-api-token',
           VITE_AUTH_MODE: 'token',

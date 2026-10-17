@@ -1,4 +1,4 @@
-# DevDeck — electron-builder config
+# HeapDeck — electron-builder config
 #
 # Run:
 #   npm run build:win    → Windows installer (NSIS)
@@ -7,9 +7,9 @@
 #
 # Artifacts land in dist/
 
-appId: com.devdeck.app
-productName: DevDeck
-copyright: Copyright © 2026 DevDeck
+appId: com.heapdeck.app
+productName: HeapDeck
+copyright: Copyright © 2026 HeapDeck
 
 directories:
   output: dist
@@ -41,7 +41,7 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: DevDeck
+  shortcutName: HeapDeck
   artifactName: ${productName}-${version}-Setup.${ext}
 
 # ─── macOS ───

@@ -19,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"devdeck/internal/domain/repos"
+	"heapdeck/internal/domain/repos"
 )
 
 var (

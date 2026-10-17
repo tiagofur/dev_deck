@@ -14,9 +14,9 @@ import {
 
 describe('workbench utils', () => {
   it('formats valid JSON', () => {
-    expect(formatJson('{"name":"DevDeck"}')).toEqual({
+    expect(formatJson('{"name":"HeapDeck"}')).toEqual({
       ok: true,
-      output: '{\n  "name": "DevDeck"\n}',
+      output: '{\n  "name": "HeapDeck"\n}',
     })
   })
 
@@ -29,14 +29,14 @@ describe('workbench utils', () => {
   it('decodes JWT header and payload locally', () => {
     const token = [
       'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0',
-      'eyJzdWIiOiIxMjMiLCJuYW1lIjoiRGV2RGVjayJ9',
+      'eyJzdWIiOiIxMjMiLCJuYW1lIjoiSGVhcERlY2sifQ',
       '',
     ].join('.')
 
     expect(decodeJwt(token)).toEqual({
       ok: true,
       header: { alg: 'none', typ: 'JWT' },
-      payload: { sub: '123', name: 'DevDeck' },
+      payload: { sub: '123', name: 'HeapDeck' },
     })
   })
 
@@ -68,7 +68,7 @@ describe('workbench utils', () => {
       requestConfigToCurl({
         method: 'POST',
         url: 'https://example.test/widgets',
-        headers: "Content-Type: application/json\nX-Name: DevDeck's test",
+        headers: "Content-Type: application/json\nX-Name: HeapDeck's test",
         body: '{"ok":true}',
       })
     ).toBe(
@@ -76,7 +76,7 @@ describe('workbench utils', () => {
         'curl -X POST',
         "'https://example.test/widgets'",
         "-H 'Content-Type: application/json'",
-        "-H 'X-Name: DevDeck'\\''s test'",
+        "-H 'X-Name: HeapDeck'\\''s test'",
         '--data \'{"ok":true}\'',
       ].join(' \\\n  ')
     )
@@ -90,23 +90,23 @@ describe('workbench utils', () => {
           "'https://example.test/widgets/1'",
           "-H 'Content-Type: application/json'",
           "-H 'X-Test: yes'",
-          '--data \'{"name":"DevDeck"}\'',
+          '--data \'{"name":"HeapDeck"}\'',
         ].join(' \\\n  ')
       )
     ).toEqual({
       method: 'PATCH',
       url: 'https://example.test/widgets/1',
       headers: 'Content-Type: application/json\nX-Test: yes',
-      body: '{"name":"DevDeck"}',
+      body: '{"name":"HeapDeck"}',
     })
   })
 
   it('tests regular expressions and captures groups', () => {
-    expect(testRegex('(dev)(deck)', 'i', 'DevDeck devdeck')).toEqual({
+    expect(testRegex('(heap)(deck)', 'i', 'HeapDeck heapdeck')).toEqual({
       ok: true,
       matches: [
-        { match: 'DevDeck', index: 0, groups: ['Dev', 'Deck'] },
-        { match: 'devdeck', index: 8, groups: ['dev', 'deck'] },
+        { match: 'HeapDeck', index: 0, groups: ['Heap', 'Deck'] },
+        { match: 'heapdeck', index: 8, groups: ['heap', 'deck'] },
       ],
     })
   })

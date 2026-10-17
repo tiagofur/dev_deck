@@ -1,6 +1,6 @@
 # Competitive Analysis
 
-How **DevDeck.ai** compares to other bookmarking and knowledge management tools.
+How **HeapDeck.com** compares to other bookmarking and knowledge management tools.
 
 [Leer en español](COMPETITIVE_ANALYSIS.es.md)
 
@@ -11,12 +11,12 @@ How **DevDeck.ai** compares to other bookmarking and knowledge management tools.
 ### 1.1 Raindrop.io
 - **Pros:** Excellent cross-platform sync, polished UI.
 - **Cons:** Generic (not dev-focused), no CLI, manual tagging is high friction.
-- **DevDeck Advantage:** Native CLI, "Smart Paste" for snippets, and AI-driven semantic search by intent.
+- **HeapDeck Advantage:** Native CLI, "Smart Paste" for snippets, and AI-driven semantic search by intent.
 
 ### 1.2 GitHub Stars
 - **Pros:** Default for many devs, zero effort to save.
 - **Cons:** Only for repos. Hard to search inside 1000+ stars. No way to save "Why did I star this?".
-- **DevDeck Advantage:** Unified vault for repos + CLIs + snippets + shortcuts. AI summarizes READMEs so you don't have to re-read them.
+- **HeapDeck Advantage:** Unified vault for repos + CLIs + snippets + shortcuts. AI summarizes READMEs so you don't have to re-read them.
 
 ---
 
@@ -25,18 +25,18 @@ How **DevDeck.ai** compares to other bookmarking and knowledge management tools.
 ### 2.1 Notion / Obsidian
 - **Pros:** Extremely flexible, "All-in-one" workspace.
 - **Cons:** Too much friction for quick saves. Becomes a graveyard of unsorted notes.
-- **DevDeck Advantage:** Built for speed. Capture in < 1s. Zero manual organization required.
+- **HeapDeck Advantage:** Built for speed. Capture in < 1s. Zero manual organization required.
 
 ### 2.2 Pocket
 - **Pros:** Great "Read it later" experience.
 - **Cons:** Focuses on articles, not tools. No dev-centric features.
-- **DevDeck Advantage:** Focuses on the *utility* of the tool (installation commands, key features) rather than just reading.
+- **HeapDeck Advantage:** Focuses on the *utility* of the tool (installation commands, key features) rather than just reading.
 
 ---
 
 ## 3. Comparison Matrix
 
-| Feature | DevDeck | Raindrop | GitHub Stars | Notion |
+| Feature | HeapDeck | Raindrop | GitHub Stars | Notion |
 |---------|---------|----------|--------------|--------|
 | **AI Summary** | ✅ (With provider)* | ❌ | ❌ | ⚠️ (Manual) |
 | **CLI Capture** | ✅ (Native) | ❌ | ❌ | ❌ |
@@ -45,8 +45,8 @@ How **DevDeck.ai** compares to other bookmarking and knowledge management tools.
 | **Open Source** | ✅ | ❌ | ❌ | ❌ |
 | **Self-Hostable** | ✅ | ❌ | ❌ | ❌ |
 
-> \* AI summaries and tags require a configured provider (OpenAI or local Ollama). Without one, DevDeck falls back to a built-in heuristic tagger.
-> \*\* Offline-first sync is product direction, deferred until after 1.0. Today DevDeck runs in cloud mode; Workbench utilities do run fully local without network access.
+> \* AI summaries and tags require a configured provider (OpenAI or local Ollama). Without one, HeapDeck falls back to a built-in heuristic tagger.
+> \*\* Offline-first sync is product direction, deferred until after 1.0. Today HeapDeck runs in cloud mode; Workbench utilities do run fully local without network access.
 
 ---
 

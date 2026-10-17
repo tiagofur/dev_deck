@@ -1,6 +1,6 @@
-# DevDeck — Self-hosting guide
+# HeapDeck — Self-hosting guide
 
-> Guía paso a paso para levantar DevDeck en tu propio VPS. Pensado para un solo user o un grupo pequeño. Stack: Docker Compose + Caddy + Postgres + DevDeck API.
+> Guía paso a paso para levantar HeapDeck en tu propio VPS. Pensado para un solo user o un grupo pequeño. Stack: Docker Compose + Caddy + Postgres + HeapDeck API.
 
 ---
 
@@ -8,7 +8,7 @@
 
 - VPS con Linux (probado en Ubuntu 22.04 / Debian 12).
 - 1 vCPU, 1 GB RAM, 10 GB disco como mínimo.
-- Dominio apuntando al VPS (ej: `devdeck.tu-dominio.com`).
+- Dominio apuntando al VPS (ej: `heapdeck.tu-dominio.com`).
 - Docker 24+ y Docker Compose v2 instalados.
 - Cuenta de GitHub para crear una OAuth App.
 
@@ -17,8 +17,8 @@
 ## Paso 1 — OAuth App en GitHub
 
 1. Ir a https://github.com/settings/developers → **New OAuth App**.
-2. **Homepage URL:** `https://devdeck.tu-dominio.com`
-3. **Authorization callback URL:** `https://api.devdeck.tu-dominio.com/api/auth/github/callback`
+2. **Homepage URL:** `https://heapdeck.tu-dominio.com`
+3. **Authorization callback URL:** `https://api.heapdeck.tu-dominio.com/api/auth/github/callback`
 4. Guardar el `Client ID`.
 5. Generar un `Client Secret`. Guardarlo ahora, GitHub no lo muestra de vuelta.
 
@@ -27,8 +27,8 @@
 ## Paso 2 — Clonar el repo
 
 ```bash
-git clone https://github.com/<owner>/devdeck.git
-cd devdeck/deploy
+git clone https://github.com/<owner>/heapdeck.git
+cd heapdeck/deploy
 ```
 
 ---
@@ -39,22 +39,22 @@ Crear `deploy/.env` a partir del ejemplo:
 
 ```env
 # Dominios
-DOMAIN=devdeck.tu-dominio.com
-API_DOMAIN=api.devdeck.tu-dominio.com
-APP_DOMAIN=app.devdeck.tu-dominio.com
+DOMAIN=heapdeck.tu-dominio.com
+API_DOMAIN=api.heapdeck.tu-dominio.com
+APP_DOMAIN=app.heapdeck.tu-dominio.com
 
 # Postgres
-POSTGRES_USER=devdeck
+POSTGRES_USER=heapdeck
 POSTGRES_PASSWORD=<password-largo-y-random>
-POSTGRES_DB=devdeck
+POSTGRES_DB=heapdeck
 
 # Backend API
-DATABASE_URL=postgres://devdeck:<password>@db:5432/devdeck?sslmode=disable
+DATABASE_URL=postgres://heapdeck:<password>@db:5432/heapdeck?sslmode=disable
 AUTH_MODE=jwt
 JWT_SECRET=<256-bit-random-hex>
 GITHUB_CLIENT_ID=<del paso 1>
 GITHUB_CLIENT_SECRET=<del paso 1>
-OAUTH_REDIRECT_URL=https://api.devdeck.tu-dominio.com/api/auth/github/callback
+OAUTH_REDIRECT_URL=https://api.heapdeck.tu-dominio.com/api/auth/github/callback
 ALLOWED_GITHUB_LOGINS=tu-usuario,otro-usuario
 
 # Feature flags
@@ -115,7 +115,7 @@ El primer boot corre migrations automáticamente. Si `SEED_CHEATSHEETS=true`, ad
 
 **Verificar salud:**
 ```bash
-curl https://api.devdeck.tu-dominio.com/healthz
+curl https://api.heapdeck.tu-dominio.com/healthz
 # → {"status":"ok"}
 ```
 
@@ -123,7 +123,7 @@ curl https://api.devdeck.tu-dominio.com/healthz
 
 ## Paso 6 — Login inicial
 
-1. Abrir `https://app.devdeck.tu-dominio.com` en el browser.
+1. Abrir `https://app.heapdeck.tu-dominio.com` en el browser.
 2. Click "Login con GitHub".
 3. Autorizar la OAuth App.
 4. Si tu GitHub login está en `ALLOWED_GITHUB_LOGINS`, entrás al home.
@@ -135,7 +135,7 @@ Si no está en la allowlist, el backend devuelve 403. Agregarlo a `.env`, `docke
 ## Paso 7 — Cliente desktop (opcional)
 
 1. Descargar el instalador para tu OS desde releases de GitHub (Win NSIS, Mac DMG, Linux AppImage).
-2. En Settings, configurar **API URL** = `https://api.devdeck.tu-dominio.com`.
+2. En Settings, configurar **API URL** = `https://api.heapdeck.tu-dominio.com`.
 3. Login OAuth (abre browser).
 
 ---
@@ -146,10 +146,10 @@ Postgres en `deploy/docker-compose.yml` monta un volumen `pgdata`. Para backup:
 
 ```bash
 # dump diario
-docker compose exec -T db pg_dump -U devdeck devdeck | gzip > backups/devdeck-$(date +%F).sql.gz
+docker compose exec -T db pg_dump -U heapdeck heapdeck | gzip > backups/heapdeck-$(date +%F).sql.gz
 
 # restore
-gunzip -c backups/devdeck-2026-04-08.sql.gz | docker compose exec -T db psql -U devdeck devdeck
+gunzip -c backups/heapdeck-2026-04-08.sql.gz | docker compose exec -T db psql -U heapdeck heapdeck
 ```
 
 Recomendación: cronjob en el host + sync a S3/Backblaze B2 con `rclone`.
@@ -159,7 +159,7 @@ Recomendación: cronjob en el host + sync a S3/Backblaze B2 con `rclone`.
 ## Actualizaciones
 
 ```bash
-cd devdeck
+cd heapdeck
 git pull
 cd deploy
 docker compose pull
@@ -180,7 +180,7 @@ Migrations corren automáticamente al boot del `api` container. **Siempre hacer 
 ### `api` en crash loop
 - Logs: `docker compose logs api`.
 - Revisar `DATABASE_URL`, `JWT_SECRET`, `GITHUB_CLIENT_ID`.
-- Si es por migration: `docker compose exec db psql -U devdeck devdeck` y revisar `schema_migrations`.
+- Si es por migration: `docker compose exec db psql -U heapdeck heapdeck` y revisar `schema_migrations`.
 
 ### 401 en requests
 - Token expiró: el cliente debería auto-refresh. Si no, re-login.

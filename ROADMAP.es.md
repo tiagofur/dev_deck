@@ -1,12 +1,12 @@
-# DevDeck — Roadmap
+# HeapDeck — Roadmap
 
-> 🌐 [devdeck.ai](https://devdeck.ai) — Tu memoria externa para desarrollo, asistida por IA.
+> 🌐 [heapdeck.com](https://heapdeck.com) — Tu memoria externa para desarrollo, asistida por IA.
 >
 > 📝 **Actualizado Mayo 2026:** roadmap vivo del producto.
 
 ## Dirección actual
 
-DevDeck está evolucionando de memoria externa hacia un **Developer Workbench**: conocimiento dev guardado que puede recuperarse por intención y reutilizarse como comandos, snippets, requests, runbooks y utilities locales.
+HeapDeck está evolucionando de memoria externa hacia un **Developer Workbench**: conocimiento dev guardado que puede recuperarse por intención y reutilizarse como comandos, snippets, requests, runbooks y utilities locales.
 
 Ver [docs/DEV_WORKBENCH.es.md](docs/DEV_WORKBENCH.es.md) para la propuesta de producto actual.
 
@@ -15,7 +15,7 @@ Ver [docs/DEV_WORKBENCH.es.md](docs/DEV_WORKBENCH.es.md) para la propuesta de pr
 ### Ola 4.5 a 17 — Cerradas
 - ✅ §16.5 Higiene de repo (ADRs, docs, licensing)
 - ✅ §16.9 `POST /api/items/capture` con detección, dedupe y enrich async
-- ✅ §16.10 CLI `devdeck` (v0.5.0 Beta Pública)
+- ✅ §16.10 CLI `heapdeck` (v0.5.0 Beta Pública)
 - ✅ §16.11 Extensión de browser (v0.5.0 Beta Pública)
 - ✅ Wave 5-12: Features avanzadas, sync y social
 - ✅ Wave 13-16: Enterprise identity y Agentes autónomos
@@ -34,7 +34,7 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 ### Fase 16.5 — Higiene de repo ✅
 - Remover `backend/api.exe` y agregar `*.exe`, `api`, `api.bin` a `.gitignore`. ✅
 - Reconciliar duplicación de Ola 5/6 en este mismo ROADMAP (secciones `[DEPRECATED]` removidas). ✅
-- Screenshots del README → Completado (ver [devdeck.ai](https://devdeck.ai)). ✅
+- Screenshots del README → Completado (ver [heapdeck.com](https://heapdeck.com)). ✅
 - Crear `CONTRIBUTING.md`, `SECURITY.md`, `docs/SELF_HOSTING.md`. ✅
 - Crear `docs/TESTING_STRATEGY.md` y `docs/CAPTURE.md`. ✅
 - ADRs `0001-items-polymorphism.md` y `0002-sync-strategy.md` marcadas como **Aceptadas**. ✅
@@ -43,13 +43,13 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - Backend: `internal/testutil/postgres.go` con `testcontainers-go` + tests de handlers (repos/commands/cheatsheets/auth/search/stats) + authservice JWT. ✅
 - Enricher: tests con `httptest.Server` mockeando GitHub + SSRF guard tests rechazando IPs privadas. ✅
 - Desktop: Vitest + `@testing-library/react` con 57 tests unitarios (format, preferences, auth, RepoCard, TagChip, PasteInterceptor, detector). Playwright config + skeleton con los 5 flows. ✅
-- Web Vue: intencionalmente sin tocar en Wave 4.5 inicial; **reemplazada por React 18 en §16.13** (ver abajo). Post-migración los 57 tests se redistribuyeron en los nuevos packages: 39 en `@devdeck/api-client`, 5 en `@devdeck/ui`, 18 en `@devdeck/features`, 5 en `apps/desktop` = **67 tests totales**. ✅
+- Web Vue: intencionalmente sin tocar en Wave 4.5 inicial; **reemplazada por React 18 en §16.13** (ver abajo). Post-migración los 57 tests se redistribuyeron en los nuevos packages: 39 en `@heapdeck/api-client`, 5 en `@heapdeck/ui`, 18 en `@heapdeck/features`, 5 en `apps/desktop` = **67 tests totales**. ✅
 - GitHub Actions: workflow `ci.yml` con jobs `backend`, `cli`, `monorepo`, `extension` y `e2e`; el job `monorepo` valida `pnpm typecheck`, `pnpm test`, `pnpm build:web` y `pnpm build:desktop`. ✅
 - Ver `docs/TESTING_STRATEGY.md` para el plan sprint-by-sprint.
 
 ### Fase 16.7 — Observability mínima ✅
 - `slog` estructurado stdlib en backend (reemplaza zerolog en main, middleware, handlers, cron, seed). ✅
-- Endpoint `/metrics` Prometheus con histogram de latencia por handler/método/status + contadores de errores 5xx + `devdeck_enrich_jobs_total` + `devdeck_capture_items_total`. ✅
+- Endpoint `/metrics` Prometheus con histogram de latencia por handler/método/status + contadores de errores 5xx + `heapdeck_enrich_jobs_total` + `heapdeck_capture_items_total`. ✅
 - Tracing OTel — pospuesto (noop por default, se enchufa cuando haya collector).
 - Logging específico de IA — Ola 6.
 
@@ -67,10 +67,10 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - Response incluye `duplicate_of` cuando aplica y `enrichment_status`. ✅
 - Tests end-to-end con los 9 tipos de input + dedupe intra-tabla + dedupe cross-table contra `repos` legacy. ✅
 
-### Fase 16.10 — CLI `devdeck` (v0.5.0 Beta Pública) ✅
+### Fase 16.10 — CLI `heapdeck` (v0.5.0 Beta Pública) ✅
 - Localizado en `cli/` (Go con Cobra).
 - Soporte para `login`, `logout`, `add`, `search`, `list`, `open`, `status`, `import`.
-- Nuevo comando interactivo: `devdeck agent` para chatear con el vault.
+- Nuevo comando interactivo: `heapdeck agent` para chatear con el vault.
 - Almacenamiento seguro de tokens en el Keychain del sistema.
 
 ### Fase 16.11 — Extensión de browser (v0.5.0 Beta Pública) ✅
@@ -85,8 +85,8 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - Detección de tipo heurística client-side (`features/capture/detect.ts`) alineada con la del backend — matriz de tests gemela. ✅
 - `CaptureModal` neo-brutalist con URL/text + type picker override + why_saved + tags. ✅
 - Atajo `Cmd/Ctrl+Shift+V` abre el modal con clipboard prefill. ✅
-- Web: cubierto en §16.13 con la migración a React (el `CaptureModal` ahora vive en `@devdeck/features` y lo consume tanto desktop como web sin duplicación).
-- CLI: `devdeck import github-stars` — se hace junto con §16.10.
+- Web: cubierto en §16.13 con la migración a React (el `CaptureModal` ahora vive en `@heapdeck/features` y lo consume tanto desktop como web sin duplicación).
+- CLI: `heapdeck import github-stars` — se hace junto con §16.10.
 
 ### Fase 16.13 — Monorepo pnpm workspaces + Web React ✅
 
@@ -95,9 +95,9 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - Estructura del repo: `apps/{desktop,web}` + `packages/{ui,api-client,features}`. ✅
 - Web client **migrado de Vue 3 a React 18** reutilizando 100% de pages y componentes del desktop. ✅
 - Tres packages compartidos:
-  - `@devdeck/ui` — design system (Button, TagChip, EmptyState, PageTransition, Toaster, ConfirmHost, toast/confirm singletons, `tailwind-preset.cjs`, `globals.css`). ✅
-  - `@devdeck/api-client` — fetch wrapper + TanStack Query hooks + auth con `TokenStorage` pluggable (`localStorageAdapter` para web, `electronSafeStorageAdapter` para desktop) + config runtime (`configureApiClient`). ✅
-  - `@devdeck/features` — las 7 pages + todos los componentes de dominio (Topbar, Sidebar, RepoCard, ItemCard, Commands, Discovery, Mascot, modales). ✅
+  - `@heapdeck/ui` — design system (Button, TagChip, EmptyState, PageTransition, Toaster, ConfirmHost, toast/confirm singletons, `tailwind-preset.cjs`, `globals.css`). ✅
+  - `@heapdeck/api-client` — fetch wrapper + TanStack Query hooks + auth con `TokenStorage` pluggable (`localStorageAdapter` para web, `electronSafeStorageAdapter` para desktop) + config runtime (`configureApiClient`). ✅
+  - `@heapdeck/features` — las 7 pages + todos los componentes de dominio (Topbar, Sidebar, RepoCard, ItemCard, Commands, Discovery, Mascot, modales). ✅
 - Dependency graph estricto y acíclico: `apps → features → ui → api-client`. ✅
 - Tailwind preset compartido; Vite aliases en ambas apps; tsconfig paths en `tsconfig.base.json`. ✅
 - Refactors clave:
@@ -107,7 +107,7 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - Pages web nuevas (Electron no las tiene): `LoginPage` (OAuth GitHub + token fallback), `AuthCallbackPage` (acepta `?token=&refresh_token=` o URL fragment), `NotFoundPage`, `AuthGuard`. ✅
 - Desktop mantiene `HashRouter` + `PasteInterceptor` (Electron-only); web usa `BrowserRouter` + `AuthGuard`. ✅
 - **Side effect:** se removieron 3.444 archivos de `web/node_modules/` erróneamente trackeados en HEAD.
-- **Verificación:** `pnpm typecheck` ✅ · `pnpm test` 67 tests ✅ · `pnpm -F @devdeck/desktop build` ✅ · `pnpm -F @devdeck/web build` ✅
+- **Verificación:** `pnpm typecheck` ✅ · `pnpm test` 67 tests ✅ · `pnpm -F @heapdeck/desktop build` ✅ · `pnpm -F @heapdeck/web build` ✅
 - Ver [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md) para la decisión completa y [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) §2.0/2.1/2.2 para la arquitectura actualizada.
 - Commit: `698b432 feat(monorepo): pnpm workspaces + Vue→React web migration` en branch `claude/setup-react-web-app-LVWhi`.
 
@@ -117,9 +117,9 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - [x] ≥ 5 flows E2E pasando en Electron (Playwright skeleton con los 5 flows).
 - [x] Endpoint `/api/items/capture` en producción con tests.
 - [x] Web client migrado a React y compartiendo código con desktop (§16.13).
-- [x] CLI `devdeck` en release v0.5.0 Beta Pública con distribución global.
+- [x] CLI `heapdeck` en release v0.5.0 Beta Pública con distribución global.
 - [x] Extensión Chrome en Chrome Web Store (v0.5.0 Beta Pública). ✅
-- [x] README con screenshots (enlace a [devdeck.ai](https://devdeck.ai)). ✅
+- [x] README con screenshots (enlace a [heapdeck.com](https://heapdeck.com)). ✅
 - [x] `api.exe` fuera del repo.
 - [x] ADRs 0001, 0002 y 0003 con decisión final ("Aceptadas").
 
@@ -248,7 +248,7 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 
 ## 🌊 Ola 4 — Web client (Vue, luego React) + Auth real
 
-> **Nota histórica:** las fases 14 y 15 describen el skeleton Vue 3 original del web client. En Wave 4.5 §16.13 ese cliente fue **migrado completo a React 18** y restructurado a monorepo pnpm workspaces. La paridad de features se mantuvo via `@devdeck/features` (un solo codebase compartido con desktop). Ver `docs/adr/0003-monorepo-pnpm-workspaces.md`.
+> **Nota histórica:** las fases 14 y 15 describen el skeleton Vue 3 original del web client. En Wave 4.5 §16.13 ese cliente fue **migrado completo a React 18** y restructurado a monorepo pnpm workspaces. La paridad de features se mantuvo via `@heapdeck/features` (un solo codebase compartido con desktop). Ver `docs/adr/0003-monorepo-pnpm-workspaces.md`.
 
 ### Fase 12 — Auth backend ✅
 - `migrations/0004_auth_users_sessions.sql`: tablas `users` + `refresh_sessions`
@@ -286,7 +286,7 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - Cheatsheet detail: entries con copy button + filtro por tag/search
 - Discovery mode: skip/keep flow
 - Mascota Snarkel — componente Vue con 5 moods, bubble con transición, click-to-interact
-- Deploy a `app.devdeck.tu-dominio.com` via Caddy (pendiente config)
+- Deploy a `app.heapdeck.tu-dominio.com` via Caddy (pendiente config)
 
 ### Fase 16 — Pulido cross-platform ⏳
 - Verificación paridad Electron ↔ Web
@@ -329,7 +329,7 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 > - IA: Ollama como default, OpenAI opt-in. Rate limits obligatorios desde el primer endpoint (ver Fase 18).
 > - Búsqueda híbrida: RRF (Reciprocal Rank Fusion), no ponderación lineal. Ver `docs/archive/REVIEW_2026_04.md §3.2`.
 
-> **Objetivo:** convertir DevDeck de directorio de repos a knowledge OS para developers. Justificar el `.ai` con features de IA que resuelven fricción real, no decorativas.
+> **Objetivo:** convertir HeapDeck de directorio de repos a knowledge OS para developers. Justificar el `.ai` con features de IA que resuelven fricción real, no decorativas.
 
 ### Fase 17 — Modelo de items extendido ✅
 
@@ -339,7 +339,7 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - Campos: `why_saved`, `when_to_use`, `ai_summary`, `ai_tags` — todos presentes. `embedding` (vector) queda para Fase 19. ✅
 - `POST /api/items/capture` — hereda de §16.9; detecta tipo automáticamente. ✅
 - `GET /api/items`, `GET /api/items/:id`, `PATCH /api/items/:id`, `DELETE /api/items/:id`, `POST /api/items/:id/seen`. ✅
-- Frontend (`@devdeck/features`): `ItemsPage` con grid por tipo + filtros de tipo + search + empty state; `ItemCard` adaptada por tipo; `CaptureModal` con `why_saved` + type override. Funciona en desktop y web sin duplicación. ✅
+- Frontend (`@heapdeck/features`): `ItemsPage` con grid por tipo + filtros de tipo + search + empty state; `ItemCard` adaptada por tipo; `CaptureModal` con `why_saved` + type override. Funciona en desktop y web sin duplicación. ✅
 
 ### Fase 18 — Auto-tagging + Auto-summary (IA) 🚧
 
@@ -365,25 +365,25 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - Endpoint `GET /api/search?q=...&mode=semantic|text|hybrid` — query param para elegir modo
 - Frontend: búsqueda semántica activada en `GlobalSearchModal` con toggle; resultados muestran score de relevancia
 
-### Fase 20 — Items relacionados + "Ask DevDeck"
+### Fase 20 — Items relacionados + "Ask HeapDeck"
 
 - `internal/ai/related.go`: dado un item, buscar los K más similares por embedding (K=5 por default)
 - Endpoint `GET /api/items/:id/related` — devuelve items relacionados con score
 - Frontend: sidebar "También te puede interesar" en `ItemDetailPage` con cards mini
 - `internal/ai/ask.go`: RAG simple — búsqueda semántica sobre vault del usuario + respuesta con contexto
 - Endpoint `POST /api/ask` — body `{question: string}` → `{answer: string, sources: Item[]}`
-- Frontend: panel "Ask DevDeck" en sidebar; contexto claro: "Basado en tu vault, encontré…"
+- Frontend: panel "Ask HeapDeck" en sidebar; contexto claro: "Basado en tu vault, encontré…"
 - Vistas por intención en `HomePage`: "AI Tools", "Terminal stuff", "Mac shortcuts", "Go setup", "Olvidados (sin abrir en 3 meses)"
 
 ---
 
 ## 🌊 Ola 6 — Offline-first + Sync + Multi-usuario
 
-> **Objetivo:** hacer que DevDeck funcione sin red y se sincronice entre devices; habilitar sharing y multi-usuario real.
+> **Objetivo:** hacer que HeapDeck funcione sin red y se sincronice entre devices; habilitar sharing y multi-usuario real.
 
 ### Fase 21 — Offline-first con SQLite local
 
-- **Electron:** SQLite local via `better-sqlite3` o `sql.js`; DB en `userData/devdeck.db`
+- **Electron:** SQLite local via `better-sqlite3` o `sql.js`; DB en `userData/heapdeck.db`
 - **Web (PWA):** `sql.js` con persistencia en Origin Private File System (OPFS)
 - `src/local-db/schema.sql`: schema local (subset del schema backend)
 - `src/local-db/migrations.ts`: migraciones locales versionadas
@@ -410,14 +410,14 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - CRUD endpoints: `GET|POST /api/decks`, `GET|PATCH|DELETE /api/decks/:id`
 - Endpoint `GET /api/decks/:slug/public` — público, sin auth; devuelve deck + items (metadata pública solamente)
 - Endpoint `POST /api/decks/:id/import` — importa items de un deck público al vault del usuario autenticado
-- Open Graph: `GET /deck/:slug` en landing (devdeck.ai) con meta tags `og:title`, `og:description`, `og:image` (preview del deck)
+- Open Graph: `GET /deck/:slug` en landing (heapdeck.com) con meta tags `og:title`, `og:description`, `og:image` (preview del deck)
 - Frontend app: UI de "Crear deck", selector de items, toggle público/privado, copy link button
-- Frontend landing (devdeck.ai): página `devdeck.ai/deck/:slug` — preview del deck con lista de items + CTA "Importar a mi DevDeck"
+- Frontend landing (heapdeck.com): página `heapdeck.com/deck/:slug` — preview del deck con lista de items + CTA "Importar a mi HeapDeck"
 
 ### Fase 24 — Perfil público + Multi-usuario completo
 
 - `GET /api/users/:username/public` — perfil público: nombre, bio, decks públicos
-- Landing: `devdeck.ai/@username` — página de perfil con decks públicos del usuario
+- Landing: `heapdeck.com/@username` — página de perfil con decks públicos del usuario
 - Auth: ampliar allowlist de usuarios (pasar de 1 username a N usernames en `ALLOWED_GITHUB_LOGINS`)
 - Admin: `GET /api/admin/users` — listar usuarios (solo para el owner); gestión de permisos
 - Rate limiting por usuario para endpoints de IA (proteger contra abuso de costos)
@@ -447,7 +447,7 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 ### Fase 28 — Extensión de Navegador v2
 
 - Migración de `extension/` (Vanilla JS) a `apps/extension` (React + Vite + TS)
-- Reuso de `@devdeck/api-client` y `@devdeck/ui` para paridad funcional total
+- Reuso de `@heapdeck/api-client` y `@heapdeck/ui` para paridad funcional total
 - Persistencia local: integración de `sqlocal` (SQLite/OPFS) en el worker de la extensión
 
 ### Fase 29 — Landing Page v2 y Publicación

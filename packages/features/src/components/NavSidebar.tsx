@@ -16,8 +16,8 @@ import {
   BookMarked
 } from 'lucide-react'
 import { useLocation, Link, useNavigate } from 'react-router-dom'
-import { usePreferences, useMe, useFeatureFlags } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { usePreferences, useMe, useFeatureFlags } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 import { UserAvatar } from './UserAvatar'
 
 interface NavSidebarProps {
@@ -56,7 +56,7 @@ export function NavSidebar({ isOpen, onClose, reviewCount }: NavSidebarProps) {
       <div className="p-4 border-b-3 border-ink flex items-center justify-between shrink-0">
         {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- heading doubles as a clickable logo; primary navigation is provided by the nav links below */}
         <h1
-          aria-label="DevDeck"
+          aria-label="HeapDeck"
           className="cursor-pointer font-display text-2xl font-black uppercase tracking-tight"
           onClick={() => {
             navigate('/items')

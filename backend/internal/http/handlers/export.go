@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/domain/cheatsheets"
-	"devdeck/internal/domain/commands"
-	"devdeck/internal/domain/items"
-	"devdeck/internal/store"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/domain/cheatsheets"
+	"heapdeck/internal/domain/commands"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/store"
 )
 
 // VaultExportHandler produces a full export of the user's vault.
@@ -124,7 +124,7 @@ func (h *VaultExportHandler) Export(w http.ResponseWriter, r *http.Request) {
 	date := export.ExportedAt.Format("2006-01-02")
 	if format == "json" {
 		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="devdeck-vault-%s.json"`, date))
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="heapdeck-vault-%s.json"`, date))
 		enc := json.NewEncoder(w)
 		enc.SetIndent("", "  ")
 		_ = enc.Encode(export)
@@ -132,7 +132,7 @@ func (h *VaultExportHandler) Export(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/markdown; charset=utf-8")
-	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="devdeck-vault-%s.md"`, date))
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="heapdeck-vault-%s.md"`, date))
 	_, _ = w.Write([]byte(renderVaultMarkdown(export)))
 }
 
@@ -140,7 +140,7 @@ func (h *VaultExportHandler) Export(w http.ResponseWriter, r *http.Request) {
 // The JSON format is the full-fidelity one; this is for reading and grepping.
 func renderVaultMarkdown(export vaultExport) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "# DevDeck vault export — %s\n\n", export.ExportedAt.Format("2006-01-02"))
+	fmt.Fprintf(&b, "# HeapDeck vault export — %s\n\n", export.ExportedAt.Format("2006-01-02"))
 
 	fmt.Fprintf(&b, "## Items (%d)\n\n", len(export.Items))
 	for _, it := range export.Items {

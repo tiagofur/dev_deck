@@ -22,7 +22,7 @@ import (
 // so /api/repos/abc-123 shows up as /api/repos/{id}) and status code.
 var HTTPRequestDuration = promauto.NewHistogramVec(
 	prometheus.HistogramOpts{
-		Name:    "devdeck_http_request_duration_seconds",
+		Name:    "heapdeck_http_request_duration_seconds",
 		Help:    "Latency of HTTP requests, labelled by method/route/status.",
 		Buckets: prometheus.ExponentialBuckets(0.005, 2, 12), // 5ms → ~10s
 	},
@@ -33,7 +33,7 @@ var HTTPRequestDuration = promauto.NewHistogramVec(
 // HTTPRequestDuration so you can build an "error budget" alert.
 var HTTPRequestErrors = promauto.NewCounterVec(
 	prometheus.CounterOpts{
-		Name: "devdeck_http_request_errors_total",
+		Name: "heapdeck_http_request_errors_total",
 		Help: "Total 5xx responses, labelled by method/route.",
 	},
 	[]string{"method", "route"},
@@ -43,7 +43,7 @@ var HTTPRequestErrors = promauto.NewCounterVec(
 // the "success rate" of the enricher at a glance.
 var EnrichJobs = promauto.NewCounterVec(
 	prometheus.CounterOpts{
-		Name: "devdeck_enrich_jobs_total",
+		Name: "heapdeck_enrich_jobs_total",
 		Help: "Background enrichment jobs, labelled by kind (github/og) and outcome (ok/error/skipped).",
 	},
 	[]string{"kind", "outcome"},
@@ -53,7 +53,7 @@ var EnrichJobs = promauto.NewCounterVec(
 // Useful to see which capture channels are actually landing items.
 var CaptureItems = promauto.NewCounterVec(
 	prometheus.CounterOpts{
-		Name: "devdeck_capture_items_total",
+		Name: "heapdeck_capture_items_total",
 		Help: "Items captured via POST /api/items/capture, labelled by source channel, detected item_type, and outcome (created/duplicate/invalid).",
 	},
 	[]string{"source", "item_type", "outcome"},
@@ -62,7 +62,7 @@ var CaptureItems = promauto.NewCounterVec(
 // AgentToolCalls counts how many times the AI agent uses a specific tool.
 var AgentToolCalls = promauto.NewCounterVec(
 	prometheus.CounterOpts{
-		Name: "devdeck_agent_tool_calls_total",
+		Name: "heapdeck_agent_tool_calls_total",
 		Help: "Total tool calls made by the AI agent, labelled by tool name.",
 	},
 	[]string{"tool_name"},
@@ -71,7 +71,7 @@ var AgentToolCalls = promauto.NewCounterVec(
 // AgentChatDuration measures the time it takes for the agent to finish a complete orchestrator loop.
 var AgentChatDuration = promauto.NewHistogram(
 	prometheus.HistogramOpts{
-		Name:    "devdeck_agent_chat_loop_duration_seconds",
+		Name:    "heapdeck_agent_chat_loop_duration_seconds",
 		Help:    "Latency of a full AI agent orchestration loop.",
 		Buckets: prometheus.LinearBuckets(0.5, 2.0, 15), // 0.5s to 30s
 	},

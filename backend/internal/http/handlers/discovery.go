@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"devdeck/internal/cache"
-	"devdeck/internal/store"
+	"heapdeck/internal/cache"
+	"heapdeck/internal/store"
 )
 
 type DiscoveryHandler struct {

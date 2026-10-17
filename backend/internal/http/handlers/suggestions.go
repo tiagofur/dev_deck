@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"devdeck/internal/store"
+	"heapdeck/internal/store"
 )
 
 type SuggestionsHandler struct {

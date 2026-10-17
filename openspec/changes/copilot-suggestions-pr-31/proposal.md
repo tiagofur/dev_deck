@@ -27,7 +27,7 @@ Resolve critical bugs and technical debt identified by Copilot during the review
 ## Approach
 1. **UTF-8 Safety**: Update `truncate` in `heuristic.go` to use `[]rune` instead of byte-slicing.
 2. **Priority Fix**: Reorder conditional checks in `enrich.go`'s `run` loop to ensure `hadError` flag sets the final status to `error` even if some stages succeeded.
-3. **Magic String Removal**: Verify if `EnrichmentStatus` is exported in `@devdeck/api-client`. If not, export it and use it in `ItemCard.tsx`.
+3. **Magic String Removal**: Verify if `EnrichmentStatus` is exported in `@heapdeck/api-client`. If not, export it and use it in `ItemCard.tsx`.
 4. **Indentation**: Use `sed` or editor tools to convert all tabs to 2 spaces in `TECHNICAL_ROADMAP_AI_OFFLINE.md`.
 
 ## Affected Areas

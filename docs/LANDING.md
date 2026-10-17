@@ -1,6 +1,6 @@
 # Landing Page Structure
 
-This document outlines the layout and sections for the **devdeck.ai** landing page.
+This document outlines the layout and sections for the **heapdeck.com** landing page.
 
 [Leer en español](LANDING.es.md)
 

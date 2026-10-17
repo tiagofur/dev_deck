@@ -1,8 +1,8 @@
 import { KeyboardEvent, useMemo, useState } from 'react'
 import { Plus, X, Sparkles, ChevronDown } from 'lucide-react'
 import clsx from 'clsx'
-import { useUserTags } from '@devdeck/api-client'
-import { hashIndex } from '@devdeck/ui'
+import { useUserTags } from '@heapdeck/api-client'
+import { hashIndex } from '@heapdeck/ui'
 
 const tagColors = [
   'bg-accent-yellow',

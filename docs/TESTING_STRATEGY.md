@@ -1,6 +1,6 @@
 # Testing Strategy & CI
 
-This document outlines how we ensure the quality and stability of **DevDeck.ai**.
+This document outlines how we ensure the quality and stability of **HeapDeck.com**.
 
 [Leer en español](TESTING_STRATEGY.es.md)
 

@@ -1,9 +1,9 @@
 import { Sparkles, Trash2 } from 'lucide-react'
-import { useInstallStarterKit, useRemoveDemoData } from '@devdeck/api-client'
-import { Button, confirm, showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+import { useInstallStarterKit, useRemoveDemoData } from '@heapdeck/api-client'
+import { Button, confirm, showToast } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 
-const DEMO_KIT_ID = 'devdeck-demo'
+const DEMO_KIT_ID = 'heapdeck-demo'
 
 /**
  * Load/remove the demo vault. Every demo item carries the 'demo' tag,

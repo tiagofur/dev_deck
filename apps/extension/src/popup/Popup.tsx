@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Sparkles, Brain, Loader2, CheckCircle2 } from 'lucide-react'
-import { useCapture, isLoggedIn } from '@devdeck/api-client'
-import { Button } from '@devdeck/ui'
+import { useCapture, isLoggedIn } from '@heapdeck/api-client'
+import { Button } from '@heapdeck/ui'
 
 export function Popup() {
   const [tab, setTab] = useState<chrome.tabs.Tab | null>(null)
@@ -54,7 +54,7 @@ export function Popup() {
       <header className="flex items-center justify-between">
         <h1 className="font-display font-black uppercase text-xl tracking-tight flex items-center gap-2">
           <Sparkles size={20} className="text-accent-yellow fill-accent-yellow" />
-          DevDeck
+          HeapDeck
         </h1>
         <span className="text-[9px] font-mono bg-bg-elevated border border-ink px-1.5 py-0.5 uppercase font-bold text-ink-soft">
           Quick Capture

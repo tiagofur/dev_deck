@@ -1,6 +1,6 @@
-# DevDeck.ai Design System
+# HeapDeck.com Design System
 
-DevDeck follows a **Neo-brutalist / High-Contrast** aesthetic. It's designed to be clean, professional, and distinct from the generic "SaaS SaaS" look.
+HeapDeck follows a **Neo-brutalist / High-Contrast** aesthetic. It's designed to be clean, professional, and distinct from the generic "SaaS SaaS" look.
 
 [Leer en español](DESIGN_SYSTEM.es.md)
 

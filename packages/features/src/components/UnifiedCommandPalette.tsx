@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import {
   CommandPalette,
   showToast,
-} from '@devdeck/ui'
+} from '@heapdeck/ui'
 import {
   useGlobalSearch,
   useCapture,
   useSystemConfig,
   type SearchResult,
-} from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+} from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 import {
   Search,
   Plus,
@@ -148,7 +148,7 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
         title_hint: text.length > 48 ? `${text.slice(0, 48)}...` : text,
         type_hint: 'note',
         tags: ['palette'],
-        why_saved: 'Quick-created from the DevDeck command palette.',
+        why_saved: 'Quick-created from the HeapDeck command palette.',
       })
       showToast('Saved to your vault', 'success')
       onClose()
@@ -179,7 +179,7 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
       onSelect: () => {
         onClose()
         // Parent will open capture modal or we can trigger it here
-        window.dispatchEvent(new CustomEvent('devdeck:open-capture'))
+        window.dispatchEvent(new CustomEvent('heapdeck:open-capture'))
       },
     },
     {

@@ -15,13 +15,13 @@ describe('preferences', () => {
     setPreferences({ mascotEnabled: false })
     expect(getPreferences().mascotEnabled).toBe(false)
     // And it survives a fresh read.
-    const raw = localStorage.getItem('devdeck.prefs.v1')
+    const raw = localStorage.getItem('heapdeck.prefs.v1')
     expect(raw).toBeTruthy()
     expect(JSON.parse(raw!)).toMatchObject({ mascotEnabled: false })
   })
 
   it('falls back to defaults when stored JSON is corrupt', () => {
-    localStorage.setItem('devdeck.prefs.v1', '{ not json')
+    localStorage.setItem('heapdeck.prefs.v1', '{ not json')
     const p = getPreferences()
     expect(p.mascotEnabled).toBe(true)
   })

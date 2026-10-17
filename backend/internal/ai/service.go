@@ -5,9 +5,9 @@ import (
 	"errors"
 	"strings"
 
-	"devdeck/internal/ai/agent"
-	"devdeck/internal/config"
-	"devdeck/internal/domain/items"
+	"heapdeck/internal/ai/agent"
+	"heapdeck/internal/config"
+	"heapdeck/internal/domain/items"
 )
 
 // Input is the sanitized subset of an item we allow the AI layer to see.

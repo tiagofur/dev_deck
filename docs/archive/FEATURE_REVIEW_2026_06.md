@@ -1,4 +1,4 @@
-# DevDeck — Revisión de producto y documentación (Junio 2026)
+# HeapDeck — Revisión de producto y documentación (Junio 2026)
 
 > ⚠️ **Documento histórico (archivado).** Es un snapshot con fecha; partes ya no reflejan el estado actual del producto. Ver [ROADMAP.md](../../ROADMAP.md) para el estado vigente.
 

@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"devdeck/internal/domain/circles"
-	"devdeck/internal/domain/items"
+	"heapdeck/internal/domain/circles"
+	"heapdeck/internal/domain/items"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"

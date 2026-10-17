@@ -1,5 +1,5 @@
 {
-  "name": "@devdeck/api-client",
+  "name": "@heapdeck/api-client",
   "version": "0.6.0",
   "private": true,
   "type": "module",

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"devdeck/internal/domain/items"
+	"heapdeck/internal/domain/items"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"

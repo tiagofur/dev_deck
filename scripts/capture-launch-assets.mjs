@@ -8,7 +8,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const desktopRequire = createRequire(join(root, 'apps/desktop/package.json'))
 const { chromium } = desktopRequire('@playwright/test')
 
-const baseUrl = process.env.DEVDECK_WEB_URL || 'http://127.0.0.1:5173'
+const baseUrl = process.env.HEAPDECK_WEB_URL || 'http://127.0.0.1:5173'
 const outDir = join(root, 'docs/assets/launch')
 mkdirSync(outDir, { recursive: true })
 
@@ -16,9 +16,9 @@ const now = '2026-06-04T18:00:00.000Z'
 
 const demoUser = {
   id: 'demo-user',
-  login: 'devdeck-demo',
-  username: 'devdeck-demo',
-  display_name: 'DevDeck Demo',
+  login: 'heapdeck-demo',
+  username: 'heapdeck-demo',
+  display_name: 'HeapDeck Demo',
   avatar_url: '',
   role: 'user',
   plan: 'public-beta',
@@ -26,9 +26,9 @@ const demoUser = {
   onboarding_completed: true,
   created_at: '2026-05-01T12:00:00.000Z',
   stack_tags: ['typescript', 'go', 'react', 'ai-tools'],
-  website: 'https://devdeck.ai',
+  website: 'https://heapdeck.com',
   location: 'Remote',
-  github_url: 'https://github.com/tiagofur/dev_deck',
+  github_url: 'https://github.com/tiagofur/heapdeck',
 }
 
 function item(input) {
@@ -125,7 +125,7 @@ const circles = [
   {
     id: 'circle-launch-guild',
     name: 'Launch Guild',
-    description: 'A private Circle for polishing DevDeck public beta assets, docs, and daily workflows.',
+    description: 'A private Circle for polishing HeapDeck public beta assets, docs, and daily workflows.',
     invite_code: 'LAUNCH50',
     created_by: 'demo-user',
     created_at: now,
@@ -143,7 +143,7 @@ const circles = [
 ]
 
 const members = [
-  { user_id: 'demo-user', username: 'devdeck-demo', display_name: 'DevDeck Demo', avatar_url: '', role: 'owner' },
+  { user_id: 'demo-user', username: 'heapdeck-demo', display_name: 'HeapDeck Demo', avatar_url: '', role: 'owner' },
   { user_id: 'maya', username: 'maya-dev', display_name: 'Maya Chen', avatar_url: '', role: 'member' },
   { user_id: 'ana', username: 'anasouza', display_name: 'Ana Souza', avatar_url: '', role: 'member' },
 ]
@@ -162,9 +162,9 @@ async function fulfillJson(route, body, status = 200) {
 
 async function installDemoApi(page) {
   await page.addInitScript(() => {
-    localStorage.setItem('devdeck_access_token', 'launch-demo-token')
-    localStorage.setItem('devdeck_refresh_token', 'launch-demo-refresh')
-    localStorage.setItem('devdeck.prefs.v1', JSON.stringify({ theme: 'system' }))
+    localStorage.setItem('heapdeck_access_token', 'launch-demo-token')
+    localStorage.setItem('heapdeck_refresh_token', 'launch-demo-refresh')
+    localStorage.setItem('heapdeck.prefs.v1', JSON.stringify({ theme: 'system' }))
   })
 
   await page.route('**/api/**', async (route) => {
@@ -210,12 +210,12 @@ const page = await context.newPage()
 await installDemoApi(page)
 
 try {
-  await capture(page, '/', 'devdeck-vault.png', 'TanStack Query')
-  await capture(page, '/workbench?tool=json', 'devdeck-workbench.png', 'Developer Workbench')
-  await capture(page, '/circles', 'devdeck-circles.png', 'Launch Guild')
-  await capture(page, '/circles/circle-launch-guild', 'devdeck-circle-detail.png', 'Shared Vault')
+  await capture(page, '/', 'heapdeck-vault.png', 'TanStack Query')
+  await capture(page, '/workbench?tool=json', 'heapdeck-workbench.png', 'Developer Workbench')
+  await capture(page, '/circles', 'heapdeck-circles.png', 'Launch Guild')
+  await capture(page, '/circles/circle-launch-guild', 'heapdeck-circle-detail.png', 'Shared Vault')
 } finally {
   await browser.close()
 }
 
-if (!existsSync(join(outDir, 'devdeck-vault.png'))) throw new Error('Screenshot capture failed')
+if (!existsSync(join(outDir, 'heapdeck-vault.png'))) throw new Error('Screenshot capture failed')

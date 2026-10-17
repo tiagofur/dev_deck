@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strings"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/authservice"
-	"devdeck/internal/config"
-	"devdeck/internal/store"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/authservice"
+	"heapdeck/internal/config"
+	"heapdeck/internal/store"
 
 	"github.com/google/uuid"
 )
@@ -77,7 +77,7 @@ func OptionalTokenAuth(cfg config.Config, authService *authservice.Service, st *
 
 					// Try API Key
 					tokenStr := strings.TrimPrefix(h, prefix)
-					if st != nil && strings.HasPrefix(tokenStr, "devdeck_") {
+					if st != nil && strings.HasPrefix(tokenStr, "heapdeck_") {
 						if userID, err := st.ValidateAPIKey(r.Context(), tokenStr); err == nil {
 							if user, err := st.GetUserByID(r.Context(), userID); err == nil {
 								ctx := authctx.WithUserID(r.Context(), userID)

@@ -8,7 +8,7 @@
 
 ## Contexto
 
-DevDeck nació como "directorio visual de repos". A partir de Ola 5, el modelo central evoluciona de `Repo` a `Item`, donde `Item` puede ser cualquiera de: `repo`, `cli`, `plugin`, `shortcut`, `snippet`, `agent`, `prompt`, `article`, `tool`, `workflow`, `note`.
+HeapDeck nació como "directorio visual de repos". A partir de Ola 5, el modelo central evoluciona de `Repo` a `Item`, donde `Item` puede ser cualquiera de: `repo`, `cli`, `plugin`, `shortcut`, `snippet`, `agent`, `prompt`, `article`, `tool`, `workflow`, `note`.
 
 Necesitamos decidir **cómo modelar esa polimorfia en Postgres** sin cargar deuda técnica pesada para las olas siguientes (sync, búsqueda semántica, runbooks, decks compartibles).
 
@@ -164,7 +164,7 @@ CREATE TABLE items (
    ```
 
 ### Por qué A y no B
-- DevDeck es un proyecto indie con superficie de features en crecimiento. El costo de B (DDL por tipo nuevo, joins, boilerplate de store por tipo) es alto y persistente.
+- HeapDeck es un proyecto indie con superficie de features en crecimiento. El costo de B (DDL por tipo nuevo, joins, boilerplate de store por tipo) es alto y persistente.
 - Los refinamientos (validación, generated columns, partial indexes) **mitigan los contras reales** de A: pérdida de tipado y queries lentas sobre JSONB.
 - Sync y búsqueda semántica son más simples con una sola tabla.
 

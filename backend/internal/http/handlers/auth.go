@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/authservice"
-	"devdeck/internal/domain/auth"
-	"devdeck/internal/store"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/authservice"
+	"heapdeck/internal/domain/auth"
+	"heapdeck/internal/store"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -44,7 +44,7 @@ type AuthConfig struct {
 
 // refreshCookieName is the HttpOnly cookie that carries the refresh token in
 // cookie mode. Scoped to /api/auth so it is only sent to the auth endpoints.
-const refreshCookieName = "devdeck_refresh"
+const refreshCookieName = "heapdeck_refresh"
 
 // refreshCookiePath scopes the cookie to the auth subtree.
 const refreshCookiePath = "/api/auth"

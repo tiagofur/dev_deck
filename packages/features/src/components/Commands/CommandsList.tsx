@@ -15,7 +15,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import type { RepoCommand } from '@devdeck/api-client'
+import type { RepoCommand } from '@heapdeck/api-client'
 import { CommandCard } from './CommandCard'
 
 interface Props {

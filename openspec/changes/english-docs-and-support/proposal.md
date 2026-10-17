@@ -5,7 +5,7 @@
 **Author**: Antigravity
 
 ## Intent
-Globalize the **DevDeck.ai** repository to attract international contributors and users. This involves making English the primary language for all public documentation and providing a way for the community to support the project financially.
+Globalize the **HeapDeck.com** repository to attract international contributors and users. This involves making English the primary language for all public documentation and providing a way for the community to support the project financially.
 
 ## User Review Required
 > [!IMPORTANT]

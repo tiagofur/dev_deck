@@ -1,13 +1,13 @@
 # ─────────────────────────────────────────────────────────────
-# DevDeck API — multi-stage build
+# HeapDeck API — multi-stage build
 #
 # Stage 1: build the static binary in a full Go image.
 # Stage 2: copy only the binary into a distroless image (~5 MB total).
 #
 # IMPORTANT: run `go mod tidy` locally before building so go.sum exists.
 #
-# Build:    docker build -t devdeck-api:latest .
-# Run:      docker run -p 8080:8080 --env-file .env devdeck-api:latest
+# Build:    docker build -t heapdeck-api:latest .
+# Run:      docker run -p 8080:8080 --env-file .env heapdeck-api:latest
 # ─────────────────────────────────────────────────────────────
 
 # Stage 1 — builder

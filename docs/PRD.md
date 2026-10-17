@@ -1,4 +1,4 @@
-# DevDeck — Product Requirements Document
+# HeapDeck — Product Requirements Document
 
 > Version: 1.1 · Owner: tfurt · Last updated: May 2026
 >
@@ -10,9 +10,9 @@
 
 ## 1. Vision
 
-> **DevDeck is your AI-assisted external memory for development work.**
+> **HeapDeck is your AI-assisted external memory for development work.**
 
-DevDeck helps developers save, organize, retrieve, and reuse useful development knowledge: repos, CLIs, plugins, cheatsheets, shortcuts, snippets, agents, prompts, requests, runbooks, and workflows.
+HeapDeck helps developers save, organize, retrieve, and reuse useful development knowledge: repos, CLIs, plugins, cheatsheets, shortcuts, snippets, agents, prompts, requests, runbooks, and workflows.
 
 The **Developer Workbench** shipped this direction (see phase status in [DEV_WORKBENCH.md](DEV_WORKBENCH.md)):
 
@@ -40,7 +40,7 @@ The problem is not a lack of tools. The problem is rebuilding context again and 
 
 ## 3. Solution
 
-DevDeck combines three layers:
+HeapDeck combines three layers:
 
 1. **Polymorphic vault:** dev-specific item types.
 2. **Intelligent retrieval:** text, fuzzy, and semantic search.
@@ -48,8 +48,8 @@ DevDeck combines three layers:
 
 Product boundary:
 
-- DevDeck does not replace IDEs, launchers, API clients, or secret managers.
-- DevDeck stores the context that makes actions reusable.
+- HeapDeck does not replace IDEs, launchers, API clients, or secret managers.
+- HeapDeck stores the context that makes actions reusable.
 - If an integrated utility does not become more valuable by connecting to the vault, it probably does not belong in core.
 
 ---

@@ -1,4 +1,4 @@
-import type { Item } from '@devdeck/api-client'
+import type { Item } from '@heapdeck/api-client'
 import { ItemCard } from './ItemCard'
 
 interface Props {

@@ -1,8 +1,8 @@
-# DevDeck — Architecture
+# HeapDeck — Architecture
 
 > Versión: 1.1 · Última actualización: Mayo 2026
 >
-> Este documento describe la arquitectura actual y la dirección técnica de DevDeck. Debe mantenerse sincronizado con el código real y con el roadmap, evitando presentar propuestas futuras como features ya cerradas.
+> Este documento describe la arquitectura actual y la dirección técnica de HeapDeck. Debe mantenerse sincronizado con el código real y con el roadmap, evitando presentar propuestas futuras como features ya cerradas.
 
 ---
 
@@ -51,7 +51,7 @@ graph TD
 Desde Wave 17, el monorepo pnpm workspaces es el núcleo del proyecto:
 
 ```
-dev_deck/
+heapdeck/
 ├── apps/
 │   ├── desktop/              # Electron + Native Shell support
 │   └── web/                  # Vite + React (PWA capabilities)
@@ -96,7 +96,7 @@ La tabla central `items` soporta múltiples tipos (repos, snippets, clis, runboo
 |----------|---------|-----------|
 | **Hybrid Execution** | Seguridad primero | La IA propone, el humano aprueba en su terminal local. |
 | **Monorepo Shared Features** | Velocidad de desarrollo | 100% de la lógica de dominio se comparte entre Web y Desktop. |
-| **Offline-first with OPFS** | Resiliencia | DevDeck funciona en aviones y túneles; sincroniza al volver la red. |
+| **Offline-first with OPFS** | Resiliencia | HeapDeck funciona en aviones y túneles; sincroniza al volver la red. |
 | **Neo-Brutalismo UI** | Identidad de marca | Una estética "coder-centric" que destaca en el mercado. |
 
 ---

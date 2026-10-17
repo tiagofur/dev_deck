@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/domain/items"
-	"devdeck/internal/jobs"
-	"devdeck/internal/store"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/jobs"
+	"heapdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"

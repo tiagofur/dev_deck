@@ -3,9 +3,9 @@ package store_test
 import (
 	"testing"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/domain/items"
-	"devdeck/internal/store"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/store"
 )
 
 func TestStore_ListItems_StackFilter(t *testing.T) {
@@ -138,7 +138,7 @@ func TestStore_ListItems_EmptyVault(t *testing.T) {
 	}
 }
 
-func TestStore_AskDevDeck_Citations(t *testing.T) {
+func TestStore_AskHeapDeck_Citations(t *testing.T) {
 	st, ctx := newStore(t)
 
 	userID := mustUUID(t, "00000000-0000-0000-0000-000000000001")
@@ -155,9 +155,9 @@ func TestStore_AskDevDeck_Citations(t *testing.T) {
 	}
 
 	// Run Ask (text search fallback since embedding is nil)
-	res, err := st.AskDevDeck(ctx, "Citation", nil, 5)
+	res, err := st.AskHeapDeck(ctx, "Citation", nil, 5)
 	if err != nil {
-		t.Fatalf("AskDevDeck failed: %v", err)
+		t.Fatalf("AskHeapDeck failed: %v", err)
 	}
 
 	if len(res.Citations) == 0 {

@@ -1,4 +1,4 @@
-module devdeck-cli
+module heapdeck-cli
 
 go 1.23
 

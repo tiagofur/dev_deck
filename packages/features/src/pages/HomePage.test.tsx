@@ -47,8 +47,8 @@ vi.mock('../components/ItemGrid', () => ({
   ItemGrid: () => <div data-testid="item-grid" />,
 }))
 
-vi.mock('@devdeck/api-client', async () => {
-  const actual = await vi.importActual<object>('@devdeck/api-client')
+vi.mock('@heapdeck/api-client', async () => {
+  const actual = await vi.importActual<object>('@heapdeck/api-client')
   return {
     ...actual,
     useItems: mocks.useItems,
@@ -68,7 +68,7 @@ describe('<HomePage>', () => {
   it('shows actionable guidance for an empty repos list', async () => {
     const user = userEvent.setup()
     const captureListener = vi.fn()
-    window.addEventListener('devdeck:open-capture', captureListener)
+    window.addEventListener('heapdeck:open-capture', captureListener)
 
     render(<HomePage />)
 
@@ -79,6 +79,6 @@ describe('<HomePage>', () => {
     await user.click(screen.getByRole('button', { name: /capture your first repo/i }))
     expect(captureListener).toHaveBeenCalledTimes(1)
 
-    window.removeEventListener('devdeck:open-capture', captureListener)
+    window.removeEventListener('heapdeck:open-capture', captureListener)
   })
 })

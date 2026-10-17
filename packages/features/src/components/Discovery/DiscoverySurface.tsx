@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Sparkles, Flame, Trophy, Layers, Users } from 'lucide-react'
 import { useState } from 'react'
-import { Button } from '@devdeck/ui'
+import { Button } from '@heapdeck/ui'
 import { SwipeCard, type SwipeDirection } from './SwipeCard'
 import { TrendingFeed } from './TrendingFeed'
 import { CuratorLeaderboard } from './CuratorLeaderboard'
@@ -11,9 +11,9 @@ import {
   useMarkSeen,
   useUpdateRepo,
   usePreferences,
-} from '@devdeck/api-client'
-import { showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+} from '@heapdeck/api-client'
+import { showToast } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 
 type Tab = 'swipe' | 'trending' | 'leaderboard' | 'team'
 

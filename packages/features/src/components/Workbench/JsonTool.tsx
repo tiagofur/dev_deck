@@ -10,10 +10,10 @@ export function JsonTool() {
     <ToolFrame title="JSON formatter">
       <ExampleButton
         onLoad={() =>
-          setInput('{ "name":"devdeck","tags":["cli","vault"], "stars": 1234,"nested":{"ok":true,"version":"0.5.0"}}')
+          setInput('{ "name":"heapdeck","tags":["cli","vault"], "stars": 1234,"nested":{"ok":true,"version":"0.5.0"}}')
         }
       />
-      <TextArea label="Input" value={input} onChange={setInput} placeholder='{"hello":"devdeck"}' />
+      <TextArea label="Input" value={input} onChange={setInput} placeholder='{"hello":"heapdeck"}' />
       {result.error && input.trim() && (
         <p className="border-2 border-ink bg-accent-pink px-3 py-2 font-mono text-sm">
           {result.error}

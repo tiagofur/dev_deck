@@ -1,20 +1,20 @@
-# DevDeck — Developer Workbench
+# HeapDeck — Developer Workbench
 
 > Estado: propuesta de producto · Última actualización: Mayo 2026
 
-DevDeck empezó como una memoria externa para developers: guardar, organizar y recuperar repos, CLIs, snippets, prompts, comandos, workflows y notas con contexto. El siguiente paso no es convertirlo en un IDE, un launcher genérico ni un clon de herramientas existentes.
+HeapDeck empezó como una memoria externa para developers: guardar, organizar y recuperar repos, CLIs, snippets, prompts, comandos, workflows y notas con contexto. El siguiente paso no es convertirlo en un IDE, un launcher genérico ni un clon de herramientas existentes.
 
 El siguiente paso es más específico:
 
-> **DevDeck convierte conocimiento dev guardado en acciones reutilizables.**
+> **HeapDeck convierte conocimiento dev guardado en acciones reutilizables.**
 
-La diferencia importa. No queremos competir frontalmente con Raycast, Postman, DevToys, Notion, Obsidian o cualquier otra herramienta que ya hace bien su trabajo. Queremos que DevDeck sea la capa personal donde lo que encontrás, aprendés y usás queda conectado a acciones concretas: copiar un comando, abrir un runbook, probar un request, formatear un payload, reutilizar un snippet o recuperar una decisión técnica.
+La diferencia importa. No queremos competir frontalmente con Raycast, Postman, DevToys, Notion, Obsidian o cualquier otra herramienta que ya hace bien su trabajo. Queremos que HeapDeck sea la capa personal donde lo que encontrás, aprendés y usás queda conectado a acciones concretas: copiar un comando, abrir un runbook, probar un request, formatear un payload, reutilizar un snippet o recuperar una decisión técnica.
 
 ---
 
 ## 1. Principio de producto
 
-DevDeck debe ser una herramienta diaria, pero no por acumulación infinita de features. Debe ganarse ese lugar por hacer muy bien tres cosas:
+HeapDeck debe ser una herramienta diaria, pero no por acumulación infinita de features. Debe ganarse ese lugar por hacer muy bien tres cosas:
 
 1. **Capturar rápido** lo que un developer no quiere perder.
 2. **Recuperar por intención** aunque no recuerdes el nombre exacto.
@@ -50,7 +50,7 @@ La promesa no es "tener todas las herramientas". La promesa es:
 
 Cada nueva herramienta integrada debe pasar esta prueba:
 
-> **¿Esta acción se vuelve más valiosa porque está conectada al vault de DevDeck?**
+> **¿Esta acción se vuelve más valiosa porque está conectada al vault de HeapDeck?**
 
 Si la respuesta es no, probablemente pertenece a otra app.
 
@@ -59,7 +59,7 @@ Ejemplos:
 | Idea | Encaja si... | No encaja si... |
 |------|--------------|-----------------|
 | JSON formatter | Podés guardar el payload formateado como snippet, request o nota de debugging. | Solo duplica una web cualquiera de formateo. |
-| JWT decoder | Ayuda a inspeccionar tokens localmente sin enviar datos sensibles fuera. | DevDeck empieza a almacenar tokens sin modelo de seguridad serio. |
+| JWT decoder | Ayuda a inspeccionar tokens localmente sin enviar datos sensibles fuera. | HeapDeck empieza a almacenar tokens sin modelo de seguridad serio. |
 | API tester | Requests rápidos se guardan como items reutilizables por proyecto. | Intenta reemplazar colecciones complejas de Postman. |
 | Command palette | Busca items, comandos, tools y runbooks del vault. | Quiere reemplazar todo el launcher del sistema. |
 | Clipboard/snippets | Reutiliza comandos y fragmentos explícitamente guardados. | Vigila todo el portapapeles por defecto. |
@@ -105,7 +105,7 @@ Estado de implementación:
 
 ### 4.2 Command Palette
 
-La paleta debe empezar como una superficie de DevDeck, no como una promesa de reemplazar el sistema operativo.
+La paleta debe empezar como una superficie de HeapDeck, no como una promesa de reemplazar el sistema operativo.
 
 MVP:
 
@@ -141,7 +141,7 @@ No debe intentar ser Postman. Debe resolver el caso de uso rápido:
 - Guardar request como item.
 - Asociar request a proyecto, stack o runbook.
 
-La ventaja de DevDeck no es tener más opciones que Postman. Es que un request queda junto al conocimiento que explica por qué existe.
+La ventaja de HeapDeck no es tener más opciones que Postman. Es que un request queda junto al conocimiento que explica por qué existe.
 
 Estado de implementación:
 
@@ -158,7 +158,7 @@ Estado de implementación:
 
 Esta es una de las apuestas más importantes.
 
-Cuando el usuario está trabajando en un repo o proyecto, DevDeck debería poder mostrar:
+Cuando el usuario está trabajando en un repo o proyecto, HeapDeck debería poder mostrar:
 
 - Comandos frecuentes.
 - `.env` esperados sin exponer secretos.
@@ -168,11 +168,11 @@ Cuando el usuario está trabajando en un repo o proyecto, DevDeck debería poder
 - Snippets guardados.
 - Decisiones o notas técnicas.
 
-Esto convierte DevDeck en memoria de trabajo, no solo archivo histórico.
+Esto convierte HeapDeck en memoria de trabajo, no solo archivo histórico.
 
 Estado de implementación:
 
-- `devdeck project` detecta carpeta/remote git y busca contexto relacionado sin escanear archivos ni leer `.env`.
+- `heapdeck project` detecta carpeta/remote git y busca contexto relacionado sin escanear archivos ni leer `.env`.
 - Desktop expone detección segura del proyecto actual vía `electronAPI.project.detectCurrent()`.
 - El Workbench incluye una tool `Project` para nombre, remote, notas, búsqueda de contexto relacionado y guardado como nota.
 - Los resultados relacionados se pueden abrir/copiar desde la superficie de proyecto.
@@ -233,7 +233,7 @@ Riesgo:
 
 Regla:
 
-> DevDeck puede ayudar a documentar variables esperadas y abrir integraciones con gestores seguros, pero no debe implementar criptografía propia.
+> HeapDeck puede ayudar a documentar variables esperadas y abrir integraciones con gestores seguros, pero no debe implementar criptografía propia.
 
 Si se hace, debe usar mecanismos nativos:
 
@@ -261,7 +261,7 @@ Objetivo: utilidad diaria inmediata.
 Éxito:
 
 - Una utility abre en menos de 500 ms en Desktop.
-- El usuario puede resolver una tarea común sin salir de DevDeck.
+- El usuario puede resolver una tarea común sin salir de HeapDeck.
 - Ningún input sensible se envía fuera del dispositivo.
 
 ### Fase 2 — Palette MVP
@@ -296,9 +296,9 @@ Objetivo: conectar ejecución ligera con conocimiento.
 
 - Un request probado hoy puede recuperarse y reutilizarse mañana sin reconstruir contexto.
 
-### Fase 4 — Project-Aware DevDeck
+### Fase 4 — Project-Aware HeapDeck
 
-Objetivo: que DevDeck entienda el contexto local de trabajo.
+Objetivo: que HeapDeck entienda el contexto local de trabajo.
 
 - Detectar repo/carpeta actual desde Desktop o CLI.
 - Mostrar items relacionados.
@@ -307,7 +307,7 @@ Objetivo: que DevDeck entienda el contexto local de trabajo.
 
 Éxito:
 
-- Al entrar a un proyecto viejo, DevDeck te devuelve el mapa de trabajo en segundos.
+- Al entrar a un proyecto viejo, HeapDeck te devuelve el mapa de trabajo en segundos.
 
 ### Fase 5 — Features avanzadas opt-in
 
@@ -338,7 +338,7 @@ Métricas útiles para saber si esto funciona:
 - **Local trust:** porcentaje de acciones ejecutadas sin red.
 - **Search success:** búsquedas que terminan en abrir/copiar/usar un item.
 
-La métrica más importante no es cuántas features tiene DevDeck. Es cuántas veces evita que el developer reconstruya contexto.
+La métrica más importante no es cuántas features tiene HeapDeck. Es cuántas veces evita que el developer reconstruya contexto.
 
 ---
 
@@ -353,7 +353,7 @@ Para llegar ahí:
 - Separar `good first issue` de trabajo core.
 - Publicar ejemplos reales de workflows.
 - Evitar promesas grandilocuentes.
-- Mostrar cómo DevDeck ahorra tiempo hoy, no solo lo que podría ser mañana.
+- Mostrar cómo HeapDeck ahorra tiempo hoy, no solo lo que podría ser mañana.
 
 La comunidad llega cuando el producto ya le resolvió algo a alguien.
 
@@ -361,7 +361,7 @@ La comunidad llega cuando el producto ya le resolvió algo a alguien.
 
 ## 9. Decisión
 
-DevDeck debe evolucionar de:
+HeapDeck debe evolucionar de:
 
 > "Guardo cosas útiles para desarrollo"
 

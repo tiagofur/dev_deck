@@ -207,7 +207,7 @@ export function CommandPalette({
                 </div>
                 <div className="flex items-center gap-2 text-[10px] font-mono text-ink-soft">
                   <Brain size={12} />
-                  DevDeck Brain v1.0
+                  HeapDeck Brain v1.0
                 </div>
               </div>
             </Command>

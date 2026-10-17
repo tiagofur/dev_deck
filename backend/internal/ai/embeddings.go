@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"devdeck/internal/config"
+	"heapdeck/internal/config"
 )
 
 const (

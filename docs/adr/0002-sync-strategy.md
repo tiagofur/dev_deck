@@ -8,7 +8,7 @@
 ---
 
 ## Context
-DevDeck must work offline in the desktop app. Changes made while offline must sync to the backend when a connection is restored.
+HeapDeck must work offline in the desktop app. Changes made while offline must sync to the backend when a connection is restored.
 
 ## Decision
 We will use an **Operation-based Sync Queue** with **Last-Write-Wins (LWW)** conflict resolution.

@@ -2,7 +2,7 @@ package store
 
 import (
 	"context"
-	"devdeck/internal/domain/cheatsheets"
+	"heapdeck/internal/domain/cheatsheets"
 	"errors"
 	"fmt"
 	"strings"

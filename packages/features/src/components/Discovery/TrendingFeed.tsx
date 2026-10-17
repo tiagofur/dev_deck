@@ -1,6 +1,6 @@
 import { Flame } from 'lucide-react'
-import { useTrendingTools } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { useTrendingTools } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function TrendingFeed() {
   const { t } = useTranslation()

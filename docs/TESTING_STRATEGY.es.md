@@ -1,4 +1,4 @@
-# DevDeck — Estrategia de testing
+# HeapDeck — Estrategia de testing
 
 > **Estado actual:** 0 tests. **Target Ola 4.5:** red de seguridad suficiente para refactorear con confianza.
 >
@@ -46,7 +46,7 @@ func SetupPostgres(t *testing.T) (*pgxpool.Pool, func()) {
     ctx := context.Background()
     pgContainer, err := postgres.RunContainer(ctx,
         testcontainers.WithImage("pgvector/pgvector:pg16"),
-        postgres.WithDatabase("devdeck_test"),
+        postgres.WithDatabase("heapdeck_test"),
         postgres.WithUsername("test"),
         postgres.WithPassword("test"),
         testcontainers.WithWaitStrategy(
@@ -136,27 +136,27 @@ Contra el binario buildeado + backend dockerizado con seeds.
 
 | Package | Count | Tests |
 |---------|-------|-------|
-| `@devdeck/api-client` | 39 | `auth/auth.test.ts` (6), `format.test.ts` (3), `preferences.test.ts` (4), `features/capture/detect.test.ts` (26) |
-| `@devdeck/ui` | 5 | `TagChip.test.tsx` |
-| `@devdeck/features` | 18 | `RepoCard.test.tsx` (8), `ItemCard.test.tsx` (10) |
+| `@heapdeck/api-client` | 39 | `auth/auth.test.ts` (6), `format.test.ts` (3), `preferences.test.ts` (4), `features/capture/detect.test.ts` (26) |
+| `@heapdeck/ui` | 5 | `TagChip.test.tsx` |
+| `@heapdeck/features` | 18 | `RepoCard.test.tsx` (8), `ItemCard.test.tsx` (10) |
 | `apps/desktop` | 5 | `PasteInterceptor.test.tsx` (Electron-only component) |
 | **Total** | **67** | |
 
 ### Stack
 - **Unit/component:** Vitest + `@testing-library/react` + `@testing-library/user-event`.
 - **E2E (desktop):** Playwright contra Electron build, backend live + Postgres efímero en CI.
-- **E2E (web):** todavía no existe una suite dedicada; hoy la cobertura del cliente web viene de `@devdeck/features`, `@devdeck/api-client`, `@devdeck/ui` y del build verificado en CI.
+- **E2E (web):** todavía no existe una suite dedicada; hoy la cobertura del cliente web viene de `@heapdeck/features`, `@heapdeck/api-client`, `@heapdeck/ui` y del build verificado en CI.
 
 ### Cómo correr tests
 
 ```bash
 pnpm test                         # todos los packages (pnpm -r test)
 
-pnpm -F @devdeck/api-client test  # solo api-client
-pnpm -F @devdeck/ui test          # solo ui
-pnpm -F @devdeck/features test    # solo features
-pnpm -F @devdeck/desktop test     # solo desktop (PasteInterceptor)
-pnpm -F @devdeck/desktop test:e2e # Playwright flows
+pnpm -F @heapdeck/api-client test  # solo api-client
+pnpm -F @heapdeck/ui test          # solo ui
+pnpm -F @heapdeck/features test    # solo features
+pnpm -F @heapdeck/desktop test     # solo desktop (PasteInterceptor)
+pnpm -F @heapdeck/desktop test:e2e # Playwright flows
 ```
 
 ### Dónde escribir tests nuevos
@@ -206,7 +206,7 @@ jobs:
   backend:
     # backend/go vet/go test -race ./...
   cli:
-    # cli/go test ./... + build ./cmd/devdeck + smoke --help
+    # cli/go test ./... + build ./cmd/heapdeck + smoke --help
   monorepo:
     # pnpm install --frozen-lockfile
     # pnpm typecheck

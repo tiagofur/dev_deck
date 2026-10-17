@@ -9,7 +9,7 @@ func TestOnboarding_DemoKit_InstallAndRemove(t *testing.T) {
 	ts := newTestServer(t)
 
 	// Install the demo kit.
-	rec := ts.do(t, http.MethodPost, "/api/onboarding/install", map[string]any{"kit_id": "devdeck-demo"})
+	rec := ts.do(t, http.MethodPost, "/api/onboarding/install", map[string]any{"kit_id": "heapdeck-demo"})
 	if rec.Code != http.StatusNoContent {
 		t.Fatalf("install demo kit: %d %s", rec.Code, rec.Body.String())
 	}

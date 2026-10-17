@@ -1,4 +1,4 @@
-# DevDeck.ai Vision
+# HeapDeck.com Vision
 
 > **Your AI-assisted external memory for development work.**
 
@@ -19,8 +19,8 @@ Developers discover a massive amount of information daily: useful repos, niche C
 
 ---
 
-## 2. The Solution: DevDeck.ai
-DevDeck is a **high-signal, low-friction** vault for dev knowledge.
+## 2. The Solution: HeapDeck.com
+HeapDeck is a **high-signal, low-friction** vault for dev knowledge.
 
 ### 2.1 Core Pillars
 1. **Offline-First & Native:** It must be fast. Instant search, instant capture.
@@ -33,7 +33,7 @@ DevDeck is a **high-signal, low-friction** vault for dev knowledge.
 ## 3. Differentiators
 - **Semantic Search:** Don't search for "ffmpeg". Search for "convert video to gif". The AI knows which tool does that.
 - **Native Experience:** A desktop app (Electron) that feels like part of the OS (shortcuts, global search).
-- **Zero Friction:** "Copy URL -> Open DevDeck -> Saved". No folders to choose, no tags to type.
+- **Zero Friction:** "Copy URL -> Open HeapDeck -> Saved". No folders to choose, no tags to type.
 - **Open Source:** Your knowledge vault shouldn't be a black box.
 
 ---
@@ -46,15 +46,15 @@ DevDeck is a **high-signal, low-friction** vault for dev knowledge.
 ---
 
 ## 5. Long-term Vision
-DevDeck aims to become the **standard repository for developer workflows**. Not just a place to store links, but a place to store *how you work*.
+HeapDeck aims to become the **standard repository for developer workflows**. Not just a place to store links, but a place to store *how you work*.
 
-*"DevDeck is to your knowledge what Git is to your code."*
+*"HeapDeck is to your knowledge what Git is to your code."*
 
 ---
 
 ## 6. Developer Workbench: From Memory to Action
 
-DevDeck evolved from passive storage into contextual action without becoming a generic launcher or a clone of existing tools. The Developer Workbench — local utilities, command palette, reusable requests, and project context — is largely shipped (see phase status in [DEV_WORKBENCH.md](DEV_WORKBENCH.md)). The product boundary remains:
+HeapDeck evolved from passive storage into contextual action without becoming a generic launcher or a clone of existing tools. The Developer Workbench — local utilities, command palette, reusable requests, and project context — is largely shipped (see phase status in [DEV_WORKBENCH.md](DEV_WORKBENCH.md)). The product boundary remains:
 
 > Save useful developer knowledge, retrieve it by intent, and turn it into reusable actions.
 

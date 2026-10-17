@@ -1,4 +1,4 @@
-# DevDeck — Roadmap Técnico: Offline-first + Sync + Multi-usuario + IA (v0.5 beta)
+# HeapDeck — Roadmap Técnico: Offline-first + Sync + Multi-usuario + IA (v0.5 beta)
 
 > Versión: 0.5.0 (Beta Pública) · Última actualización: Mayo 2026
 
@@ -56,7 +56,7 @@ Sistema multi-tenant con perfiles públicos y vaults compartidos (Teams).
 ### ✅ Sprint 1 — Modelo extendido + Quick capture (Fase 17 — COMPLETO)
 ### ✅ Sprint 2 — Auto-tagging + Auto-summary (Fase 18 — COMPLETO)
 ### ✅ Sprint 3 — Búsqueda semántica (Fase 19 — COMPLETO)
-### ✅ Sprint 4 — Items relacionados + Ask DevDeck (Fase 20 — COMPLETO)
+### ✅ Sprint 4 — Items relacionados + Ask HeapDeck (Fase 20 — COMPLETO)
 ### ✅ Sprint 5 — SQLite local + offline básico (Fase 21 — COMPLETO)
 ### ✅ Sprint 6 — Sync bidireccional + multi-device (Fase 22 — COMPLETO)
 ### ✅ Sprint 7 — Decks compartibles (Fase 23 — COMPLETO)

@@ -1,12 +1,12 @@
 # Versioning & Release Strategy
 
-> Este documento describe el sistema de versionado, estrategia de release y convenciones de commits de DevDeck.
+> Este documento describe el sistema de versionado, estrategia de release y convenciones de commits de HeapDeck.
 
 ---
 
 ## 1. Versionado Semántico
 
-DevDeck usa [Semantic Versioning](https://semver.org/) (SemVer) con el formato `MAJOR.MINOR.PATCH`:
+HeapDeck usa [Semantic Versioning](https://semver.org/) (SemVer) con el formato `MAJOR.MINOR.PATCH`:
 
 | Componente | Cuándo cambia | Ejemplo |
 |-----------|---------------|---------|
@@ -16,11 +16,11 @@ DevDeck usa [Semantic Versioning](https://semver.org/) (SemVer) con el formato `
 
 **Estado actual:** `0.5.0` — beta pública / hito de launch-readiness.
 
-> DevDeck todavía no es un producto estable `1.0.0`. La posición pública honesta es: beta open-source funcional, con dirección clara de memoria para developers, polish activo y lanzamiento comunitario en progreso.
+> HeapDeck todavía no es un producto estable `1.0.0`. La posición pública honesta es: beta open-source funcional, con dirección clara de memoria para developers, polish activo y lanzamiento comunitario en progreso.
 
-### Cuándo DevDeck puede ser 1.0.0
+### Cuándo HeapDeck puede ser 1.0.0
 
-DevDeck no debería etiquetarse como `1.0.0` hasta que esto sea verdad:
+HeapDeck no debería etiquetarse como `1.0.0` hasta que esto sea verdad:
 
 - Onboarding/demo limpio para que una persona nueva vea valor en minutos.
 - Setup local y self-hosting verificados en una máquina limpia.

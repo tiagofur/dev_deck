@@ -9,7 +9,7 @@ import (
 )
 
 func CheckIndexes() {
-	dbURL := "postgres://devdeck:devdeck_local_pass@localhost:5432/devdeck?sslmode=disable"
+	dbURL := "postgres://heapdeck:heapdeck_local_pass@localhost:5432/heapdeck?sslmode=disable"
 	conn, err := pgx.Connect(context.Background(), dbURL)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)

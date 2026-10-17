@@ -17,7 +17,7 @@ function CopilotWidget() {
 
   useEffect(() => {
     void getBaseUrl().then(setBaseUrl)
-    // Check if current URL is in DevDeck
+    // Check if current URL is in HeapDeck
     const url = window.location.href
     chrome.runtime.sendMessage({ type: 'CHECK_URL', url }, (response) => {
       if (response?.item) {
@@ -82,7 +82,7 @@ function CopilotWidget() {
 
 // Inyectar en Shadow DOM para evitar que el CSS de la página rompa el widget
 const container = document.createElement('div')
-container.id = 'devdeck-copilot-root'
+container.id = 'heapdeck-copilot-root'
 document.body.appendChild(container)
 
 const shadow = container.attachShadow({ mode: 'open' })

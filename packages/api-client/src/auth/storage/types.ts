@@ -16,17 +16,17 @@ export interface TokenStorage {
 const noopThrow: TokenStorage = {
   getAccess() {
     throw new Error(
-      '[@devdeck/api-client] TokenStorage not configured. Call setTokenStorage() in your app entrypoint before using auth helpers.',
+      '[@heapdeck/api-client] TokenStorage not configured. Call setTokenStorage() in your app entrypoint before using auth helpers.',
     )
   },
   getRefresh() {
-    throw new Error('[@devdeck/api-client] TokenStorage not configured.')
+    throw new Error('[@heapdeck/api-client] TokenStorage not configured.')
   },
   setTokens() {
-    throw new Error('[@devdeck/api-client] TokenStorage not configured.')
+    throw new Error('[@heapdeck/api-client] TokenStorage not configured.')
   },
   clear() {
-    throw new Error('[@devdeck/api-client] TokenStorage not configured.')
+    throw new Error('[@heapdeck/api-client] TokenStorage not configured.')
   },
 }
 

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"devdeck/internal/ai"
-	"devdeck/internal/ai/agent"
-	"devdeck/internal/store"
+	"heapdeck/internal/ai"
+	"heapdeck/internal/ai/agent"
+	"heapdeck/internal/store"
 )
 
 type AgentHandler struct {

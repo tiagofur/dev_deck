@@ -1,6 +1,6 @@
 import { Check, Globe, Monitor, MessageSquare } from 'lucide-react'
-import { Button } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+import { Button } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function OnboardingChecklist() {
   const { t } = useTranslation()

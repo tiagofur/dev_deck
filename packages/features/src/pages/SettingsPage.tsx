@@ -2,7 +2,7 @@ import { ArrowLeft, Check, Coffee, Eye, EyeOff, Globe, Laptop, Settings as Setti
 
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, confirm } from '@devdeck/ui'
+import { Button, confirm } from '@heapdeck/ui'
 import { AppShell } from '../components/AppShell'
 import {
   getAccessToken,
@@ -22,9 +22,9 @@ import {
   useOrgSAML,
   useUpdateOrgSAML,
   useGenerateSCIMToken,
-} from '@devdeck/api-client'
-import { showToast } from '@devdeck/ui'
-import { useTranslation, setLanguage, type AppLanguage } from '@devdeck/i18n'
+} from '@heapdeck/api-client'
+import { showToast } from '@heapdeck/ui'
+import { useTranslation, setLanguage, type AppLanguage } from '@heapdeck/i18n'
 import { WebhookManager } from '../components/WebhookManager'
 import { IntegrationsList } from '../components/IntegrationsList'
 import { ImportStarsSection } from '../components/ImportStarsSection'
@@ -257,7 +257,7 @@ export function SettingsPage() {
         <Section title={t('settings.about')}>
           <div className="space-y-2">
             <p className="font-display font-black text-3xl uppercase">
-              DevDeck
+              HeapDeck
             </p>
             <p className="font-mono text-sm text-ink-soft">v{APP_VERSION}</p>
             <p className="text-sm mt-3">

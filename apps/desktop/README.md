@@ -1,6 +1,6 @@
-# DevDeck Desktop
+# HeapDeck Desktop
 
-Electron + React + TypeScript + Tailwind. Frontend de DevDeck en estilo neo-brutalist.
+Electron + React + TypeScript + Tailwind. Frontend de HeapDeck en estilo neo-brutalist.
 
 ## Quick start
 
@@ -20,7 +20,7 @@ VITE_API_URL=http://localhost:8080
 VITE_AUTH_MODE=jwt
 ```
 
-Además el backend tiene que estar en `AUTH_MODE=jwt` y tener configurado al menos un proveedor OAuth (GitHub, Google o Apple). Desktop usa callback por protocolo `devdeck://auth/callback`, así que el login abre el browser del sistema y vuelve a la app cuando termina.
+Además el backend tiene que estar en `AUTH_MODE=jwt` y tener configurado al menos un proveedor OAuth (GitHub, Google o Apple). Desktop usa callback por protocolo `heapdeck://auth/callback`, así que el login abre el browser del sistema y vuelve a la app cuando termina.
 
 > Si necesitás el modo viejo para tests/debug, todavía podés levantarlo con `VITE_AUTH_MODE=token` + `VITE_API_TOKEN=...`, pero ya no es el flujo principal.
 

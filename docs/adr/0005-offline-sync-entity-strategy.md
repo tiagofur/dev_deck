@@ -48,7 +48,7 @@ All entities use **Last-Write-Wins at the field level**, keyed on `updated_at` (
 ### Why not full CRDTs?
 
 - **Complexity budget:** Most fields are simple scalars (title, description, URL). CRDTs add significant implementation and testing overhead for minimal benefit.
-- **Low conflict probability:** DevDeck is primarily a single-user tool with optional team sharing. Concurrent edits on the same field by two devices are rare.
+- **Low conflict probability:** HeapDeck is primarily a single-user tool with optional team sharing. Concurrent edits on the same field by two devices are rare.
 - **Escape hatch:** For the `notes` field (free-form text), a CRDT layer (Yjs/Automerge) is planned for Wave 9 / Phase 34. This ADR does not cover that scope.
 
 ### Limitations accepted
@@ -272,4 +272,4 @@ All tables include `local_updated_at` for tracking when the row was last modifie
 
 ---
 
-*Part of the DevDeck Architecture Decision Records*
+*Part of the HeapDeck Architecture Decision Records*

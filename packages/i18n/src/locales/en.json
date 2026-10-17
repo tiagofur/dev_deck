@@ -90,7 +90,7 @@
     "plugin_registered": "Plugin registered",
     "register_http_plugin": "+ Register HTTP Plugin",
     "output_webhooks": "Outgoing Webhooks",
-    "output_webhooks_desc": "Subscribe to DevDeck events to notify external systems (e.g., Slack, Zapier).",
+    "output_webhooks_desc": "Subscribe to HeapDeck events to notify external systems (e.g., Slack, Zapier).",
     "plugin_gallery": "Plugin Gallery",
     "integrations": "Integrations",
     "import_stars_title": "Import GitHub Stars",
@@ -145,7 +145,7 @@
       "cert_label": "X.509 Certificate (PEM)"
     },
     "notifications_toast": {
-      "title": "DevDeck Connected!",
+      "title": "HeapDeck Connected!",
       "body": "Now you will receive important alerts on your device."
     }
   },
@@ -193,7 +193,7 @@
     "edit_modal_title": "Edit Curator Profile",
     "username_label": "Unique Username",
     "username_placeholder": "e.g., tux_hacker",
-    "username_desc": "The slug for your public curator profile: devdeck.ai/u/{{username}}",
+    "username_desc": "The slug for your public curator profile: heapdeck.com/u/{{username}}",
     "curation_stack": "My Curation Stack",
     "no_tech_yet": "No technologies added yet. Select below.",
     "suggested_tags": "Suggested (Click to toggle):",
@@ -207,7 +207,7 @@
     "edit_loading_msg": "Preparing your curator profile...",
     "login_required": "Log in to view your profile",
     "login_button": "Login",
-    "achievement_early_adopter_desc": "You joined the pioneer curators of DevDeck.",
+    "achievement_early_adopter_desc": "You joined the pioneer curators of HeapDeck.",
     "achievement_curator_master_desc": "You have saved more than 5 items in your personal vault.",
     "achievement_deck_builder_desc": "You created at least one custom deck to organize tips.",
     "achievement_flame_keeper_desc": "You kept an active knowledge curation streak.",
@@ -291,7 +291,7 @@
   },
   "plugins": {
     "gallery_title": "Plugin Gallery",
-    "gallery_subtitle": "Curated by the DevDeck community",
+    "gallery_subtitle": "Curated by the HeapDeck community",
     "exploring": "Exploring the ecosystem...",
     "enter_webhook_url": "Enter the destination URL for {{name}}:",
     "install_success": "{{name}} installed successfully",
@@ -300,7 +300,7 @@
   },
   "webhooks": {
     "title": "Outgoing Webhooks",
-    "description": "Subscribe to DevDeck events to notify external systems.",
+    "description": "Subscribe to HeapDeck events to notify external systems.",
     "new_button": "New Outgoing Webhook",
     "configure_title": "Configure Webhook",
     "name_placeholder": "Name (e.g., Slack Integration)",
@@ -345,7 +345,7 @@
   },
   "waitlist": {
     "title": "Join the Waitlist",
-    "grow_desc": "DevDeck is growing. Leave us your email and we will send you an invitation soon.",
+    "grow_desc": "HeapDeck is growing. Leave us your email and we will send you an invitation soon.",
     "join_button": "Join the list",
     "success_title": "You're in!",
     "success_desc": "You are now on the waitlist. We will notify you at {{email}} as soon as we have a spot for you.",
@@ -407,7 +407,7 @@
   },
   "onboarding": {
     "loop_title": "Three moves. That's the whole app.",
-    "loop_subtitle": "Everything in DevDeck is this loop. Master it and you'll never lose a useful find again.",
+    "loop_subtitle": "Everything in HeapDeck is this loop. Master it and you'll never lose a useful find again.",
     "loop_capture": "Capture",
     "loop_capture_desc": "Paste a URL or hit the + button. Type detection, tags, and enrichment happen automatically — saving takes seconds, not decisions.",
     "loop_retrieve": "Retrieve",
@@ -429,7 +429,7 @@
     "create_deck": "Create a Deck",
     "create_deck_desc": "Group related commands or tips into a collection.",
     "welcome_title": "Hello, {{name}}!",
-    "welcome_desc": "Welcome to your new external memory. DevDeck helps you organize the chaos of tools you discover every day.",
+    "welcome_desc": "Welcome to your new external memory. HeapDeck helps you organize the chaos of tools you discover every day.",
     "start_button": "Start",
     "choose_pack_title": "Choose your Starter Pack",
     "choose_pack_desc": "Select a stack to pre-populate your vault with essential tools.",
@@ -438,8 +438,8 @@
     "ready_title": "Ready for action!",
     "ready_desc": "Your vault is configured. Remember to install the <1>Chrome Extension</1> to capture resources in one click.",
     "first_item_captured": "First item captured",
-    "enter_button": "Enter DevDeck",
-    "finish_toast": "All set! Welcome to DevDeck.",
+    "enter_button": "Enter HeapDeck",
+    "finish_toast": "All set! Welcome to HeapDeck.",
     "back_button": "Back",
     "continue_button": "Continue"
   },
@@ -903,7 +903,7 @@
       "discovery": "Discovery"
     },
     "title": "Explore Vaults",
-    "subtitle": "Discover cheatsheets created by the community and the DevDeck official team. Copy them to your personal vault with a single click.",
+    "subtitle": "Discover cheatsheets created by the community and the HeapDeck official team. Copy them to your personal vault with a single click.",
     "loading_message": "Exploring collective knowledge...",
     "search_placeholder": "Search public cheatsheets...",
     "no_results": "We couldn't find what you're looking for. Try another category or term!",
@@ -1022,7 +1022,7 @@
     "save_error": "Error saving"
   },
   "auth": {
-    "login_title": "DevDeck",
+    "login_title": "HeapDeck",
     "login_subtitle": "Your external memory for development.",
     "verify_success": "Email verified successfully. You can log in now!",
     "reset_success": "Password updated. You can log in with the new one!",
@@ -1061,7 +1061,7 @@
     "verification_sent": "We have sent a verification email to {{email}}. Please check your inbox to activate your account.",
     "register_me": "Register",
     "invite_code_label": "Invitation Code",
-    "invite_code_placeholder": "Ex: DEVDECK-XXXX-XXXX",
+    "invite_code_placeholder": "Ex: HEAPDECK-XXXX-XXXX",
     "waitlist_hint": "If you don't have one, join the waitlist on the web."
   },
   "workspace": {

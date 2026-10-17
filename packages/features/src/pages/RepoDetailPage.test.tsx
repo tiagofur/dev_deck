@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { RepoDetailPage } from './RepoDetailPage'
-import type { Repo } from '@devdeck/api-client'
+import type { Repo } from '@heapdeck/api-client'
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
@@ -32,8 +32,8 @@ vi.mock('../components/AppShell', () => ({
   AppShell: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }))
 
-vi.mock('@devdeck/ui', async () => {
-  const actual = await vi.importActual<typeof import('@devdeck/ui')>('@devdeck/ui')
+vi.mock('@heapdeck/ui', async () => {
+  const actual = await vi.importActual<typeof import('@heapdeck/ui')>('@heapdeck/ui')
   return {
     ...actual,
     confirm: mocks.confirm,
@@ -41,8 +41,8 @@ vi.mock('@devdeck/ui', async () => {
   }
 })
 
-vi.mock('@devdeck/api-client', async () => {
-  const actual = await vi.importActual<typeof import('@devdeck/api-client')>('@devdeck/api-client')
+vi.mock('@heapdeck/api-client', async () => {
+  const actual = await vi.importActual<typeof import('@heapdeck/api-client')>('@heapdeck/api-client')
   return {
     ...actual,
     useRepo: mocks.useRepo,
@@ -61,9 +61,9 @@ vi.mock('@devdeck/api-client', async () => {
 
 const repo: Repo = {
   id: 'repo-1',
-  url: 'https://github.com/devdeck/app',
+  url: 'https://github.com/heapdeck/app',
   source: 'github',
-  owner: 'devdeck',
+  owner: 'heapdeck',
   name: 'app',
   description: 'Developer utility belt',
   language: 'TypeScript',

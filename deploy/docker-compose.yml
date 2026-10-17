@@ -1,4 +1,4 @@
-# DevDeck production stack — runs on the VPS.
+# HeapDeck production stack — runs on the VPS.
 #
 # Five services:
 #   db     — Postgres 16, persistent volume
@@ -10,21 +10,21 @@
 #   1. cp .env.example .env  &&  edit values
 #   2. docker compose up -d --build
 #   3. (first time only) apply migration:
-#      docker compose exec -T db psql -U devdeck devdeck < ../backend/migrations/0001_init.sql
+#      docker compose exec -T db psql -U heapdeck heapdeck < ../backend/migrations/0001_init.sql
 
 services:
   db:
     image: pgvector/pgvector:pg16
-    container_name: devdeck-db
+    container_name: heapdeck-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: devdeck
+      POSTGRES_USER: heapdeck
       POSTGRES_PASSWORD: ${PG_PASS}
-      POSTGRES_DB: devdeck
+      POSTGRES_DB: heapdeck
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U devdeck -d devdeck"]
+      test: ["CMD-SHELL", "pg_isready -U heapdeck -d heapdeck"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -36,15 +36,15 @@ services:
     build:
       context: ../backend
       dockerfile: Dockerfile
-    image: ghcr.io/tiagofur/devdeck-api:latest
-    container_name: devdeck-api
+    image: ghcr.io/tiagofur/heapdeck-api:latest
+    container_name: heapdeck-api
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     environment:
       PORT: "8080"
-      DB_URL: postgres://devdeck:${PG_PASS}@db:5432/devdeck?sslmode=disable
+      DB_URL: postgres://heapdeck:${PG_PASS}@db:5432/heapdeck?sslmode=disable
       AUTH_MODE: ${AUTH_MODE:-jwt}
       JWT_SECRET: ${JWT_SECRET:-}
       REFRESH_SECRET: ${REFRESH_SECRET:-}
@@ -70,8 +70,8 @@ services:
     build:
       context: ..
       dockerfile: apps/web/Dockerfile
-    image: ghcr.io/tiagofur/devdeck-web:latest
-    container_name: devdeck-web
+    image: ghcr.io/tiagofur/heapdeck-web:latest
+    container_name: heapdeck-web
     restart: unless-stopped
     ports:
       - "127.0.0.1:3050:3000"
@@ -81,7 +81,7 @@ services:
   # Monitoring (v1.0.0)
   prometheus:
     image: prom/prometheus:v2.54.1
-    container_name: devdeck-prometheus
+    container_name: heapdeck-prometheus
     restart: unless-stopped
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
@@ -95,7 +95,7 @@ services:
 
   grafana:
     image: grafana/grafana:11.2.0
-    container_name: devdeck-grafana
+    container_name: heapdeck-grafana
     restart: unless-stopped
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GF_PASS:-admin}

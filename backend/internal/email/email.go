@@ -42,7 +42,7 @@ func (s *ResendSender) Send(ctx context.Context, to, subject, htmlBody string) e
 	}
 
 	reqBody := resendRequest{
-		From:    "DevDeck <noreply@devdeck.app>", // Should probably be configurable
+		From:    "HeapDeck <noreply@heapdeck.app>", // Should probably be configurable
 		To:      []string{to},
 		Subject: subject,
 		HTML:    htmlBody,

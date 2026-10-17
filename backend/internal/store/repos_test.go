@@ -5,10 +5,10 @@ import (
 	"errors"
 	"testing"
 
-	"devdeck/internal/domain/commands"
-	"devdeck/internal/domain/repos"
-	"devdeck/internal/store"
-	"devdeck/internal/testutil"
+	"heapdeck/internal/domain/commands"
+	"heapdeck/internal/domain/repos"
+	"heapdeck/internal/store"
+	"heapdeck/internal/testutil"
 )
 
 func newStore(t *testing.T) (*store.Store, context.Context) {

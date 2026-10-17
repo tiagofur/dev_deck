@@ -1,4 +1,4 @@
--- DevDeck — Wave 1 initial schema
+-- HeapDeck — Wave 1 initial schema
 -- Run with: psql "$DB_URL" -f migrations/0001_init.sql
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;

@@ -1,13 +1,13 @@
 # Circles — Modelo de contribución comunitaria
 
-Circles es la memoria colectiva privada de DevDeck para comunidades de developers.
+Circles es la memoria colectiva privada de HeapDeck para comunidades de developers.
 
 La idea es simple: cuando alguien encuentra un repo, comando, artículo, plugin, workflow, runbook o salida del Workbench que sirve, eso no debería perderse en Slack, Discord, Telegram o el historial del chat. Tiene que transformarse en conocimiento reutilizable para el grupo.
 
 ## Loop de producto
 
 1. Un developer captura un hallazgo en su vault personal.
-2. DevDeck lo enriquece con tags, resumen, fuente y contexto de `why_saved`.
+2. HeapDeck lo enriquece con tags, resumen, fuente y contexto de `why_saved`.
 3. El developer lo comparte a un Circle con una nota corta explicando por qué importa.
 4. Los miembros pueden guardar, forkear, starrear, probar o convertirlo en runbook/deck.
 5. Los hallazgos de mayor señal pueden convertirse en digest semanal, colección pública o showcase de la comunidad.
@@ -37,4 +37,4 @@ Circles es el puente entre utilidad individual y visibilidad comunitaria:
 - Los grupos obtienen valor con hallazgos compartidos, digests, runbooks y decks reutilizables.
 - Las páginas públicas pueden mostrar colecciones seleccionadas de alta señal sin exponer contenido privado del Circle.
 
-Esto convierte a DevDeck en algo más que un bookmark manager: pasa a ser la memoria de ingeniería reutilizable de una comunidad.
+Esto convierte a HeapDeck en algo más que un bookmark manager: pasa a ser la memoria de ingeniería reutilizable de una comunidad.

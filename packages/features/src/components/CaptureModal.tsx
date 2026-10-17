@@ -1,6 +1,6 @@
 import { ClipboardEvent, FormEvent, KeyboardEvent as ReactKeyboardEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { ExternalLink, Plus, Sparkles, Users, X } from 'lucide-react'
-import { Button } from '@devdeck/ui'
+import { Button } from '@heapdeck/ui'
 import {
   detectType,
   getLastUsedDeck,
@@ -17,9 +17,9 @@ import {
   type Item,
   type ItemType,
   type PreviewResponse,
-} from '@devdeck/api-client'
-import { showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+} from '@heapdeck/api-client'
+import { showToast } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 import { DeckSelect } from './Deck/DeckSelect'
 import { CAPTURE_LANES, laneForId, laneForType, type CaptureLaneId } from './Capture/captureTypes'
 

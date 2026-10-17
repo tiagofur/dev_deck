@@ -56,16 +56,16 @@ importers:
 
   apps/desktop:
     dependencies:
-      '@devdeck/api-client':
+      '@heapdeck/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
-      '@devdeck/features':
+      '@heapdeck/features':
         specifier: workspace:*
         version: link:../../packages/features
-      '@devdeck/i18n':
+      '@heapdeck/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
-      '@devdeck/ui':
+      '@heapdeck/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@dnd-kit/core':
@@ -171,13 +171,13 @@ importers:
 
   apps/extension:
     dependencies:
-      '@devdeck/api-client':
+      '@heapdeck/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
-      '@devdeck/features':
+      '@heapdeck/features':
         specifier: workspace:*
         version: link:../../packages/features
-      '@devdeck/ui':
+      '@heapdeck/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@tanstack/react-query':
@@ -232,7 +232,7 @@ importers:
       '@astrojs/tailwind':
         specifier: ^6.0.0
         version: 6.0.2(astro@7.3.8(@types/node@25.9.3)(esbuild@0.27.7)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(tailwindcss@3.4.19(yaml@2.9.1))
-      '@devdeck/ui':
+      '@heapdeck/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       astro:
@@ -257,16 +257,16 @@ importers:
 
   apps/web:
     dependencies:
-      '@devdeck/api-client':
+      '@heapdeck/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
-      '@devdeck/features':
+      '@heapdeck/features':
         specifier: workspace:*
         version: link:../../packages/features
-      '@devdeck/i18n':
+      '@heapdeck/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
-      '@devdeck/ui':
+      '@heapdeck/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@tanstack/react-query':
@@ -367,16 +367,16 @@ importers:
 
   packages/features:
     dependencies:
-      '@devdeck/api-client':
+      '@heapdeck/api-client':
         specifier: workspace:*
         version: link:../api-client
-      '@devdeck/i18n':
+      '@heapdeck/i18n':
         specifier: workspace:*
         version: link:../i18n
-      '@devdeck/realtime-client':
+      '@heapdeck/realtime-client':
         specifier: workspace:*
         version: link:../realtime-client
-      '@devdeck/ui':
+      '@heapdeck/ui':
         specifier: workspace:*
         version: link:../ui
       '@dnd-kit/core':

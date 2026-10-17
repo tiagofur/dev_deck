@@ -44,7 +44,7 @@
     },
     {
       "label": "f-String Formatting",
-      "command": "name = 'DevDeck'\nprint(f'{name:>20}')       # right-align\nprint(f'{3.14159:.2f}')    # 2 decimals\nprint(f'{1000000:,}')      # comma separator",
+      "command": "name = 'HeapDeck'\nprint(f'{name:>20}')       # right-align\nprint(f'{3.14159:.2f}')    # 2 decimals\nprint(f'{1000000:,}')      # comma separator",
       "description": "Format numbers, alignment, and precision inside f-strings",
       "tags": ["fstring", "format", "display"]
     },

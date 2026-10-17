@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"devdeck/internal/domain/auth"
+	"heapdeck/internal/domain/auth"
 
 	"github.com/google/uuid"
 )

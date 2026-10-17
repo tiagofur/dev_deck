@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"devdeck/internal/store"
+	"heapdeck/internal/store"
 	"net/http"
 )
 

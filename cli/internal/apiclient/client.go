@@ -1,4 +1,4 @@
-// Package apiclient is a thin HTTP wrapper over the DevDeck REST API.
+// Package apiclient is a thin HTTP wrapper over the HeapDeck REST API.
 // It's deliberately simple — no retries, no rate limiting, no
 // codegen — because the CLI does one request per command and the
 // ergonomic budget is "fits on a laptop screen".
@@ -122,7 +122,7 @@ func (c *Client) Search(ctx context.Context, query string, limit int, mode strin
 // ─── Repos (legacy list endpoint) ───
 //
 // There is no /api/items list endpoint yet (that ships in Ola 5).
-// For `devdeck list` we use the existing /api/repos endpoint so the
+// For `heapdeck list` we use the existing /api/repos endpoint so the
 // CLI has something to show today.
 
 type ListReposParams struct {
@@ -303,7 +303,7 @@ func (c *Client) AgentChat(ctx context.Context, in AgentChatInput) (*AgentChatRe
 
 // ─── Health ───
 
-// Health hits GET /healthz. Used by `devdeck status` as a liveness check.
+// Health hits GET /healthz. Used by `heapdeck status` as a liveness check.
 // The endpoint is public so the token is optional here.
 func (c *Client) Health(ctx context.Context) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.BaseURL+"/healthz", nil)
@@ -344,7 +344,7 @@ func (c *Client) do(ctx context.Context, method, path string, body, out any) err
 		req.Header.Set("Content-Type", "application/json")
 	}
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", "devdeck-cli/0.1")
+	req.Header.Set("User-Agent", "heapdeck-cli/0.1")
 
 	resp, err := c.HTTP.Do(req)
 	if err != nil {

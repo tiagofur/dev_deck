@@ -1,7 +1,7 @@
 import React from 'react'
 import { History } from 'lucide-react'
-import { useTranslation } from '@devdeck/i18n'
-import type { Item } from '@devdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
+import type { Item } from '@heapdeck/api-client'
 
 export interface ActivityTimelineProps {
   items: Item[]

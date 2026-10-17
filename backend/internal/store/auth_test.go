@@ -3,10 +3,10 @@ package store_test
 import (
 	"testing"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/domain/auth"
-	"devdeck/internal/domain/items"
-	"devdeck/internal/store/seed"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/domain/auth"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/store/seed"
 )
 
 func TestStore_Auth_GitHub(t *testing.T) {

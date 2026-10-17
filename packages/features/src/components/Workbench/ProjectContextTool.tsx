@@ -1,17 +1,17 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FolderGit2 } from 'lucide-react'
-import { Button, showToast } from '@devdeck/ui'
+import { Button, showToast } from '@heapdeck/ui'
 import {
   useCapture,
   useGlobalSearch,
   useItem,
   useUpdateItem,
   type SearchResult,
-} from '@devdeck/api-client'
+} from '@heapdeck/api-client'
 import { ToolFrame, TextArea } from './shared'
 
-const PROJECT_STORAGE_KEY = 'devdeck.workbench.project.v1'
+const PROJECT_STORAGE_KEY = 'heapdeck.workbench.project.v1'
 
 interface DesktopProjectAPI {
   detectCurrent: () => Promise<{
@@ -83,7 +83,7 @@ export function ProjectContextTool() {
         title_hint: `${name || 'Project'} context`,
         type_hint: 'note',
         tags: ['project-context', name].filter(Boolean),
-        why_saved: 'Project context saved from DevDeck Workbench.',
+        why_saved: 'Project context saved from HeapDeck Workbench.',
       })
       showToast('Project context saved to your vault', 'success')
     } catch {
@@ -124,7 +124,7 @@ export function ProjectContextTool() {
           <input
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="dev_deck"
+            placeholder="heapdeck"
             className="h-11 border-3 border-ink bg-bg-primary px-3 font-mono text-sm outline-none focus:bg-accent-yellow/10"
           />
         </label>

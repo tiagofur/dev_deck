@@ -1,16 +1,16 @@
-# DevDeck.ai
+# HeapDeck.com
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Support-Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/tiagofur)
 
 > **The developer memory layer for everything useful you discover, build, and share.**
 
-[Leer en español](README.es.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [First contribution](docs/FIRST_CONTRIBUTION.md) · [Discussions](https://github.com/tiagofur/dev_deck/discussions) · [Discussions guide](docs/DISCUSSIONS.md) · [Support](docs/SUPPORT.md) · [Community model](docs/CIRCLES_COMMUNITY.md)
+[Leer en español](README.es.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [First contribution](docs/FIRST_CONTRIBUTION.md) · [Discussions](https://github.com/tiagofur/heapdeck/discussions) · [Discussions guide](docs/DISCUSSIONS.md) · [Support](docs/SUPPORT.md) · [Community model](docs/CIRCLES_COMMUNITY.md)
 
-DevDeck is an open-source desktop/web app for developers who keep losing useful repos, CLIs, snippets, prompts, shortcuts, cheatsheets, and workflow notes across chats, bookmarks, browser tabs, and GitHub stars.
+HeapDeck is an open-source desktop/web app for developers who keep losing useful repos, CLIs, snippets, prompts, shortcuts, cheatsheets, and workflow notes across chats, bookmarks, browser tabs, and GitHub stars.
 
 It turns scattered discoveries into a searchable engineering memory: capture useful artifacts, enrich them with context, retrieve them by intent, use them inside a developer workbench, and share high-signal findings with trusted Circles.
 
-Domain: **[devdeck.ai](https://devdeck.ai)**
+Domain: **[heapdeck.com](https://heapdeck.com)**
 
 Current version: **0.6.0 Public Beta** — functional, useful, and actively being polished before a stable 1.0 release.
 
@@ -22,7 +22,7 @@ Developers do not have a saving problem. We have a **rediscovery problem**.
 
 You saw the perfect CLI in a Discord thread. A repo solved an auth problem. A prompt helped with a code review. A shortcut saved you five minutes. Three weeks later, you remember the shape of the solution — but not the name, link, flags, or context.
 
-DevDeck is built for that moment.
+HeapDeck is built for that moment.
 
 It is not another bookmark graveyard. It is a practical, AI-assisted memory system for daily development work.
 
@@ -50,19 +50,19 @@ This is the product direction: from “my saved links” to **our reusable engin
 - **Multi-surface app:** shared React feature package for Web and Desktop, plus a browser extension and Go CLI.
 - **Offline-first direction:** local-first desktop/web architecture with sync-oriented docs and implementation work in progress.
 
-DevDeck is still evolving. If something is rough, that is exactly where contributors can have a visible impact.
+HeapDeck is still evolving. If something is rough, that is exactly where contributors can have a visible impact.
 
 ---
 
 ## Screenshots and demo
 
-![DevDeck public beta demo loop](docs/assets/launch/devdeck-demo-loop.gif)
+![HeapDeck public beta demo loop](docs/assets/launch/heapdeck-demo-loop.gif)
 
 Launch-safe demo screenshots are generated from local demo data, not private user records.
 
 | Vault | Workbench | Circles | Shared Circle vault |
 |-------|-----------|---------|---------------------|
-| ![DevDeck Vault screenshot](docs/assets/launch/devdeck-vault.png) | ![DevDeck Workbench screenshot](docs/assets/launch/devdeck-workbench.png) | ![DevDeck Circles screenshot](docs/assets/launch/devdeck-circles.png) | ![DevDeck shared Circle vault screenshot](docs/assets/launch/devdeck-circle-detail.png) |
+| ![HeapDeck Vault screenshot](docs/assets/launch/heapdeck-vault.png) | ![HeapDeck Workbench screenshot](docs/assets/launch/heapdeck-workbench.png) | ![HeapDeck Circles screenshot](docs/assets/launch/heapdeck-circles.png) | ![HeapDeck shared Circle vault screenshot](docs/assets/launch/heapdeck-circle-detail.png) |
 
 The core demo path is: capture useful developer artifacts, add context, use them in Workbench, then share high-signal findings with a trusted Circle.
 
@@ -84,7 +84,7 @@ See [docs/assets/launch/README.md](docs/assets/launch/README.md) to regenerate t
 ### Monorepo layout
 
 ```txt
-dev_deck/
+heapdeck/
 ├── apps/
 │   ├── desktop/          # Electron app
 │   ├── extension/        # Browser extension
@@ -96,7 +96,7 @@ dev_deck/
 │   ├── i18n/             # Locale resources
 │   └── realtime-client/  # Realtime collaboration client
 ├── backend/              # Go API
-├── cli/                  # devdeck CLI
+├── cli/                  # heapdeck CLI
 ├── deploy/               # Docker Compose + Caddy
 └── docs/                 # Product, architecture, launch, and ops docs
 ```
@@ -164,7 +164,7 @@ New here? Start with [docs/FIRST_CONTRIBUTION.md](docs/FIRST_CONTRIBUTION.md), t
 
 ## Support the project
 
-DevDeck is an indie open-source project. Support helps fund domain/hosting costs, CI, development time, public beta polish, and AI-assisted coding tools used to move faster while still reviewing changes carefully.
+HeapDeck is an indie open-source project. Support helps fund domain/hosting costs, CI, development time, public beta polish, and AI-assisted coding tools used to move faster while still reviewing changes carefully.
 
 - Sponsor/support: [Buy Me a Coffee](https://www.buymeacoffee.com/tiagofur)
 - Read the support plan: [docs/SUPPORT.md](docs/SUPPORT.md)

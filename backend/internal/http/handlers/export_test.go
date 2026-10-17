@@ -41,7 +41,7 @@ func TestVaultExport_JSONIncludesItemsAndRunbooks(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Fatalf("export: %d %s", rec.Code, rec.Body.String())
 	}
-	if cd := rec.Header().Get("Content-Disposition"); !strings.Contains(cd, "devdeck-vault-") {
+	if cd := rec.Header().Get("Content-Disposition"); !strings.Contains(cd, "heapdeck-vault-") {
 		t.Errorf("missing attachment filename, got %q", cd)
 	}
 
@@ -69,7 +69,7 @@ func TestVaultExport_MarkdownRendersSections(t *testing.T) {
 		t.Fatalf("markdown export: %d %s", rec.Code, rec.Body.String())
 	}
 	body := rec.Body.String()
-	for _, want := range []string{"# DevDeck vault export", "## Items (1)", "Cmd+Shift+P", "## Runbooks (0)"} {
+	for _, want := range []string{"# HeapDeck vault export", "## Items (1)", "Cmd+Shift+P", "## Runbooks (0)"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("markdown missing %q\n%s", want, body)
 		}

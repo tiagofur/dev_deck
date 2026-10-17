@@ -2,7 +2,7 @@
 // the CLI still works on Linux minimal containers (CI, SSH boxes) where
 // there's no Secret Service daemon running.
 //
-// Secrets are stored under the "devdeck-cli" service name; individual
+// Secrets are stored under the "heapdeck-cli" service name; individual
 // keys are namespaced with the API URL so a user can point at multiple
 // backends without clobbering each other's tokens.
 package keyring
@@ -17,7 +17,7 @@ import (
 	zk "github.com/zalando/go-keyring"
 )
 
-const service = "devdeck-cli"
+const service = "heapdeck-cli"
 
 // ErrNotFound is returned when no token is stored for the given key.
 var ErrNotFound = errors.New("keyring: token not found")
@@ -26,7 +26,7 @@ var ErrNotFound = errors.New("keyring: token not found")
 // multiple backends can coexist).
 func Store(key, token string) error {
 	if err := zk.Set(service, key, token); err != nil {
-		// Fall back to a 0600 file under $XDG_DATA_HOME/devdeck if the OS
+		// Fall back to a 0600 file under $XDG_DATA_HOME/heapdeck if the OS
 		// keyring isn't available (headless Linux, WSL without gnome-keyring).
 		return storeFile(key, token)
 	}
@@ -65,7 +65,7 @@ func Delete(key string) error {
 // ─── File fallback ───
 //
 // The fallback stores a flat map[string]string as JSON under 0600 in
-// ~/.local/share/devdeck/keyring.json. It's not encrypted — we rely on
+// ~/.local/share/heapdeck/keyring.json. It's not encrypted — we rely on
 // filesystem perms. This is explicitly a fallback for headless boxes;
 // the real keyring is always tried first.
 
@@ -75,13 +75,13 @@ type fileStore struct {
 
 func fallbackPath() (string, error) {
 	if xdg := os.Getenv("XDG_DATA_HOME"); xdg != "" {
-		return filepath.Join(xdg, "devdeck", "keyring.json"), nil
+		return filepath.Join(xdg, "heapdeck", "keyring.json"), nil
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(home, ".local", "share", "devdeck", "keyring.json"), nil
+	return filepath.Join(home, ".local", "share", "heapdeck", "keyring.json"), nil
 }
 
 func loadFile() (*fileStore, error) {

@@ -1,6 +1,6 @@
 # Workflow: Issue → PR → Merge
 
-## Para trabajo correcto en DevDeck
+## Para trabajo correcto en HeapDeck
 
 ### Nunca hacer:
 - ❌ Commits directos a main

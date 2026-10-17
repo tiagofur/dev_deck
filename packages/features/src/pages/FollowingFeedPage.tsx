@@ -5,9 +5,9 @@ import {
   User as UserIcon,
   Search
 } from 'lucide-react'
-import { useFollowingFeed, type FeedEvent } from '@devdeck/api-client'
-import { Button } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+import { useFollowingFeed, type FeedEvent } from '@heapdeck/api-client'
+import { Button } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 import { AppShell } from '../components/AppShell'
 
 export function FollowingFeedPage() {

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"devdeck/internal/ai/agent"
+	"heapdeck/internal/ai/agent"
 )
 
 // AgentLMStudio implements the agent.Agent interface using LM Studio's

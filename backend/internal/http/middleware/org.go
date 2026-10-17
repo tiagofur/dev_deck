@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"devdeck/internal/authctx"
+	"heapdeck/internal/authctx"
 
 	"github.com/google/uuid"
 )

@@ -19,7 +19,7 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
-vi.mock('@devdeck/api-client', () => ({
+vi.mock('@heapdeck/api-client', () => ({
   useGlobalSearch: mocks.useGlobalSearch,
   useSystemConfig: mocks.useSystemConfig,
 }))
@@ -84,7 +84,7 @@ describe('<GlobalSearchModal>', () => {
     const user = userEvent.setup()
     const onClose = vi.fn()
     const captureListener = vi.fn()
-    window.addEventListener('devdeck:open-capture', captureListener)
+    window.addEventListener('heapdeck:open-capture', captureListener)
 
     renderModal(true, onClose)
     await user.type(screen.getByPlaceholderText(/search anything/i), 'docker')
@@ -95,6 +95,6 @@ describe('<GlobalSearchModal>', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
     expect(captureListener).toHaveBeenCalledTimes(1)
 
-    window.removeEventListener('devdeck:open-capture', captureListener)
+    window.removeEventListener('heapdeck:open-capture', captureListener)
   })
 })

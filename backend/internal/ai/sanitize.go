@@ -3,7 +3,7 @@ package ai
 import (
 	"strings"
 
-	"devdeck/internal/domain/items"
+	"heapdeck/internal/domain/items"
 )
 
 // SanitizeForAI keeps only public/useful context before sending data to an

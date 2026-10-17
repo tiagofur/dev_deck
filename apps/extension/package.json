@@ -1,19 +1,19 @@
 {
-  "name": "@devdeck/extension",
+  "name": "@heapdeck/extension",
   "version": "0.6.0",
   "private": true,
   "type": "module",
-  "description": "DevDeck — browser extension (React/Vite).",
+  "description": "HeapDeck — browser extension (React/Vite).",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "package": "npm run build && zip -r ../../dist/devdeck-extension-v0.5.0.zip dist/",
+    "package": "npm run build && zip -r ../../dist/heapdeck-extension-v0.5.0.zip dist/",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@devdeck/api-client": "workspace:*",
-    "@devdeck/features": "workspace:*",
-    "@devdeck/ui": "workspace:*",
+    "@heapdeck/api-client": "workspace:*",
+    "@heapdeck/features": "workspace:*",
+    "@heapdeck/ui": "workspace:*",
     "@tanstack/react-query": "^5.101.4",
     "framer-motion": "^14.0.0",
     "lucide-react": "^1.28.0",

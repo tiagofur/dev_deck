@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'DevDeck — Knowledge OS',
-        short_name: 'DevDeck',
+        name: 'HeapDeck — Knowledge OS',
+        short_name: 'HeapDeck',
         description: 'Your developer knowledge vault, offline-first.',
         theme_color: '#000000',
         background_color: '#F9F9F9',
@@ -47,7 +47,7 @@ export default defineConfig({
             handler: 'NetworkOnly',
             options: {
               backgroundSync: {
-                name: 'devdeck-sync-queue',
+                name: 'heapdeck-sync-queue',
                 options: {
                   maxRetentionTime: 24 * 60, // Retry for 24h
                 },
@@ -64,20 +64,20 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@devdeck/ui/styles/globals.css': resolve(
+      '@heapdeck/ui/styles/globals.css': resolve(
         __dirname,
         '../../packages/ui/styles/globals.css',
       ),
-      '@devdeck/ui': resolve(__dirname, '../../packages/ui/src/index.ts'),
-      '@devdeck/api-client': resolve(
+      '@heapdeck/ui': resolve(__dirname, '../../packages/ui/src/index.ts'),
+      '@heapdeck/api-client': resolve(
         __dirname,
         '../../packages/api-client/src/index.ts',
       ),
-      '@devdeck/features': resolve(
+      '@heapdeck/features': resolve(
         __dirname,
         '../../packages/features/src/index.ts',
       ),
-      '@devdeck/i18n': resolve(
+      '@heapdeck/i18n': resolve(
         __dirname,
         '../../packages/i18n/src/index.ts',
       ),

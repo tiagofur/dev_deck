@@ -4,8 +4,8 @@ import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import { FileText } from 'lucide-react'
-import { useReadme } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { useReadme } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 interface Props {
   repoId: string

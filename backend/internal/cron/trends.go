@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"time"
 
-	"devdeck/internal/store"
-	"devdeck/internal/webhooks"
+	"heapdeck/internal/store"
+	"heapdeck/internal/webhooks"
 
 	"github.com/google/uuid"
 )

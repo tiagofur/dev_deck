@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"devdeck/internal/http/handlers"
+	"heapdeck/internal/http/handlers"
 )
 
 // These tests exercise the cookie-mode CSRF (Origin) guard at the handler
@@ -22,7 +22,7 @@ func newOriginGuardHandler(cookieMode bool, origins []string) *handlers.AuthHand
 }
 
 func TestRefresh_OriginGuard_DBFree(t *testing.T) {
-	allowed := []string{"http://localhost:5173", "https://app.devdeck.io"}
+	allowed := []string{"http://localhost:5173", "https://app.heapdeck.io"}
 
 	tests := []struct {
 		name       string

@@ -1,4 +1,4 @@
-import type { Item } from '@devdeck/api-client'
+import type { Item } from '@heapdeck/api-client'
 
 export function detailPathForItem(item: Pick<Item, 'id' | 'item_type'> | null | undefined): string {
   if (!item) return '/items'

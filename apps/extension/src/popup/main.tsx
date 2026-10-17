@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { configureApiClient, setTokenStorage, startSyncEngine } from '@devdeck/api-client'
+import { configureApiClient, setTokenStorage, startSyncEngine } from '@heapdeck/api-client'
 import { Popup } from './Popup'
 import { chromeStorageAdapter } from '../lib/storage'
 import { getBaseUrl } from '../lib/config'

@@ -31,7 +31,7 @@ func (g *GitHubEnricher) FetchPackageScripts(ctx context.Context, owner, repo st
 	}
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
-	req.Header.Set("User-Agent", "DevDeck/0.1")
+	req.Header.Set("User-Agent", "HeapDeck/0.1")
 	if g.token != "" {
 		req.Header.Set("Authorization", "Bearer "+g.token)
 	}

@@ -1,6 +1,6 @@
-# @devdeck/api-client
+# @heapdeck/api-client
 
-The official SDK for interacting with the DevDeck Go API.
+The official SDK for interacting with the HeapDeck Go API.
 
 ## Features
 
@@ -11,4 +11,4 @@ The official SDK for interacting with the DevDeck Go API.
 
 ---
 
-*Part of the DevDeck Monorepo*
+*Part of the HeapDeck Monorepo*

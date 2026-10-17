@@ -1,5 +1,5 @@
 /**
- * DevDeck Extension Background Script (MV3)
+ * HeapDeck Extension Background Script (MV3)
  */
 import { getBaseUrl } from '../lib/config'
 
@@ -7,13 +7,13 @@ chrome.runtime.onInstalled.addListener(() => {
   // Register context menus
   chrome.contextMenus.create({
     id: 'save-link',
-    title: 'Guardar link en DevDeck',
+    title: 'Guardar link en HeapDeck',
     contexts: ['link']
   });
   
   chrome.contextMenus.create({
     id: 'save-selection',
-    title: 'Guardar selección como nota en DevDeck',
+    title: 'Guardar selección como nota en HeapDeck',
     contexts: ['selection']
   });
 });
@@ -87,7 +87,7 @@ async function handleCapture(payload: CapturePayload) {
   try {
     const { access } = await chrome.storage.local.get('access')
     if (!access) {
-      console.warn('DevDeck: No access token found')
+      console.warn('HeapDeck: No access token found')
       return
     }
 

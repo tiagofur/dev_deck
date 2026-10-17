@@ -11,7 +11,7 @@ const { title, description, lang = 'en' } = Astro.props;
 
 // Absolute URLs (Open Graph / canonical require absolute URLs to work on
 // social platforms and search engines). Astro.site is set in astro.config.
-const siteUrl = Astro.site ?? new URL('https://devdeck.ai');
+const siteUrl = Astro.site ?? new URL('https://heapdeck.com');
 const canonical = new URL(Astro.url.pathname, siteUrl);
 const ogImage = new URL('/og-image.svg', siteUrl);
 const enUrl = new URL('/', siteUrl);

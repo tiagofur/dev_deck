@@ -85,8 +85,8 @@ func (s *Service) send(hook WebhookData, body []byte) {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-DevDeck-Signature", sig)
-	req.Header.Set("X-DevDeck-Event-ID", uuid.New().String())
+	req.Header.Set("X-HeapDeck-Signature", sig)
+	req.Header.Set("X-HeapDeck-Event-ID", uuid.New().String())
 
 	resp, err := s.httpc.Do(req)
 	if err != nil {

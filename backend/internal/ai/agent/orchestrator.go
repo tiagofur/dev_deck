@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"time"
 
-	"devdeck/internal/metrics"
+	"heapdeck/internal/metrics"
 )
 
 type Orchestrator struct {

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Button } from '@devdeck/ui'
+import { Button } from '@heapdeck/ui'
 import {
   encodeBase64,
   decodeBase64,
@@ -29,7 +29,7 @@ export function TransformTool({ tool }: { tool: 'base64' | 'url' }) {
           setMode('encode')
           setInput(
             tool === 'base64'
-              ? 'DevDeck saves your best finds.'
+              ? 'HeapDeck saves your best finds.'
               : 'https://example.dev/search?q=developer memory&lang=es'
           )
         }}

@@ -1,11 +1,11 @@
-# Contribuir a DevDeck
+# Contribuir a HeapDeck
 
-Gracias por querer ayudar. DevDeck es un proyecto indie con visión fuerte, así que te pido que leas esto antes de abrir un PR.
+Gracias por querer ayudar. HeapDeck es un proyecto indie con visión fuerte, así que te pido que leas esto antes de abrir un PR.
 
 ## Antes de empezar
 
 1. Leé `docs/VISION.md` y `docs/PRD.md`. Si tu propuesta no encaja, probablemente te digamos que no. Mejor ahorrarte el tiempo.
-2. Para features nuevas o ideas todavía verdes: empezá en [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions). No envíes PRs grandes sin ack previo.
+2. Para features nuevas o ideas todavía verdes: empezá en [GitHub Discussions](https://github.com/tiagofur/heapdeck/discussions). No envíes PRs grandes sin ack previo.
 3. Para bugs: abrí un issue con repro pasos, versión, OS, stack trace si aplica.
 
 ## Setup local
@@ -29,13 +29,13 @@ go run ./cmd/api
 ### Desktop (Electron + React)
 ```bash
 pnpm dev:desktop                  # atajo desde la raíz
-# equivalente: pnpm -F @devdeck/desktop dev
+# equivalente: pnpm -F @heapdeck/desktop dev
 ```
 
 ### Web (React)
 ```bash
 pnpm dev:web                      # atajo desde la raíz
-# equivalente: pnpm -F @devdeck/web dev
+# equivalente: pnpm -F @heapdeck/web dev
 # el dev server escucha en http://localhost:5173 y proxea /api → :8080
 ```
 
@@ -46,7 +46,7 @@ pnpm lint                         # ESLint sobre el frontend web (apps/web + pac
 pnpm format                       # Prettier --write en todo el repo
 pnpm typecheck                    # tsc --noEmit en los 5 packages
 pnpm test                         # vitest run en los 4 que tienen tests
-pnpm -F @devdeck/desktop test:e2e # Playwright flows del Electron
+pnpm -F @heapdeck/desktop test:e2e # Playwright flows del Electron
 ```
 
 `pnpm lint` debe reportar **0 errores** para mergear (los warnings son un backlog
@@ -60,7 +60,7 @@ aceptado y decreciente — resolver uno es una gran primera contribución).
 - **Código específico de Electron** (paste interceptor, OS shortcuts, safeStorage adapter) → `apps/desktop/src/renderer/src/`.
 - **Código específico de web** (LoginPage, AuthCallbackPage, NotFoundPage, AuthGuard) → `apps/web/src/`.
 
-Los packages se importan via alias `@devdeck/ui`, `@devdeck/api-client`, `@devdeck/features` — tanto en TS (`tsconfig.base.json` paths) como en Vite (aliases en cada app). No hay build step: los packages son TypeScript source consumido directo.
+Los packages se importan via alias `@heapdeck/ui`, `@heapdeck/api-client`, `@heapdeck/features` — tanto en TS (`tsconfig.base.json` paths) como en Vite (aliases en cada app). No hay build step: los packages son TypeScript source consumido directo.
 
 Ver [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md) para la arquitectura completa.
 
@@ -79,11 +79,11 @@ Ver [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-work
 - ESLint + Prettier (config flat compartida en la raíz: `eslint.config.mjs`, `.prettierrc.json`). `pnpm lint` debe quedar con 0 errores.
 - `strict: true` en `tsconfig.base.json` (heredado por todos los packages).
 - Components funcionales, hooks. Nada de class components nuevos.
-- Imports absolutos via `@devdeck/ui`, `@devdeck/api-client`, `@devdeck/features` cuando cruzan package; `@/` solo para paths internos del app (`apps/desktop/src/renderer/src/`).
+- Imports absolutos via `@heapdeck/ui`, `@heapdeck/api-client`, `@heapdeck/features` cuando cruzan package; `@/` solo para paths internos del app (`apps/desktop/src/renderer/src/`).
 
 ### React
 - Hooks only, nada de `React.Component`.
-- Estado server: TanStack Query v5 (hooks en `@devdeck/api-client/src/features/*/api.ts`).
+- Estado server: TanStack Query v5 (hooks en `@heapdeck/api-client/src/features/*/api.ts`).
 - Estado UI local: `useState`. Sin redux/zustand/jotai.
 - Routing: `react-router-dom` v6. Desktop usa `HashRouter`, web usa `BrowserRouter`.
 
@@ -121,7 +121,7 @@ Closes #123
 
 - Branch desde `main`, nombre descriptivo: `feat/capture-endpoint`, `fix/reorder-race`.
 - Un PR = una cosa. Si estás tocando backend + frontend para una misma feature, ok, pero no mezcles features distintas.
-- Usá [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions) para preguntas, propuestas verdes o coordinación comunitaria antes de abrir un PR grande. Ver [docs/DISCUSSIONS.md](docs/DISCUSSIONS.md) para categorías y formatos sugeridos.
+- Usá [GitHub Discussions](https://github.com/tiagofur/heapdeck/discussions) para preguntas, propuestas verdes o coordinación comunitaria antes de abrir un PR grande. Ver [docs/DISCUSSIONS.md](docs/DISCUSSIONS.md) para categorías y formatos sugeridos.
 - Descripción del PR debe tener:
   - **Qué** cambia.
   - **Por qué** (link al issue).
@@ -151,7 +151,7 @@ No sin discusión previa en un issue. El look & feel es parte de la identidad de
 Aún no hay i18n setup. Si querés agregarla, es una feature grande — abrí issue primero.
 
 **¿Puedo vender/fork-ear/usar comercialmente?**
-Ver `LICENSE`. DevDeck se distribuye bajo la licencia Apache 2.0.
+Ver `LICENSE`. HeapDeck se distribuye bajo la licencia Apache 2.0.
 
 ## Código de conducta
 

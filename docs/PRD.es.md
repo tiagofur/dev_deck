@@ -1,4 +1,4 @@
-# DevDeck — Product Requirements Document
+# HeapDeck — Product Requirements Document
 
 > Versión: 1.1 · Owner: tfurt · Última actualización: Mayo 2026
 >
@@ -8,27 +8,27 @@
 
 ## 0. Nombre y dominio
 
-**DevDeck** es una baraja personal de herramientas, comandos y conocimiento de desarrollo: organizada, extensible y curada por el propio developer.
+**HeapDeck** es una baraja personal de herramientas, comandos y conocimiento de desarrollo: organizada, extensible y curada por el propio developer.
 
-**Dominio:** [devdeck.ai](https://devdeck.ai)
+**Dominio:** [heapdeck.com](https://heapdeck.com)
 
 | Subdominio | Propósito |
 |------------|-----------|
-| `devdeck.ai` | Landing page + marketing + descargas |
-| `app.devdeck.ai` | Web app |
-| `api.devdeck.ai` | Backend REST + sync |
-| `docs.devdeck.ai` | Documentación |
-| `download.devdeck.ai` | Descargas de la app desktop |
+| `heapdeck.com` | Landing page + marketing + descargas |
+| `app.heapdeck.com` | Web app |
+| `api.heapdeck.com` | Backend REST + sync |
+| `docs.heapdeck.com` | Documentación |
+| `download.heapdeck.com` | Descargas de la app desktop |
 
-El `.ai` no debe ser decorativo. La IA en DevDeck existe para clasificar, resumir, enriquecer, recuperar por intención y sugerir relaciones útiles dentro del vault.
+El `.ai` no debe ser decorativo. La IA en HeapDeck existe para clasificar, resumir, enriquecer, recuperar por intención y sugerir relaciones útiles dentro del vault.
 
 ---
 
 ## 1. Visión
 
-> **DevDeck es tu memoria externa asistida por IA para el trabajo de desarrollo.**
+> **HeapDeck es tu memoria externa asistida por IA para el trabajo de desarrollo.**
 
-DevDeck ayuda a guardar, organizar, recuperar y reutilizar todo lo útil que un developer encuentra o construye: repos, CLIs, plugins, cheatsheets, shortcuts, snippets, agentes, prompts, requests, runbooks y workflows.
+HeapDeck ayuda a guardar, organizar, recuperar y reutilizar todo lo útil que un developer encuentra o construye: repos, CLIs, plugins, cheatsheets, shortcuts, snippets, agentes, prompts, requests, runbooks y workflows.
 
 El **Developer Workbench** ya materializó esta dirección (ver estado por fase en [DEV_WORKBENCH.es.md](DEV_WORKBENCH.es.md)):
 
@@ -56,7 +56,7 @@ El problema no es falta de herramientas. El problema es reconstruir contexto una
 
 ## 3. Solución
 
-DevDeck combina tres capas:
+HeapDeck combina tres capas:
 
 1. **Vault polimórfico:** items específicos para trabajo dev.
 2. **Recuperación inteligente:** búsqueda textual, fuzzy y semántica.
@@ -64,8 +64,8 @@ DevDeck combina tres capas:
 
 La frontera de producto:
 
-- DevDeck no reemplaza IDEs, launchers, clientes API o gestores de secretos.
-- DevDeck guarda el contexto que hace que esas acciones sean reutilizables.
+- HeapDeck no reemplaza IDEs, launchers, clientes API o gestores de secretos.
+- HeapDeck guarda el contexto que hace que esas acciones sean reutilizables.
 - Cuando una utility integrada no gana valor por estar conectada al vault, probablemente no pertenece al core.
 
 ---
