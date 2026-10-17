@@ -106,7 +106,7 @@ describe('workbench utils', () => {
       ok: true,
       matches: [
         { match: 'HeapDeck', index: 0, groups: ['Heap', 'Deck'] },
-        { match: 'heapdeck', index: 8, groups: ['heap', 'deck'] },
+        { match: 'heapdeck', index: 9, groups: ['heap', 'deck'] },
       ],
     })
   })
