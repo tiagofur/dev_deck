@@ -1,8 +1,8 @@
 package store_test
 
 import (
-	"heapdeck/internal/authctx"
 	"errors"
+	"heapdeck/internal/authctx"
 	"testing"
 
 	"heapdeck/internal/domain/auth"
