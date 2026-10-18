@@ -110,7 +110,6 @@ func (c Config) CORSOriginList() []string {
 	return out
 }
 
-
 func (c Config) EnabledAuthProviders() []string {
 	providers := []string{}
 	if strings.TrimSpace(c.GitHubClientID) != "" && strings.TrimSpace(c.GitHubClientSecret) != "" {

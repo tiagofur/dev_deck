@@ -54,7 +54,6 @@ func TestConfig_CORSOriginList(t *testing.T) {
 	}
 }
 
-
 func TestLoad(t *testing.T) {
 	// Helper to set and unset env vars
 	setenv := func(t *testing.T, key, val string) {
