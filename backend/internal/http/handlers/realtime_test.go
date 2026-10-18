@@ -83,7 +83,9 @@ func (s *realtimeServer) createItem(t *testing.T, userID uuid.UUID, orgID *uuid.
 	return id
 }
 
-func (s *realtimeServer) dial(t *testing.T, roomID, token, origin string) (*websocket.Conn, *http.Response, error) {
+// dialStatus performs the handshake and consumes the response entirely,
+// returning the HTTP status (101 on success) so callers never hold a body.
+func (s *realtimeServer) dialStatus(t *testing.T, roomID, token, origin string) (int, error) {
 	t.Helper()
 	wsURL := "ws" + strings.TrimPrefix(s.http.URL, "http") + "/api/realtime/" + roomID
 	if token != "" {
@@ -93,7 +95,18 @@ func (s *realtimeServer) dial(t *testing.T, roomID, token, origin string) (*webs
 	if origin != "" {
 		header.Set("Origin", origin)
 	}
-	return websocket.DefaultDialer.Dial(wsURL, header)
+	conn, resp, err := websocket.DefaultDialer.Dial(wsURL, header)
+	if resp != nil {
+		defer func() { _ = resp.Body.Close() }()
+	}
+	if err != nil {
+		if resp != nil {
+			return resp.StatusCode, err
+		}
+		return 0, err
+	}
+	_ = conn.Close()
+	return http.StatusSwitchingProtocols, nil
 }
 
 // Unauthenticated sockets, foreign rooms and cross-site origins are all
@@ -122,50 +135,46 @@ func TestRealtime_Connect(t *testing.T) {
 	orgItem := s.createItem(t, owner.ID, &org.ID)
 
 	// Missing/invalid token → 401 before any upgrade.
-	if _, resp, err := s.dial(t, "item-"+ownItem.String(), "", ""); err == nil {
+	if status, err := s.dialStatus(t, "item-"+ownItem.String(), "", ""); err == nil {
 		t.Fatal("expected dial without token to fail")
-	} else if resp == nil || resp.StatusCode != http.StatusUnauthorized {
-		t.Fatalf("expected 401, got %+v err=%v", resp, err)
+	} else if status != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d err=%v", status, err)
 	}
 
 	// Non-"item-" rooms are rejected outright.
-	if _, resp, err := s.dial(t, "garbage", ownerTok, ""); err == nil {
+	if status, err := s.dialStatus(t, "garbage", ownerTok, ""); err == nil {
 		t.Fatal("expected dial with malformed room to fail")
-	} else if resp == nil || resp.StatusCode != http.StatusBadRequest {
-		t.Fatalf("expected 400, got %+v err=%v", resp, err)
+	} else if status != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d err=%v", status, err)
 	}
 
 	// An item owned by someone else → 403.
-	if _, resp, err := s.dial(t, "item-"+ownItem.String(), intruderTok, ""); err == nil {
+	if status, err := s.dialStatus(t, "item-"+ownItem.String(), intruderTok, ""); err == nil {
 		t.Fatal("expected dial to foreign item to fail")
-	} else if resp == nil || resp.StatusCode != http.StatusForbidden {
-		t.Fatalf("expected 403, got %+v err=%v", resp, err)
+	} else if status != http.StatusForbidden {
+		t.Fatalf("expected 403, got %d err=%v", status, err)
 	}
 
 	// Cross-site origins are rejected even with a valid token.
-	if _, resp, err := s.dial(t, "item-"+ownItem.String(), ownerTok, "https://evil.example"); err == nil {
+	if status, err := s.dialStatus(t, "item-"+ownItem.String(), ownerTok, "https://evil.example"); err == nil {
 		t.Fatal("expected evil origin to fail")
-	} else if resp == nil || resp.StatusCode != http.StatusForbidden {
-		t.Fatalf("expected 403, got %+v err=%v", resp, err)
+	} else if status != http.StatusForbidden {
+		t.Fatalf("expected 403, got %d err=%v", status, err)
 	}
 
 	// Owner joins their own room.
-	conn, _, err := s.dial(t, "item-"+ownItem.String(), ownerTok, "http://localhost:5173")
-	if err != nil {
-		t.Fatalf("owner dial: %v", err)
+	if status, err := s.dialStatus(t, "item-"+ownItem.String(), ownerTok, "http://localhost:5173"); err != nil || status != http.StatusSwitchingProtocols {
+		t.Fatalf("owner dial: status=%d err=%v", status, err)
 	}
-	_ = conn.Close()
 
 	// Org members can join rooms for org items; intruders still cannot.
-	conn, _, err = s.dial(t, "item-"+orgItem.String(), memberTok, "")
-	if err != nil {
-		t.Fatalf("member dial: %v", err)
+	if status, err := s.dialStatus(t, "item-"+orgItem.String(), memberTok, ""); err != nil || status != http.StatusSwitchingProtocols {
+		t.Fatalf("member dial: status=%d err=%v", status, err)
 	}
-	_ = conn.Close()
 
-	if _, resp, err := s.dial(t, "item-"+orgItem.String(), intruderTok, ""); err == nil {
+	if status, err := s.dialStatus(t, "item-"+orgItem.String(), intruderTok, ""); err == nil {
 		t.Fatal("expected intruder dial to org item to fail")
-	} else if resp == nil || resp.StatusCode != http.StatusForbidden {
-		t.Fatalf("expected 403, got %+v err=%v", resp, err)
+	} else if status != http.StatusForbidden {
+		t.Fatalf("expected 403, got %d err=%v", status, err)
 	}
 }
