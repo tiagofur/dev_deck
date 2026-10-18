@@ -360,3 +360,20 @@ function tokenizeShell(input: string): string[] {
   if (token) tokens.push(token)
   return tokens
 }
+
+// Header names whose values must never be persisted locally (Workbench API
+// tester history lives in localStorage, and users routinely paste auth
+// headers there).
+const SENSITIVE_HEADER_PATTERN =
+  /^(authorization|proxy-authorization|cookie|x-api-key|[a-z0-9-]*(token|secret|password|credential|apikey|api-key)[a-z0-9-]*)$/i
+
+export function redactSensitiveHeaders(headers: string): string {
+  return headers
+    .split('\n')
+    .filter((line) => {
+      const separator = line.indexOf(':')
+      if (separator === -1) return true
+      return !SENSITIVE_HEADER_PATTERN.test(line.slice(0, separator).trim())
+    })
+    .join('\n')
+}

@@ -46,7 +46,7 @@ Si encontrás una vulnerabilidad de seguridad en HeapDeck, **por favor no abras 
 Para orientar a researchers: estas son áreas donde sabemos que hay superficie de ataque y el estado actual de las mitigaciones:
 
 1. **Scraper de Open Graph** (`internal/enricher/generic.go`): Protegido contra SSRF mediante validación de IPs prohibidas (CIDRs) en tiempo de dial (`ssrfSafeTransport`).
-2. **Allowlist de GitHub logins**: Autenticación restringida por `ALLOWED_GITHUB_LOGINS`. Bypass de esta lista se considera crítico.
+2. **Auth local y registro** (`internal/http/handlers/auth.go`): el registro soporta gating por invitación (`REQUIRE_INVITE`) y los endpoints de auth tienen rate limit por IP. Cualquier bypass del gate de invitaciones o credential stuffing es crítico.
 3. **JWT refresh flow**: La revocación depende de la eliminación de sesiones en DB. Un refresh token robado activo post-logout es crítico.
 4. **Markdown rendering**: Usamos `react-markdown` + `rehype-highlight`. Encontrar XSS vía markdown malicioso es crítico.
 5. **Ejecución de Runbooks (Agentes)**: El modelo de confianza es híbrido (Fase 50). La IA propone comandos pero el cliente (Desktop) requiere **aprobación manual explícita**. Cualquier ejecución no supervisada es un hallazgo crítico.

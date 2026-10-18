@@ -52,7 +52,19 @@ func (s *Store) GetUserByID(ctx context.Context, id uuid.UUID) (*auth.User, erro
 	return scanUser(row)
 }
 
+// UpsertUser creates or updates the user behind a GitHub identity. If a
+// local account registered before login validation already owns the same
+// login, the GitHub identity is stored under a "-gh" suffixed login instead
+// of failing the whole OAuth flow with a 500.
 func (s *Store) UpsertUser(ctx context.Context, ghUser auth.GitHubUser) (*auth.User, error) {
+	user, err := s.upsertGitHubUser(ctx, ghUser, ghUser.Login)
+	if err != nil && isUniqueViolation(err) {
+		return s.upsertGitHubUser(ctx, ghUser, ghUser.Login+"-gh")
+	}
+	return user, err
+}
+
+func (s *Store) upsertGitHubUser(ctx context.Context, ghUser auth.GitHubUser, login string) (*auth.User, error) {
 	row := s.Writer().QueryRow(ctx, `
 		INSERT INTO users (github_id, login, username, avatar_url, display_name, role, region)
 		VALUES ($1, $2, $3, $4, $5, 'user', $6)
@@ -62,7 +74,7 @@ func (s *Store) UpsertUser(ctx context.Context, ghUser auth.GitHubUser) (*auth.U
 			display_name = EXCLUDED.display_name,
 			updated_at = NOW()
 		RETURNING `+userColumns,
-		ghUser.ID, ghUser.Login, ghUser.Login, ghUser.AvatarURL, ghUser.Name, s.appRegion)
+		ghUser.ID, login, ghUser.Login, ghUser.AvatarURL, ghUser.Name, s.appRegion)
 	return scanUser(row)
 }
 

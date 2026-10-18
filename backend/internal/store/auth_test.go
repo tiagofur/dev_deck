@@ -147,3 +147,52 @@ func TestStore_InstallStarterKit_SeedsContextualDemoItems(t *testing.T) {
 		t.Fatalf("expected idempotent install to keep %d items, got %d", wantItems, after.Total)
 	}
 }
+
+func TestStore_Auth_UpsertUserLoginCollision(t *testing.T) {
+	st, ctx := newStore(t)
+
+	// A local account owns the login first.
+	if _, err := st.CreateUserLocalTx(ctx, nil, "collision-handle", "not-a-real-hash"); err != nil {
+		t.Fatalf("create local user: %v", err)
+	}
+
+	ghUser := auth.GitHubUser{
+		ID:        99887766,
+		Login:     "collision-handle",
+		AvatarURL: "https://avatar.com/c",
+		Name:      "Collision",
+	}
+
+	user, err := st.UpsertUser(ctx, ghUser)
+	if err != nil {
+		t.Fatalf("upsert with colliding login: %v", err)
+	}
+	if user.Login != "collision-handle-gh" {
+		t.Fatalf("login = %q, want the suffixed %q", user.Login, "collision-handle-gh")
+	}
+	if user.GitHubID == nil || *user.GitHubID != ghUser.ID {
+		t.Fatalf("github_id = %v, want %d", user.GitHubID, ghUser.ID)
+	}
+
+	// Logging in again with the same GitHub identity updates the same row.
+	ghUser.Name = "Collision Updated"
+	second, err := st.UpsertUser(ctx, ghUser)
+	if err != nil {
+		t.Fatalf("second upsert: %v", err)
+	}
+	if second.ID != user.ID {
+		t.Fatalf("second upsert created user %s, want the same %s", second.ID, user.ID)
+	}
+	if second.DisplayName != "Collision Updated" {
+		t.Fatalf("display_name = %q, want the updated value", second.DisplayName)
+	}
+
+	// The local account stays untouched.
+	local, _, err := st.GetUserByLogin(ctx, "collision-handle")
+	if err != nil {
+		t.Fatalf("local user missing: %v", err)
+	}
+	if local.GitHubID != nil {
+		t.Fatalf("local account must keep github_id nil, got %v", local.GitHubID)
+	}
+}

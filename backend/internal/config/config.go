@@ -64,7 +64,6 @@ type Config struct {
 	AppleOAuthCallbackURL   string `env:"APPLE_OAUTH_CALLBACK_URL" envDefault:"http://localhost:8080/api/auth/apple/callback"`
 	WebOAuthRedirectURL     string `env:"WEB_OAUTH_REDIRECT_URL" envDefault:"http://localhost:5173/auth/callback"`
 	DesktopOAuthRedirectURL string `env:"DESKTOP_OAUTH_REDIRECT_URL" envDefault:"heapdeck://auth/callback"`
-	AllowedGitHubLogins     string `env:"ALLOWED_GITHUB_LOGINS"` // legacy single-user option
 
 	// ─── Wave 7: Local Auth & Email ───
 	LocalAuthEnabled bool   `env:"LOCAL_AUTH_ENABLED" envDefault:"false"`
@@ -111,20 +110,6 @@ func (c Config) CORSOriginList() []string {
 	return out
 }
 
-// AllowedLoginsMap returns a set of allowed GitHub logins.
-// Empty map means all logins are allowed.
-func (c Config) AllowedLoginsMap() map[string]bool {
-	if c.AllowedGitHubLogins == "" {
-		return nil
-	}
-	m := make(map[string]bool)
-	for _, l := range strings.Split(c.AllowedGitHubLogins, ",") {
-		if s := strings.TrimSpace(l); s != "" {
-			m[s] = true
-		}
-	}
-	return m
-}
 
 func (c Config) EnabledAuthProviders() []string {
 	providers := []string{}

@@ -54,55 +54,6 @@ func TestConfig_CORSOriginList(t *testing.T) {
 	}
 }
 
-func TestConfig_AllowedLoginsMap(t *testing.T) {
-	tests := []struct {
-		name                string
-		allowedGitHubLogins string
-		want                map[string]bool
-	}{
-		{
-			name:                "Standard logins",
-			allowedGitHubLogins: "user1,user2",
-			want:                map[string]bool{"user1": true, "user2": true},
-		},
-		{
-			name:                "Logins with spaces",
-			allowedGitHubLogins: " user1 ,  user2 ",
-			want:                map[string]bool{"user1": true, "user2": true},
-		},
-		{
-			name:                "Empty string",
-			allowedGitHubLogins: "",
-			want:                nil,
-		},
-		{
-			name:                "Only spaces and commas",
-			allowedGitHubLogins: " , , ",
-			want:                map[string]bool{},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := Config{AllowedGitHubLogins: tt.allowedGitHubLogins}
-			got := c.AllowedLoginsMap()
-			if tt.want == nil {
-				if got != nil {
-					t.Errorf("got %v, want nil", got)
-				}
-				return
-			}
-			if len(got) != len(tt.want) {
-				t.Fatalf("got len %d, want %d", len(got), len(tt.want))
-			}
-			for k := range tt.want {
-				if !got[k] {
-					t.Errorf("missing key %q", k)
-				}
-			}
-		})
-	}
-}
 
 func TestLoad(t *testing.T) {
 	// Helper to set and unset env vars

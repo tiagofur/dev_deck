@@ -5,6 +5,7 @@ import {
   formatJson,
   parseHeaders,
   parseCurlCommand,
+  redactSensitiveHeaders,
   requestConfigToCurl,
   scanSecrets,
   serializeRequestConfig,
@@ -143,5 +144,27 @@ describe('workbench utils', () => {
         match: 'PASSWO...alue',
       },
     ])
+  })
+})
+
+describe('redactSensitiveHeaders', () => {
+  it('strips auth-bearing headers before local persistence', () => {
+    expect(
+      redactSensitiveHeaders(
+        ['Accept: application/json', 'Authorization: Bearer super-secret', 'X-Api-Key: abc123', 'Content-Type: application/json'].join('\n'),
+      ),
+    ).toBe(['Accept: application/json', 'Content-Type: application/json'].join('\n'))
+  })
+
+  it('matches credential keywords case-insensitively and keeps ordinary headers', () => {
+    expect(
+      redactSensitiveHeaders(
+        ['X-Auth-Token: keep-me-out', 'x-api-key: nope', 'X-Forwarded-For: 1.2.3.4', 'Accept-Language: es'].join('\n'),
+      ),
+    ).toBe(['X-Forwarded-For: 1.2.3.4', 'Accept-Language: es'].join('\n'))
+  })
+
+  it('keeps lines that are not headers', () => {
+    expect(redactSensitiveHeaders('just a note\nAuthorization: Bearer x')).toBe('just a note')
   })
 })

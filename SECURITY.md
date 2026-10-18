@@ -49,7 +49,7 @@ If you find a security vulnerability in HeapDeck, **please do not open a public 
 To guide researchers, these are the areas where we know there is an attack surface:
 
 1.  **Open Graph Scraper** (`internal/enricher/generic.go`): Protected against SSRF using `blockedCIDRs` and dial-time validation in `ssrfSafeTransport`.
-2.  **GitHub Login Allowlist**: Authentication depends on the `ALLOWED_GITHUB_LOGINS` environment variable. Finding a way to bypass this list is considered critical.
+2.  **Local Auth & Registration** (`internal/http/handlers/auth.go`): sign-ups support invite gating (`REQUIRE_INVITE`) and auth endpoints are rate-limited per IP. Anything that bypasses the invite gate or enables credential stuffing is considered critical.
 3.  **JWT Refresh Flow**: Revocation depends on DB session deletion. If a stolen refresh token can still generate access tokens after a logout, it's considered critical.
 4.  **Markdown Rendering**: We use `react-markdown` + `rehype-highlight` in Electron. Finding XSS via crafted markdown is considered critical.
 

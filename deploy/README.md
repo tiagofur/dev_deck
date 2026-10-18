@@ -54,7 +54,6 @@ AUTH_MODE=jwt
 GITHUB_CLIENT_ID=...
 GITHUB_CLIENT_SECRET=...
 GITHUB_OAUTH_CALLBACK_URL=https://heapdeck.com/api/auth/callback
-ALLOWED_GITHUB_LOGINS=tu-usuario,otro-colega
 
 # JWT Secrets
 JWT_SECRET=<hex-32-chars>
@@ -111,7 +110,8 @@ done
 curl https://heapdeck.com/healthz
 
 # Métricas (Prometheus)
-curl https://heapdeck.com/metrics
+# Las métricas solo se exponen dentro de la red interna de compose:
+docker compose exec prometheus wget -qO- http://api:8080/metrics | head -5
 ```
 
 Si todo está bien, vas a ver `{"status":"ok"}` y una lista de métricas que incluyen `heapdeck_agent_tool_calls_total`.

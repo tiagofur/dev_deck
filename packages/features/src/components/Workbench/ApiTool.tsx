@@ -7,6 +7,7 @@ import {
   serializeRequestConfig,
   requestConfigToCurl,
   parseCurlCommand,
+  redactSensitiveHeaders,
 } from '../../workbench/utils'
 import { ToolFrame, TextArea, ResultActions, ExampleButton } from './shared'
 
@@ -185,11 +186,14 @@ export function ApiTool() {
   }
 
   function rememberCurrentRequest() {
+    // Auth headers must not reach localStorage: the history survives XSS
+    // and shared machines, so sensitive values are stripped before saving.
+    const persistedHeaders = redactSensitiveHeaders(headers)
     const nextRequest: SavedApiRequest = {
-      id: `${method}:${url}:${headers}:${body}`,
+      id: `${method}:${url}:${persistedHeaders}:${body}`,
       method,
       url,
-      headers,
+      headers: persistedHeaders,
       body,
       updatedAt: new Date().toISOString(),
     }

@@ -55,7 +55,6 @@ JWT_SECRET=<256-bit-random-hex>
 GITHUB_CLIENT_ID=<del paso 1>
 GITHUB_CLIENT_SECRET=<del paso 1>
 OAUTH_REDIRECT_URL=https://api.heapdeck.tu-dominio.com/api/auth/github/callback
-ALLOWED_GITHUB_LOGINS=tu-usuario,otro-usuario
 
 # Feature flags
 SEED_CHEATSHEETS=true
@@ -126,9 +125,10 @@ curl https://api.heapdeck.tu-dominio.com/healthz
 1. Abrir `https://app.heapdeck.tu-dominio.com` en el browser.
 2. Click "Login con GitHub".
 3. Autorizar la OAuth App.
-4. Si tu GitHub login está en `ALLOWED_GITHUB_LOGINS`, entrás al home.
+4. Al autorizar, volvés a la app autenticado y entrás al home.
 
-Si no está en la allowlist, el backend devuelve 403. Agregarlo a `.env`, `docker compose up -d api` para reload.
+Si el login falla, revisá que `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` y
+`GITHUB_OAUTH_CALLBACK_URL` coincidan exactamente con la GitHub OAuth App.
 
 ---
 
