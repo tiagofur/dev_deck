@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"heapdeck/internal/authctx"
+	"heapdeck/internal/enricher"
 	"heapdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
@@ -41,6 +42,13 @@ func (h *WebhooksHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	if req.Name == "" || req.URL == "" {
 		writeError(w, http.StatusBadRequest, "INVALID_INPUT", "name and url are required")
+		return
+	}
+
+	// Deliveries are signed POSTs to user-supplied URLs; reject anything
+	// that is not a public http(s) endpoint up front.
+	if err := enricher.ValidatePublicURL(r.Context(), req.URL); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_URL", "url must be a public http(s) endpoint")
 		return
 	}
 

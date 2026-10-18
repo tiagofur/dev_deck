@@ -1,7 +1,9 @@
 package http
 
 import (
+	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"heapdeck/internal/ai"
@@ -46,14 +48,35 @@ func NewRouter(cfg config.Config, st *store.Store, en *enricher.Service, as *aut
 	})
 }
 
+// clientIP returns the client IP used for rate limiting. All external
+// traffic arrives through Caddy, which appends the real client address to
+// X-Forwarded-For; the rightmost entry is the only one the trusted proxy
+// controls, so attacker-supplied leftmost entries are ignored (the removed
+// chi RealIP middleware took the leftmost one and was trivially spoofable).
+// Direct access without a proxy — local dev — falls back to the socket.
+func clientIP(r *http.Request) string {
+	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		if i := strings.LastIndex(xff, ","); i >= 0 {
+			return strings.TrimSpace(xff[i+1:])
+		}
+		return strings.TrimSpace(xff)
+	}
+	if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
+		return host
+	}
+	return r.RemoteAddr
+}
+
 func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(chimw.RequestID)
-	r.Use(chimw.RealIP) //nolint:staticcheck // SA1019: RealIP is vulnerable to IP spoofing, but keeping for compatibility
 	r.Use(mw.Logger)
 	r.Use(metrics.Instrument)
 	r.Use(chimw.Recoverer)
+	// Global body cap (matches the avatar upload limit); JSON endpoints
+	// previously accepted unbounded bodies.
+	r.Use(chimw.RequestSize(5 << 20))
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   cfg.CORSOriginList(),
 		AllowedMethods:   []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
@@ -181,7 +204,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 						r.Use(httprate.LimitBy(
 							cfg.AuthRateLimitPerMinute,
 							1*time.Minute,
-							func(r *http.Request) (string, error) { return r.RemoteAddr, nil },
+							func(r *http.Request) (string, error) { return clientIP(r), nil },
 							httprate.WithLimitHandler(func(w http.ResponseWriter, _ *http.Request) {
 								w.Header().Set("Content-Type", "application/json")
 								w.WriteHeader(http.StatusTooManyRequests)
@@ -211,13 +234,13 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 
 		r.Group(func(r chi.Router) {
 			r.Use(mw.TokenAuth(cfg, as, st))
-			r.Use(mw.ContextOrg)
+			r.Use(mw.ContextOrg(st))
 
 			if !cfg.RateLimitDisabled {
 				r.Use(httprate.LimitBy(
 					cfg.RateLimitPerMinute,
 					1*time.Minute,
-					func(r *http.Request) (string, error) { return r.RemoteAddr, nil },
+					func(r *http.Request) (string, error) { return clientIP(r), nil },
 					httprate.WithLimitHandler(func(w http.ResponseWriter, _ *http.Request) {
 						w.Header().Set("Content-Type", "application/json")
 						w.WriteHeader(http.StatusTooManyRequests)
@@ -265,18 +288,23 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Route("/orgs", func(or chi.Router) {
 				or.Post("/", orgsH.Create)
 				or.Get("/", orgsH.List)
-				or.Get("/{id}/feed", orgsH.GetFeed)
-				or.Post("/{id}/members", orgsH.AddMember)
 
-				or.Route("/{id}/discovery", func(dr chi.Router) {
-					dr.Get("/trending", orgsH.GetDiscoveryTrending)
-					dr.Get("/recommendations", orgsH.GetRecommendations)
-				})
+				// Org-scoped routes resolve membership from the path id —
+				// never from the caller-controlled X-Org-ID header.
+				or.Route("/{id}", func(ir chi.Router) {
+					ir.Use(mw.RequireOrgPermissionFromPath(st, "id", "org:read"))
+					ir.Get("/feed", orgsH.GetFeed)
+					ir.Route("/discovery", func(dr chi.Router) {
+						dr.Get("/trending", orgsH.GetDiscoveryTrending)
+						dr.Get("/recommendations", orgsH.GetRecommendations)
+					})
 
-				or.Group(func(or chi.Router) {
-					or.Use(mw.RequireOrgPermission(st, "org:admin"))
-					or.Get("/{id}/insights", orgsH.GetInsights)
-					or.Post("/{id}/scim/token", orgsH.GenerateSCIMToken)
+					ir.Group(func(ar chi.Router) {
+						ar.Use(mw.RequireOrgPermissionFromPath(st, "id", "org:admin"))
+						ar.Post("/members", orgsH.AddMember)
+						ar.Get("/insights", orgsH.GetInsights)
+						ar.Post("/scim/token", orgsH.GenerateSCIMToken)
+					})
 				})
 			})
 
@@ -427,8 +455,15 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		})
 	})
 
-	// Serve static files from the uploads directory
-	r.Handle("/uploads/*", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
+	// Serve static files from the uploads directory. http.FileServer lists
+	// directories, so only file paths are served.
+	r.Handle("/uploads/*", http.StripPrefix("/uploads/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/") {
+			http.NotFound(w, r)
+			return
+		}
+		http.FileServer(http.Dir("./uploads")).ServeHTTP(w, r)
+	})))
 
 	return r
 }

@@ -94,8 +94,9 @@ func (h *SCIMHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// 2. Add to Org
-	if err := h.store.AddOrgMember(r.Context(), orgID, user.ID, "member"); err != nil {
+	// 2. Add to Org — "member" is not a role in the RBAC matrix; SCIM
+	// provisioning grants read access, same as an invited viewer.
+	if err := h.store.AddOrgMember(r.Context(), orgID, user.ID, "viewer"); err != nil {
 		writeInternal(w, err)
 		return
 	}

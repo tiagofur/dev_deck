@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"time"
 
+	"devdeck/internal/enricher"
+
 	"github.com/google/uuid"
 )
 
@@ -41,7 +43,13 @@ type Service struct {
 func New(st WebhookStore) *Service {
 	return &Service{
 		store: st,
-		httpc: &http.Client{Timeout: 5 * time.Second},
+		// Delivery targets are user-supplied URLs; reuse the enricher's
+		// SSRF transport so signed deliveries refuse to dial private
+		// networks even after a DNS rebinding.
+		httpc: &http.Client{
+			Timeout:   5 * time.Second,
+			Transport: enricher.SSRFSafeTransport(5 * time.Second),
+		},
 	}
 }
 
