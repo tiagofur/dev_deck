@@ -211,7 +211,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 
 		r.Group(func(r chi.Router) {
 			r.Use(mw.TokenAuth(cfg, as, st))
-			r.Use(mw.ContextOrg)
+			r.Use(mw.ContextOrg(st))
 
 			if !cfg.RateLimitDisabled {
 				r.Use(httprate.LimitBy(
@@ -265,18 +265,23 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Route("/orgs", func(or chi.Router) {
 				or.Post("/", orgsH.Create)
 				or.Get("/", orgsH.List)
-				or.Get("/{id}/feed", orgsH.GetFeed)
-				or.Post("/{id}/members", orgsH.AddMember)
 
-				or.Route("/{id}/discovery", func(dr chi.Router) {
-					dr.Get("/trending", orgsH.GetDiscoveryTrending)
-					dr.Get("/recommendations", orgsH.GetRecommendations)
-				})
+				// Org-scoped routes resolve membership from the path id —
+				// never from the caller-controlled X-Org-ID header.
+				or.Route("/{id}", func(ir chi.Router) {
+					ir.Use(mw.RequireOrgPermissionFromPath(st, "id", "org:read"))
+					ir.Get("/feed", orgsH.GetFeed)
+					ir.Route("/discovery", func(dr chi.Router) {
+						dr.Get("/trending", orgsH.GetDiscoveryTrending)
+						dr.Get("/recommendations", orgsH.GetRecommendations)
+					})
 
-				or.Group(func(or chi.Router) {
-					or.Use(mw.RequireOrgPermission(st, "org:admin"))
-					or.Get("/{id}/insights", orgsH.GetInsights)
-					or.Post("/{id}/scim/token", orgsH.GenerateSCIMToken)
+					ir.Group(func(ar chi.Router) {
+						ar.Use(mw.RequireOrgPermissionFromPath(st, "id", "org:admin"))
+						ar.Post("/members", orgsH.AddMember)
+						ar.Get("/insights", orgsH.GetInsights)
+						ar.Post("/scim/token", orgsH.GenerateSCIMToken)
+					})
 				})
 			})
 
