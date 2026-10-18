@@ -1,8 +1,8 @@
 {
-  "name": "@devdeck/desktop",
+  "name": "@heapdeck/desktop",
   "version": "0.6.0",
   "private": true,
-  "description": "DevDeck — your personal dev multi-tool. Desktop app.",
+  "description": "HeapDeck — your personal dev multi-tool. Desktop app.",
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
@@ -19,10 +19,10 @@
     "dist:linux": "electron-vite build && electron-builder --linux"
   },
   "dependencies": {
-    "@devdeck/api-client": "workspace:*",
-    "@devdeck/features": "workspace:*",
-    "@devdeck/i18n": "workspace:*",
-    "@devdeck/ui": "workspace:*",
+    "@heapdeck/api-client": "workspace:*",
+    "@heapdeck/features": "workspace:*",
+    "@heapdeck/i18n": "workspace:*",
+    "@heapdeck/ui": "workspace:*",
     "@dnd-kit/core": "^6.1.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",

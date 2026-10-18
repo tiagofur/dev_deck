@@ -1,18 +1,18 @@
-# DevDeck — Análisis Competitivo
+# HeapDeck — Análisis Competitivo
 
 > Versión: 1.1 · Owner: tfurt · Última actualización: 2026-06-10
 
-> **Nota de estado (junio 2026):** las menciones a "offline-first" en este documento describen la dirección de producto, no el estado actual. El sync offline está pospuesto a post-1.0; hoy la app funciona en cloud mode (las utilities del Workbench sí corren 100% local, sin red). La IA (resúmenes, tags, búsqueda semántica) requiere un provider configurado (OpenAI u Ollama local); sin provider, DevDeck usa un tagger heurístico integrado. Ver [FEATURE_REVIEW_2026_06.md](archive/FEATURE_REVIEW_2026_06.md) (decisión A5) y el [ROADMAP](../ROADMAP.md).
+> **Nota de estado (junio 2026):** las menciones a "offline-first" en este documento describen la dirección de producto, no el estado actual. El sync offline está pospuesto a post-1.0; hoy la app funciona en cloud mode (las utilities del Workbench sí corren 100% local, sin red). La IA (resúmenes, tags, búsqueda semántica) requiere un provider configurado (OpenAI u Ollama local); sin provider, HeapDeck usa un tagger heurístico integrado. Ver [FEATURE_REVIEW_2026_06.md](archive/FEATURE_REVIEW_2026_06.md) (decisión A5) y el [ROADMAP](../ROADMAP.md).
 
 ---
 
 ## 0. Propósito del documento
 
-Este análisis compara DevDeck contra las herramientas más relevantes en las categorías adyacentes al producto: **bookmark managers**, **herramientas PKM / second-brain** y **developer utilities**. El objetivo es entender qué hacen bien estas herramientas, qué no resuelven para los developers, dónde puede diferenciarse DevDeck y qué implica eso para el posicionamiento.
+Este análisis compara HeapDeck contra las herramientas más relevantes en las categorías adyacentes al producto: **bookmark managers**, **herramientas PKM / second-brain** y **developer utilities**. El objetivo es entender qué hacen bien estas herramientas, qué no resuelven para los developers, dónde puede diferenciarse HeapDeck y qué implica eso para el posicionamiento.
 
-El análisis está alineado con el reposicionamiento actual de DevDeck:
+El análisis está alineado con el reposicionamiento actual de HeapDeck:
 
-> **DevDeck.ai — Tu knowledge OS para developers. Guarda todo lo útil. Encuéntralo cuando lo necesitás. Con IA que organiza, no que charla.**
+> **HeapDeck.com — Tu knowledge OS para developers. Guarda todo lo útil. Encuéntralo cuando lo necesitás. Con IA que organiza, no que charla.**
 
 ---
 
@@ -51,7 +51,7 @@ El análisis está alineado con el reposicionamiento actual de DevDeck:
 - No tiene ninguna integración con GitHub, CLIs, entornos de desarrollo ni editores.
 - No hay IA orientada al contexto de lo guardado; solo categorización manual.
 
-#### Dónde puede diferenciarse DevDeck
+#### Dónde puede diferenciarse HeapDeck
 - **Foco en devs desde el modelo de datos**: el tipo de item (repo, CLI, plugin, shortcut, workflow, agent) define la metadata y las acciones disponibles.
 - **IA útil**: auto-tagging con stack + propósito + contexto de uso, en vez de dejar todo al criterio manual del usuario.
 - **Offline-first real**: SQLite local + sync posterior, no depender de conexión para acceder a tu conocimiento.
@@ -59,7 +59,7 @@ El análisis está alineado con el reposicionamiento actual de DevDeck:
 - **Búsqueda semántica por intención**: "herramientas para agentes en terminal" vs buscar el tag exacto "agents".
 
 #### Implicancias estratégicas
-Raindrop.io es el competidor más parecido en UX pero más lejano en propósito. El usuario que lo usa para guardar links de dev tiene un workaround, no una solución real. El posicionamiento contra Raindrop es simple: **"Raindrop es para todos. DevDeck es para developers."** La diferenciación es de audiencia, no de features.
+Raindrop.io es el competidor más parecido en UX pero más lejano en propósito. El usuario que lo usa para guardar links de dev tiene un workaround, no una solución real. El posicionamiento contra Raindrop es simple: **"Raindrop es para todos. HeapDeck es para developers."** La diferenciación es de audiencia, no de features.
 
 ---
 
@@ -84,7 +84,7 @@ Raindrop.io es el competidor más parecido en UX pero más lejano en propósito.
 - La IA es genérica: escribe y resume texto, pero no "sabe" que lo que guardaste es un CLI de Go o un agente para Copilot.
 - **No escala bien para colecciones de herramientas**: las bases de datos de Notion se vuelven pesadas cuando querés guardar 300 repos o 50 CLIs con metadata estructurada.
 
-#### Dónde puede diferenciarse DevDeck
+#### Dónde puede diferenciarse HeapDeck
 - **Captura en segundos, no en minutos**: URL → IA completa tipo, stack, propósito → guardar. Sin decisiones de estructura.
 - **Modelo de datos específico para devs**: campos que tienen sentido para un developer (stack, tipo de herramienta, cuándo usarlo, comandos relacionados).
 - **Offline-first sin compromisos**: funciona en avión, café sin wifi, VPN lenta.
@@ -92,7 +92,7 @@ Raindrop.io es el competidor más parecido en UX pero más lejano en propósito.
 - **Búsqueda semántica sobre assets de dev**, no solo búsqueda de texto en páginas.
 
 #### Implicancias estratégicas
-Notion es el competidor más mencionado en el imaginario colectivo de devs que intentan organizar su conocimiento. El riesgo es que el usuario diga "ya uso Notion para esto". El contra-argumento es contundente: **DevDeck no requiere que lo organices vos — la IA lo organiza por vos.** El posicionamiento debe atacar directamente el friction de Notion: "¿Cuánto tardás en guardar algo en Notion? En DevDeck son 3 segundos."
+Notion es el competidor más mencionado en el imaginario colectivo de devs que intentan organizar su conocimiento. El riesgo es que el usuario diga "ya uso Notion para esto". El contra-argumento es contundente: **HeapDeck no requiere que lo organices vos — la IA lo organiza por vos.** El posicionamiento debe atacar directamente el friction de Notion: "¿Cuánto tardás en guardar algo en Notion? En HeapDeck son 3 segundos."
 
 ---
 
@@ -118,15 +118,15 @@ Notion es el competidor más mencionado en el imaginario colectivo de devs que i
 - No tiene UX pensada para "coleccionar herramientas": está pensada para escribir y conectar ideas, no para administrar un inventario de assets.
 - Sync entre dispositivos requiere esfuerzo extra (Obsidian Sync pagado, iCloud, etc.).
 
-#### Dónde puede diferenciarse DevDeck
-- **Zero configuration**: DevDeck funciona para guardar assets de dev desde el primer minuto. Sin plugins, sin templates, sin decisiones de estructura.
+#### Dónde puede diferenciarse HeapDeck
+- **Zero configuration**: HeapDeck funciona para guardar assets de dev desde el primer minuto. Sin plugins, sin templates, sin decisiones de estructura.
 - **IA integrada y específica**: no un plugin de terceros, sino IA que entiende el dominio de los developers.
 - **UX de colección, no de escritura**: las cards visuales, las vistas por tipo/stack/intención y el quick capture son superiores para el caso de uso de "guardar herramientas".
 - **Sync sin fricción**: GitHub OAuth + backend propio + offline SQLite local. No dependés de iCloud ni de pagar Obsidian Sync.
 - **Modelo de datos estructurado**: campos específicos para cada tipo de item, no markdown libre.
 
 #### Implicancias estratégicas
-Obsidian tiene un nicho muy sólido de "developers que quieren control total". DevDeck no compite por ese nicho — compite por el developer que **no quiere configurar nada** y solo quiere que funcione. El posicionamiento correcto: **"Obsidian es poderoso si te bancás configurarlo. DevDeck funciona desde el primer momento."** No atacar a Obsidian directamente — reconocer su poder y capturar el segmento que se perdió en la configuración.
+Obsidian tiene un nicho muy sólido de "developers que quieren control total". HeapDeck no compite por ese nicho — compite por el developer que **no quiere configurar nada** y solo quiere que funcione. El posicionamiento correcto: **"Obsidian es poderoso si te bancás configurarlo. HeapDeck funciona desde el primer momento."** No atacar a Obsidian directamente — reconocer su poder y capturar el segmento que se perdió en la configuración.
 
 ---
 
@@ -153,16 +153,16 @@ Obsidian tiene un nicho muy sólido de "developers que quieren control total". D
 - No funciona offline para su IA (requiere conexión a su API).
 - No permite organizar comandos por proyecto o repo específico.
 
-#### Dónde puede diferenciarse DevDeck
-- **Conocimiento acumulativo y contextual**: DevDeck recuerda no solo el atajo, sino *por qué es útil, en qué contexto y qué stack toca*.
+#### Dónde puede diferenciarse HeapDeck
+- **Conocimiento acumulativo y contextual**: HeapDeck recuerda no solo el atajo, sino *por qué es útil, en qué contexto y qué stack toca*.
 - **Multiplataforma real**: Win + Mac + Linux + web.
 - **Colección personal de herramientas**, no extensiones de la comunidad.
 - **Cheatsheets y comandos por proyecto** con contexto: no es un launcher, es una memoria de trabajo.
 - **Offline-first**: funciona sin internet en todos los dispositivos.
-- **DevDeck como fuente de datos para Raycast** (futuro): una extensión de Raycast que busca en tu colección de DevDeck sería el mejor de ambos mundos.
+- **HeapDeck como fuente de datos para Raycast** (futuro): una extensión de Raycast que busca en tu colección de HeapDeck sería el mejor de ambos mundos.
 
 #### Implicancias estratégicas
-Raycast y DevDeck son más complementarios que competidores directos. Raycast es *acción rápida*; DevDeck es *memoria y organización*. La oportunidad más grande es en la Ola 7 del roadmap: una extensión oficial de Raycast que busca en tu colección de DevDeck. Posicionamiento: **"DevDeck es lo que Raycast usa para saber qué ofrecerte."** Además, Raycast es macOS-only; DevDeck puede capturar developers en Linux/Windows que buscan una alternativa cross-platform.
+Raycast y HeapDeck son más complementarios que competidores directos. Raycast es *acción rápida*; HeapDeck es *memoria y organización*. La oportunidad más grande es en la Ola 7 del roadmap: una extensión oficial de Raycast que busca en tu colección de HeapDeck. Posicionamiento: **"HeapDeck es lo que Raycast usa para saber qué ofrecerte."** Además, Raycast es macOS-only; HeapDeck puede capturar developers en Linux/Windows que buscan una alternativa cross-platform.
 
 ---
 
@@ -186,13 +186,13 @@ Raycast y DevDeck son más complementarios que competidores directos. Raycast es
 - Sin sync entre dispositivos.
 - Sin multiusuario.
 
-#### Dónde puede diferenciarse DevDeck
-- **Cheatsheets y comandos personales como complemento**: DevDeck no reemplaza Dash/Zeal (no sirve de nada competir en docs oficiales), sino que cubre lo que esas herramientas no tienen: *tu* conocimiento personal, tus atajos propios, tus notas de "gotchas", tus comandos por proyecto.
-- **Integración futura**: en Ola 7, DevDeck podría linkear sus cheatsheets a docsets de Dash/Zeal. "Estás viendo la doc de Go en Dash → DevDeck te muestra tus notas y comandos de proyectos Go".
+#### Dónde puede diferenciarse HeapDeck
+- **Cheatsheets y comandos personales como complemento**: HeapDeck no reemplaza Dash/Zeal (no sirve de nada competir en docs oficiales), sino que cubre lo que esas herramientas no tienen: *tu* conocimiento personal, tus atajos propios, tus notas de "gotchas", tus comandos por proyecto.
+- **Integración futura**: en Ola 7, HeapDeck podría linkear sus cheatsheets a docsets de Dash/Zeal. "Estás viendo la doc de Go en Dash → HeapDeck te muestra tus notas y comandos de proyectos Go".
 - **Offline-first también, pero para conocimiento personal**: el mismo principio de "funciona sin internet" pero aplicado a *tu* colección curada, no a docs oficiales.
 
 #### Implicancias estratégicas
-Dash/Zeal no son competidores directos — son herramientas complementarias. La oportunidad es de integración, no de sustitución. El posicionamiento correcto: **"Dash te da las docs oficiales. DevDeck guarda lo que aprendés cuando las usás."** Esta narrativa posiciona a DevDeck como la capa personal encima de las herramientas de documentación existentes.
+Dash/Zeal no son competidores directos — son herramientas complementarias. La oportunidad es de integración, no de sustitución. El posicionamiento correcto: **"Dash te da las docs oficiales. HeapDeck guarda lo que aprendés cuando las usás."** Esta narrativa posiciona a HeapDeck como la capa personal encima de las herramientas de documentación existentes.
 
 ---
 
@@ -214,7 +214,7 @@ Dash/Zeal no son competidores directos — son herramientas complementarias. La 
 - Sin IA.
 
 #### Implicancias estratégicas
-GitHub Stars es el punto de partida conceptual de DevDeck (de hecho, el producto nació de este dolor). El posicionamiento es simple: **"¿Tenés 500 repos con estrella y nunca los encontrás cuando los necesitás? DevDeck resuelve eso."** Es el mensaje de captación más directo y universal para developers.
+GitHub Stars es el punto de partida conceptual de HeapDeck (de hecho, el producto nació de este dolor). El posicionamiento es simple: **"¿Tenés 500 repos con estrella y nunca los encontrás cuando los necesitás? HeapDeck resuelve eso."** Es el mensaje de captación más directo y universal para developers.
 
 ---
 
@@ -222,7 +222,7 @@ GitHub Stars es el punto de partida conceptual de DevDeck (de hecho, el producto
 
 | Herramienta | Categoría | Offline-first | IA útil para devs | Assets de dev como 1er nivel | Búsqueda semántica | Multiplataforma |
 |-------------|-----------|:---:|:---:|:---:|:---:|:---:|
-| **DevDeck** | Knowledge OS para devs | 🟡 (roadmap) | ✅ (con provider) | ✅ | ✅ (con provider) | ✅ |
+| **HeapDeck** | Knowledge OS para devs | 🟡 (roadmap) | ✅ (con provider) | ✅ | ✅ (con provider) | ✅ |
 | Raindrop.io | Bookmark manager | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Notion | PKM / workspace | ❌ | Parcial* | ❌ | ❌ | ✅ |
 | Obsidian | PKM offline | ✅ | Parcial** | ❌ | Parcial** | ✅ |
@@ -234,22 +234,22 @@ GitHub Stars es el punto de partida conceptual de DevDeck (de hecho, el producto
 > \*\* Obsidian tiene plugins de IA y búsqueda semántica, pero requieren configuración avanzada; no son out-of-the-box.  
 > \*\*\* Raycast AI responde preguntas, pero no organiza tu colección personal de herramientas.  
 > † Dash es macOS; Zeal es Linux/Windows. Ninguno es multiplataforma completo.  
-> 🟡 El offline-first de DevDeck está pospuesto a post-1.0; hoy la app funciona en cloud mode (las utilities del Workbench sí corren 100% local). "Con provider" = requiere OpenAI u Ollama configurado; sin provider se usa el tagger heurístico y búsqueda de texto/fuzzy.
+> 🟡 El offline-first de HeapDeck está pospuesto a post-1.0; hoy la app funciona en cloud mode (las utilities del Workbench sí corren 100% local). "Con provider" = requiere OpenAI u Ollama configurado; sin provider se usa el tagger heurístico y búsqueda de texto/fuzzy.
 
 ---
 
-## 4. Gaps del mercado que DevDeck puede capturar
+## 4. Gaps del mercado que HeapDeck puede capturar
 
 A partir del análisis, emergen **tres gaps concretos** que ninguna herramienta existente cubre de forma satisfactoria para developers:
 
 ### Gap 1 — La memoria del developer
-Ninguna herramienta resuelve bien el problema de "encontrarlo cuando lo necesitás". Los bookmark managers guardan pero no contextualizan; los PKMs requieren demasiado trabajo; GitHub Stars no tiene metadata útil. **DevDeck puede ser la primera herramienta que resuelve el problema de memoria y recuperación de conocimiento técnico de forma integral.**
+Ninguna herramienta resuelve bien el problema de "encontrarlo cuando lo necesitás". Los bookmark managers guardan pero no contextualizan; los PKMs requieren demasiado trabajo; GitHub Stars no tiene metadata útil. **HeapDeck puede ser la primera herramienta que resuelve el problema de memoria y recuperación de conocimiento técnico de forma integral.**
 
 ### Gap 2 — IA que entiende el dominio dev
-La IA de Notion escribe texto; la de Raycast responde preguntas; la de Obsidian (via plugins) requiere configuración. **Ninguna IA entiende de verdad qué es un CLI, un plugin de IDE con IA, un agente para Copilot o un workflow de deploy.** DevDeck puede ser la única herramienta donde la IA clasifica y contextualiza assets de dev de forma nativa.
+La IA de Notion escribe texto; la de Raycast responde preguntas; la de Obsidian (via plugins) requiere configuración. **Ninguna IA entiende de verdad qué es un CLI, un plugin de IDE con IA, un agente para Copilot o un workflow de deploy.** HeapDeck puede ser la única herramienta donde la IA clasifica y contextualiza assets de dev de forma nativa.
 
 ### Gap 3 — Offline-first para knowledge dev sin fricción
-Obsidian es offline-first pero requiere configuración y no tiene modelo estructurado para tools de dev. Raindrop, Notion y GitHub Stars requieren conexión. **DevDeck puede ser la herramienta offline-first de referencia para developers que necesitan su conocimiento disponible siempre, en cualquier red**, con sync automático cuando hay conexión.
+Obsidian es offline-first pero requiere configuración y no tiene modelo estructurado para tools de dev. Raindrop, Notion y GitHub Stars requieren conexión. **HeapDeck puede ser la herramienta offline-first de referencia para developers que necesitan su conocimiento disponible siempre, en cualquier red**, con sync automático cuando hay conexión.
 
 ---
 
@@ -257,7 +257,7 @@ Obsidian es offline-first pero requiere configuración y no tiene modelo estruct
 
 ### Definición de espacio
 
-DevDeck no compite directamente con ninguna de las herramientas analizadas. Ocupa un espacio propio:
+HeapDeck no compite directamente con ninguna de las herramientas analizadas. Ocupa un espacio propio:
 
 > **El knowledge OS para developers: offline-first, con IA que organiza, para cualquier plataforma.**
 
@@ -270,11 +270,11 @@ No es un doc browser (no es solo docs oficiales).
 
 | Si venís de... | El mensaje es... |
 |----------------|------------------|
-| **GitHub Stars** | "Guardás repos que nunca volvés a encontrar. DevDeck los recuerda con contexto." |
-| **Raindrop / Pocket** | "Guardás links de dev en una app que no sabe que sos developer. DevDeck sí lo sabe." |
-| **Notion** | "Organizar en Notion lleva minutos. En DevDeck lleva 3 segundos — la IA hace el resto." |
-| **Obsidian** | "Obsidian es poderoso si te bancás configurarlo. DevDeck funciona desde el primer minuto." |
-| **Raycast snippets** | "Raycast te ayuda a actuar rápido. DevDeck recuerda por qué cada cosa sirve y cuándo usarla." |
+| **GitHub Stars** | "Guardás repos que nunca volvés a encontrar. HeapDeck los recuerda con contexto." |
+| **Raindrop / Pocket** | "Guardás links de dev en una app que no sabe que sos developer. HeapDeck sí lo sabe." |
+| **Notion** | "Organizar en Notion lleva minutos. En HeapDeck lleva 3 segundos — la IA hace el resto." |
+| **Obsidian** | "Obsidian es poderoso si te bancás configurarlo. HeapDeck funciona desde el primer minuto." |
+| **Raycast snippets** | "Raycast te ayuda a actuar rápido. HeapDeck recuerda por qué cada cosa sirve y cuándo usarla." |
 
 ### Mensajes de posicionamiento para landing
 
@@ -291,8 +291,8 @@ No es un doc browser (no es solo docs oficiales).
 | Riesgo | Probabilidad | Impacto | Mitigación |
 |--------|-------------|---------|------------|
 | Raindrop lanza features específicas para developers | Baja | Alto | Ir más rápido en features de IA y offline; profundizar en comandos y cheatsheets (Raindrop no puede girar fácilmente a un modelo de datos específico para devs) |
-| Notion integra IA semántica real sobre colecciones | Media | Alto | Destacar la fricción de captura en Notion vs DevDeck; fortalecer el offline-first y la UX de captura en 3 segundos |
-| Obsidian lanza sync nativo gratis + IA out-of-the-box | Media | Medio | La curva de configuración de Obsidian siempre va a existir; DevDeck apunta a developers que priorizan UX sobre configurabilidad |
+| Notion integra IA semántica real sobre colecciones | Media | Alto | Destacar la fricción de captura en Notion vs HeapDeck; fortalecer el offline-first y la UX de captura en 3 segundos |
+| Obsidian lanza sync nativo gratis + IA out-of-the-box | Media | Medio | La curva de configuración de Obsidian siempre va a existir; HeapDeck apunta a developers que priorizan UX sobre configurabilidad |
 | Raycast expande a Windows/Linux y lanza colecciones personales | Baja | Alto | Fortalecer la narrativa de "memoria + organización" que Raycast no tiene (es launcher, no knowledge base) |
 | GitHub agrega knowledge base con IA sobre Stars | Baja | Muy alto | Es el riesgo existencial mayor — mitigación: multiplatforma (no solo GitHub repos), assets de dev más amplios (CLIs, atajos, etc.), offline-first |
 
@@ -304,18 +304,18 @@ En vez de ver estas herramientas solo como competencia, algunas son oportunidade
 
 | Integración | Descripción | Prioridad |
 |------------|-------------|-----------|
-| **Extensión de Raycast** | Buscar y capturar items de DevDeck desde la paleta de Raycast (Ola 7) | Alta |
+| **Extensión de Raycast** | Buscar y capturar items de HeapDeck desde la paleta de Raycast (Ola 7) | Alta |
 | **Extensión de browser** | Guardar cualquier página/repo/tool desde Chrome/Firefox con 1 click (Ola 7) | Alta |
-| **VS Code extension** | Ver cheatsheets y comandos de DevDeck desde el editor (Ola 7+) | Media |
-| **CLI de DevDeck** | `deck add <url>`, `deck search <query>` desde terminal (Ola 7) | Media |
-| **Importar desde Raindrop** | Migrar colección de Raindrop a DevDeck con categorización automática | Media |
-| **Linkear con Dash/Zeal** | Al ver cheatsheets de DevDeck, abrir el docset correspondiente en Dash/Zeal | Baja |
+| **VS Code extension** | Ver cheatsheets y comandos de HeapDeck desde el editor (Ola 7+) | Media |
+| **CLI de HeapDeck** | `deck add <url>`, `deck search <query>` desde terminal (Ola 7) | Media |
+| **Importar desde Raindrop** | Migrar colección de Raindrop a HeapDeck con categorización automática | Media |
+| **Linkear con Dash/Zeal** | Al ver cheatsheets de HeapDeck, abrir el docset correspondiente en Dash/Zeal | Baja |
 
 ---
 
 ## 8. Conclusión
 
-DevDeck ocupa un espacio genuinamente diferente al de todas las herramientas analizadas. El punto de diferenciación más fuerte y sostenible es la combinación de:
+HeapDeck ocupa un espacio genuinamente diferente al de todas las herramientas analizadas. El punto de diferenciación más fuerte y sostenible es la combinación de:
 
 1. **Foco exclusivo en developers** (no genérico como Raindrop o Notion)
 2. **IA que entiende el dominio** (no IA genérica de escritura)
@@ -325,6 +325,6 @@ DevDeck ocupa un espacio genuinamente diferente al de todas las herramientas ana
 
 La narrativa más poderosa para el lanzamiento sigue siendo la más simple:
 
-> **"¿Cuántos repos, CLIs y herramientas encontraste útiles y nunca volviste a encontrar? DevDeck resuelve eso."**
+> **"¿Cuántos repos, CLIs y herramientas encontraste útiles y nunca volviste a encontrar? HeapDeck resuelve eso."**
 
 Esa frase conecta con el dolor universal de cualquier developer y no tiene respuesta directa en el mercado actual.

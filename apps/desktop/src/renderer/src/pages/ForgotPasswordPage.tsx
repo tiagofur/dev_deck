@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Loader2, ArrowLeft } from 'lucide-react'
-import { forgotPassword } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { forgotPassword } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function ForgotPasswordPage() {
   const { t } = useTranslation()

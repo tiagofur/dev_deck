@@ -9,8 +9,8 @@ import (
 	"net/url"
 	"strings"
 
-	"devdeck/internal/authservice"
-	"devdeck/internal/store"
+	"heapdeck/internal/authservice"
+	"heapdeck/internal/store"
 
 	"github.com/crewjam/saml"
 	"github.com/google/uuid"
@@ -23,9 +23,9 @@ type SAMLHandler struct {
 }
 
 type SAMLHandlerConfig struct {
-	EntityID    string // DevDeck SP Entity ID
-	BaseURL     string // ej: https://api.devdeck.ai
-	FrontendURL string // ej: https://app.devdeck.ai
+	EntityID    string // HeapDeck SP Entity ID
+	BaseURL     string // ej: https://api.heapdeck.com
+	FrontendURL string // ej: https://app.heapdeck.com
 }
 
 func NewSAMLHandler(s *store.Store, as *authservice.Service, cfg SAMLHandlerConfig) *SAMLHandler {

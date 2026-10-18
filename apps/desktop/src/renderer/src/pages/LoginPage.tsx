@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { Apple, Globe, Loader2, ArrowRight } from 'lucide-react'
 import { GithubIcon as Github } from '../components/icons/GithubIcon'
-import { fetchAuthProviders, loginLocal, loginStep1, setTokens, type AuthProviderInfo } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { fetchAuthProviders, loginLocal, loginStep1, setTokens, type AuthProviderInfo } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function LoginPage() {
   const { t } = useTranslation()

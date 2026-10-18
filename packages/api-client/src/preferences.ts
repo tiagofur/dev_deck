@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-const STORAGE_KEY = 'devdeck.prefs.v1'
+const STORAGE_KEY = 'heapdeck.prefs.v1'
 
 export interface Preferences {
   mascotEnabled: boolean

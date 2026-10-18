@@ -4,10 +4,10 @@
     "noEmit": true,
     "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
     "paths": {
-      "@devdeck/ui": ["../../packages/ui/src/index.ts"],
-      "@devdeck/ui/*": ["../../packages/ui/*"],
-      "@devdeck/api-client": ["../../packages/api-client/src/index.ts"],
-      "@devdeck/features": ["../../packages/features/src/index.ts"]
+      "@heapdeck/ui": ["../../packages/ui/src/index.ts"],
+      "@heapdeck/ui/*": ["../../packages/ui/*"],
+      "@heapdeck/api-client": ["../../packages/api-client/src/index.ts"],
+      "@heapdeck/features": ["../../packages/features/src/index.ts"]
     }
   },
   "include": ["src/**/*", "vite.config.ts"],

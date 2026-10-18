@@ -1,11 +1,11 @@
-// Configurable DevDeck server URL. The published extension defaults to the
+// Configurable HeapDeck server URL. The published extension defaults to the
 // hosted instance; self-hosters and local devs can override it from the
 // options page (persisted in chrome.storage.local). This replaces the
 // previously hardcoded http://localhost:8080 that made the built extension
 // unusable against any non-local backend.
-export const DEFAULT_BASE_URL = 'https://devdeck.ai'
+export const DEFAULT_BASE_URL = 'https://heapdeck.com'
 
-const KEY = 'devdeck.base_url'
+const KEY = 'heapdeck.base_url'
 
 export async function getBaseUrl(): Promise<string> {
   try {

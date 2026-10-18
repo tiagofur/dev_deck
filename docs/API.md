@@ -1,6 +1,6 @@
-# DevDeck.ai API Specification (0.5.0 Public Beta)
+# HeapDeck.com API Specification (0.5.0 Public Beta)
 
-This document describes the REST API for **DevDeck.ai**.
+This document describes the REST API for **HeapDeck.com**.
 
 [Leer en español](API.es.md)
 
@@ -10,12 +10,12 @@ This document describes the REST API for **DevDeck.ai**.
 The API uses **JWT (JSON Web Tokens)** for most operations and **API Keys** for programmatic access.
 
 - **JWT Header:** `Authorization: Bearer <access_token>`
-- **API Key Header:** `X-API-Key: devdeck_<token>`
+- **API Key Header:** `X-API-Key: heapdeck_<token>`
 
 ---
 
 ## 2. Base URL
-- **Production:** `https://api.devdeck.ai`
+- **Production:** `https://api.heapdeck.com`
 - **Development:** `http://localhost:8080`
 
 ---

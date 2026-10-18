@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"devdeck/internal/domain/auth"
+	"heapdeck/internal/domain/auth"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"

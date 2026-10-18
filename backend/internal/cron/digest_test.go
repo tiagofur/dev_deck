@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"devdeck/internal/domain/items"
+	"heapdeck/internal/domain/items"
 )
 
 func mkItem(title string) *items.Item {

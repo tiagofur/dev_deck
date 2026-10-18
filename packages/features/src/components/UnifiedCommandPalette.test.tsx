@@ -21,15 +21,15 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
-vi.mock('@devdeck/api-client', () => ({
+vi.mock('@heapdeck/api-client', () => ({
   useGlobalSearch: mocks.useGlobalSearch,
   useAsk: mocks.useAsk,
   useCapture: mocks.useCapture,
   useSystemConfig: mocks.useSystemConfig,
 }))
 
-vi.mock('@devdeck/ui', async () => {
-  const actual = await vi.importActual<typeof import('@devdeck/ui')>('@devdeck/ui')
+vi.mock('@heapdeck/ui', async () => {
+  const actual = await vi.importActual<typeof import('@heapdeck/ui')>('@heapdeck/ui')
   return {
     ...actual,
     showToast: mocks.showToast,

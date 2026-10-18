@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"devdeck/internal/domain/auth"
-	"devdeck/internal/domain/items"
-	"devdeck/internal/store/seed"
+	"heapdeck/internal/domain/auth"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/store/seed"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"

@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"devdeck/internal/domain/stats"
-	"devdeck/internal/store"
+	"heapdeck/internal/domain/stats"
+	"heapdeck/internal/store"
 )
 
 type StatsHandler struct {

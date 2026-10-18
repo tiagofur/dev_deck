@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"devdeck/internal/domain/repos"
+	"heapdeck/internal/domain/repos"
 )
 
 type WebhookEnricher struct {

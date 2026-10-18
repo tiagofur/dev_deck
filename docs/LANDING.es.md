@@ -1,8 +1,8 @@
-# DevDeck — Copy para landing devdeck.ai (versión en español)
+# HeapDeck — Copy para landing heapdeck.com (versión en español)
 
 > Versión: 1.0 · Última actualización: 2026-04-08
 >
-> Este documento contiene el copy completo **en español** para la landing page de [devdeck.ai](https://devdeck.ai).
+> Este documento contiene el copy completo **en español** para la landing page de [heapdeck.com](https://heapdeck.com).
 > Incluye: hero, secciones de features, social proof, pricing y CTA.
 >
 > **Idioma:** español rioplatense (para audiencia hispanohablante / versión ES del sitio).
@@ -13,10 +13,10 @@
 ## Metadata / SEO
 
 ```
-title:       DevDeck.ai — Tu memoria externa para desarrollo, asistida por IA
+title:       HeapDeck.com — Tu memoria externa para desarrollo, asistida por IA
 description: Guarda repos, CLIs, plugins, atajos y workflows. La IA los organiza.
              Vos los encontrás cuando los necesitás.
-og:title:    DevDeck.ai — Knowledge OS para developers
+og:title:    HeapDeck.com — Knowledge OS para developers
 og:image:    /og-image.png (neo-brutalist card con logo + tagline)
 ```
 
@@ -37,14 +37,14 @@ La IA los organiza. Vos los encontrás cuando los necesitás.
 
 ### Copy de apoyo (debajo del subheadline)
 ```
-Dejá de perder herramientas útiles. DevDeck recuerda por vos —
+Dejá de perder herramientas útiles. HeapDeck recuerda por vos —
 con contexto real de para qué sirve cada cosa y búsqueda por intención.
 ```
 
 ### CTAs
 ```
 [Descargar para Mac / Windows / Linux]     → /download
-[Probar en el browser]                     → app.devdeck.ai
+[Probar en el browser]                     → app.heapdeck.com
 ```
 
 ### Social proof debajo del CTA
@@ -81,7 +81,7 @@ Open-source · Self-hosteable · Offline-first
 
 ### Resolución
 ```
-DevDeck es el lugar donde esas cosas dejan de perderse.
+HeapDeck es el lugar donde esas cosas dejan de perderse.
 ```
 
 ---
@@ -130,7 +130,7 @@ No es un chatbot genérico. Es IA para tu memoria de desarrollo.
 🧠  Auto-summary
 
 Guardás un repo o una herramienta.
-DevDeck genera automáticamente:
+HeapDeck genera automáticamente:
 "qué es, para qué sirve, cuándo usarlo, qué stack toca".
 
 Sin que escribas nada.
@@ -163,7 +163,7 @@ Encontrá lo que guardaste aunque no recuerdes el nombre exacto.
 ```
 🔗  Related items
 
-Cuando ves un item, DevDeck sugiere:
+Cuando ves un item, HeapDeck sugiere:
 repos similares, cheatsheets relacionadas,
 comandos del mismo stack, shortcuts complementarios.
 
@@ -175,15 +175,15 @@ Tu base de conocimiento se interconecta sola.
 ✨  Content → Knowledge
 
 Pegá una URL, un README o un texto.
-DevDeck genera: resumen, tags, comandos detectados, prerrequisitos.
+HeapDeck genera: resumen, tags, comandos detectados, prerrequisitos.
 Guardalo como cheatsheet, item o runbook con un click.
 
 Contenido bruto → conocimiento accionable.
 ```
 
-#### Ask DevDeck
+#### Ask HeapDeck
 ```
-💬  Ask DevDeck
+💬  Ask HeapDeck
 
 Preguntale a tu propia base de conocimiento.
 
@@ -293,7 +293,7 @@ Donde vos trabajás.
 ```
 🖥️  Desktop                     🌐  Web
 Electron para macOS,            React 18 en cualquier browser.
-Windows y Linux.                app.devdeck.ai
+Windows y Linux.                app.heapdeck.com
 Atajos globales de sistema.     GitHub OAuth. Mismos datos.
 Offline-first.                  Mismo UI que desktop — un solo codebase.
 ```
@@ -328,19 +328,19 @@ Tuyo, de verdad.
 
 ### Copy
 ```
-DevDeck es open-source y self-hosteable.
+HeapDeck es open-source y self-hosteable.
 
 Corrés tu propio backend en tu VPS con Docker Compose + Caddy.
 Tus datos no pasan por servidores de terceros.
 TLS automático. Control total.
 
-O usás la versión hosteada en devdeck.ai — tu elección.
+O usás la versión hosteada en heapdeck.com — tu elección.
 ```
 
 ### Links
 ```
-[Ver en GitHub]    → github.com/tiagofur/dev_deck
-[Docs de deploy]   → docs.devdeck.ai/self-hosting
+[Ver en GitHub]    → github.com/tiagofur/heapdeck
+[Docs de deploy]   → docs.heapdeck.com/self-hosting
 ```
 
 ---
@@ -379,14 +379,14 @@ Dejá de perder herramientas útiles.
 
 ### Subheadline
 ```
-DevDeck recuerda por vos.
+HeapDeck recuerda por vos.
 ```
 
 ### CTAs
 ```
 [Descargar desktop →]          → /download
-[Abrir en el browser →]        → app.devdeck.ai
-[Ver en GitHub →]              → github.com/tiagofur/dev_deck
+[Abrir en el browser →]        → app.heapdeck.com
+[Ver en GitHub →]              → github.com/tiagofur/heapdeck
 ```
 
 ---
@@ -394,7 +394,7 @@ DevDeck recuerda por vos.
 ## Footer
 
 ```
-DevDeck.ai — Tu memoria externa para desarrollo, asistida por IA.
+HeapDeck.com — Tu memoria externa para desarrollo, asistida por IA.
 
 [GitHub]  [Docs]  [Changelog]  [Twitter/X]
 
@@ -405,19 +405,19 @@ Open-source · Self-hosteable · Offline-first · Hecho con ☕ por @tiagofur
 
 ## Notas de implementación de la landing
 
-### Stack recomendado para devdeck.ai landing
+### Stack recomendado para heapdeck.com landing
 - **Framework:** Astro (estático, fast, SEO) o Next.js (si quieren SSR)
 - **Estilos:** Mismo design system neo-brutalist — tokens desde `packages/ui/styles/globals.css` + `packages/ui/tailwind-preset.cjs` del monorepo principal
 - **Deploy:** Vercel / Netlify / Cloudflare Pages — gratis para sitios estáticos
-- **Dominio:** `devdeck.ai` → landing, `app.devdeck.ai` → React web app (`apps/web`), `api.devdeck.ai` → backend Go
+- **Dominio:** `heapdeck.com` → landing, `app.heapdeck.com` → React web app (`apps/web`), `api.heapdeck.com` → backend Go
 
 ### DNS setup recomendado
 ```
-devdeck.ai          A/CNAME → Vercel/Netlify (landing)
-www.devdeck.ai      CNAME   → devdeck.ai
-app.devdeck.ai      A       → VPS (React web app via Caddy)
-api.devdeck.ai      A       → VPS (Go API via Caddy)
-docs.devdeck.ai     CNAME   → docs hosting (GitBook/Starlight/Mintlify)
+heapdeck.com          A/CNAME → Vercel/Netlify (landing)
+www.heapdeck.com      CNAME   → heapdeck.com
+app.heapdeck.com      A       → VPS (React web app via Caddy)
+api.heapdeck.com      A       → VPS (Go API via Caddy)
+docs.heapdeck.com     CNAME   → docs hosting (GitBook/Starlight/Mintlify)
 ```
 
 ### Animaciones recomendadas

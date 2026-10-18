@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { GitFork, Star, ExternalLink } from 'lucide-react'
-import type { Repo } from '@devdeck/api-client'
-import { formatCount } from '@devdeck/api-client'
-import { TagChip, hashIndex } from '@devdeck/ui'
+import type { Repo } from '@heapdeck/api-client'
+import { formatCount } from '@heapdeck/api-client'
+import { TagChip, hashIndex } from '@heapdeck/ui'
 
 interface Props {
   repo: Repo

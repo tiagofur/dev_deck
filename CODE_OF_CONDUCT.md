@@ -1,6 +1,6 @@
 # Code of Conduct
 
-DevDeck is a community for developers who want to build useful, high-signal tools together. We want contributors to feel safe asking questions, sharing feedback, and making small improvements.
+HeapDeck is a community for developers who want to build useful, high-signal tools together. We want contributors to feel safe asking questions, sharing feedback, and making small improvements.
 
 ## Expected behavior
 
@@ -26,4 +26,4 @@ Reports will be reviewed privately. Maintainers may remove comments, close threa
 
 ## Scope
 
-This code of conduct applies to this repository, GitHub issues and pull requests, and community spaces directly connected to DevDeck.
+This code of conduct applies to this repository, GitHub issues and pull requests, and community spaces directly connected to HeapDeck.

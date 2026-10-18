@@ -13,8 +13,8 @@ const mocks = vi.hoisted(() => ({
   useUpdateItem: vi.fn(),
 }))
 
-vi.mock('@devdeck/api-client', async () => {
-  const actual = await vi.importActual<typeof import('@devdeck/api-client')>('@devdeck/api-client')
+vi.mock('@heapdeck/api-client', async () => {
+  const actual = await vi.importActual<typeof import('@heapdeck/api-client')>('@heapdeck/api-client')
   return {
     ...actual,
     useCapture: mocks.useCapture,
@@ -58,9 +58,9 @@ describe('<WorkbenchPage>', () => {
   it('formats JSON locally in the Workbench UI', async () => {
     renderWorkbench()
 
-    fireEvent.change(screen.getByLabelText('Input'), { target: { value: '{"name":"DevDeck"}' } })
+    fireEvent.change(screen.getByLabelText('Input'), { target: { value: '{"name":"HeapDeck"}' } })
 
-    expect(screen.getByLabelText('Output')).toHaveValue('{\n  "name": "DevDeck"\n}')
+    expect(screen.getByLabelText('Output')).toHaveValue('{\n  "name": "HeapDeck"\n}')
   })
 
   it('opens a specific tool from the Workbench deep link', () => {
@@ -132,13 +132,13 @@ describe('<WorkbenchPage>', () => {
   it('guides users to build project memory when no related context exists', () => {
     renderWorkbench('/workbench?tool=project')
 
-    fireEvent.change(screen.getByLabelText('Project name'), { target: { value: 'dev_deck' } })
+    fireEvent.change(screen.getByLabelText('Project name'), { target: { value: 'heapdeck' } })
 
     expect(screen.getByText('Build this project memory')).toBeInTheDocument()
     expect(screen.getByText('Save a command')).toBeInTheDocument()
     expect(screen.getByText('Save a gotcha')).toBeInTheDocument()
     expect(screen.getByText('Use the project tag')).toBeInTheDocument()
-    expect(screen.getByText('Tag related items with project:dev_deck.')).toBeInTheDocument()
+    expect(screen.getByText('Tag related items with project:heapdeck.')).toBeInTheDocument()
   })
 
   it('links an existing item to the current project with a project tag', async () => {
@@ -163,13 +163,13 @@ describe('<WorkbenchPage>', () => {
 
     renderWorkbench('/workbench?tool=project')
 
-    fireEvent.change(screen.getByLabelText('Project name'), { target: { value: 'dev_deck' } })
+    fireEvent.change(screen.getByLabelText('Project name'), { target: { value: 'heapdeck' } })
     fireEvent.click(screen.getByRole('button', { name: /link project/i }))
 
     await waitFor(() => {
       expect(mutateAsync).toHaveBeenCalledWith({
         id: 'item-1',
-        input: { tags: ['workflow', 'project:dev_deck'] },
+        input: { tags: ['workflow', 'project:heapdeck'] },
       })
     })
   })
@@ -203,7 +203,7 @@ describe('<WorkbenchPage>', () => {
 
     renderWorkbench()
 
-    fireEvent.change(screen.getByLabelText('Input'), { target: { value: '{"name":"DevDeck"}' } })
+    fireEvent.change(screen.getByLabelText('Input'), { target: { value: '{"name":"HeapDeck"}' } })
     fireEvent.click(screen.getByRole('button', { name: /share to circle/i }))
 
     const saveAndShare = screen.getByRole('button', { name: /save and share/i })
@@ -218,7 +218,7 @@ describe('<WorkbenchPage>', () => {
     await waitFor(() => {
       expect(captureOutput).toHaveBeenCalledWith({
         source: 'manual',
-        text: '{\n  "name": "DevDeck"\n}',
+        text: '{\n  "name": "HeapDeck"\n}',
         title_hint: 'Formatted JSON',
         type_hint: 'snippet',
         tags: ['workbench', 'circle-share'],

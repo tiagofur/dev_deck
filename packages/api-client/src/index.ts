@@ -1,4 +1,4 @@
-// @devdeck/api-client — public surface.
+// @heapdeck/api-client — public surface.
 
 // Config + fetch wrapper
 export { api, APIError } from './api-client'

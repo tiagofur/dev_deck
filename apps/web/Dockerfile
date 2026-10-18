@@ -1,11 +1,11 @@
 # ─────────────────────────────────────────────────────────────
-# DevDeck Web — multi-stage build
+# HeapDeck Web — multi-stage build
 #
 # Stage 1: build the React app with Vite.
 # Stage 2: serve static assets with nginx.
 #
-# Build:    docker build -t devdeck-web:latest -f apps/web/Dockerfile .
-# Run:      docker run -p 3000:3000 --env-file .env devdeck-web:latest
+# Build:    docker build -t heapdeck-web:latest -f apps/web/Dockerfile .
+# Run:      docker run -p 3000:3000 --env-file .env heapdeck-web:latest
 # ─────────────────────────────────────────────────────────────
 
 # Stage 1 — builder

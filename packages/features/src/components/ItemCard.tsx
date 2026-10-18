@@ -20,7 +20,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { GithubIcon as Github } from './icons/GithubIcon'
-import type { Item, ItemType } from '@devdeck/api-client'
+import type { Item, ItemType } from '@heapdeck/api-client'
 import {
   formatCount,
   EnrichmentStatus,
@@ -29,9 +29,9 @@ import {
   useReviewItemAITags,
   useCircles,
   useShareToCircle,
-} from '@devdeck/api-client'
-import { TagChip, hashIndex, showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+} from '@heapdeck/api-client'
+import { TagChip, hashIndex, showToast } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 import { ShareToCirclePanel } from './ShareToCirclePanel'
 
 interface TypeStyle {

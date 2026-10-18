@@ -1,4 +1,4 @@
-// @devdeck/ui — design-system primitives.
+// @heapdeck/ui — design-system primitives.
 
 export { Button } from './Button'
 export { TagChip, hashIndex } from './TagChip'

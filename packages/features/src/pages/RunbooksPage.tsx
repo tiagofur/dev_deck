@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { Library, ListChecks, Terminal } from 'lucide-react'
-import { useRunbooks, type RunbookWithItem } from '@devdeck/api-client'
-import { Button } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+import { useRunbooks, type RunbookWithItem } from '@heapdeck/api-client'
+import { Button } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 import { AppShell } from '../components/AppShell'
 
 export function RunbooksPage() {

@@ -40,7 +40,7 @@ export declare function CropModal(props: CropModalProps): React.JSX.Element
 ### 2.2. `EditProfileModal.tsx`
 ```typescript
 import React from 'react'
-import { User, UpdateUserInput } from '@devdeck/api-client'
+import { User, UpdateUserInput } from '@heapdeck/api-client'
 
 export interface EditProfileModalProps {
   isOpen: boolean
@@ -92,7 +92,7 @@ export declare function TechStackSection(props: TechStackSectionProps): React.JS
 ### 2.5. `ActivityTimeline.tsx`
 ```typescript
 import React from 'react'
-import { Item } from '@devdeck/api-client'
+import { Item } from '@heapdeck/api-client'
 
 export interface ActivityTimelineProps {
   items: Item[]
@@ -108,4 +108,4 @@ export declare function ActivityTimeline(props: ActivityTimelineProps): React.JS
 
 - **CropModal:** Mantener el styling brutalista (#f3f4f6 para el fondo del canvas, bordes negros gruesos `border-3 border-ink`, sombras robustas `shadow-hard`). Soporte completo para slider de zoom interactivo y inputs manuales si los hubiere.
 - **EditProfileModal:** Sincronizar el avatar usando GitHub OAuth avatar endpoint (`https://github.com/${username}.png`) al accionar el botón "Sincronizar" o trigger de subida local. Utilizar triggers ocultos para la subida de ficheros (`<input type="file" />` activado por el clic sobre el avatar actual).
-- **Internationalization (i18n):** Todo texto e interactivo debe seguir utilizando el hook `useTranslation()` de `@devdeck/i18n` para garantizar la compatibilidad con el sistema multiidioma (español e inglés).
+- **Internationalization (i18n):** Todo texto e interactivo debe seguir utilizando el hook `useTranslation()` de `@heapdeck/i18n` para garantizar la compatibilidad con el sistema multiidioma (español e inglés).

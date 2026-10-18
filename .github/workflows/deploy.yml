@@ -8,8 +8,8 @@ on:
 env:
   REGISTRY: ghcr.io
   # Image names must be lowercase
-  IMAGE_NAME_API: devdeck-api
-  IMAGE_NAME_WEB: devdeck-web
+  IMAGE_NAME_API: heapdeck-api
+  IMAGE_NAME_WEB: heapdeck-web
 
 jobs:
   build-and-push:
@@ -70,6 +70,6 @@ jobs:
                 *seed_test*) echo "Skipping $f (dev/CI test seed, never in prod)"; continue ;;
               esac
               echo "Applying $f"
-              awk '/-- [+]goose Down/{exit} {print}' "$f" | docker compose exec -T db psql -U devdeck devdeck -v ON_ERROR_STOP=1
+              awk '/-- [+]goose Down/{exit} {print}' "$f" | docker compose exec -T db psql -U heapdeck heapdeck -v ON_ERROR_STOP=1
             done
             docker system prune -f

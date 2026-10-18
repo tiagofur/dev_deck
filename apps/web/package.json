@@ -1,9 +1,9 @@
 {
-  "name": "@devdeck/web",
+  "name": "@heapdeck/web",
   "version": "0.6.0",
   "private": true,
   "type": "module",
-  "description": "DevDeck — web client (React).",
+  "description": "HeapDeck — web client (React).",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -13,10 +13,10 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@devdeck/api-client": "workspace:*",
-    "@devdeck/features": "workspace:*",
-    "@devdeck/i18n": "workspace:*",
-    "@devdeck/ui": "workspace:*",
+    "@heapdeck/api-client": "workspace:*",
+    "@heapdeck/features": "workspace:*",
+    "@heapdeck/i18n": "workspace:*",
+    "@heapdeck/ui": "workspace:*",
     "@tanstack/react-query": "^5.104.1",
     "framer-motion": "^14.0.0",
     "lucide-react": "^1.53.0",

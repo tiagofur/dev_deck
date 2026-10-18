@@ -2,14 +2,14 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Rocket, Box, Check, ArrowRight, Loader2, Plus, Search, Wrench } from 'lucide-react'
-import { Button, showToast } from '@devdeck/ui'
+import { Button, showToast } from '@heapdeck/ui'
 import { 
   useOnboardingKits, 
   useInstallStarterKit, 
   useCompleteOnboarding,
   useMe
-} from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+} from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function OnboardingPage() {
   const { t } = useTranslation()
@@ -182,7 +182,7 @@ export function OnboardingPage() {
                 />
               </div>
 
-              {selectedKit === 'devdeck-demo' && (
+              {selectedKit === 'heapdeck-demo' && (
                 <p className="border-3 border-ink bg-accent-lavender/40 p-4 font-mono text-sm">
                   {t('onboarding.loop_demo_hint')}
                 </p>

@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   useSystemConfig: vi.fn(),
 }))
 
-vi.mock('@devdeck/api-client', () => ({
+vi.mock('@heapdeck/api-client', () => ({
   getPendingCount: mocks.getPendingCount,
   syncNow: mocks.syncNow,
   useSystemConfig: mocks.useSystemConfig,

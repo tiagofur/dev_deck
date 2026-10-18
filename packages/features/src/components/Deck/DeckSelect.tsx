@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronDown, Plus, Search, X } from 'lucide-react'
-import { Button } from '@devdeck/ui'
+import { Button } from '@heapdeck/ui'
 import {
   type Deck,
   useDecks,
@@ -9,8 +9,8 @@ import {
   getLastUsedDeck,
   setLastUsedDeck,
   getRecentDeckIds,
-} from '@devdeck/api-client'
-import { showToast } from '@devdeck/ui'
+} from '@heapdeck/api-client'
+import { showToast } from '@heapdeck/ui'
 
 interface DeckSelectProps {
   value: string | null

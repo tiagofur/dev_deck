@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Clipboard, Save, Share2, Sparkles } from 'lucide-react'
-import { Button, showToast } from '@devdeck/ui'
-import { useCapture, useCircles, useShareToCircle } from '@devdeck/api-client'
+import { Button, showToast } from '@heapdeck/ui'
+import { useCapture, useCircles, useShareToCircle } from '@heapdeck/api-client'
 import { ShareToCirclePanel } from '../ShareToCirclePanel'
 
 export function ToolFrame({
@@ -95,7 +95,7 @@ export function ResultActions({
         title_hint: title,
         type_hint: itemType,
         tags: ['workbench'],
-        why_saved: 'Generated from DevDeck Workbench.',
+        why_saved: 'Generated from HeapDeck Workbench.',
       })
       showToast('Saved to your vault', 'success')
     } catch {

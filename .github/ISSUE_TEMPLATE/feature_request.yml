@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest a focused improvement for DevDeck.
+description: Suggest a focused improvement for HeapDeck.
 title: "feat(scope): describe the improvement"
 labels: [enhancement, status:needs-review]
 body:

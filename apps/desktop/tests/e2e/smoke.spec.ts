@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-test.describe('DevDeck — desktop renderer E2E', () => {
+test.describe('HeapDeck — desktop renderer E2E', () => {
   test.beforeEach(async ({ page }) => {
     page.on('console', (msg) => {
       console.log(`Browser [${msg.type()}]: ${msg.text()}`)
@@ -31,16 +31,16 @@ test.describe('DevDeck — desktop renderer E2E', () => {
     }, { url: apiUrl, token: apiToken })
     console.log('API Auth Check Response:', JSON.stringify(response))
     expect(response.status).toBe(200)
-    expect(response.body.login).toBe('devdeck-test')
+    expect(response.body.login).toBe('heapdeck-test')
   })
 
   test('1. token-mode auth bypass: home loads without OAuth', async ({ page }) => {
     // In token mode there is no /login page; the items vault page should render.
     // Wait for the URL to settle at / (it might bounce through /login)
     await expect(page).toHaveURL(/\//, { timeout: 15_000 })
-    await expect(page).toHaveTitle(/DevDeck/i, { timeout: 15_000 })
-    // DevDeck title heading on ItemsPage is visible.
-    await expect(page.getByLabel('DevDeck').first()).toBeVisible({ timeout: 20_000 })
+    await expect(page).toHaveTitle(/HeapDeck/i, { timeout: 15_000 })
+    // HeapDeck title heading on ItemsPage is visible.
+    await expect(page.getByLabel('HeapDeck').first()).toBeVisible({ timeout: 20_000 })
   })
 
   test('2. capture item: opens modal, submits, sees the new card', async ({ page }) => {
@@ -122,7 +122,7 @@ test.describe('DevDeck — desktop renderer E2E', () => {
 
   test('5. command palette: Ctrl+K opens global search command palette', async ({ page }) => {
     // Wait for page to be fully loaded and hydrated
-    await expect(page.getByLabel('DevDeck').first()).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByLabel('HeapDeck').first()).toBeVisible({ timeout: 15_000 })
     // Trigger the global shortcut
     await page.keyboard.press('Control+k')
     // Command palette action should be visible.

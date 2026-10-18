@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to DevDeck will be documented in this file.
+All notable changes to HeapDeck will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.6.0] - 2026-06-14
 
 Quality & security hardening pass across the whole monorepo (web, desktop,
-extension, backend, landing) to make DevDeck contribution-ready as an
+extension, backend, landing) to make HeapDeck contribution-ready as an
 open-source project.
 
 ### Added
@@ -88,7 +88,7 @@ open-source project.
 
 ### Added
 
-- **Public beta positioning**: DevDeck is now presented honestly as a functional open-source public beta, not a stable 1.0 product.
+- **Public beta positioning**: HeapDeck is now presented honestly as a functional open-source public beta, not a stable 1.0 product.
 - **Developer memory loop**: Public docs now explain the capture → context → retrieval → Workbench → Circles workflow.
 - **Circles community flow**: Circle sharing now includes context notes, attribution, source metadata, tags, and empty-state contribution guidance.
 - **Developer Workbench direction**: Docs describe the Workbench as a daily-use surface for reusable developer utilities, requests, snippets, runbooks, and project context.
@@ -151,7 +151,7 @@ open-source project.
 
 ---
 
-[Unreleased]: https://github.com/tiagofur/dev_deck/compare/v0.5.0...HEAD
-[0.5.0]: https://github.com/tiagofur/dev_deck/compare/v0.1.0...v0.5.0
-[0.1.0]: https://github.com/tiagofur/dev_deck/compare/v0.0.5...v0.1.0
-[0.0.5]: https://github.com/tiagofur/dev_deck/releases/tag/v0.0.5
+[Unreleased]: https://github.com/tiagofur/heapdeck/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/tiagofur/heapdeck/compare/v0.1.0...v0.5.0
+[0.1.0]: https://github.com/tiagofur/heapdeck/compare/v0.0.5...v0.1.0
+[0.0.5]: https://github.com/tiagofur/heapdeck/releases/tag/v0.0.5

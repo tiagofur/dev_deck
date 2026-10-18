@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button } from '@devdeck/ui'
+import { Button } from '@heapdeck/ui'
 import { generateUuid } from '../../workbench/utils'
 import { ToolFrame, TextArea, ResultActions } from './shared'
 

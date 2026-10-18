@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Users, Copy, Check, ChevronLeft, LogOut } from 'lucide-react'
-import { Button, showToast } from '@devdeck/ui'
-import { useCircles, useCreateCircle, useJoinCircle, useLeaveCircle } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { Button, showToast } from '@heapdeck/ui'
+import { useCircles, useCreateCircle, useJoinCircle, useLeaveCircle } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 import { AppShell } from '../components/AppShell'
 
 export function CirclesPage() {
@@ -104,7 +104,7 @@ export function CirclesPage() {
 
         <div className="border-t-2 border-ink border-dashed pt-4">
           <p className="font-mono text-[10px] text-ink-soft text-center">
-            DevDeck Circles v1.0
+            HeapDeck Circles v1.0
           </p>
         </div>
       </aside>

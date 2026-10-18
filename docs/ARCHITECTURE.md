@@ -1,6 +1,6 @@
-# DevDeck.ai Architecture
+# HeapDeck.com Architecture
 
-This document describes the technical architecture, data model, and system flow of **DevDeck.ai**.
+This document describes the technical architecture, data model, and system flow of **HeapDeck.com**.
 
 [Leer en español](ARCHITECTURE.es.md)
 
@@ -111,7 +111,7 @@ A single table handles multiple types (repos, clis, snippets, etc.) via `item_ty
 ## 5. Deployment
 
 - **Infrastructure as Code**: Terraform + Docker Compose.
-- **Security**: HMAC SHA-256 for webhooks, TLS everywhere, PATs with `devdeck_` prefix.
+- **Security**: HMAC SHA-256 for webhooks, TLS everywhere, PATs with `heapdeck_` prefix.
 
 ---
 

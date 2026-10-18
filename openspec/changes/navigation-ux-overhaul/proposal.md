@@ -1,7 +1,7 @@
 # Proposal: Core Navigation & Information Architecture Overhaul (P0.UX)
 
 ## Intent
-Redesign the core navigation of DevDeck to reduce cognitive load and simplify the user interface. Currently, DevDeck exposes ~35 features directly to all users via an overloaded Topbar. The overhaul will introduce a persistent left navigation sidebar (`NavSidebar`) with progressive disclosure (hiding social/team features for individual users) and simplify the Topbar to hold only contextual actions.
+Redesign the core navigation of HeapDeck to reduce cognitive load and simplify the user interface. Currently, HeapDeck exposes ~35 features directly to all users via an overloaded Topbar. The overhaul will introduce a persistent left navigation sidebar (`NavSidebar`) with progressive disclosure (hiding social/team features for individual users) and simplify the Topbar to hold only contextual actions.
 
 ## Scope
 

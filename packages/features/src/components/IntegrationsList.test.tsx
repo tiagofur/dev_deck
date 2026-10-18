@@ -10,8 +10,8 @@ const mocks = vi.hoisted(() => ({
   useCreateWebhook: vi.fn(),
 }))
 
-vi.mock('@devdeck/api-client', async () => {
-  const actual = await vi.importActual<typeof import('@devdeck/api-client')>('@devdeck/api-client')
+vi.mock('@heapdeck/api-client', async () => {
+  const actual = await vi.importActual<typeof import('@heapdeck/api-client')>('@heapdeck/api-client')
   return {
     ...actual,
     useFeaturedPlugins: mocks.useFeaturedPlugins,
@@ -28,7 +28,7 @@ const featured = [
     type: 'enricher',
     name: 'NPM Registry',
     description: 'Extracts npm package metadata.',
-    author: 'DevDeck Team',
+    author: 'HeapDeck Team',
     icon_url: 'npm.svg',
     url_pattern: '^https://www\\.npmjs\\.com/package/([^/]+)',
     endpoint_url: 'https://plugins.example.dev/npm',
@@ -38,7 +38,7 @@ const featured = [
     type: 'webhook',
     name: 'Slack Bridge',
     description: 'Notifies a Slack channel on capture.',
-    author: 'DevDeck Team',
+    author: 'HeapDeck Team',
     icon_url: 'slack.png',
     events: ['item.created'],
   },

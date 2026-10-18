@@ -8,8 +8,8 @@ const mocks = vi.hoisted(() => ({
   useImportGithubStars: vi.fn(),
 }))
 
-vi.mock('@devdeck/api-client', async () => {
-  const actual = await vi.importActual<typeof import('@devdeck/api-client')>('@devdeck/api-client')
+vi.mock('@heapdeck/api-client', async () => {
+  const actual = await vi.importActual<typeof import('@heapdeck/api-client')>('@heapdeck/api-client')
   return {
     ...actual,
     useMe: mocks.useMe,

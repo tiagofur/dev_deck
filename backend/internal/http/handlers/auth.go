@@ -20,11 +20,11 @@ import (
 	"strings"
 	"time"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/authservice"
-	"devdeck/internal/domain/auth"
-	"devdeck/internal/email"
-	"devdeck/internal/store"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/authservice"
+	"heapdeck/internal/domain/auth"
+	"heapdeck/internal/email"
+	"heapdeck/internal/store"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -57,7 +57,7 @@ type AuthConfig struct {
 
 // refreshCookieName is the HttpOnly cookie that carries the refresh token in
 // cookie mode. Scoped to /api/auth so it is only sent to the auth endpoints.
-const refreshCookieName = "devdeck_refresh"
+const refreshCookieName = "heapdeck_refresh"
 
 // refreshCookiePath scopes the cookie to the auth subtree.
 const refreshCookiePath = "/api/auth"
@@ -720,6 +720,8 @@ var emailPattern = regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`)
 // dummyBcryptHash is a bcrypt digest used to equalize response timing when
 // the account does not exist or has no local password, so request latency
 // cannot reveal account existence. Digest of "heapdeck-timing-pad".
+//
+// #nosec G101 -- it is a timing pad for a public constant string, not a credential.
 const dummyBcryptHash = "$2a$10$s3YCwakrM3YMeGuXYjQ2JOqumeLGbmdSJz8Ehadu/idiTVnCKpKly"
 
 const passwordResetEmailTemplate = `<!doctype html>

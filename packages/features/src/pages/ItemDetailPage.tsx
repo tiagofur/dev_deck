@@ -16,7 +16,7 @@ import {
 	Trash2,
 	Users,
 } from 'lucide-react'
-import { Button, confirm, showToast } from '@devdeck/ui'
+import { Button, confirm, showToast } from '@heapdeck/ui'
 import {
 	useAIEnrichItem,
 	useDeleteItem,
@@ -36,13 +36,13 @@ import {
 	type Item,
 	type Runbook,
 	type RunbookStep,
-} from '@devdeck/api-client'
+} from '@heapdeck/api-client'
 import { NotesEditor } from '../components/NotesEditor'
 import { TagsEditor } from '../components/TagsEditor'
 import { TeamReviewCard } from '../components/TeamReviewCard'
 import { AppShell } from '../components/AppShell'
 import { ShareToCirclePanel } from '../components/ShareToCirclePanel'
-import { useTranslation, type TFunction } from '@devdeck/i18n'
+import { useTranslation, type TFunction } from '@heapdeck/i18n'
 
 
 export function ItemDetailPage() {

@@ -13,7 +13,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ActionsBar } from '../components/ActionsBar'
 import { AppShell } from '../components/AppShell'
-import { Button } from '@devdeck/ui'
+import { Button } from '@heapdeck/ui'
 import { AddCommandModal } from '../components/Commands/AddCommandModal'
 import { CommandsList } from '../components/Commands/CommandsList'
 import { ImportScriptsModal } from '../components/Commands/ImportScriptsModal'
@@ -28,23 +28,23 @@ import {
   usePackageScripts,
   useReorderCommands,
   useUpdateCommand,
-} from '@devdeck/api-client'
+} from '@heapdeck/api-client'
 import type {
   CommandCategory,
   CreateCommandInput,
   PackageScript,
   RepoCommand,
-} from '@devdeck/api-client'
+} from '@heapdeck/api-client'
 import {
   useDeleteRepo,
   useRefreshRepo,
   useRepo,
   useUpdateRepo,
-} from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
-import { confirm } from '@devdeck/ui'
-import { formatCount } from '@devdeck/api-client'
-import { showToast } from '@devdeck/ui'
+} from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
+import { confirm } from '@heapdeck/ui'
+import { formatCount } from '@heapdeck/api-client'
+import { showToast } from '@heapdeck/ui'
 
 type Tab = 'overview' | 'readme' | 'commands'
 

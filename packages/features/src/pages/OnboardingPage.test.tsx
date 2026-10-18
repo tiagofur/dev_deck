@@ -15,8 +15,8 @@ vi.mock('react-router-dom', () => ({
   useNavigate: () => mocks.navigate,
 }))
 
-vi.mock('@devdeck/api-client', async () => {
-  const actual = await vi.importActual<typeof import('@devdeck/api-client')>('@devdeck/api-client')
+vi.mock('@heapdeck/api-client', async () => {
+  const actual = await vi.importActual<typeof import('@heapdeck/api-client')>('@heapdeck/api-client')
   return {
     ...actual,
     useMe: mocks.useMe,
@@ -27,8 +27,8 @@ vi.mock('@devdeck/api-client', async () => {
 })
 
 const demoKit = {
-  id: 'devdeck-demo',
-  name: 'DevDeck Launch Demo',
+  id: 'heapdeck-demo',
+  name: 'HeapDeck Launch Demo',
   description: 'A realistic demo vault.',
   icon: 'demo.ico',
   items: [],
@@ -47,7 +47,7 @@ describe('<OnboardingPage>', () => {
     await user.click(screen.getByRole('button', { name: /start/i }))
     // AnimatePresence transitions mount the next step asynchronously.
     if (pickDemo) {
-      await user.click(await screen.findByText('DevDeck Launch Demo'))
+      await user.click(await screen.findByText('HeapDeck Launch Demo'))
     }
     await user.click(await screen.findByRole('button', { name: /continue/i }))
     await screen.findByText(/1\. Capture/i)
@@ -89,7 +89,7 @@ describe('<OnboardingPage>', () => {
     await advanceToLoopStep(user, true)
     await user.click(screen.getByRole('button', { name: /enter|finish|go to/i }))
 
-    expect(install).toHaveBeenCalledWith('devdeck-demo')
+    expect(install).toHaveBeenCalledWith('heapdeck-demo')
     expect(complete).toHaveBeenCalled()
     expect(mocks.navigate).toHaveBeenCalledWith('/items')
   })

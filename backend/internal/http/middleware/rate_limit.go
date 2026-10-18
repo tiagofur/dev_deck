@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"devdeck/internal/authctx"
+	"heapdeck/internal/authctx"
 
 	"github.com/go-chi/httprate"
 )

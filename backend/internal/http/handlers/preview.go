@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"devdeck/internal/domain/items"
-	"devdeck/internal/enricher"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/enricher"
 )
 
 // PreviewHandler handles POST /api/items/preview. Returns metadata for a

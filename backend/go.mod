@@ -1,4 +1,4 @@
-module devdeck
+module heapdeck
 
 go 1.26.0
 

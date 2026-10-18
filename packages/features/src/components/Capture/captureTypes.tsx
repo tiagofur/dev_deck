@@ -10,7 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { GithubIcon as Github } from '../icons/GithubIcon'
-import type { ItemType } from '@devdeck/api-client'
+import type { ItemType } from '@heapdeck/api-client'
 
 export type CaptureLaneId =
   | 'repo'

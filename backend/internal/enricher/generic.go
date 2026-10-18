@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"devdeck/internal/domain/repos"
+	"heapdeck/internal/domain/repos"
 
 	"golang.org/x/net/html"
 )
@@ -34,7 +34,7 @@ func (e *OpenGraphEnricher) Fetch(ctx context.Context, rawURL string) (*repos.Me
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "DevDeck/0.1 (+https://devdeck.local)")
+	req.Header.Set("User-Agent", "HeapDeck/0.1 (+https://heapdeck.local)")
 	req.Header.Set("Accept", "text/html,application/xhtml+xml")
 
 	resp, err := e.httpc.Do(req)

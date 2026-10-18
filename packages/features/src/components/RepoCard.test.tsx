@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { RepoCard } from './RepoCard'
-import type { Repo } from '@devdeck/api-client'
+import type { Repo } from '@heapdeck/api-client'
 
 const baseRepo: Repo = {
   id: 'a1b2c3',

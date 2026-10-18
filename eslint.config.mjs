@@ -1,4 +1,4 @@
-// Flat ESLint config for the DevDeck web frontend (apps/web + shared packages).
+// Flat ESLint config for the HeapDeck web frontend (apps/web + shared packages).
 // Backend (Go), CLI, desktop and extension are intentionally out of scope here
 // and keep their own toolchains.
 import js from '@eslint/js'

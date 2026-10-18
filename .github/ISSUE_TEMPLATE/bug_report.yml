@@ -17,7 +17,7 @@ body:
     attributes:
       label: Bug description
       description: What is broken?
-      placeholder: DevDeck does X, but I expected Y.
+      placeholder: HeapDeck does X, but I expected Y.
     validations:
       required: true
   - type: textarea

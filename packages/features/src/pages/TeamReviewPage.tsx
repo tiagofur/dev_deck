@@ -1,13 +1,13 @@
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Box, CheckCircle2, Users } from 'lucide-react'
-import { Button } from '@devdeck/ui'
-import { useFeatureFlags, useItems, usePreferences } from '@devdeck/api-client'
+import { Button } from '@heapdeck/ui'
+import { useFeatureFlags, useItems, usePreferences } from '@heapdeck/api-client'
 import { ItemCard } from '../components/ItemCard'
 import { detailPathForItem } from '../utils/itemRoutes'
 import { AppShell } from '../components/AppShell'
 import { OrgRequiredEmptyState } from '../components/OrgRequiredEmptyState'
 import { FeatureDisabledState } from '../components/FeatureDisabledState'
-import { useTranslation } from '@devdeck/i18n'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function TeamReviewPage() {
   const { t } = useTranslation()

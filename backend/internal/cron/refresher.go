@@ -11,8 +11,8 @@ import (
 	"log/slog"
 	"time"
 
-	"devdeck/internal/enricher"
-	"devdeck/internal/store"
+	"heapdeck/internal/enricher"
+	"heapdeck/internal/store"
 )
 
 type Refresher struct {

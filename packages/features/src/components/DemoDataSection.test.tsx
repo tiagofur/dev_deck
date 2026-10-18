@@ -9,8 +9,8 @@ const mocks = vi.hoisted(() => ({
   confirm: vi.fn(),
 }))
 
-vi.mock('@devdeck/api-client', async () => {
-  const actual = await vi.importActual<typeof import('@devdeck/api-client')>('@devdeck/api-client')
+vi.mock('@heapdeck/api-client', async () => {
+  const actual = await vi.importActual<typeof import('@heapdeck/api-client')>('@heapdeck/api-client')
   return {
     ...actual,
     useInstallStarterKit: mocks.useInstallStarterKit,
@@ -18,8 +18,8 @@ vi.mock('@devdeck/api-client', async () => {
   }
 })
 
-vi.mock('@devdeck/ui', async () => {
-  const actual = await vi.importActual<typeof import('@devdeck/ui')>('@devdeck/ui')
+vi.mock('@heapdeck/ui', async () => {
+  const actual = await vi.importActual<typeof import('@heapdeck/ui')>('@heapdeck/ui')
   return {
     ...actual,
     confirm: mocks.confirm,
@@ -40,7 +40,7 @@ describe('<DemoDataSection>', () => {
     render(<DemoDataSection />)
     await user.click(screen.getByRole('button', { name: /load demo data/i }))
 
-    expect(install).toHaveBeenCalledWith('devdeck-demo')
+    expect(install).toHaveBeenCalledWith('heapdeck-demo')
   })
 
   it('removes demo data only after confirmation', async () => {

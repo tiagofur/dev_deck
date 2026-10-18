@@ -2,11 +2,11 @@
 
 ## Reportar una vulnerabilidad
 
-Si encontrás una vulnerabilidad de seguridad en DevDeck, **por favor no abras un issue público**. Mandá un email a:
+Si encontrás una vulnerabilidad de seguridad en HeapDeck, **por favor no abras un issue público**. Mandá un email a:
 
-**security@devdeck.ai**
+**security@heapdeck.com**
 
-(Si no tenés ese canal todavía, mandá a `tiagofur@gmail.com` con subject `[DevDeck Security]`.)
+(Si no tenés ese canal todavía, mandá a `tiagofur@gmail.com` con subject `[HeapDeck Security]`.)
 
 ### Qué incluir
 
@@ -38,7 +38,7 @@ Si encontrás una vulnerabilidad de seguridad en DevDeck, **por favor no abras u
 - Vulnerabilidades que requieren acceso físico al device.
 - DoS por recursos (ej: mandar 10k items concurrentes). Tenemos rate limits y circuit breakers en roadmap.
 - Deployments self-hosted con config insegura (responsabilidad del operador).
-- Vulnerabilidades en dependencias sin vector de explotación en DevDeck.
+- Vulnerabilidades en dependencias sin vector de explotación en HeapDeck.
 - Spam, phishing, social engineering.
 
 ## Áreas sensibles conocidas

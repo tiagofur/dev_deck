@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { Loader2, KeyRound } from 'lucide-react'
-import { resetPassword } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { resetPassword } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function ResetPasswordPage() {
   const { t } = useTranslation()

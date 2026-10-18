@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/store"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"

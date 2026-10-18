@@ -79,7 +79,7 @@ export function WorkbenchPage() {
                 Developer Workbench
               </h1>
               <p className="mt-2 max-w-3xl font-mono text-sm text-ink-soft">
-                Small offline utilities connected to your DevDeck vault. Inputs stay in this
+                Small offline utilities connected to your HeapDeck vault. Inputs stay in this
                 browser/app session unless you choose to save an output.
               </p>
             </div>

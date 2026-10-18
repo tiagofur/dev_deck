@@ -1,6 +1,6 @@
 import React from 'react'
 import { Library, Briefcase, Flame, Sparkles, Trophy, Check } from 'lucide-react'
-import { useTranslation } from '@devdeck/i18n'
+import { useTranslation } from '@heapdeck/i18n'
 
 export interface Achievement {
   id: string

@@ -1,6 +1,6 @@
 # GitHub Discussions guide
 
-GitHub Discussions is the place for early collaboration around DevDeck. Use it when the topic needs conversation before it becomes a focused issue or pull request.
+GitHub Discussions is the place for early collaboration around HeapDeck. Use it when the topic needs conversation before it becomes a focused issue or pull request.
 
 ## When to use Discussions
 
@@ -9,8 +9,8 @@ Use Discussions for:
 - Questions about setup, usage, self-hosting, or contribution flow.
 - Rough product ideas that still need shape.
 - Community workflows, Circle use cases, and collaboration patterns.
-- Show-and-tell posts with screenshots, demos, or personal DevDeck setups.
-- Feedback from people trying DevDeck before a public launch.
+- Show-and-tell posts with screenshots, demos, or personal HeapDeck setups.
+- Feedback from people trying HeapDeck before a public launch.
 
 Use Issues for:
 
@@ -38,10 +38,10 @@ Use Pull Requests for:
 
 Start with these pinned-style entry points:
 
-- [Welcome to DevDeck Discussions](https://github.com/tiagofur/dev_deck/discussions/96) — orientation and community flow.
-- [Share ideas for DevDeck Circles and community workflows](https://github.com/tiagofur/dev_deck/discussions/97) — rough Circle/community proposals.
-- [Ask setup, usage, and contribution questions here](https://github.com/tiagofur/dev_deck/discussions/98) — Q&A for users and contributors.
-- [Show us your DevDeck workflow](https://github.com/tiagofur/dev_deck/discussions/99) — demos, screenshots, workflows, and inspiration.
+- [Welcome to HeapDeck Discussions](https://github.com/tiagofur/heapdeck/discussions/96) — orientation and community flow.
+- [Share ideas for HeapDeck Circles and community workflows](https://github.com/tiagofur/heapdeck/discussions/97) — rough Circle/community proposals.
+- [Ask setup, usage, and contribution questions here](https://github.com/tiagofur/heapdeck/discussions/98) — Q&A for users and contributors.
+- [Show us your HeapDeck workflow](https://github.com/tiagofur/heapdeck/discussions/99) — demos, screenshots, workflows, and inspiration.
 
 ## Recommended posting format
 
@@ -52,7 +52,7 @@ For ideas:
 What problem are you seeing?
 
 ## Proposal
-What should DevDeck do?
+What should HeapDeck do?
 
 ## Community value
 Who benefits from this?

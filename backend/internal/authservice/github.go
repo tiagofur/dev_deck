@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"devdeck/internal/domain/auth"
+	"heapdeck/internal/domain/auth"
 )
 
 // ExchangeGitHubCode exchanges an authorization code for an access token.
@@ -67,7 +67,7 @@ func (s *Service) FetchGitHubUser(ctx context.Context, token string) (*auth.GitH
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("User-Agent", "DevDeck/0.1")
+	req.Header.Set("User-Agent", "HeapDeck/0.1")
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {

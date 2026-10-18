@@ -10,8 +10,8 @@ const mocks = vi.hoisted(() => ({
   useShareToCircle: vi.fn(),
 }))
 
-vi.mock('@devdeck/api-client', async () => {
-  const actual = await vi.importActual<typeof import('@devdeck/api-client')>('@devdeck/api-client')
+vi.mock('@heapdeck/api-client', async () => {
+  const actual = await vi.importActual<typeof import('@heapdeck/api-client')>('@heapdeck/api-client')
   return {
     ...actual,
     useCapture: mocks.useCapture,
@@ -34,8 +34,8 @@ describe('Workbench tool examples', () => {
     await user.click(screen.getByRole('button', { name: /try an example/i }))
 
     const [input, output] = screen.getAllByRole('textbox') as HTMLTextAreaElement[]
-    expect(input.value).toContain('"name":"devdeck"')
-    expect(output.value).toContain('"name": "devdeck"')
+    expect(input.value).toContain('"name":"heapdeck"')
+    expect(output.value).toContain('"name": "heapdeck"')
   })
 
   it('loads the regex example and shows matches immediately', async () => {
@@ -47,6 +47,6 @@ describe('Workbench tool examples', () => {
     expect(screen.getByDisplayValue('(\\w+)@(\\w+)\\.dev')).toBeInTheDocument()
     const matches = screen.getAllByRole('textbox').at(-1) as HTMLTextAreaElement
     expect(matches.value).toContain('"count": 2')
-    expect(matches.value).toContain('ana@devdeck.dev')
+    expect(matches.value).toContain('ana@heapdeck.dev')
   })
 })

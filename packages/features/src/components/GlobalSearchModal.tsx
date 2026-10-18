@@ -1,9 +1,9 @@
 import { BookOpen, Boxes, Code2, Plus, Search, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useGlobalSearch, useSystemConfig } from '@devdeck/api-client'
-import type { SearchResult } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { useGlobalSearch, useSystemConfig } from '@heapdeck/api-client'
+import type { SearchResult } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 interface Props {
   open: boolean
@@ -48,7 +48,7 @@ export function GlobalSearchModal({ open, onClose }: Props) {
 
   function openCaptureInstead() {
     onClose()
-    window.dispatchEvent(new CustomEvent('devdeck:open-capture'))
+    window.dispatchEvent(new CustomEvent('heapdeck:open-capture'))
   }
 
   // Group results by type.

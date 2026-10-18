@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom'
 import { Plus, Users } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
-import { setPreferences, useCreateOrg } from '@devdeck/api-client'
-import { Button, showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+import { setPreferences, useCreateOrg } from '@heapdeck/api-client'
+import { Button, showToast } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 import { AppShell } from './AppShell'
 
 export interface OrgRequiredEmptyStateProps {

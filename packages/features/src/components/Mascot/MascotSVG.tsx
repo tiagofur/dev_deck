@@ -1,11 +1,11 @@
-import type { MascotMood } from '@devdeck/api-client'
+import type { MascotMood } from '@heapdeck/api-client'
 
 interface Props {
   mood: MascotMood
 }
 
 /**
- * Snarkel — DevDeck's axolotl mascot. Pure SVG so it's lightweight,
+ * Snarkel — HeapDeck's axolotl mascot. Pure SVG so it's lightweight,
  * scalable, and easy to tweak. Mood changes the eyes/mouth/eyebrow.
  */
 export function MascotSVG({ mood }: Props) {

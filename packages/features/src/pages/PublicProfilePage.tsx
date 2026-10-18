@@ -6,9 +6,9 @@ import {
   useFollowUser, 
   useUnfollowUser,
   useMe
-} from '@devdeck/api-client'
-import { Button, showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+} from '@heapdeck/api-client'
+import { Button, showToast } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function PublicProfilePage() {
   const { t } = useTranslation()
@@ -176,7 +176,7 @@ export function PublicProfilePage() {
       <footer className="max-w-4xl mx-auto p-12 text-center">
         <p className="text-[10px] font-mono text-ink-soft uppercase tracking-widest flex items-center justify-center gap-2">
           <Sparkles size={12} className="text-accent-pink" />
-          Powered by DevDeck.ai
+          Powered by HeapDeck.com
         </p>
       </footer>
     </div>

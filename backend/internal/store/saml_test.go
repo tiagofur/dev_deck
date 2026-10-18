@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"devdeck/internal/store"
+	"heapdeck/internal/store"
 )
 
 func TestStore_GetSAMLConfigByDomain_NotFound(t *testing.T) {

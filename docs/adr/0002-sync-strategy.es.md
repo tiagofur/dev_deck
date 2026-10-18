@@ -6,7 +6,7 @@
 
 ## Contexto
 
-DevDeck tiene que funcionar sin red. Los clientes (Electron, Web PWA) escriben local primero, y sincronizan cuando hay conexión. Pueden haber múltiples devices del mismo usuario editando en paralelo.
+HeapDeck tiene que funcionar sin red. Los clientes (Electron, Web PWA) escriben local primero, y sincronizan cuando hay conexión. Pueden haber múltiples devices del mismo usuario editando en paralelo.
 
 El roadmap actual (Fase 22) propone "last-write-wins por campo usando `updated_at`". Este ADR formaliza la decisión y cubre los casos que LWW ingenuo no resuelve.
 

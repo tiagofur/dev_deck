@@ -67,7 +67,7 @@ export function setDatabaseAdapter(customAdapter: DatabaseAdapter) {
  */
 export function getAdapter(): DatabaseAdapter {
     if (!adapter) {
-        adapter = new OPFSAdapter('devdeck.db');
+        adapter = new OPFSAdapter('heapdeck.db');
     }
     return adapter;
 }

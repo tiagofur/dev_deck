@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"devdeck/internal/store"
-	"devdeck/internal/store/seed"
+	"heapdeck/internal/store"
+	"heapdeck/internal/store/seed"
 )
 
 type OnboardingHandler struct {

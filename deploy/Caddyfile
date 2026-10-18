@@ -1,4 +1,4 @@
-# Caddyfile — DevDeck reverse proxy with automatic HTTPS
+# Caddyfile — HeapDeck reverse proxy with automatic HTTPS
 
 # Main Domain (Web App)
 {$DOMAIN} {

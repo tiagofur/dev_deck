@@ -11,10 +11,10 @@ import {
   type CaptureInput,
   type Item,
   type ItemType,
-} from '@devdeck/api-client'
-import { showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
-import { CaptureModal } from '@devdeck/features'
+} from '@heapdeck/api-client'
+import { showToast } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
+import { CaptureModal } from '@heapdeck/features'
 
 // Wave 4.5 §16.12 — paste inteligente.
 //

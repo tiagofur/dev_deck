@@ -1,7 +1,7 @@
 import { CheckCircle2, Clipboard, Users, X } from 'lucide-react'
-import { Button } from '@devdeck/ui'
-import type { Item } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { Button } from '@heapdeck/ui'
+import type { Item } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 interface Props {
 	item: Item

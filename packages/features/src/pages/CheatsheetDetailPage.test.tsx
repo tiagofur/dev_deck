@@ -26,8 +26,8 @@ vi.mock('../components/AppShell', () => ({
   AppShell: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }))
 
-vi.mock('@devdeck/api-client', async () => {
-  const actual = await vi.importActual<typeof import('@devdeck/api-client')>('@devdeck/api-client')
+vi.mock('@heapdeck/api-client', async () => {
+  const actual = await vi.importActual<typeof import('@heapdeck/api-client')>('@heapdeck/api-client')
   return {
     ...actual,
     useCheatsheet: mocks.useCheatsheet,
@@ -41,8 +41,8 @@ vi.mock('@devdeck/api-client', async () => {
   }
 })
 
-vi.mock('@devdeck/ui', async () => {
-  const actual = await vi.importActual<typeof import('@devdeck/ui')>('@devdeck/ui')
+vi.mock('@heapdeck/ui', async () => {
+  const actual = await vi.importActual<typeof import('@heapdeck/ui')>('@heapdeck/ui')
   return {
     ...actual,
     showToast: mocks.showToast,

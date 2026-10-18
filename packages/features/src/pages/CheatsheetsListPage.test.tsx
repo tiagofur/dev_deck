@@ -21,8 +21,8 @@ vi.mock('../components/AppShell', () => ({
   ),
 }))
 
-vi.mock('@devdeck/ui', async () => {
-  const actual = await vi.importActual<object>('@devdeck/ui')
+vi.mock('@heapdeck/ui', async () => {
+  const actual = await vi.importActual<object>('@heapdeck/ui')
   return {
     ...actual,
     Button: ({
@@ -42,8 +42,8 @@ vi.mock('@devdeck/ui', async () => {
   }
 })
 
-vi.mock('@devdeck/api-client', async () => {
-  const actual = await vi.importActual<object>('@devdeck/api-client')
+vi.mock('@heapdeck/api-client', async () => {
+  const actual = await vi.importActual<object>('@heapdeck/api-client')
   return {
     ...actual,
     useCheatsheets: mocks.useCheatsheets,
@@ -52,7 +52,7 @@ vi.mock('@devdeck/api-client', async () => {
   }
 })
 
-vi.mock('@devdeck/i18n', () => ({
+vi.mock('@heapdeck/i18n', () => ({
   useTranslation: () => ({
     t: (key: string) => key,
   }),

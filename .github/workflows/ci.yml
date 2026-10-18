@@ -44,11 +44,11 @@ jobs:
         run: go build ./...
 
       - name: Run tests with coverage
-        # DEVDECK_REQUIRE_DB=1 forces the testcontainers-backed store/handler
+        # HEAPDECK_REQUIRE_DB=1 forces the testcontainers-backed store/handler
         # tests to fail instead of skip if Docker isn't available. GitHub-hosted
         # Linux runners always have Docker, so this should always pass.
         env:
-          DEVDECK_REQUIRE_DB: '1'
+          HEAPDECK_REQUIRE_DB: '1'
         run: |
           # -p 2 caps concurrent test packages: each DB-backed package holds a
           # pgvector testcontainer, and -race + atomic coverage on a 4-core
@@ -93,10 +93,10 @@ jobs:
         run: go test -race -timeout=5m ./...
 
       - name: Build binary
-        run: go build -o /tmp/devdeck ./cmd/devdeck
+        run: go build -o /tmp/heapdeck ./cmd/heapdeck
 
       - name: Smoke test (--help)
-        run: /tmp/devdeck --help
+        run: /tmp/heapdeck --help
 
   workspace:
     name: Workspace (lint + typecheck + unit tests)
@@ -121,34 +121,34 @@ jobs:
         run: pnpm lint
 
       - name: Typecheck api-client
-        run: pnpm -F @devdeck/api-client typecheck
+        run: pnpm -F @heapdeck/api-client typecheck
 
       - name: Typecheck features
-        run: pnpm -F @devdeck/features typecheck
+        run: pnpm -F @heapdeck/features typecheck
 
       - name: Typecheck ui
-        run: pnpm -F @devdeck/ui typecheck
+        run: pnpm -F @heapdeck/ui typecheck
 
       - name: Typecheck web
-        run: pnpm -F @devdeck/web typecheck
+        run: pnpm -F @heapdeck/web typecheck
 
       - name: Unit tests (api-client)
-        run: pnpm -F @devdeck/api-client test
+        run: pnpm -F @heapdeck/api-client test
 
       - name: Unit tests (features)
-        run: pnpm -F @devdeck/features test
+        run: pnpm -F @heapdeck/features test
 
       - name: Unit tests (ui)
-        run: pnpm -F @devdeck/ui test
+        run: pnpm -F @heapdeck/ui test
 
       - name: Unit tests (web)
-        run: pnpm -F @devdeck/web test
+        run: pnpm -F @heapdeck/web test
 
       - name: Build web
-        run: pnpm -F @devdeck/web build
+        run: pnpm -F @heapdeck/web build
 
       - name: Build landing
-        run: pnpm -F @devdeck/landing build
+        run: pnpm -F @heapdeck/landing build
 
   desktop:
     name: Desktop (Vitest + typecheck + build)
@@ -170,13 +170,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Typecheck
-        run: pnpm -F @devdeck/desktop typecheck
+        run: pnpm -F @heapdeck/desktop typecheck
 
       - name: Vitest unit tests
-        run: pnpm -F @devdeck/desktop test
+        run: pnpm -F @heapdeck/desktop test
 
       - name: Build (electron-vite)
-        run: pnpm -F @devdeck/desktop build
+        run: pnpm -F @heapdeck/desktop build
 
   extension:
     name: Extension (Vite + typecheck + build)
@@ -198,10 +198,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Typecheck
-        run: pnpm -F @devdeck/extension typecheck
+        run: pnpm -F @heapdeck/extension typecheck
 
       - name: Build
-        run: pnpm -F @devdeck/extension build
+        run: pnpm -F @heapdeck/extension build
 
   e2e:
     name: E2E (Playwright + live backend)
@@ -211,17 +211,17 @@ jobs:
       postgres:
         image: pgvector/pgvector:pg16
         env:
-          POSTGRES_USER: devdeck
-          POSTGRES_PASSWORD: devdeck
-          POSTGRES_DB: devdeck
+          POSTGRES_USER: heapdeck
+          POSTGRES_PASSWORD: heapdeck
+          POSTGRES_DB: heapdeck
         ports: ['5432:5432']
         options: >-
-          --health-cmd "pg_isready -U devdeck"
+          --health-cmd "pg_isready -U heapdeck"
           --health-interval 5s
           --health-timeout 3s
           --health-retries 10
     env:
-      DB_URL: postgres://devdeck:devdeck@localhost:5432/devdeck?sslmode=disable
+      DB_URL: postgres://heapdeck:heapdeck@localhost:5432/heapdeck?sslmode=disable
       JWT_SECRET: test-jwt-secret
       AUTH_MODE: token
       API_TOKEN: test-api-token
@@ -257,7 +257,7 @@ jobs:
           set -e
           for f in migrations/*.sql; do
             echo "Applying $f"
-            sed '/-- +goose Down/,$d' "$f" | PGPASSWORD=devdeck psql -h localhost -U devdeck -d devdeck -v ON_ERROR_STOP=1
+            sed '/-- +goose Down/,$d' "$f" | PGPASSWORD=heapdeck psql -h localhost -U heapdeck -d heapdeck -v ON_ERROR_STOP=1
           done
 
       - name: Start backend
@@ -265,9 +265,9 @@ jobs:
         env:
           LOG_LEVEL: debug
         run: |
-          go build -o /tmp/devdeck-api ./cmd/api
-          /tmp/devdeck-api 2>&1 &
-          echo $! > /tmp/devdeck-api.pid
+          go build -o /tmp/heapdeck-api ./cmd/api
+          /tmp/heapdeck-api 2>&1 &
+          echo $! > /tmp/heapdeck-api.pid
           # Wait for /healthz to come up.
           for i in 1 2 3 4 5 6 7 8 9 10; do
             if curl -fsS http://localhost:8080/healthz; then
@@ -283,13 +283,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build desktop app artifacts for renderer-only E2E
-        run: pnpm -F @devdeck/desktop build
+        run: pnpm -F @heapdeck/desktop build
 
       - name: Install Playwright browsers
         run: pnpm --dir apps/desktop exec playwright install --with-deps chromium
 
       - name: Run Playwright tests
-        run: pnpm -F @devdeck/desktop test:e2e
+        run: pnpm -F @heapdeck/desktop test:e2e
 
       - name: Upload Playwright report
         if: failure()
@@ -302,6 +302,6 @@ jobs:
       - name: Stop backend
         if: always()
         run: |
-          if [ -f /tmp/devdeck-api.pid ]; then
-            kill "$(cat /tmp/devdeck-api.pid)" 2>/dev/null || true
+          if [ -f /tmp/heapdeck-api.pid ]; then
+            kill "$(cat /tmp/heapdeck-api.pid)" 2>/dev/null || true
           fi

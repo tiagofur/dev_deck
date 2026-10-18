@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { Copy, Edit3, GripVertical, Trash2 } from 'lucide-react'
 import type { HTMLAttributes } from 'react'
-import type { CommandCategory, RepoCommand } from '@devdeck/api-client'
-import { showToast } from '@devdeck/ui'
+import type { CommandCategory, RepoCommand } from '@heapdeck/api-client'
+import { showToast } from '@heapdeck/ui'
 
 interface Props {
   command: RepoCommand

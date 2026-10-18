@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"devdeck/internal/domain/items"
+	"heapdeck/internal/domain/items"
 )
 
 func TestHeuristicSummarize(t *testing.T) {

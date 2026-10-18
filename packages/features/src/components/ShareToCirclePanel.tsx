@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Share2, X } from 'lucide-react'
-import { Button } from '@devdeck/ui'
-import type { Circle } from '@devdeck/api-client'
+import { Button } from '@heapdeck/ui'
+import type { Circle } from '@heapdeck/api-client'
 
 interface ShareToCirclePanelProps {
   circles: Circle[]

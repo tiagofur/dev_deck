@@ -1,12 +1,12 @@
 # First contribution guide
 
-Thanks for considering a contribution to DevDeck. The best first PR is small, useful, and easy to review.
+Thanks for considering a contribution to HeapDeck. The best first PR is small, useful, and easy to review.
 
 Not sure where things live? Read the one-page [architecture map](ARCHITECTURE_MAP.md) first.
 
 ## Quick path
 
-1. Pick an issue labeled [`good first issue`](https://github.com/tiagofur/dev_deck/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%22) or [`help wanted`](https://github.com/tiagofur/dev_deck/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22help%20wanted%22).
+1. Pick an issue labeled [`good first issue`](https://github.com/tiagofur/heapdeck/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22good%20first%20issue%22) or [`help wanted`](https://github.com/tiagofur/heapdeck/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22help%20wanted%22).
 2. Make sure the issue has `status:approved`.
 3. Create a focused branch from `main`.
 4. Change only what the issue needs.
@@ -60,6 +60,6 @@ Every PR should:
 
 ## Need help?
 
-Use [GitHub Discussions](https://github.com/tiagofur/dev_deck/discussions) for questions, rough ideas, community workflows, and early feedback. See [docs/DISCUSSIONS.md](DISCUSSIONS.md) for category guidance and posting formats.
+Use [GitHub Discussions](https://github.com/tiagofur/heapdeck/discussions) for questions, rough ideas, community workflows, and early feedback. See [docs/DISCUSSIONS.md](DISCUSSIONS.md) for category guidance and posting formats.
 
 Open an issue only when the problem or proposal is clear enough to become a focused, reviewable task. If the idea is still rough, start in Discussions first and keep the proposed first step small.

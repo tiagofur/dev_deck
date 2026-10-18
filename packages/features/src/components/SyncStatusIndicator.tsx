@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Cloud, CloudOff, RefreshCw } from 'lucide-react'
-import { getPendingCount, syncNow, useSystemConfig } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { getPendingCount, syncNow, useSystemConfig } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function SyncStatusIndicator() {
   const { t } = useTranslation()

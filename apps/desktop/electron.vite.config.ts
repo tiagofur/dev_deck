@@ -2,7 +2,7 @@ import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 
-if (process.env.DEVDECK_E2E === 'true') {
+if (process.env.HEAPDECK_E2E === 'true') {
   process.env.VITE_API_URL = ''
   process.env.VITE_AUTH_MODE = 'token'
   process.env.VITE_API_TOKEN = process.env.VITE_API_TOKEN || 'test-api-token'
@@ -35,20 +35,20 @@ export default defineConfig({
     resolve: {
       alias: {
         '@': resolve(__dirname, 'src/renderer/src'),
-        '@devdeck/ui/styles/globals.css': resolve(
+        '@heapdeck/ui/styles/globals.css': resolve(
           __dirname,
           '../../packages/ui/styles/globals.css',
         ),
-        '@devdeck/ui': resolve(__dirname, '../../packages/ui/src/index.ts'),
-        '@devdeck/api-client': resolve(
+        '@heapdeck/ui': resolve(__dirname, '../../packages/ui/src/index.ts'),
+        '@heapdeck/api-client': resolve(
           __dirname,
           '../../packages/api-client/src/index.ts',
         ),
-        '@devdeck/features': resolve(
+        '@heapdeck/features': resolve(
           __dirname,
           '../../packages/features/src/index.ts',
         ),
-        '@devdeck/i18n': resolve(
+        '@heapdeck/i18n': resolve(
           __dirname,
           '../../packages/i18n/src/index.ts',
         ),

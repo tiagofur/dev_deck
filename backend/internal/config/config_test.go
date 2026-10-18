@@ -247,7 +247,7 @@ func TestLoad(t *testing.T) {
 		setenv(t, "DB_URL", "postgres://localhost:5432/db")
 		setenv(t, "AUTH_MODE", "token")
 		setenv(t, "API_TOKEN", "test-token")
-		setenv(t, "CORS_ORIGINS", "https://app.devdeck.io,http://localhost:5173")
+		setenv(t, "CORS_ORIGINS", "https://app.heapdeck.io,http://localhost:5173")
 
 		if _, err := Load(); err != nil {
 			t.Fatalf("expected no error for explicit origins, got %v", err)

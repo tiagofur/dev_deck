@@ -6,11 +6,11 @@ import (
 	"net/url"
 	"strings"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/domain/items"
-	"devdeck/internal/jobs"
-	"devdeck/internal/metrics"
-	"devdeck/internal/store"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/jobs"
+	"heapdeck/internal/metrics"
+	"heapdeck/internal/store"
 
 	"github.com/google/uuid"
 )

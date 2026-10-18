@@ -5,8 +5,8 @@ import (
 	"errors"
 	"net/http"
 
-	"devdeck/internal/domain/commands"
-	"devdeck/internal/store"
+	"heapdeck/internal/domain/commands"
+	"heapdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"

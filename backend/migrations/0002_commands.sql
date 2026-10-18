@@ -1,4 +1,4 @@
--- DevDeck — Wave 2: per-repo commands
+-- HeapDeck — Wave 2: per-repo commands
 -- Run with: psql "$DB_URL" -f migrations/0002_commands.sql
 
 CREATE TABLE IF NOT EXISTS repo_commands (

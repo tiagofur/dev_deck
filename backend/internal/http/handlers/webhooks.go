@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/enricher"
-	"devdeck/internal/store"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/enricher"
+	"heapdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"

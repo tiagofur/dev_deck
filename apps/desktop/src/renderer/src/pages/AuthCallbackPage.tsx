@@ -4,7 +4,7 @@ import {
   parseAuthErrorFromQuery,
   parseTokensFromFragment,
   parseTokensFromQuery,
-} from '@devdeck/api-client'
+} from '@heapdeck/api-client'
 
 export function AuthCallbackPage() {
   const navigate = useNavigate()

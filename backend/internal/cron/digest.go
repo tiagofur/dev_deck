@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"devdeck/internal/ai"
-	"devdeck/internal/authctx"
-	"devdeck/internal/domain/items"
-	"devdeck/internal/store"
+	"heapdeck/internal/ai"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/store"
 
 	"github.com/google/uuid"
 )

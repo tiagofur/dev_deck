@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Button, showToast } from '@devdeck/ui'
+import { Button, showToast } from '@heapdeck/ui'
 import { ToolFrame, TextArea } from './shared'
 
-const EXPANDER_STORAGE_KEY = 'devdeck.workbench.expander.v1'
+const EXPANDER_STORAGE_KEY = 'heapdeck.workbench.expander.v1'
 
 interface SnippetAlias {
   alias: string

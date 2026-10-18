@@ -1,25 +1,25 @@
 services:
   db:
     image: pgvector/pgvector:pg16
-    container_name: devdeck-db-local
+    container_name: heapdeck-db-local
     restart: unless-stopped
     environment:
-      POSTGRES_USER: devdeck
+      POSTGRES_USER: heapdeck
       POSTGRES_PASSWORD: ${PG_PASS}
-      POSTGRES_DB: devdeck
+      POSTGRES_DB: heapdeck
     ports:
       - "5432:5432"
     volumes:
       - pgdata_local:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U devdeck -d devdeck"]
+      test: ["CMD-SHELL", "pg_isready -U heapdeck -d heapdeck"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   migrate:
     image: postgres:16-alpine
-    container_name: devdeck-migrate
+    container_name: heapdeck-migrate
     depends_on:
       db:
         condition: service_healthy
@@ -33,7 +33,7 @@ services:
       sh -c "
         for f in /migrations/*.sql; do
           echo \"Applying $$f...\"
-          awk '/-- [+]goose Down/{exit} {print}' \"$$f\" | psql -h db -U devdeck -d devdeck || exit 1
+          awk '/-- [+]goose Down/{exit} {print}' \"$$f\" | psql -h db -U heapdeck -d heapdeck || exit 1
         done
         echo All migrations applied.
       "
@@ -43,15 +43,15 @@ services:
     build:
       context: ../backend
       dockerfile: Dockerfile
-    image: devdeck-api:latest
-    container_name: devdeck-api-local
+    image: heapdeck-api:latest
+    container_name: heapdeck-api-local
     restart: unless-stopped
     depends_on:
       migrate:
         condition: service_completed_successfully
     environment:
       PORT: "8080"
-      DB_URL: postgres://devdeck:${PG_PASS}@db:5432/devdeck?sslmode=disable
+      DB_URL: postgres://heapdeck:${PG_PASS}@db:5432/heapdeck?sslmode=disable
       AUTH_MODE: ${AUTH_MODE:-token}
       API_TOKEN: ${API_TOKEN}
       JWT_SECRET: ${JWT_SECRET:-}

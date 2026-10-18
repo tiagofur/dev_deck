@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"devdeck/internal/domain/items"
-	"devdeck/internal/domain/repos"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/domain/repos"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"

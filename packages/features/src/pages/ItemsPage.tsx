@@ -5,9 +5,9 @@ import { AppShell } from '../components/AppShell'
 import { ItemCard } from '../components/ItemCard'
 import { OnboardingChecklist } from '../components/OnboardingChecklist'
 import { detailPathForItem } from '../utils/itemRoutes'
-import { useItems } from '@devdeck/api-client'
-import { ALL_ITEM_TYPES, type ItemType } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { useItems } from '@heapdeck/api-client'
+import { ALL_ITEM_TYPES, type ItemType } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 // Ola 5 Fase 17 — polymorphic items grid.
 //
@@ -73,7 +73,7 @@ export function ItemsPage() {
   const hasFilters = type !== 'all' || stack.length > 0 || workflow || query.length > 0
 
   function openCapture() {
-    window.dispatchEvent(new CustomEvent('devdeck:open-capture'))
+    window.dispatchEvent(new CustomEvent('heapdeck:open-capture'))
   }
 
   // Count by type for the chip badges. The UI doesn't paginate between

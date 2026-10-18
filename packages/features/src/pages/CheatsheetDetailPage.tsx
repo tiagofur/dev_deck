@@ -1,7 +1,7 @@
 import { ArrowLeft, Copy, Filter, Plus, Search, Share2, Trash2, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Button } from '@devdeck/ui'
+import { Button } from '@heapdeck/ui'
 import { AppShell } from '../components/AppShell'
 import {
   useCheatsheet,
@@ -12,10 +12,10 @@ import {
   useCapture,
   useCircles,
   useShareToCircle,
-} from '@devdeck/api-client'
-import type { CheatsheetDetail, Entry } from '@devdeck/api-client'
-import { showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+} from '@heapdeck/api-client'
+import type { CheatsheetDetail, Entry } from '@heapdeck/api-client'
+import { showToast } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 import { ShareToCirclePanel } from '../components/ShareToCirclePanel'
 
 export function CheatsheetDetailPage() {

@@ -9,16 +9,16 @@ import (
 	"testing"
 	"time"
 
-	"devdeck/internal/ai"
-	"devdeck/internal/authservice"
-	"devdeck/internal/config"
-	"devdeck/internal/domain/auth"
-	"devdeck/internal/email"
-	"devdeck/internal/enricher"
-	httpapi "devdeck/internal/http"
-	"devdeck/internal/jobs"
-	"devdeck/internal/store"
-	"devdeck/internal/testutil"
+	"heapdeck/internal/ai"
+	"heapdeck/internal/authservice"
+	"heapdeck/internal/config"
+	"heapdeck/internal/domain/auth"
+	"heapdeck/internal/email"
+	"heapdeck/internal/enricher"
+	httpapi "heapdeck/internal/http"
+	"heapdeck/internal/jobs"
+	"heapdeck/internal/store"
+	"heapdeck/internal/testutil"
 )
 
 // orgAuthzServer is a JWT-mode variant of testServer so tests can act as

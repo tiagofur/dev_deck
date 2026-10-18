@@ -10,14 +10,14 @@ import (
 	"strings"
 	"testing"
 
-	"devdeck/internal/ai"
-	"devdeck/internal/config"
-	"devdeck/internal/email"
-	"devdeck/internal/enricher"
-	httpapi "devdeck/internal/http"
-	"devdeck/internal/jobs"
-	"devdeck/internal/store"
-	"devdeck/internal/testutil"
+	"heapdeck/internal/ai"
+	"heapdeck/internal/config"
+	"heapdeck/internal/email"
+	"heapdeck/internal/enricher"
+	httpapi "heapdeck/internal/http"
+	"heapdeck/internal/jobs"
+	"heapdeck/internal/store"
+	"heapdeck/internal/testutil"
 
 	"github.com/google/uuid"
 )

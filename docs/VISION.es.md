@@ -1,4 +1,4 @@
-# DevDeck — Visión de producto y posicionamiento
+# HeapDeck — Visión de producto y posicionamiento
 
 > Versión: 1.1 · Última actualización: 2026-04-08
 
@@ -6,7 +6,7 @@
 
 ## La visión en una línea
 
-> **DevDeck es tu memoria externa para desarrollo, asistida por IA.**
+> **HeapDeck es tu memoria externa para desarrollo, asistida por IA.**
 
 O más específico:
 
@@ -25,11 +25,11 @@ El ciclo doloroso:
 4. Si lo encontrás, no recordás para qué servía
 5. Terminás googleando de cero algo que ya habías resuelto
 
-DevDeck rompe ese ciclo con **captura rápida, contexto automático y recuperación inteligente**.
+HeapDeck rompe ese ciclo con **captura rápida, contexto automático y recuperación inteligente**.
 
 ---
 
-## Qué es DevDeck (y qué no es)
+## Qué es HeapDeck (y qué no es)
 
 ### Es:
 - Tu **colección personal** de assets útiles para desarrollar
@@ -52,13 +52,13 @@ El análisis competitivo completo (con tablas de pros/contras y diferenciación 
 
 **Competidores principales:**
 
-| Tool | Por qué no es suficiente para devs | Relación con DevDeck |
+| Tool | Por qué no es suficiente para devs | Relación con HeapDeck |
 |------|------------------------------------|----------------------|
-| **GitHub Stars** | Solo repos de GitHub; sin contexto; sin búsqueda útil | DevDeck lo reemplaza y expande |
-| **Raindrop / Pocket** | Genéricos; sin foco dev; sin commands ni runbooks | DevDeck es el Raindrop especializado para devs |
-| **Notion / Obsidian** | Trabajo manual total; sin metadata automática; captura lenta | DevDeck complementa (captura rápida + IA) |
-| **Raycast / Alfred** | Launchers; no persisten contexto largo plazo | DevDeck puede alimentar acciones con contexto propio |
-| **Pieces.app** | Solo snippets de código; sin repos, CLIs, shortcuts, workflows | DevDeck es más amplio en tipos de items |
+| **GitHub Stars** | Solo repos de GitHub; sin contexto; sin búsqueda útil | HeapDeck lo reemplaza y expande |
+| **Raindrop / Pocket** | Genéricos; sin foco dev; sin commands ni runbooks | HeapDeck es el Raindrop especializado para devs |
+| **Notion / Obsidian** | Trabajo manual total; sin metadata automática; captura lenta | HeapDeck complementa (captura rápida + IA) |
+| **Raycast / Alfred** | Launchers; no persisten contexto largo plazo | HeapDeck puede alimentar acciones con contexto propio |
+| **Pieces.app** | Solo snippets de código; sin repos, CLIs, shortcuts, workflows | HeapDeck es más amplio en tipos de items |
 
 ---
 
@@ -73,7 +73,7 @@ El análisis competitivo completo (con tablas de pros/contras y diferenciación 
 ### Para diferentes audiencias
 
 **Para el dev individual:**
-> Dejá de perder herramientas útiles. DevDeck recuerda por vos.
+> Dejá de perder herramientas útiles. HeapDeck recuerda por vos.
 
 **Para devs con muchos stacks:**
 > Todo lo que usás en Go, Node, Python, Docker y macOS — en un solo lugar, organizado por IA.
@@ -83,7 +83,7 @@ El análisis competitivo completo (con tablas de pros/contras y diferenciación 
 
 ---
 
-## Por qué DevDeck gana
+## Por qué HeapDeck gana
 
 ### Diferenciadores genuinos
 
@@ -91,7 +91,7 @@ El análisis competitivo completo (con tablas de pros/contras y diferenciación 
 
 2. **Multi-tipo de items** — Repos, CLIs, plugins, prompts, atajos, workflows — todo en un lugar con el mismo paradigma de captura/recuperación.
 
-3. **IA para memoria, no para chat** — La IA en DevDeck clasifica, resume y recupera. No es un chatbot decorativo.
+3. **IA para memoria, no para chat** — La IA en HeapDeck clasifica, resume y recupera. No es un chatbot decorativo.
 
 4. **Discovery mode** — La app trabaja activamente para que redescubrás lo que guardaste. No es solo un storage pasivo.
 
@@ -111,7 +111,7 @@ El análisis competitivo completo (con tablas de pros/contras y diferenciación 
 |------|----------------|---------------|
 | **Olas 1–4 (actual)** | "Directorio visual de repos con cheatsheets" | Preview rico, commands, cheatsheets, web client |
 | **Ola 5** | "Knowledge OS para devs" | Multi-tipo items, runbooks, quick capture |
-| **Ola 6** | "Tu memoria dev asistida por IA" | Auto-summary, semantic search, Ask DevDeck |
+| **Ola 6** | "Tu memoria dev asistida por IA" | Auto-summary, semantic search, Ask HeapDeck |
 | **Ola 7** | "Tu knowledge base dev, en todos tus dispositivos" | Offline-first, multi-device, decks compartibles |
 | **Siguiente** | "Tu workbench dev: memoria + acción" | Developer Workbench, paleta, utilities locales, requests reutilizables |
 
@@ -126,7 +126,7 @@ R: Porque la IA hace trabajo real y útil: auto-clasifica tus items, genera res�
 R: El repositorio es público. El plan es mantenerlo open-source, con opción de self-hosting (como hacemos nosotros con VPS + Docker Compose + Caddy).
 
 **P: ¿Compite con Notion?**
-R: No directamente. Si usás Notion para knowledge management general, DevDeck se complementa: es la "pestaña dev" de tu sistema de conocimiento, con captura rápida y metadata automática.
+R: No directamente. Si usás Notion para knowledge management general, HeapDeck se complementa: es la "pestaña dev" de tu sistema de conocimiento, con captura rápida y metadata automática.
 
 **P: ¿Necesito usar su IA o puedo usar la mía?**
 R: La IA es opt-in. Podés configurar tu propia OpenAI API key o usar Ollama localmente. Sin API key configurada, la app funciona en modo fuzzy clásico (comportamiento de Olas 1–4).
@@ -138,7 +138,7 @@ R: Hoy es para uso individual o muy pequeño (allowlist de GitHub). El plan es e
 
 ## Developer Workbench: de memoria a acción
 
-DevDeck ya evolucionó más allá del almacenamiento pasivo: el Developer Workbench (utilities locales, paleta de comandos, requests reutilizables, contexto de proyecto) está implementado en su mayor parte. La frontera sigue siendo clara: no buscamos reemplazar cada app que un developer ya usa, sino conectar memoria, búsqueda y acciones reutilizables.
+HeapDeck ya evolucionó más allá del almacenamiento pasivo: el Developer Workbench (utilities locales, paleta de comandos, requests reutilizables, contexto de proyecto) está implementado en su mayor parte. La frontera sigue siendo clara: no buscamos reemplazar cada app que un developer ya usa, sino conectar memoria, búsqueda y acciones reutilizables.
 
 Para el estado por fase de esta evolución, revisar:
 👉 **[DEV_WORKBENCH.es.md](DEV_WORKBENCH.es.md)**

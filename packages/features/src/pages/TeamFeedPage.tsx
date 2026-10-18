@@ -8,8 +8,8 @@ import {
   LayoutGrid, 
   User as UserIcon
 } from 'lucide-react'
-import { useOrgFeed, usePreferences, type ActivityEntry } from '@devdeck/api-client'
-import { useTranslation, type TFunction } from '@devdeck/i18n'
+import { useOrgFeed, usePreferences, type ActivityEntry } from '@heapdeck/api-client'
+import { useTranslation, type TFunction } from '@heapdeck/i18n'
 import { AppShell } from '../components/AppShell'
 import { OrgRequiredEmptyState } from '../components/OrgRequiredEmptyState'
 

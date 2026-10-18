@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/http/middleware"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/http/middleware"
 )
 
 func TestRequireAdmin(t *testing.T) {

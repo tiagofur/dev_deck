@@ -1,4 +1,4 @@
-import type { Repo } from '@devdeck/api-client'
+import type { Repo } from '@heapdeck/api-client'
 import { RepoCard } from './RepoCard'
 
 interface Props {

@@ -2,10 +2,10 @@ import { useEffect, useState, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Edit3, Eye, Save, Users, X } from 'lucide-react'
-import { Button } from '@devdeck/ui'
-import { createRoom } from '@devdeck/realtime-client'
-import { useFeatureFlags } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { Button } from '@heapdeck/ui'
+import { createRoom } from '@heapdeck/realtime-client'
+import { useFeatureFlags } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 type Room = ReturnType<typeof createRoom>
 type YText = ReturnType<Room['getText']>
