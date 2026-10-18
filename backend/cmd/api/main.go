@@ -47,6 +47,10 @@ func main() {
 	logger = newLogger(cfg.LogLevel, os.Getenv("LOG_FORMAT"))
 	slog.SetDefault(logger)
 
+	if cfg.RateLimitDisabled {
+		logger.Warn("RATE_LIMIT_DISABLED=true: per-IP rate limiting is OFF; never ship this configuration to production")
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

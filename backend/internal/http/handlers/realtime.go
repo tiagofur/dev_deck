@@ -3,16 +3,50 @@ package handlers
 import (
 	"log/slog"
 	"net/http"
+	"strings"
 	"sync"
 
+	"heapdeck/internal/authservice"
+	"heapdeck/internal/store"
+
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true // Allow all origins for now, production should be stricter
-	},
+type RealtimeHandler struct {
+	rooms       map[string]*Room
+	mu          sync.Mutex
+	upgrader    websocket.Upgrader
+	authService *authservice.Service
+	store       *store.Store
+}
+
+// NewRealtimeHandler builds the collaborative-rooms handler. Realtime rooms
+// relay Yjs document updates between clients, so they must never be open:
+// connections authenticate with an access token and may only join rooms for
+// items they can read. allowedOrigins is the CORS allowlist — browsers always
+// send Origin on WebSocket handshakes, so cross-site pages are rejected while
+// non-browser clients (no Origin header) keep working.
+func NewRealtimeHandler(as *authservice.Service, st *store.Store, allowedOrigins []string) *RealtimeHandler {
+	allowed := make(map[string]bool, len(allowedOrigins))
+	for _, o := range allowedOrigins {
+		allowed[strings.TrimRight(o, "/")] = true
+	}
+	return &RealtimeHandler{
+		rooms:       make(map[string]*Room),
+		authService: as,
+		store:       st,
+		upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				origin := r.Header.Get("Origin")
+				if origin == "" {
+					return true
+				}
+				return allowed[strings.TrimRight(origin, "/")]
+			},
+		},
+	}
 }
 
 // Room represents a real-time collaboration room (e.g. for an item or deck)
@@ -37,26 +71,37 @@ func (r *Room) broadcast(msgType int, data []byte, sender *websocket.Conn) {
 	}
 }
 
-type RealtimeHandler struct {
-	rooms map[string]*Room
-	mu    sync.Mutex
-}
-
-func NewRealtimeHandler() *RealtimeHandler {
-	return &RealtimeHandler{
-		rooms: make(map[string]*Room),
-	}
-}
-
 // WS /api/realtime/{roomID}
+//
+// Rooms are named "item-<uuid>" and access follows item visibility: owner or
+// organization member. The access token travels in the query string because
+// the WebSocket API cannot send headers.
 func (h *RealtimeHandler) Connect(w http.ResponseWriter, r *http.Request) {
 	roomID := chi.URLParam(r, "roomID")
-	if roomID == "" {
-		http.Error(w, "missing room id", http.StatusBadRequest)
+	itemIDStr, ok := strings.CutPrefix(roomID, "item-")
+	if !ok {
+		http.Error(w, "invalid room id", http.StatusBadRequest)
+		return
+	}
+	itemID, err := uuid.Parse(itemIDStr)
+	if err != nil {
+		http.Error(w, "invalid room id", http.StatusBadRequest)
 		return
 	}
 
-	conn, err := upgrader.Upgrade(w, r, nil)
+	userID, _, _, err := h.authService.ValidateAccessToken(r.URL.Query().Get("token"))
+	if err != nil {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	allowed, err := h.store.CanAccessItem(r.Context(), userID, itemID)
+	if err != nil || !allowed {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+
+	conn, err := h.upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		slog.Error("failed to upgrade to websocket", "err", err)
 		return

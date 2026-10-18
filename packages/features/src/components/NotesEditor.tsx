@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm'
 import { Edit3, Eye, Save, Users, X } from 'lucide-react'
 import { Button } from '@heapdeck/ui'
 import { createRoom } from '@heapdeck/realtime-client'
-import { useFeatureFlags } from '@heapdeck/api-client'
+import { getConfig, getAccessToken, useFeatureFlags } from '@heapdeck/api-client'
 import { useTranslation } from '@heapdeck/i18n'
 
 type Room = ReturnType<typeof createRoom>
@@ -40,7 +40,12 @@ export function NotesEditor({ value, onSave, saving, roomID }: Props) {
   useEffect(() => {
     if (!features.realtime || !roomID || mode !== 'edit') return
 
-    const room = createRoom(roomID)
+    // Derive the WS endpoint from the API base (https→wss) and authenticate:
+    // the backend rejects unauthenticated sockets and rooms the user cannot
+    // read.
+    const { baseUrl } = getConfig()
+    const realtimeURL = `${baseUrl.replace(/^http/, 'ws').replace(/\/$/, '')}/api/realtime`
+    const room = createRoom(roomID, realtimeURL, getAccessToken())
     roomRef.current = room
     const yText = room.getText('notes')
     yTextRef.current = yText
