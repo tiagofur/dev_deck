@@ -719,10 +719,9 @@ var emailPattern = regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`)
 
 // dummyBcryptHash is a bcrypt digest used to equalize response timing when
 // the account does not exist or has no local password, so request latency
-// cannot reveal account existence. Digest of "heapdeck-timing-pad".
-//
-// #nosec G101 -- it is a timing pad for a public constant string, not a credential.
-const dummyBcryptHash = "$2a$10$s3YCwakrM3YMeGuXYjQ2JOqumeLGbmdSJz8Ehadu/idiTVnCKpKly"
+// cannot reveal account existence. Digest of "heapdeck-timing-pad":
+// a timing pad for a public constant string, not a credential.
+const dummyBcryptHash = "$2a$10$s3YCwakrM3YMeGuXYjQ2JOqumeLGbmdSJz8Ehadu/idiTVnCKpKly" //nolint:gosec // G101
 
 const passwordResetEmailTemplate = `<!doctype html>
 <html>
