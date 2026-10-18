@@ -535,10 +535,10 @@ func (h *AuthHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 
 	// Generate filename using userID and timestamp
 	filename := fmt.Sprintf("%s-%d.png", userID, time.Now().Unix())
-	filepath := filepath.Join(uploadsDir, filename)
+	destPath := filepath.Join(uploadsDir, filename)
 
-	// #nosec G304 -- filepath is built from a server-generated UUID and timestamp under a fixed uploads dir; not user-controlled.
-	out, err := os.Create(filepath)
+	// #nosec G304 -- destPath is built from a server-generated UUID and timestamp under a fixed uploads dir; not user-controlled.
+	out, err := os.Create(destPath)
 	if err != nil {
 		writeInternal(w, err)
 		return
@@ -556,6 +556,12 @@ func (h *AuthHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeInternal(w, err)
 		return
+	}
+
+	// Best-effort cleanup of the previous avatar file: every upload used to
+	// leave a new UUID-timestamp file behind.
+	if previous, perr := h.store.GetUserByID(r.Context(), userID); perr == nil && strings.HasPrefix(previous.AvatarURL, "/uploads/") {
+		_ = os.Remove(filepath.Join("uploads", filepath.Base(previous.AvatarURL)))
 	}
 
 	writeJSON(w, http.StatusOK, map[string]string{"avatar_url": avatarURL})

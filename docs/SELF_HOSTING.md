@@ -62,7 +62,6 @@ PG_PASS=<strong-random-password>
 # Auth
 AUTH_MODE=jwt
 LOCAL_AUTH_ENABLED=true
-ALLOWED_GITHUB_LOGINS=your-github-login
 GITHUB_CLIENT_ID=<from GitHub OAuth App>
 GITHUB_CLIENT_SECRET=<from GitHub OAuth App>
 GITHUB_OAUTH_CALLBACK_URL=https://heapdeck.yourdomain.com/api/auth/github/callback
@@ -97,8 +96,8 @@ Notes:
 - `AUTH_MODE=jwt` is the current default for the production compose stack.
 - `LOCAL_AUTH_ENABLED=true` enables email/password login alongside OAuth. If
   you want GitHub-only auth, set it to `false`.
-- `ALLOWED_GITHUB_LOGINS` acts as a login allowlist. Leave it empty only if you
-  intentionally want any GitHub account to be allowed.
+- Registration gating: set `REQUIRE_INVITE=true` to require invite codes for
+  local sign-ups. Leave it unset for open registration.
 - If `AI_PROVIDER=openai`, the backend requires both
   `AI_EXTERNAL_OPT_IN=true` and `OPENAI_API_KEY`.
 
@@ -189,9 +188,8 @@ Current `0.5.0` public beta limitations worth knowing up front:
 - **Migrations failed:** connect to Postgres with
   `docker compose exec db psql -U heapdeck heapdeck` and inspect which migration
   stopped.
-- **GitHub login returns 403:** add your GitHub login to
-  `ALLOWED_GITHUB_LOGINS`, then restart the API with
-  `docker compose up -d api`.
+- **GitHub login fails:** confirm `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET`
+  and `GITHUB_OAUTH_CALLBACK_URL` match the GitHub OAuth app exactly.
 - **HTTPS certificate is not issued:** confirm DNS is pointed at the VPS and
   ports `80` and `443` are open, then inspect `docker compose logs caddy`.
 
