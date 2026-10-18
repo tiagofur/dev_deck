@@ -104,6 +104,8 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		AuthCookieMode:          cfg.AuthCookieMode,
 		AuthCookieSecure:        cfg.AuthCookieSecure,
 		AllowedOrigins:          cfg.CORSOriginList(),
+		EmailSender:             deps.EmailSender,
+		FrontendURL:             cfg.FrontendURL,
 	})
 
 	reposH := handlers.NewReposHandler(st, en)
@@ -192,6 +194,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				r.Get("/me", authH.Me)
 				r.Patch("/me", authH.UpdateMe)
 				r.Post("/me/avatar", authH.UploadAvatar)
+				r.Post("/change-password", authH.ChangePassword)
 				r.Patch("/me/onboarding/complete", authH.CompleteOnboarding)
 			})
 
@@ -217,6 +220,8 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 					r.Post("/register", authH.Register)
 					r.Post("/login", authH.LoginLocal)
 					r.Post("/login-step1", samlH.LoginStep1)
+					r.Post("/forgot-password", authH.ForgotPassword)
+					r.Post("/reset-password", authH.ResetPassword)
 					r.Get("/github/login", authH.Login)
 					r.Get("/github/callback", authH.Callback)
 

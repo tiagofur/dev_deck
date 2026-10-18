@@ -296,3 +296,66 @@ func (s *Store) CreateUserLocalTx(ctx context.Context, tx pgx.Tx, login, passwor
 	}
 	return u, nil
 }
+
+// CreatePasswordResetToken stores a hashed reset token valid until expiresAt.
+func (s *Store) CreatePasswordResetToken(ctx context.Context, userID uuid.UUID, tokenHash string, expiresAt time.Time) error {
+	_, err := s.Writer().Exec(ctx, `
+		INSERT INTO password_reset_tokens (token_hash, user_id, expires_at)
+		VALUES ($1, $2, $3)
+	`, tokenHash, userID, expiresAt)
+	return err
+}
+
+// ConsumePasswordResetToken deletes a valid (non-expired) reset token and
+// returns its user. Single-use: the row is gone once consumed.
+func (s *Store) ConsumePasswordResetToken(ctx context.Context, tokenHash string) (uuid.UUID, error) {
+	row := s.Writer().QueryRow(ctx, `
+		DELETE FROM password_reset_tokens
+		WHERE token_hash = $1 AND expires_at > NOW()
+		RETURNING user_id
+	`, tokenHash)
+	var userID uuid.UUID
+	if err := row.Scan(&userID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return uuid.Nil, ErrNotFound
+		}
+		return uuid.Nil, err
+	}
+	return userID, nil
+}
+
+// GetUserPasswordHash returns the local password hash, or "" when the user
+// signs in through an external provider.
+func (s *Store) GetUserPasswordHash(ctx context.Context, userID uuid.UUID) (string, error) {
+	var hash *string
+	err := s.Reader().QueryRow(ctx, `
+		SELECT password_hash FROM users WHERE id = $1
+	`, userID).Scan(&hash)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", ErrNotFound
+		}
+		return "", err
+	}
+	if hash == nil {
+		return "", nil
+	}
+	return *hash, nil
+}
+
+// UpdateUserPasswordHash replaces the local password hash.
+func (s *Store) UpdateUserPasswordHash(ctx context.Context, userID uuid.UUID, hash string) error {
+	_, err := s.Writer().Exec(ctx, `
+		UPDATE users SET password_hash = $2, updated_at = NOW() WHERE id = $1
+	`, userID, hash)
+	return err
+}
+
+// RevokeUserSessions deletes every refresh session of a user (used after a
+// password reset or change, so old credentials stop working everywhere).
+func (s *Store) RevokeUserSessions(ctx context.Context, userID uuid.UUID) error {
+	_, err := s.Writer().Exec(ctx, `
+		DELETE FROM refresh_sessions WHERE user_id = $1
+	`, userID)
+	return err
+}
