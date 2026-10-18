@@ -990,3 +990,25 @@ func (s *Store) GetDiscoveryNext(ctx context.Context) (*repos.Repo, error) {
 	}
 	return r, nil
 }
+
+// CanAccessItem reports whether the user may open an item's realtime room:
+// the owner, or a member of the organization that owns the item.
+func (s *Store) CanAccessItem(ctx context.Context, userID, itemID uuid.UUID) (bool, error) {
+	var ok bool
+	err := s.Reader().QueryRow(ctx, `
+		SELECT EXISTS (
+			SELECT 1 FROM items i
+			WHERE i.id = $1 AND (
+				i.user_id = $2
+				OR (
+					i.org_id IS NOT NULL
+					AND EXISTS (
+						SELECT 1 FROM org_members om
+						WHERE om.org_id = i.org_id AND om.user_id = $2
+					)
+				)
+			)
+		)
+	`, itemID, userID).Scan(&ok)
+	return ok, err
+}

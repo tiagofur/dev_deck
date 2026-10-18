@@ -136,7 +136,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	invitesH := handlers.NewInvitesHandler(st)
 	notificationsH := handlers.NewNotificationsHandler(st)
 	orgsH := handlers.NewOrgsHandler(st)
-	realtimeH := handlers.NewRealtimeHandler()
+	realtimeH := handlers.NewRealtimeHandler(as, st, cfg.CORSOriginList())
 	keysH := handlers.NewKeysHandler(st)
 	enrichersH := handlers.NewEnrichersHandler(st)
 	webhooksH := handlers.NewWebhooksHandler(st)
@@ -164,7 +164,12 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		r.Get("/system/config", systemH.GetConfig)
 		r.Get("/suggestions/commands", suggestionsH.Commands)
 		r.Get("/plugins/featured", pluginsH.ListFeatured)
-		r.Post("/waitlist", invitesH.JoinWaitlist)
+		// Public, unauthenticated write: flood-guarded per IP.
+		r.With(httprate.LimitBy(
+			10,
+			1*time.Minute,
+			func(r *http.Request) (string, error) { return clientIP(r), nil },
+		)).Post("/waitlist", invitesH.JoinWaitlist)
 
 		// Cheatsheet management (Consolidated to avoid Chi router panics)
 		r.Route("/cheatsheets", func(cr chi.Router) {
@@ -458,6 +463,14 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	// ─── SCIM 2.0 ───
 	r.Route("/scim/v2", func(sr chi.Router) {
 		sr.Use(mw.SCIMAuth(st))
+		// Bearer-token authenticated but not rate limited by the JWT groups:
+		// keep automated IdP syncs fast while still blunting brute force on
+		// the token itself.
+		sr.Use(httprate.LimitBy(
+			120,
+			1*time.Minute,
+			func(r *http.Request) (string, error) { return clientIP(r), nil },
+		))
 		sr.Route("/Users", func(ur chi.Router) {
 			ur.Get("/", scimH.ListUsers)
 			ur.Post("/", scimH.CreateUser)

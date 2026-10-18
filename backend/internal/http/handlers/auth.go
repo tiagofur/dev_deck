@@ -153,14 +153,16 @@ func (h *AuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 	// Exchange code for access token.
 	ghToken, err := h.authService.ExchangeGitHubCode(r.Context(), h.config.GitHubClientID, h.config.GitHubClientSecret, code)
 	if err != nil {
-		writeError(w, http.StatusBadGateway, "GITHUB_ERROR", "failed to exchange code: "+err.Error())
+		slog.Error("github oauth: exchange failed", "err", err)
+		writeError(w, http.StatusBadGateway, "GITHUB_ERROR", "failed to exchange code")
 		return
 	}
 
 	// Fetch GitHub user profile.
 	ghUser, err := h.authService.FetchGitHubUser(r.Context(), ghToken)
 	if err != nil {
-		writeError(w, http.StatusBadGateway, "GITHUB_ERROR", "failed to fetch github user: "+err.Error())
+		slog.Error("github oauth: fetch user failed", "err", err)
+		writeError(w, http.StatusBadGateway, "GITHUB_ERROR", "failed to fetch github user")
 		return
 	}
 
@@ -301,13 +303,15 @@ func (h *AuthHandler) GoogleCallback(w http.ResponseWriter, r *http.Request) {
 
 	gToken, err := h.authService.ExchangeGoogleCode(r.Context(), h.config.GoogleClientID, h.config.GoogleClientSecret, h.config.GoogleOAuthCallbackURL, code)
 	if err != nil {
-		writeError(w, http.StatusBadGateway, "GOOGLE_ERROR", "failed to exchange code: "+err.Error())
+		slog.Error("google oauth: exchange failed", "err", err)
+		writeError(w, http.StatusBadGateway, "GOOGLE_ERROR", "failed to exchange code")
 		return
 	}
 
 	gUser, err := h.authService.FetchGoogleUser(r.Context(), gToken)
 	if err != nil {
-		writeError(w, http.StatusBadGateway, "GOOGLE_ERROR", "failed to fetch google user: "+err.Error())
+		slog.Error("google oauth: fetch user failed", "err", err)
+		writeError(w, http.StatusBadGateway, "GOOGLE_ERROR", "failed to fetch google user")
 		return
 	}
 

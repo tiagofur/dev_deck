@@ -41,8 +41,8 @@ export function NotificationCenter() {
     if (n.action_url) {
       if (n.action_url.startsWith('/')) {
         navigate(n.action_url)
-      } else {
-        window.open(n.action_url, '_blank')
+      } else if (/^https?:\/\//i.test(n.action_url)) {
+        window.open(n.action_url, '_blank', 'noopener,noreferrer')
       }
     }
   }
