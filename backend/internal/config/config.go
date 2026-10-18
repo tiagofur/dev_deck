@@ -76,7 +76,7 @@ type Config struct {
 	// the refresh token as an HttpOnly cookie (and refresh reads it cookie-first,
 	// body-fallback). Default false → byte-identical to the legacy body/Bearer
 	// flow. Desktop/extension keep using the JSON body regardless of this flag.
-	AuthCookieMode bool `env:"AUTH_COOKIE_MODE" envDefault:"false"`
+	AuthCookieMode bool `env:"AUTH_COOKIE_MODE" envDefault:"true"`
 	// AuthCookieSecure controls the Secure attribute on the refresh cookie.
 	// Browsers refuse Secure cookies over plain http://, so local/dev over
 	// http needs this off; production over https keeps it on (the default).

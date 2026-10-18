@@ -204,7 +204,7 @@ func TestLoad(t *testing.T) {
 		}
 	})
 
-	t.Run("AuthCookieMode defaults off and Secure defaults on", func(t *testing.T) {
+	t.Run("AuthCookieMode defaults on and Secure defaults on", func(t *testing.T) {
 		setenv(t, "DB_URL", "postgres://localhost:5432/db")
 		setenv(t, "AUTH_MODE", "token")
 		setenv(t, "API_TOKEN", "test-token")
@@ -215,8 +215,10 @@ func TestLoad(t *testing.T) {
 		if err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
-		if cfg.AuthCookieMode {
-			t.Errorf("AuthCookieMode should default to false")
+		// ADR 0004: cookie mode is the default for web OAuth; the desktop
+		// deep-link flow opts out per device inside the handlers.
+		if !cfg.AuthCookieMode {
+			t.Errorf("AuthCookieMode should default to true")
 		}
 		if !cfg.AuthCookieSecure {
 			t.Errorf("AuthCookieSecure should default to true")

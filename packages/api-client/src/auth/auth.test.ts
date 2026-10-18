@@ -6,6 +6,7 @@ import {
   clearTokens,
   isLoggedIn,
   parseTokensFromFragment,
+  parseTokensFromQuery,
 } from './auth'
 import { setTokenStorage } from './storage/types'
 import { localStorageAdapter } from './storage/localStorage'
@@ -54,8 +55,35 @@ describe('auth (browser fallback)', () => {
     expect(parseTokensFromFragment()).toBeNull()
   })
 
-  it('parseTokensFromFragment returns null for incomplete fragment', () => {
+  it('parseTokensFromFragment stores access-only callbacks (cookie mode)', () => {
     window.location.hash = '#access_token=only-access'
-    expect(parseTokensFromFragment()).toBeNull()
+    const result = parseTokensFromFragment()
+    expect(result).toEqual({ access: 'only-access', refresh: null })
+    expect(getAccessToken()).toBe('only-access')
+    expect(getRefreshToken()).toBeNull()
+  })
+
+  it('parseTokensFromQuery stores tokens and strips them from the URL', () => {
+    window.history.replaceState(null, '', '/auth/callback?token=ACC&refresh_token=REF')
+    const result = parseTokensFromQuery()
+    expect(result).toEqual({ access: 'ACC', refresh: 'REF' })
+    expect(getAccessToken()).toBe('ACC')
+    expect(getRefreshToken()).toBe('REF')
+    // The query string must not survive in history, Referer or logs.
+    expect(window.location.search).toBe('')
+  })
+
+  it('parseTokensFromQuery accepts access-only callbacks (cookie mode) and cleans the URL', () => {
+    window.history.replaceState(null, '', '/auth/callback?token=COOKIE-ACC')
+    const result = parseTokensFromQuery()
+    expect(result).toEqual({ access: 'COOKIE-ACC', refresh: null })
+    expect(getAccessToken()).toBe('COOKIE-ACC')
+    expect(getRefreshToken()).toBeNull()
+    expect(window.location.search).toBe('')
+  })
+
+  it('parseTokensFromQuery returns null without a token', () => {
+    window.history.replaceState(null, '', '/auth/callback?error=denied')
+    expect(parseTokensFromQuery()).toBeNull()
   })
 })
