@@ -40,6 +40,9 @@ type AuthConfig struct {
 	GitHubClientID          string
 	GitHubClientSecret      string
 	GitHubOAuthCallbackURL  string
+	GoogleClientID          string
+	GoogleClientSecret      string
+	GoogleOAuthCallbackURL  string
 	WebOAuthRedirectURL     string
 	DesktopOAuthRedirectURL string
 	RequireInvite           bool
@@ -68,10 +71,14 @@ func NewAuthHandler(s *store.Store, as *authservice.Service, cfg AuthConfig) *Au
 
 // GET /api/auth/providers
 func (h *AuthHandler) Providers(w http.ResponseWriter, _ *http.Request) {
+	providers := []map[string]string{
+		{"provider": "github", "label": "GitHub"},
+	}
+	if h.config.GoogleClientID != "" && h.config.GoogleClientSecret != "" {
+		providers = append(providers, map[string]string{"provider": "google", "label": "Google"})
+	}
 	writeJSON(w, http.StatusOK, map[string]any{
-		"providers": []map[string]string{
-			{"provider": "github", "label": "GitHub"},
-		},
+		"providers": providers,
 	})
 }
 
@@ -191,6 +198,12 @@ func (h *AuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	h.completeOAuthLogin(w, r, device, user)
+}
+
+// completeOAuthLogin issues the session and redirects per device and cookie
+// mode. Shared by every OAuth provider callback.
+func (h *AuthHandler) completeOAuthLogin(w http.ResponseWriter, r *http.Request, device string, user *auth.User) {
 	pair, err := h.generateTokenPair(r, *user)
 	if err != nil {
 		writeInternal(w, err)
@@ -216,6 +229,121 @@ func (h *AuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 
 	redirectTo, _ := appendTokenPair(redirectBase, pair)
 	http.Redirect(w, r, redirectTo, http.StatusTemporaryRedirect)
+}
+
+// GET /api/auth/google/login
+func (h *AuthHandler) GoogleLogin(w http.ResponseWriter, r *http.Request) {
+	inviteCode := r.URL.Query().Get("invite_code")
+	device := normalizeAuthDevice(r.URL.Query().Get("device"))
+	state := randomState()
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "oauth_state",
+		Value:    state + "|" + device + "|" + inviteCode,
+		Path:     "/",
+		MaxAge:   600,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	authURL := fmt.Sprintf(
+		"https://accounts.google.com/o/oauth2/v2/auth?client_id=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s",
+		h.config.GoogleClientID,
+		url.QueryEscape(h.config.GoogleOAuthCallbackURL),
+		url.QueryEscape("openid email profile"),
+		state,
+	)
+
+	http.Redirect(w, r, authURL, http.StatusTemporaryRedirect)
+}
+
+// GET /api/auth/google/callback
+func (h *AuthHandler) GoogleCallback(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("oauth_state")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_STATE", "missing oauth cookie")
+		return
+	}
+
+	parts := strings.Split(cookie.Value, "|")
+	if len(parts) < 2 {
+		writeError(w, http.StatusBadRequest, "INVALID_STATE", "malformed oauth cookie")
+		return
+	}
+	storedState, device := parts[0], parts[1]
+	inviteCode := ""
+	if len(parts) > 2 {
+		inviteCode = parts[2]
+	}
+
+	if r.FormValue("state") != storedState {
+		writeError(w, http.StatusBadRequest, "INVALID_STATE", "state mismatch")
+		return
+	}
+
+	// Clear the cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "oauth_state",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	code := r.FormValue("code")
+	if code == "" {
+		writeError(w, http.StatusBadRequest, "MISSING_CODE", "missing code")
+		return
+	}
+
+	gToken, err := h.authService.ExchangeGoogleCode(r.Context(), h.config.GoogleClientID, h.config.GoogleClientSecret, h.config.GoogleOAuthCallbackURL, code)
+	if err != nil {
+		writeError(w, http.StatusBadGateway, "GOOGLE_ERROR", "failed to exchange code: "+err.Error())
+		return
+	}
+
+	gUser, err := h.authService.FetchGoogleUser(r.Context(), gToken)
+	if err != nil {
+		writeError(w, http.StatusBadGateway, "GOOGLE_ERROR", "failed to fetch google user: "+err.Error())
+		return
+	}
+
+	// Invite check for new users
+	var inviteID uuid.UUID
+	if h.config.RequireInvite {
+		if _, err := h.store.GetUserByGoogleID(r.Context(), gUser.Sub); errors.Is(err, store.ErrNotFound) {
+			if inviteCode == "" {
+				http.Redirect(w, r, h.config.WebOAuthRedirectURL+"?error=INVITE_REQUIRED", http.StatusTemporaryRedirect)
+				return
+			}
+			id, verr := h.store.ValidateInviteCode(r.Context(), inviteCode)
+			if verr != nil {
+				http.Redirect(w, r, h.config.WebOAuthRedirectURL+"?error=INVALID_INVITE", http.StatusTemporaryRedirect)
+				return
+			}
+			inviteID = id
+		}
+	}
+
+	user, err := h.store.UpsertGoogleUser(r.Context(), *gUser)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	// Consume invite if needed
+	if inviteID != uuid.Nil {
+		tx, _ := h.store.Pool().Begin(r.Context())
+		if tx != nil {
+			_ = h.store.UseInviteCode(r.Context(), tx, inviteID, user.ID)
+			_ = tx.Commit(r.Context())
+		}
+	}
+
+	h.completeOAuthLogin(w, r, device, user)
 }
 
 // POST /api/auth/refresh
