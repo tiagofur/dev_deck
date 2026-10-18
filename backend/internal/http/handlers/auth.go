@@ -719,11 +719,20 @@ var emailPattern = regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`)
 
 // dummyBcryptHash is a bcrypt digest used to equalize response timing when
 // the account does not exist or has no local password, so request latency
-// cannot reveal account existence. Digest of "heapdeck-timing-pad":
-// a timing pad for a public constant string, not a credential.
-const dummyBcryptHash = "$2a$10$s3YCwakrM3YMeGuXYjQ2JOqumeLGbmdSJz8Ehadu/idiTVnCKpKly" //nolint:gosec // G101
+// cannot reveal account existence. Computed once at startup from a public
+// constant string — it is a timing pad, not a credential.
+var dummyBcryptHash = bcryptDigest("heapdeck-timing-pad")
 
-const passwordResetEmailTemplate = `<!doctype html>
+func bcryptDigest(plain string) string {
+	digest, err := bcrypt.GenerateFromPassword([]byte(plain), bcrypt.DefaultCost)
+	if err != nil {
+		// bcrypt over a fixed in-memory string cannot fail.
+		panic("bcrypt digest failed: " + err.Error())
+	}
+	return string(digest)
+}
+
+const resetEmailBodyHTML = `<!doctype html>
 <html>
   <body style="font-family: sans-serif">
     <h2>Reset your HeapDeck password</h2>
@@ -758,7 +767,7 @@ func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 			sum := sha256.Sum256([]byte(token))
 			if err := h.store.CreatePasswordResetToken(r.Context(), user.ID, hex.EncodeToString(sum[:]), time.Now().Add(time.Hour)); err == nil {
 				link := strings.TrimRight(h.config.FrontendURL, "/") + "/reset-password?token=" + token
-				htmlBody := fmt.Sprintf(passwordResetEmailTemplate, html.EscapeString(link))
+				htmlBody := fmt.Sprintf(resetEmailBodyHTML, html.EscapeString(link))
 				if serr := h.config.EmailSender.Send(r.Context(), user.Login, "Reset your HeapDeck password", htmlBody); serr != nil {
 					slog.Error("forgot-password: failed to send email", "err", serr)
 				}
