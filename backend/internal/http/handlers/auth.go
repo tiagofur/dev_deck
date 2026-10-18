@@ -2,15 +2,20 @@ package handlers
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -18,6 +23,7 @@ import (
 	"devdeck/internal/authctx"
 	"devdeck/internal/authservice"
 	"devdeck/internal/domain/auth"
+	"devdeck/internal/email"
 	"devdeck/internal/store"
 
 	"github.com/google/uuid"
@@ -42,6 +48,11 @@ type AuthConfig struct {
 	AuthCookieMode   bool     // gates all cookie behavior; false → legacy body/Bearer
 	AuthCookieSecure bool     // Secure attribute on the refresh cookie (off for http dev)
 	AllowedOrigins   []string // CORS origin allowlist, used for the refresh Origin check
+
+	// Transactional email for flows like password reset (NoopSender in tests).
+	EmailSender email.Sender
+	// FrontendURL is the base URL used to build password reset links.
+	FrontendURL string
 }
 
 // refreshCookieName is the HttpOnly cookie that carries the refresh token in
@@ -312,6 +323,14 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "INVALID_INPUT", "email and password are required")
 		return
 	}
+	if !emailPattern.MatchString(body.Email) {
+		writeError(w, http.StatusBadRequest, "INVALID_INPUT", "enter a valid email address")
+		return
+	}
+	if err := validatePassword(body.Password); err != nil {
+		writeError(w, http.StatusBadRequest, "WEAK_PASSWORD", err.Error())
+		return
+	}
 
 	var inviteID uuid.UUID
 	if h.config.RequireInvite {
@@ -327,7 +346,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		inviteID = id
 	}
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
+	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), passwordHashCost)
 	if err != nil {
 		writeInternal(w, err)
 		return
@@ -389,7 +408,10 @@ func (h *AuthHandler) LoginLocal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if hash == "" {
-		writeError(w, http.StatusUnauthorized, "INVALID_CREDENTIALS", "user has no password set (try GitHub login)")
+		// Equalize timing with the wrong-password path and give no hint
+		// about whether the account exists or signs in via GitHub.
+		_ = bcrypt.CompareHashAndPassword([]byte(dummyBcryptHash), []byte(body.Password))
+		writeError(w, http.StatusUnauthorized, "INVALID_CREDENTIALS", "invalid email or password")
 		return
 	}
 
@@ -676,4 +698,173 @@ func (h *AuthHandler) originAllowed(r *http.Request) bool {
 		}
 	}
 	return false
+}
+
+// Password policy shared by register, reset and change.
+const (
+	passwordHashCost  = 12
+	minPasswordLength = 10
+)
+
+func validatePassword(password string) error {
+	if len(password) < minPasswordLength {
+		return fmt.Errorf("password must be at least %d characters", minPasswordLength)
+	}
+	return nil
+}
+
+// emailPattern keeps registrations to plausible addresses; it also prevents
+// arbitrary logins that would collide with GitHub handles in UpsertUser.
+var emailPattern = regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`)
+
+// dummyBcryptHash is a bcrypt digest used to equalize response timing when
+// the account does not exist or has no local password, so request latency
+// cannot reveal account existence. Digest of "heapdeck-timing-pad".
+const dummyBcryptHash = "$2a$10$s3YCwakrM3YMeGuXYjQ2JOqumeLGbmdSJz8Ehadu/idiTVnCKpKly"
+
+const passwordResetEmailTemplate = `<!doctype html>
+<html>
+  <body style="font-family: sans-serif">
+    <h2>Reset your HeapDeck password</h2>
+    <p>Use the link below to choose a new password. It expires in 1 hour and can be used only once.</p>
+    <p><a href="%s">Choose a new password</a></p>
+    <p>If you did not request this, you can safely ignore this email.</p>
+  </body>
+</html>`
+
+// POST /api/auth/forgot-password
+func (h *AuthHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Email string `json:"email"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
+		return
+	}
+
+	// Identical response whether or not the account exists: no enumeration.
+	const genericMessage = "if that email has an account, a password reset link has been sent"
+	if body.Email == "" || !emailPattern.MatchString(body.Email) {
+		writeJSON(w, http.StatusOK, map[string]string{"message": genericMessage})
+		return
+	}
+
+	user, hash, err := h.store.GetUserByLogin(r.Context(), body.Email)
+	if err == nil && hash != "" && h.config.EmailSender != nil {
+		raw := make([]byte, 32)
+		if _, err := rand.Read(raw); err == nil {
+			token := base64.RawURLEncoding.EncodeToString(raw)
+			sum := sha256.Sum256([]byte(token))
+			if err := h.store.CreatePasswordResetToken(r.Context(), user.ID, hex.EncodeToString(sum[:]), time.Now().Add(time.Hour)); err == nil {
+				link := strings.TrimRight(h.config.FrontendURL, "/") + "/reset-password?token=" + token
+				htmlBody := fmt.Sprintf(passwordResetEmailTemplate, html.EscapeString(link))
+				if serr := h.config.EmailSender.Send(r.Context(), user.Login, "Reset your HeapDeck password", htmlBody); serr != nil {
+					slog.Error("forgot-password: failed to send email", "err", serr)
+				}
+			} else {
+				slog.Error("forgot-password: failed to store reset token", "err", err)
+			}
+		}
+	}
+
+	writeJSON(w, http.StatusOK, map[string]string{"message": genericMessage})
+}
+
+// POST /api/auth/reset-password
+func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Token       string `json:"token"`
+		NewPassword string `json:"new_password"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
+		return
+	}
+
+	if body.Token == "" {
+		writeError(w, http.StatusBadRequest, "INVALID_INPUT", "token is required")
+		return
+	}
+	if err := validatePassword(body.NewPassword); err != nil {
+		writeError(w, http.StatusBadRequest, "WEAK_PASSWORD", err.Error())
+		return
+	}
+
+	sum := sha256.Sum256([]byte(body.Token))
+	userID, err := h.store.ConsumePasswordResetToken(r.Context(), hex.EncodeToString(sum[:]))
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_TOKEN", "this reset link is invalid or has expired")
+		return
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(body.NewPassword), passwordHashCost)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+	if err := h.store.UpdateUserPasswordHash(r.Context(), userID, string(hash)); err != nil {
+		writeInternal(w, err)
+		return
+	}
+	// A reset invalidates every refresh session: whoever holds old
+	// credentials (or an old bearer) starts from zero.
+	if err := h.store.RevokeUserSessions(r.Context(), userID); err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]string{"message": "password updated; sign in with your new password"})
+}
+
+// POST /api/auth/change-password
+func (h *AuthHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
+	userID, ok := authctx.UserID(r.Context())
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+		return
+	}
+
+	var body struct {
+		CurrentPassword string `json:"current_password"`
+		NewPassword     string `json:"new_password"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_BODY", "invalid json body")
+		return
+	}
+
+	if err := validatePassword(body.NewPassword); err != nil {
+		writeError(w, http.StatusBadRequest, "WEAK_PASSWORD", err.Error())
+		return
+	}
+
+	currentHash, err := h.store.GetUserPasswordHash(r.Context(), userID)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+	if currentHash == "" {
+		writeError(w, http.StatusBadRequest, "NO_PASSWORD", "this account signs in with an external provider")
+		return
+	}
+	if bcrypt.CompareHashAndPassword([]byte(currentHash), []byte(body.CurrentPassword)) != nil {
+		writeError(w, http.StatusUnauthorized, "INVALID_CREDENTIALS", "current password is incorrect")
+		return
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(body.NewPassword), passwordHashCost)
+	if err != nil {
+		writeInternal(w, err)
+		return
+	}
+	if err := h.store.UpdateUserPasswordHash(r.Context(), userID, string(hash)); err != nil {
+		writeInternal(w, err)
+		return
+	}
+	if err := h.store.RevokeUserSessions(r.Context(), userID); err != nil {
+		writeInternal(w, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]string{"message": "password updated"})
 }
