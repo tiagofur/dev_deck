@@ -5,6 +5,9 @@ import (
 
 	"devdeck/internal/authctx"
 	"devdeck/internal/store"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 // OrgRole represents the role a user has in an organization.
@@ -38,7 +41,11 @@ func hasPermission(role string, permission string) bool {
 	return false
 }
 
-// RequireOrgPermission ensures the user has the required permission within the active organization.
+// RequireOrgPermission ensures the user has the required permission within
+// the active organization (X-Org-ID header).
+//
+// Deprecated: the header is caller-controlled, so this must not guard routes
+// that carry the org id in their path — use RequireOrgPermissionFromPath.
 func RequireOrgPermission(st *store.Store, permission string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -69,6 +76,43 @@ func RequireOrgPermission(st *store.Store, permission string) func(http.Handler)
 			}
 
 			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+// RequireOrgPermissionFromPath ensures the user holds the required permission
+// in the organization named by the URL path parameter. Org-scoped routes must
+// use this instead of RequireOrgPermission, which trusts the X-Org-ID header
+// and would let an admin of their own org act on someone else's org id.
+func RequireOrgPermissionFromPath(st *store.Store, param, permission string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			userID, ok := authctx.UserID(r.Context())
+			if !ok {
+				unauthorized(w)
+				return
+			}
+
+			orgID, err := uuid.Parse(chi.URLParam(r, param))
+			if err != nil {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusBadRequest)
+				_, _ = w.Write([]byte(`{"error":{"code":"INVALID_ID","message":"organization id must be a uuid"}}`))
+				return
+			}
+
+			role, ok := st.IsOrgMember(r.Context(), userID, orgID)
+			if !ok {
+				forbidden(w, "not a member of this organization")
+				return
+			}
+
+			if !hasPermission(role, permission) {
+				forbidden(w, "insufficient permissions in this organization")
+				return
+			}
+
+			next.ServeHTTP(w, r.WithContext(authctx.WithOrgID(r.Context(), orgID)))
 		})
 	}
 }

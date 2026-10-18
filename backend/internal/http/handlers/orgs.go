@@ -86,6 +86,15 @@ func (h *OrgsHandler) AddMember(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Owner is never assignable through the API (org creation seeds it;
+	// transfers would be an explicit dedicated flow).
+	switch req.Role {
+	case "viewer", "editor", "admin":
+	default:
+		writeError(w, http.StatusBadRequest, "INVALID_ROLE", "role must be viewer, editor or admin")
+		return
+	}
+
 	if err := h.store.AddOrgMember(r.Context(), orgID, req.UserID, req.Role); err != nil {
 		writeInternal(w, err)
 		return
