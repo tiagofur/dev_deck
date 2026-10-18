@@ -98,6 +98,9 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		GitHubClientID:          cfg.GitHubClientID,
 		GitHubClientSecret:      cfg.GitHubClientSecret,
 		GitHubOAuthCallbackURL:  cfg.GitHubOAuthCallbackURL,
+		GoogleClientID:          cfg.GoogleClientID,
+		GoogleClientSecret:      cfg.GoogleClientSecret,
+		GoogleOAuthCallbackURL:  cfg.GoogleOAuthCallbackURL,
 		WebOAuthRedirectURL:     cfg.WebOAuthRedirectURL,
 		DesktopOAuthRedirectURL: cfg.DesktopOAuthRedirectURL,
 		RequireInvite:           cfg.RequireInvite,
@@ -224,6 +227,8 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 					r.Post("/reset-password", authH.ResetPassword)
 					r.Get("/github/login", authH.Login)
 					r.Get("/github/callback", authH.Callback)
+					r.Get("/google/login", authH.GoogleLogin)
+					r.Get("/google/callback", authH.GoogleCallback)
 
 					r.Route("/saml", func(r chi.Router) {
 						r.Get("/metadata", samlH.Metadata)

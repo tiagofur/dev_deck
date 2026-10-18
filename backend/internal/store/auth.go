@@ -371,3 +371,36 @@ func (s *Store) RevokeUserSessions(ctx context.Context, userID uuid.UUID) error 
 	`, userID)
 	return err
 }
+
+// GetUserByGoogleID returns the user linked to a Google identity.
+func (s *Store) GetUserByGoogleID(ctx context.Context, googleID string) (*auth.User, error) {
+	row := s.Reader().QueryRow(ctx, `SELECT `+userColumns+` FROM users WHERE google_id = $1`, googleID)
+	return scanUser(row)
+}
+
+// UpsertGoogleUser creates or updates the user behind a Google identity.
+// Google emails are verified, so login = email (same convention as local
+// accounts). If a local account already owns that login — registered before
+// this provider existed — the Google identity falls back to a suffixed login
+// instead of failing the whole OAuth flow.
+func (s *Store) UpsertGoogleUser(ctx context.Context, gUser auth.GoogleUser) (*auth.User, error) {
+	user, err := s.upsertGoogleUser(ctx, gUser, gUser.Email)
+	if err != nil && isUniqueViolation(err) {
+		return s.upsertGoogleUser(ctx, gUser, gUser.Email+"-google")
+	}
+	return user, err
+}
+
+func (s *Store) upsertGoogleUser(ctx context.Context, gUser auth.GoogleUser, login string) (*auth.User, error) {
+	row := s.Writer().QueryRow(ctx, `
+		INSERT INTO users (google_id, login, username, avatar_url, display_name, role, region)
+		VALUES ($1, $2, $3, $4, $5, 'user', $6)
+		ON CONFLICT (google_id) WHERE google_id IS NOT NULL DO UPDATE SET
+			login = EXCLUDED.login,
+			avatar_url = EXCLUDED.avatar_url,
+			display_name = EXCLUDED.display_name,
+			updated_at = NOW()
+		RETURNING `+userColumns,
+		gUser.Sub, login, gUser.Name, gUser.Picture, gUser.Name, s.appRegion)
+	return scanUser(row)
+}

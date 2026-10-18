@@ -56,3 +56,13 @@ type OAuthState struct {
 	Device       string
 	ExpiresAt    time.Time
 }
+
+// GoogleUser is the OIDC userinfo payload for a Google identity. Sub is the
+// stable Google account id (a string that can exceed int64) and the email is
+// always verified for the openid email profile scopes.
+type GoogleUser struct {
+	Sub     string `json:"sub"`
+	Email   string `json:"email"`
+	Name    string `json:"name"`
+	Picture string `json:"picture"`
+}

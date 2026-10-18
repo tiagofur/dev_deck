@@ -196,3 +196,68 @@ func TestStore_Auth_UpsertUserLoginCollision(t *testing.T) {
 		t.Fatalf("local account must keep github_id nil, got %v", local.GitHubID)
 	}
 }
+
+func TestStore_Auth_UpsertGoogleUser(t *testing.T) {
+	st, ctx := newStore(t)
+
+	gUser := auth.GoogleUser{
+		Sub:     "google-sub-1",
+		Email:   "guser@example.test",
+		Name:    "G User",
+		Picture: "https://pics.example/g",
+	}
+
+	user, err := st.UpsertGoogleUser(ctx, gUser)
+	if err != nil {
+		t.Fatalf("upsert google user: %v", err)
+	}
+	if user.Login != "guser@example.test" {
+		t.Fatalf("login = %q, want the verified email", user.Login)
+	}
+
+	// Same Google identity logs in again: same row, updated profile.
+	gUser.Name = "G User Updated"
+	second, err := st.UpsertGoogleUser(ctx, gUser)
+	if err != nil {
+		t.Fatalf("second upsert: %v", err)
+	}
+	if second.ID != user.ID {
+		t.Fatalf("second upsert created user %s, want the same %s", second.ID, user.ID)
+	}
+
+	// A local account owning the email predates the provider: the Google
+	// identity falls back to a suffixed login and the local account stays.
+	if _, err := st.CreateUserLocalTx(ctx, nil, "guser2@example.test", "not-a-real-hash"); err != nil {
+		t.Fatalf("create local user: %v", err)
+	}
+	local, _, err := st.GetUserByLogin(ctx, "guser2@example.test")
+	if err != nil {
+		t.Fatalf("fetch local user: %v", err)
+	}
+
+	colliding := auth.GoogleUser{Sub: "google-sub-2", Email: "guser2@example.test", Name: "G2"}
+	u2, err := st.UpsertGoogleUser(ctx, colliding)
+	if err != nil {
+		t.Fatalf("upsert colliding google user: %v", err)
+	}
+	if u2.Login != "guser2@example.test-google" {
+		t.Fatalf("login = %q, want the suffixed %q", u2.Login, "guser2@example.test-google")
+	}
+
+	localAgain, _, err := st.GetUserByLogin(ctx, "guser2@example.test")
+	if err != nil {
+		t.Fatalf("local user missing: %v", err)
+	}
+	if localAgain.ID != local.ID {
+		t.Fatalf("local account was modified by the google upsert")
+	}
+
+	// The identity resolves by its Google sub.
+	bySub, err := st.GetUserByGoogleID(ctx, "google-sub-2")
+	if err != nil {
+		t.Fatalf("GetUserByGoogleID: %v", err)
+	}
+	if bySub.ID != u2.ID {
+		t.Fatalf("sub resolves to %s, want %s", bySub.ID, u2.ID)
+	}
+}
