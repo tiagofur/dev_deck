@@ -26,21 +26,24 @@ let refreshPromise: Promise<boolean> | null = null
 async function refreshAccessToken(): Promise<boolean> {
   if (refreshPromise) return refreshPromise
   refreshPromise = (async () => {
-    const rt = getRefreshToken()
-    if (!rt) return false
     try {
       const { baseUrl } = getConfig()
+      const stored = getRefreshToken()
+      // Cookie mode (ADR 0004): the HttpOnly refresh cookie rides along via
+      // credentials: 'include', so an absent stored token is not an error —
+      // the body carries whatever the storage has, possibly nothing.
       const res = await fetch(`${baseUrl}/api/auth/refresh`, {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh_token: rt }),
+        body: JSON.stringify(stored ? { refresh_token: stored } : {}),
       })
       if (!res.ok) {
         clearTokens()
         return false
       }
       const data = await res.json()
-      setTokens(data.access_token, data.refresh_token)
+      setTokens(data.access_token, data.refresh_token ?? null)
       return true
     } catch {
       clearTokens()
@@ -116,8 +119,9 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     headers,
   })
 
-  // Auto-refresh on 401 for JWT mode.
-  if (res.status === 401 && authMode === 'jwt' && getRefreshToken()) {
+  // Auto-refresh on 401 for JWT mode. The stored refresh token is optional:
+  // cookie mode keeps it in an HttpOnly cookie instead (ADR 0004).
+  if (res.status === 401 && authMode === 'jwt') {
     const refreshed = await refreshAccessToken()
     if (refreshed) {
       // Update authorization header with new token before retrying.

@@ -16,8 +16,8 @@ export function getRefreshToken(): string | null {
   return getTokenStorage().getRefresh()
 }
 
-export function setTokens(access: string, refresh: string): void {
-  getTokenStorage().setTokens(access, refresh)
+export function setTokens(access: string, refresh?: string | null): void {
+  getTokenStorage().setTokens(access, refresh ?? '')
 }
 
 export function clearTokens(): void {
@@ -29,29 +29,34 @@ export function isLoggedIn(): boolean {
 }
 
 // Parse tokens from URL fragment (after OAuth callback).
-// Fragment format: #access_token=xxx&refresh_token=xxx&expires_in=3600
-export function parseTokensFromFragment(): { access: string; refresh: string } | null {
+// Fragment format: #access_token=xxx&refresh_token=xxx
+// Cookie mode (ADR 0004) may omit the refresh token: it lives in an
+// HttpOnly cookie instead of the URL.
+export function parseTokensFromFragment(): { access: string; refresh: string | null } | null {
   if (typeof window === 'undefined') return null
   const hash = window.location.hash.substring(1)
   if (!hash) return null
   const params = new URLSearchParams(hash)
   const access = params.get('access_token')
+  if (!access) return null
   const refresh = params.get('refresh_token')
-  if (!access || !refresh) return null
   setTokens(access, refresh)
   window.location.hash = ''
   return { access, refresh }
 }
 
 // Parse tokens from URL query string (web OAuth callback).
-// Query format: ?token=xxx&refresh_token=xxx
-export function parseTokensFromQuery(): { access: string; refresh: string } | null {
+// Query format: ?token=xxx&refresh_token=xxx — cookie mode omits the refresh
+// token (HttpOnly cookie) but the access token must still leave the URL:
+// query strings outlive the callback in history, Referer and proxy logs.
+export function parseTokensFromQuery(): { access: string; refresh: string | null } | null {
   if (typeof window === 'undefined') return null
   const params = new URLSearchParams(window.location.search)
   const access = params.get('token') ?? params.get('access_token')
+  if (!access) return null
   const refresh = params.get('refresh_token')
-  if (!access || !refresh) return null
   setTokens(access, refresh)
+  window.history.replaceState(window.history.state, '', window.location.pathname)
   return { access, refresh }
 }
 
@@ -83,12 +88,15 @@ export async function fetchAuthProviders(): Promise<AuthProviderInfo[]> {
 
 export async function logoutCurrentSession(): Promise<void> {
   const { baseUrl, authMode } = getConfig()
-  const refresh = getRefreshToken()
-  if (authMode === 'jwt' && refresh) {
+  if (authMode === 'jwt') {
+    const refresh = getRefreshToken()
+    // Cookie mode (ADR 0004): credentials carry the HttpOnly refresh cookie;
+    // the backend resolves the session from the cookie and clears it.
     await fetch(`${baseUrl}/api/auth/logout`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: refresh }),
+      body: JSON.stringify(refresh ? { refresh_token: refresh } : {}),
     }).catch(() => undefined)
   }
   clearTokens()
@@ -107,9 +115,18 @@ export async function loginStep1(email: string): Promise<LoginStep1Response> {
   return api.post<LoginStep1Response>('/api/auth/login-step1', { email })
 }
 
-export async function loginLocal(email: string, password: string): Promise<{ access_token: string; refresh_token: string; expires_in: number }> {
-  const pair = await api.post<{ access_token: string; refresh_token: string; expires_in: number }>('/api/auth/login', { email, password })
-  setTokens(pair.access_token, pair.refresh_token)
+export interface LocalLoginResult {
+  access_token: string
+  expires_in: number
+  // Cookie mode still returns the pair additively (desktop/extension need
+  // it); web callers may receive no refresh token when the server withholds
+  // it in favor of the HttpOnly cookie.
+  refresh_token?: string
+}
+
+export async function loginLocal(email: string, password: string): Promise<LocalLoginResult> {
+  const pair = await api.post<LocalLoginResult>('/api/auth/login', { email, password })
+  setTokens(pair.access_token, pair.refresh_token ?? null)
   return pair
 }
 
