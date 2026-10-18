@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	"devdeck/internal/enricher"
+	"heapdeck/internal/enricher"
 
 	"github.com/google/uuid"
 )
