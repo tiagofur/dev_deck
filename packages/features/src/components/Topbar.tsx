@@ -1,7 +1,7 @@
 import { Menu, Plus, Search } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useMe } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { useMe } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 import { SyncStatusIndicator } from './SyncStatusIndicator'
 import { NotificationCenter } from './NotificationCenter'
 import { WorkspaceSwitcher } from './WorkspaceSwitcher'
@@ -48,7 +48,7 @@ export function Topbar({
 
           {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- heading doubles as a clickable logo; primary navigation is provided elsewhere */}
           <h1
-            aria-label="DevDeck"
+            aria-label="HeapDeck"
             className="lg:hidden shrink-0 cursor-pointer whitespace-nowrap font-display text-lg font-black uppercase tracking-tight sm:text-xl"
             onClick={() => navigate('/items')}
             onKeyDown={(e) => {

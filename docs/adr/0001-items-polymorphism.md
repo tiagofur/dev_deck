@@ -10,7 +10,7 @@
 
 ## Context and Problem Statement
 
-Initially, DevDeck was focused exclusively on **Repositories**. The data model was rigid, centered around the `repos` table. As we moved towards Wave 5, the need to support other developer assets (CLIs, Plugins, Snippets, Shortcuts, Prompts) became evident.
+Initially, HeapDeck was focused exclusively on **Repositories**. The data model was rigid, centered around the `repos` table. As we moved towards Wave 5, the need to support other developer assets (CLIs, Plugins, Snippets, Shortcuts, Prompts) became evident.
 
 The challenge was: how do we store these diverse entities while maintaining a unified search experience (especially for AI semantic search) without creating a fragmented schema that is hard to maintain?
 
@@ -59,4 +59,4 @@ CREATE TABLE items (
 
 ---
 
-*Part of the DevDeck Architecture Decision Records*
+*Part of the HeapDeck Architecture Decision Records*

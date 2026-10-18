@@ -1,13 +1,13 @@
 package seed
 
 import (
-	"devdeck/internal/domain/items"
+	"heapdeck/internal/domain/items"
 )
 
 // DemoKitID identifies the demo vault kit; DemoTag marks every item it
 // installs so demo data can be bulk-removed (or kept by removing the tag).
 const (
-	DemoKitID = "devdeck-demo"
+	DemoKitID = "heapdeck-demo"
 	DemoTag   = "demo"
 )
 
@@ -35,9 +35,9 @@ func GetStarterKits() []StarterKit {
 	return []StarterKit{
 		{
 			ID:          DemoKitID,
-			Name:        "DevDeck Launch Demo",
+			Name:        "HeapDeck Launch Demo",
 			Description: "A realistic demo vault: repos, CLIs, shortcuts, prompts, snippets, notes, and workflow context. Every item is tagged 'demo' so it can be removed in one click.",
-			Icon:        "https://devdeck.ai/favicon.ico",
+			Icon:        "https://heapdeck.com/favicon.ico",
 			Items: []SeedItem{
 				{
 					Title:       "TanStack Query offline mutation patterns",
@@ -154,10 +154,10 @@ func GetStarterKits() []StarterKit {
 					Title:       "Caddy reverse proxy block for self-hosting",
 					Type:        items.TypeSnippet,
 					Description: "Minimal Caddyfile pattern for routing the web app and API behind TLS.",
-					Notes:       "devdeck.example.com {\n  reverse_proxy web:5173\n}\n\napi.devdeck.example.com {\n  reverse_proxy api:8080\n}",
+					Notes:       "heapdeck.example.com {\n  reverse_proxy web:5173\n}\n\napi.heapdeck.example.com {\n  reverse_proxy api:8080\n}",
 					Tags:        []string{DemoTag, "self-hosting", "caddy", "vps"},
 					WhySaved:    "Good starting point for validating the public beta self-hosting guide.",
-					WhenToUse:   "Use when testing DevDeck on a small VPS.",
+					WhenToUse:   "Use when testing HeapDeck on a small VPS.",
 					Meta:        map[string]any{"language": "Caddyfile", "topics": []string{"deploy", "tls"}},
 				},
 				{

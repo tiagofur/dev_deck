@@ -1,6 +1,6 @@
-# DevDeck.ai Roadmap
+# HeapDeck.com Roadmap
 
-This roadmap reflects the current public position of DevDeck: **0.5.0 Public Beta**.
+This roadmap reflects the current public position of HeapDeck: **0.5.0 Public Beta**.
 
 [Leer en español](ROADMAP.es.md)
 
@@ -8,7 +8,7 @@ This roadmap reflects the current public position of DevDeck: **0.5.0 Public Bet
 
 ## Current product direction
 
-DevDeck is becoming a developer memory layer: capture useful developer artifacts, add context, retrieve them by intent, use them inside a Workbench, and share high-signal findings with trusted Circles.
+HeapDeck is becoming a developer memory layer: capture useful developer artifacts, add context, retrieve them by intent, use them inside a Workbench, and share high-signal findings with trusted Circles.
 
 The priority before a stable `1.0.0` is not more hype. It is trust:
 
@@ -20,7 +20,7 @@ The priority before a stable `1.0.0` is not more hype. It is trust:
 - stable capture/search/workbench/Circles flows,
 - and a contributor path that makes small PRs easy.
 
-Offline-first sync is intentionally deferred until after `1.0.0` (see [docs/archive/FEATURE_REVIEW_2026_06.md](docs/archive/FEATURE_REVIEW_2026_06.md), decision A5). Today DevDeck runs in honest cloud mode; Workbench utilities work fully local, and a full vault export (#122) covers data ownership in the meantime.
+Offline-first sync is intentionally deferred until after `1.0.0` (see [docs/archive/FEATURE_REVIEW_2026_06.md](docs/archive/FEATURE_REVIEW_2026_06.md), decision A5). Today HeapDeck runs in honest cloud mode; Workbench utilities work fully local, and a full vault export (#122) covers data ownership in the meantime.
 
 ---
 
@@ -29,7 +29,7 @@ Offline-first sync is intentionally deferred until after `1.0.0` (see [docs/arch
 ### Product polish
 
 - [x] Clarify public README and launch story.
-- [x] Position DevDeck honestly as `0.5.0 Public Beta`.
+- [x] Position HeapDeck honestly as `0.5.0 Public Beta`.
 - [x] Add screenshots and/or a short demo GIF.
 - [ ] Add realistic demo/seed data for a first-run experience (#117).
 - [x] Document known limitations clearly (#129).
@@ -94,7 +94,7 @@ Offline-first sync is intentionally deferred until after `1.0.0` (see [docs/arch
 
 ## 1.0.0 criteria
 
-DevDeck should only be called `1.0.0 Stable` when:
+HeapDeck should only be called `1.0.0 Stable` when:
 
 - A new developer can understand the value from the README in under 30 seconds.
 - Screenshots/GIF/demo assets exist.
@@ -104,7 +104,7 @@ DevDeck should only be called `1.0.0 Stable` when:
 - CI and critical E2E checks are stable.
 - Contributor workflow is proven through small external-friendly issues/PRs.
 
-Until then, DevDeck stays honest: useful public beta, improving in the open.
+Until then, HeapDeck stays honest: useful public beta, improving in the open.
 
 ---
 

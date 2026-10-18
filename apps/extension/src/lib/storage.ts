@@ -1,7 +1,7 @@
-import type { TokenStorage } from '@devdeck/api-client'
+import type { TokenStorage } from '@heapdeck/api-client'
 
-const ACCESS = 'devdeck.access_token'
-const REFRESH = 'devdeck.refresh_token'
+const ACCESS = 'heapdeck.access_token'
+const REFRESH = 'heapdeck.refresh_token'
 
 // Shared token storage for the popup and options pages. Tokens are kept in
 // localStorage (the sync TokenStorage API the api-client expects) and mirrored

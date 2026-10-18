@@ -10,12 +10,12 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src/renderer/src'),
-      '@devdeck/ui': resolve(__dirname, '../../packages/ui/src/index.ts'),
-      '@devdeck/api-client': resolve(
+      '@heapdeck/ui': resolve(__dirname, '../../packages/ui/src/index.ts'),
+      '@heapdeck/api-client': resolve(
         __dirname,
         '../../packages/api-client/src/index.ts',
       ),
-      '@devdeck/features': resolve(
+      '@heapdeck/features': resolve(
         __dirname,
         '../../packages/features/src/index.ts',
       ),

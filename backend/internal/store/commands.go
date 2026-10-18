@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"devdeck/internal/domain/commands"
+	"heapdeck/internal/domain/commands"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"

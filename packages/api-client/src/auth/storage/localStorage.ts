@@ -3,8 +3,8 @@
 
 import type { TokenStorage } from './types'
 
-const ACCESS_KEY = 'devdeck_access_token'
-const REFRESH_KEY = 'devdeck_refresh_token'
+const ACCESS_KEY = 'heapdeck_access_token'
+const REFRESH_KEY = 'heapdeck_refresh_token'
 
 export const localStorageAdapter: TokenStorage = {
   getAccess() {

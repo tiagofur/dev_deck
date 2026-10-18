@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { FlaskConical } from 'lucide-react'
-import { Button } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+import { Button } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 import { AppShell } from './AppShell'
 
 export interface FeatureDisabledStateProps {

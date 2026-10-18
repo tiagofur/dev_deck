@@ -8,10 +8,10 @@ import {
   Terminal,
   Trash2,
 } from 'lucide-react'
-import { Button } from '@devdeck/ui'
-import type { Repo } from '@devdeck/api-client'
-import { showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+import { Button } from '@heapdeck/ui'
+import type { Repo } from '@heapdeck/api-client'
+import { showToast } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 
 interface Props {
   repo: Repo

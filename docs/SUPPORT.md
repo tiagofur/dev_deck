@@ -1,14 +1,14 @@
-# Support DevDeck
+# Support HeapDeck
 
-DevDeck is an indie open-source project. The goal is to build a useful developer-memory tool without hiding the core value behind a closed product.
+HeapDeck is an indie open-source project. The goal is to build a useful developer-memory tool without hiding the core value behind a closed product.
 
-Support is not required to use DevDeck. It helps keep the project moving faster and makes the public beta more sustainable.
+Support is not required to use HeapDeck. It helps keep the project moving faster and makes the public beta more sustainable.
 
 ---
 
 ## Why support matters
 
-DevDeck is being built in public as a `0.5.0 Public Beta`. That means the project is already useful, but still needs polish before a stable 1.0 release:
+HeapDeck is being built in public as a `0.5.0 Public Beta`. That means the project is already useful, but still needs polish before a stable 1.0 release:
 
 - clearer onboarding,
 - better screenshots and demo assets,
@@ -18,7 +18,7 @@ DevDeck is being built in public as a `0.5.0 Public Beta`. That means the projec
 - contributor-friendly issues,
 - and continued development time.
 
-If DevDeck helps you save, rediscover, or share developer knowledge, support helps fund the work needed to make it dependable for more people.
+If HeapDeck helps you save, rediscover, or share developer knowledge, support helps fund the work needed to make it dependable for more people.
 
 ---
 
@@ -26,7 +26,7 @@ If DevDeck helps you save, rediscover, or share developer knowledge, support hel
 
 Support goes toward practical project costs:
 
-- Domain and hosting for `devdeck.ai`.
+- Domain and hosting for `heapdeck.com`.
 - CI, test infrastructure, and release verification.
 - Development time for bug fixes, polish, docs, and onboarding.
 - AI-assisted coding tools used to move faster while still reviewing changes carefully.
@@ -47,7 +47,7 @@ If GitHub Sponsors becomes available for the project, it should be added here an
 You can also help by:
 
 - starring the repository,
-- sharing DevDeck with developers who collect tools, repos, prompts, commands, and workflows,
+- sharing HeapDeck with developers who collect tools, repos, prompts, commands, and workflows,
 - opening sharp issues with real feedback,
 - testing the public beta with your own developer resources,
 - improving docs,
@@ -66,7 +66,7 @@ Managed hosting for communities or small teams that want shared developer memory
 
 ### Paid setup and support
 
-Help individuals, teams, or communities self-host DevDeck, configure capture flows, and create a useful first vault.
+Help individuals, teams, or communities self-host HeapDeck, configure capture flows, and create a useful first vault.
 
 ### Workflow and template packs
 
@@ -86,7 +86,7 @@ Sponsorship from developer-tooling companies that align with the project and do 
 
 ## Funding principles
 
-- Keep the public message honest: DevDeck is a public beta, not a fake 1.0.
+- Keep the public message honest: HeapDeck is a public beta, not a fake 1.0.
 - Keep the open-source core useful.
 - Prefer sustainable support over manipulative paywalls.
 - Do not over-promise enterprise features before they are real.
@@ -96,8 +96,8 @@ Sponsorship from developer-tooling companies that align with the project and do 
 
 ## Current launch-readiness work
 
-The current milestone is focused on getting DevDeck ready for public community promotion:
+The current milestone is focused on getting HeapDeck ready for public community promotion:
 
-- [0.5.0 Launch Readiness](https://github.com/tiagofur/dev_deck/milestone/1)
+- [0.5.0 Launch Readiness](https://github.com/tiagofur/heapdeck/milestone/1)
 
 If you want to contribute, start with issues labeled `good first issue` or `help wanted`.

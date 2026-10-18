@@ -1,8 +1,8 @@
-# DevDeck Self-Hosting Guide
+# HeapDeck Self-Hosting Guide
 
-This guide explains how to deploy your own **DevDeck.ai** instance on a small
+This guide explains how to deploy your own **HeapDeck.com** instance on a small
 VPS using the repository's current production stack: **Docker Compose + Caddy +
-Postgres + DevDeck API + Web app**.
+Postgres + HeapDeck API + Web app**.
 
 [Leer en español](SELF_HOSTING.es.md)
 
@@ -13,7 +13,7 @@ Postgres + DevDeck API + Web app**.
 - A Linux VPS or server. Ubuntu 22.04+ or Debian 12+ are the safest targets.
 - At least **1 vCPU**, **1 GB RAM**, and **10 GB disk** for a small personal or
   team install.
-- A domain pointed at the VPS, for example `devdeck.yourdomain.com`.
+- A domain pointed at the VPS, for example `heapdeck.yourdomain.com`.
 - Docker 24+ and Docker Compose v2 installed.
 - A GitHub account so you can create a GitHub OAuth App for sign-in.
 
@@ -23,9 +23,9 @@ Postgres + DevDeck API + Web app**.
 
 1. Open GitHub [Developer Settings](https://github.com/settings/developers).
 2. Create a new **OAuth App**.
-3. Set **Homepage URL** to `https://devdeck.yourdomain.com`.
+3. Set **Homepage URL** to `https://heapdeck.yourdomain.com`.
 4. Set **Authorization callback URL** to:
-   `https://devdeck.yourdomain.com/api/auth/github/callback`
+   `https://heapdeck.yourdomain.com/api/auth/github/callback`
 5. Save the app, then copy the **Client ID** and **Client Secret**.
 
 GitHub does not show the client secret again later, so store it now.
@@ -35,8 +35,8 @@ GitHub does not show the client secret again later, so store it now.
 ## 3. Clone the Repository
 
 ```bash
-git clone https://github.com/tiagofur/dev_deck.git
-cd dev_deck/deploy
+git clone https://github.com/tiagofur/heapdeck.git
+cd heapdeck/deploy
 ```
 
 ---
@@ -53,8 +53,8 @@ Update the file with your real values:
 
 ```env
 # Public domain
-DOMAIN=devdeck.yourdomain.com
-FRONTEND_URL=https://devdeck.yourdomain.com
+DOMAIN=heapdeck.yourdomain.com
+FRONTEND_URL=https://heapdeck.yourdomain.com
 
 # Postgres
 PG_PASS=<strong-random-password>
@@ -65,9 +65,9 @@ LOCAL_AUTH_ENABLED=true
 ALLOWED_GITHUB_LOGINS=your-github-login
 GITHUB_CLIENT_ID=<from GitHub OAuth App>
 GITHUB_CLIENT_SECRET=<from GitHub OAuth App>
-GITHUB_OAUTH_CALLBACK_URL=https://devdeck.yourdomain.com/api/auth/github/callback
-WEB_OAUTH_REDIRECT_URL=https://devdeck.yourdomain.com/auth/callback
-DESKTOP_OAUTH_REDIRECT_URL=devdeck://auth/callback
+GITHUB_OAUTH_CALLBACK_URL=https://heapdeck.yourdomain.com/api/auth/github/callback
+WEB_OAUTH_REDIRECT_URL=https://heapdeck.yourdomain.com/auth/callback
+DESKTOP_OAUTH_REDIRECT_URL=heapdeck://auth/callback
 
 # JWT secrets
 JWT_SECRET=<openssl rand -hex 32>
@@ -82,7 +82,7 @@ AI_PROVIDER=heuristic
 
 # Operational defaults
 LOG_LEVEL=info
-CORS_ORIGINS=https://devdeck.yourdomain.com,app://.
+CORS_ORIGINS=https://heapdeck.yourdomain.com,app://.
 SEED_CHEATSHEETS=true
 ```
 
@@ -140,7 +140,7 @@ them after the first boot:
 ```bash
 for f in ../backend/migrations/*.sql; do
   echo "Applying $f..."
-  docker compose exec -T db psql -U devdeck devdeck -v ON_ERROR_STOP=1 -f - < "$f"
+  docker compose exec -T db psql -U heapdeck heapdeck -v ON_ERROR_STOP=1 -f - < "$f"
 done
 ```
 
@@ -154,7 +154,7 @@ cheatsheet seed data during startup.
 Confirm the public health endpoint responds:
 
 ```bash
-curl https://devdeck.yourdomain.com/healthz
+curl https://heapdeck.yourdomain.com/healthz
 ```
 
 Expected response:
@@ -163,7 +163,7 @@ Expected response:
 {"status":"ok"}
 ```
 
-Then open `https://devdeck.yourdomain.com` in the browser and verify that the
+Then open `https://heapdeck.yourdomain.com` in the browser and verify that the
 GitHub login flow returns to `/auth/callback` successfully.
 
 ---
@@ -187,7 +187,7 @@ Current `0.5.0` public beta limitations worth knowing up front:
   `PG_PASS`, `JWT_SECRET`, `GITHUB_CLIENT_ID`, and
   `GITHUB_OAUTH_CALLBACK_URL` are all set correctly.
 - **Migrations failed:** connect to Postgres with
-  `docker compose exec db psql -U devdeck devdeck` and inspect which migration
+  `docker compose exec db psql -U heapdeck heapdeck` and inspect which migration
   stopped.
 - **GitHub login returns 403:** add your GitHub login to
   `ALLOWED_GITHUB_LOGINS`, then restart the API with

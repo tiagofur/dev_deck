@@ -1,8 +1,8 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { X } from 'lucide-react'
-import { Button } from '@devdeck/ui'
-import { useAddRepo } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { Button } from '@heapdeck/ui'
+import { useAddRepo } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 interface Props {
   open: boolean

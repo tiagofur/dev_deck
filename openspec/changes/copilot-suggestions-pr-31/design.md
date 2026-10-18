@@ -16,7 +16,7 @@ The implementation focuses on three areas: data safety (UTF-8), reporting accura
 **Rationale**: The `enrichment_status` column is a simple enum. Reporting "error" if *any* part failed is safer for the UI to trigger retries or show warnings.
 
 ### Decision: Centralized Frontend Status Constants
-**Choice**: Export a `const EnrichmentStatus` object from `@devdeck/api-client`.
+**Choice**: Export a `const EnrichmentStatus` object from `@heapdeck/api-client`.
 **Alternatives considered**: Using a TypeScript `enum`.
 **Rationale**: Constant objects with `as const` are preferred in this project's style for better tree-shaking and compatibility with the polymorphic nature of the API.
 

@@ -1,10 +1,10 @@
 import { AnimatePresence, motion, type TargetAndTransition } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import { useStats } from '@devdeck/api-client'
-import type { MascotMood } from '@devdeck/api-client'
-import { usePreferences } from '@devdeck/api-client'
+import { useStats } from '@heapdeck/api-client'
+import type { MascotMood } from '@heapdeck/api-client'
+import { usePreferences } from '@heapdeck/api-client'
 import { MascotSVG } from './MascotSVG'
-import { useTranslation } from '@devdeck/i18n'
+import { useTranslation } from '@heapdeck/i18n'
 
 /**
  * Per-mood Framer Motion animation. Idle and sleeping loop forever;

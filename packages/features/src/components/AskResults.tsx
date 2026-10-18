@@ -1,5 +1,5 @@
 import { ExternalLink, Link as LinkIcon, MessageSquare } from 'lucide-react'
-import type { AskCitation, AskResponse } from '@devdeck/api-client'
+import type { AskCitation, AskResponse } from '@heapdeck/api-client'
 import { useNavigate } from 'react-router-dom'
 
 interface Props {

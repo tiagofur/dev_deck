@@ -1,4 +1,4 @@
-# DevDeck — App Audit (May 2026)
+# HeapDeck — App Audit (May 2026)
 
 > ⚠️ **Historical document (archived).** This is a dated snapshot; parts of it no longer reflect the current state of the product. See [ROADMAP.md](../../ROADMAP.md) for current status.
 
@@ -27,8 +27,8 @@
 | **Settings** | — | ✅ SettingsPage (26KB, substantial) | — | Extensive configuration surface. |
 | **Paste interceptor** | — (client-only) | ✅ PasteInterceptor (Electron) | ✅ | Desktop only. |
 | **Shortcuts modal** | — | ✅ ShortcutsModal with documented keys | — | Good UX. |
-| **i18n** | — | ✅ `@devdeck/i18n` package | — | Translations used throughout the app. |
-| **Toaster + Confirm** | — | ✅ singletons in `@devdeck/ui` | — | UX infrastructure. |
+| **i18n** | — | ✅ `@heapdeck/i18n` package | — | Translations used throughout the app. |
+| **Toaster + Confirm** | — | ✅ singletons in `@heapdeck/ui` | — | UX infrastructure. |
 
 ---
 
@@ -39,7 +39,7 @@ Code exists (backend + frontend) but depth/utility for the 90% user is questiona
 | Feature | Backend | Frontend | Real State | Verdict |
 |---------|---------|----------|-------------|---------|
 | **AI Auto-tagging + Summary** | ✅ heuristic + OpenAI + Ollama + DeepSeek + Qwen + LMStudio (6 providers) | ✅ ItemCard shows `ai_summary` and `ai_tags` | MVP works but: how many users will configure an AI provider? Heuristic is weak. | **Improve heuristic** — it's what 90% who DON'T configure AI will use. |
-| **Ask DevDeck (RAG)** | ✅ POST /api/ask | ✅ AskResults component | Requires embeddings + configured provider. Without it, dead feature. | **Hide if no provider** — don't show a dead button. |
+| **Ask HeapDeck (RAG)** | ✅ POST /api/ask | ✅ AskResults component | Requires embeddings + configured provider. Without it, dead feature. | **Hide if no provider** — don't show a dead button. |
 | **Agent Chat** | ✅ POST /api/agent/chat | ✅ AgentChat.tsx (9KB) | Requires AI provider. | **Same logic: hide if no provider.** |
 | **Semantic Search** | ✅ migration 0012, embeddings.go | ✅ toggle in search | Requires pgvector + provider. Fallback to textual exists. | OK — fallback exists. But toggle shouldn't show without embeddings. |
 | **Offline Sync** | ✅ sync handlers, delta, batch, migrations 0013-0014, 0020-0021 | ✅ SyncStatusIndicator + sync engine + queue | Engine exists but: is it active? Does local-db actually persist? `schema.ts` is 2KB — a skeleton. | **Validate it works end-to-end** before showing the indicator. |
@@ -127,7 +127,7 @@ Code exists (backend + frontend) but depth/utility for the 90% user is questiona
 
 ### 🔴 NOISE — Features that add complexity without clear return
 
-30. Ask DevDeck without configured provider → dead button
+30. Ask HeapDeck without configured provider → dead button
 31. Agent Chat without configured provider → dead button
 32. Semantic search toggle without embeddings → dead toggle
 33. Sync indicator without real offline-first → misleading indicator
@@ -230,7 +230,7 @@ The root cause is that **navigation was built incrementally** — each wave adde
 
 This is an **information architecture** problem, not a visual design problem:
 - Good IA with bad visuals → usable but ugly
-- Bad IA with good visuals → pretty but confusing ← **DevDeck is here**
+- Bad IA with good visuals → pretty but confusing ← **HeapDeck is here**
 
 ### Recommended approach
 

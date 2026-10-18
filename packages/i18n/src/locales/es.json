@@ -90,7 +90,7 @@
     "plugin_registered": "Plugin registrado",
     "register_http_plugin": "+ Registrar plugin HTTP",
     "output_webhooks": "Webhooks salientes",
-    "output_webhooks_desc": "Suscríbete a eventos de DevDeck para notificar a sistemas externos (ej., Slack, Zapier).",
+    "output_webhooks_desc": "Suscríbete a eventos de HeapDeck para notificar a sistemas externos (ej., Slack, Zapier).",
     "plugin_gallery": "Galería de plugins",
     "integrations": "Integraciones",
     "import_stars_title": "Importar estrellas de GitHub",
@@ -145,7 +145,7 @@
       "cert_label": "Certificado X.509 (PEM)"
     },
     "notifications_toast": {
-      "title": "¡DevDeck conectado!",
+      "title": "¡HeapDeck conectado!",
       "body": "Ahora recibirás alertas importantes en tu dispositivo."
     }
   },
@@ -193,7 +193,7 @@
     "edit_modal_title": "Editar perfil de curador",
     "username_label": "Nombre de usuario único",
     "username_placeholder": "ej., tux_hacker",
-    "username_desc": "El slug para tu perfil público de curador: devdeck.ai/u/{{username}}",
+    "username_desc": "El slug para tu perfil público de curador: heapdeck.com/u/{{username}}",
     "curation_stack": "Mi stack de curación",
     "no_tech_yet": "Aún no se han agregado tecnologías. Selecciona abajo.",
     "suggested_tags": "Sugeridas (haz clic para alternar):",
@@ -207,7 +207,7 @@
     "edit_loading_msg": "Preparando tu perfil de curador...",
     "login_required": "Inicia sesión para ver tu perfil",
     "login_button": "Iniciar sesión",
-    "achievement_early_adopter_desc": "Te uniste a los curadores pioneros de DevDeck.",
+    "achievement_early_adopter_desc": "Te uniste a los curadores pioneros de HeapDeck.",
     "achievement_curator_master_desc": "Has guardado más de 5 ítems en tu bóveda personal.",
     "achievement_deck_builder_desc": "Creaste al menos un deck personalizado para organizar tips.",
     "achievement_flame_keeper_desc": "Mantuviste una racha activa de curación de conocimiento.",
@@ -291,7 +291,7 @@
   },
   "plugins": {
     "gallery_title": "Galería de plugins",
-    "gallery_subtitle": "Curada por la comunidad de DevDeck",
+    "gallery_subtitle": "Curada por la comunidad de HeapDeck",
     "exploring": "Explorando el ecosistema...",
     "enter_webhook_url": "Ingresa la URL de destino para {{name}}:",
     "install_success": "{{name}} se instaló correctamente",
@@ -300,7 +300,7 @@
   },
   "webhooks": {
     "title": "Webhooks salientes",
-    "description": "Suscríbete a eventos de DevDeck para notificar a sistemas externos.",
+    "description": "Suscríbete a eventos de HeapDeck para notificar a sistemas externos.",
     "new_button": "Nuevo webhook saliente",
     "configure_title": "Configurar webhook",
     "name_placeholder": "Nombre (ej., Integración con Slack)",
@@ -345,7 +345,7 @@
   },
   "waitlist": {
     "title": "Únete a la lista de espera",
-    "grow_desc": "DevDeck está creciendo. Déjanos tu email y te enviaremos una invitación pronto.",
+    "grow_desc": "HeapDeck está creciendo. Déjanos tu email y te enviaremos una invitación pronto.",
     "join_button": "Unirme a la lista",
     "success_title": "¡Ya estás dentro!",
     "success_desc": "Ya estás en la lista de espera. Te avisaremos a {{email}} en cuanto tengamos un lugar para ti.",
@@ -407,7 +407,7 @@
   },
   "onboarding": {
     "loop_title": "Tres movimientos. Esa es toda la app.",
-    "loop_subtitle": "Todo en DevDeck es este ciclo. Domínalo y nunca volverás a perder un hallazgo útil.",
+    "loop_subtitle": "Todo en HeapDeck es este ciclo. Domínalo y nunca volverás a perder un hallazgo útil.",
     "loop_capture": "Capturar",
     "loop_capture_desc": "Pega una URL o presiona el botón +. La detección de tipo, las etiquetas y el enriquecimiento ocurren automáticamente — guardar toma segundos, no decisiones.",
     "loop_retrieve": "Recuperar",
@@ -429,7 +429,7 @@
     "create_deck": "Crea un deck",
     "create_deck_desc": "Agrupa comandos o tips relacionados en una colección.",
     "welcome_title": "¡Hola, {{name}}!",
-    "welcome_desc": "Bienvenido a tu nueva memoria externa. DevDeck te ayuda a organizar el caos de herramientas que descubres cada día.",
+    "welcome_desc": "Bienvenido a tu nueva memoria externa. HeapDeck te ayuda a organizar el caos de herramientas que descubres cada día.",
     "start_button": "Empezar",
     "choose_pack_title": "Elige tu pack inicial",
     "choose_pack_desc": "Selecciona un stack para precargar tu bóveda con herramientas esenciales.",
@@ -438,8 +438,8 @@
     "ready_title": "¡Listo para la acción!",
     "ready_desc": "Tu bóveda está configurada. Recuerda instalar la <1>Extensión de Chrome</1> para capturar recursos con un solo clic.",
     "first_item_captured": "Primer ítem capturado",
-    "enter_button": "Entrar a DevDeck",
-    "finish_toast": "¡Todo listo! Bienvenido a DevDeck.",
+    "enter_button": "Entrar a HeapDeck",
+    "finish_toast": "¡Todo listo! Bienvenido a HeapDeck.",
     "back_button": "Atrás",
     "continue_button": "Continuar"
   },
@@ -903,7 +903,7 @@
       "discovery": "Descubrimiento"
     },
     "title": "Explorar bóvedas",
-    "subtitle": "Descubre cheatsheets creadas por la comunidad y el equipo oficial de DevDeck. Cópialas a tu bóveda personal con un solo clic.",
+    "subtitle": "Descubre cheatsheets creadas por la comunidad y el equipo oficial de HeapDeck. Cópialas a tu bóveda personal con un solo clic.",
     "loading_message": "Explorando el conocimiento colectivo...",
     "search_placeholder": "Buscar cheatsheets públicas...",
     "no_results": "No pudimos encontrar lo que buscas. ¡Prueba con otra categoría o término!",
@@ -1022,7 +1022,7 @@
     "save_error": "Error al guardar"
   },
   "auth": {
-    "login_title": "DevDeck",
+    "login_title": "HeapDeck",
     "login_subtitle": "Tu memoria externa para el desarrollo.",
     "verify_success": "Email verificado con éxito. ¡Ya puedes iniciar sesión!",
     "reset_success": "Contraseña actualizada. ¡Ya puedes iniciar sesión con la nueva!",
@@ -1061,7 +1061,7 @@
     "verification_sent": "Hemos enviado un email de verificación a {{email}}. Revisa tu bandeja de entrada para activar tu cuenta.",
     "register_me": "Registrarme",
     "invite_code_label": "Código de invitación",
-    "invite_code_placeholder": "Ej: DEVDECK-XXXX-XXXX",
+    "invite_code_placeholder": "Ej: HEAPDECK-XXXX-XXXX",
     "waitlist_hint": "Si no tienes uno, únete a la lista de espera en la web."
   },
   "workspace": {

@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"devdeck/internal/domain/circles"
+	"heapdeck/internal/domain/circles"
 
 	"github.com/google/uuid"
 )

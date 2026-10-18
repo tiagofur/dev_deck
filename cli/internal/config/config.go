@@ -1,5 +1,5 @@
 // Package config loads and persists the CLI's settings from
-// ~/.config/devdeck/config.toml. The config holds everything that's
+// ~/.config/heapdeck/config.toml. The config holds everything that's
 // not a secret — the token lives in the OS keychain via internal/keyring.
 package config
 
@@ -13,10 +13,10 @@ import (
 )
 
 // Config mirrors the TOML file layout. Missing keys fall back to defaults
-// so a brand-new install just works after `devdeck login`.
+// so a brand-new install just works after `heapdeck login`.
 type Config struct {
-	// APIURL is the DevDeck backend root, e.g. "http://localhost:8080"
-	// for self-hosters or "https://api.devdeck.ai" for the hosted flavour.
+	// APIURL is the HeapDeck backend root, e.g. "http://localhost:8080"
+	// for self-hosters or "https://api.heapdeck.com" for the hosted flavour.
 	APIURL string `toml:"api_url"`
 	// DefaultSource is the `source` label the CLI reports in
 	// /api/items/capture calls. Lets us slice metrics by entry point.
@@ -45,16 +45,16 @@ func Path() (string, error) {
 }
 
 // dir resolves the base config directory. We respect XDG_CONFIG_HOME
-// for Linux power users and fall back to ~/.config/devdeck otherwise.
+// for Linux power users and fall back to ~/.config/heapdeck otherwise.
 func dir() (string, error) {
 	if xdg := os.Getenv("XDG_CONFIG_HOME"); xdg != "" {
-		return filepath.Join(xdg, "devdeck"), nil
+		return filepath.Join(xdg, "heapdeck"), nil
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(home, ".config", "devdeck"), nil
+	return filepath.Join(home, ".config", "heapdeck"), nil
 }
 
 // Load reads config.toml. If the file doesn't exist we return Default()

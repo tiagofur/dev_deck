@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, Loader2, Play, Terminal, Shield, X } from 'lucide-react'
-import { Button, showToast } from '@devdeck/ui'
-import { getAccessToken, getConfig } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { Button, showToast } from '@heapdeck/ui'
+import { getAccessToken, getConfig } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 interface Message {
   role: 'user' | 'assistant' | 'system' | 'tool'

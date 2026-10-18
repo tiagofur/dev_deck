@@ -1,12 +1,12 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { X } from 'lucide-react'
-import { Button } from '@devdeck/ui'
+import { Button } from '@heapdeck/ui'
 import type {
   CommandCategory,
   CreateCommandInput,
   RepoCommand,
-} from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+} from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 interface Props {
   open: boolean

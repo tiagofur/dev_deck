@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"time"
 
-	"devdeck/internal/webhooks"
+	"heapdeck/internal/webhooks"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"

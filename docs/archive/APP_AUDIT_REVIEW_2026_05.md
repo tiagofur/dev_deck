@@ -1,4 +1,4 @@
-# DevDeck — App Audit Review & Community Plan (May 2026)
+# HeapDeck — App Audit Review & Community Plan (May 2026)
 
 > ⚠️ **Historical document (archived).** This is a dated snapshot; parts of it no longer reflect the current state of the product. See [ROADMAP.md](../../ROADMAP.md) for current status.
 
@@ -121,13 +121,13 @@ The product should position Circles as “private collective memory for dev comm
 
 1. A developer finds a repo, command, article, plugin, workflow, or Workbench result.
 2. They capture it into their vault with `why_saved`.
-3. DevDeck suggests a concise summary and tags.
+3. HeapDeck suggests a concise summary and tags.
 4. They share it to a Circle with context.
 5. The Circle receives a digest/feed of useful findings.
 6. Other members save, fork, star, comment, or convert it into a runbook/deck.
 7. High-signal findings become public/community showcase material.
 
-This turns DevDeck from “my bookmark vault” into “our community’s reusable engineering memory”.
+This turns HeapDeck from “my bookmark vault” into “our community’s reusable engineering memory”.
 
 ## Development Plan
 

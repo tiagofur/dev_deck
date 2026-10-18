@@ -1,6 +1,6 @@
-# @devdeck/features
+# @heapdeck/features
 
-The heart of DevDeck. This package contains **100% of the business logic, pages, and domain-specific components** shared between the Web and Desktop applications.
+The heart of HeapDeck. This package contains **100% of the business logic, pages, and domain-specific components** shared between the Web and Desktop applications.
 
 ## Why this package?
 
@@ -23,9 +23,9 @@ src/
 Import components and hooks directly into your app:
 
 ```tsx
-import { CheatsheetDetail } from '@devdeck/features/cheatsheets';
+import { CheatsheetDetail } from '@heapdeck/features/cheatsheets';
 ```
 
 ---
 
-*Part of the DevDeck Monorepo*
+*Part of the HeapDeck Monorepo*

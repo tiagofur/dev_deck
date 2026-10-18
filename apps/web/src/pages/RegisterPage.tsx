@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
-import { registerUser } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { registerUser } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function RegisterPage() {
   const { t } = useTranslation()

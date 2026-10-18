@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button } from '@devdeck/ui'
+import { Button } from '@heapdeck/ui'
 import { Plus } from 'lucide-react'
 import { GithubIcon as Github } from '../components/icons/GithubIcon'
 import { detailPathForItem } from '../utils/itemRoutes'
@@ -8,8 +8,8 @@ import { Mascot } from '../components/Mascot/Mascot'
 import { ItemGrid } from '../components/ItemGrid'
 import { Sidebar } from '../components/Sidebar'
 import { AppShell } from '../components/AppShell'
-import { useItems } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import { useItems } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function HomePage() {
   const { t } = useTranslation()
@@ -55,7 +55,7 @@ export function HomePage() {
   const hasFilters = Boolean(query || tag || lang)
 
   function openCapture() {
-    window.dispatchEvent(new CustomEvent('devdeck:open-capture'))
+    window.dispatchEvent(new CustomEvent('heapdeck:open-capture'))
   }
 
   return (

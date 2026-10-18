@@ -64,7 +64,7 @@ describe('web router', () => {
     expect(appSource).toContain('NotFoundPage')
   })
 
-  it('imports shared pages from the @devdeck/features entrypoint (no deep src imports)', () => {
+  it('imports shared pages from the @heapdeck/features entrypoint (no deep src imports)', () => {
     expect(appSource).not.toMatch(/from ['"]\.\.\/\.\.\/\.\.\/packages\/features\/src/)
   })
 })

@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"regexp"
 
-	"devdeck/internal/domain/repos"
+	"heapdeck/internal/domain/repos"
 )
 
 // ErrInvalidGitHubIdentifier is returned when owner/repo doesn't match
@@ -62,7 +62,7 @@ func (g *GitHubEnricher) Fetch(ctx context.Context, owner, repo string) (*repos.
 	}
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
-	req.Header.Set("User-Agent", "DevDeck/0.1")
+	req.Header.Set("User-Agent", "HeapDeck/0.1")
 	if g.token != "" {
 		req.Header.Set("Authorization", "Bearer "+g.token)
 	}

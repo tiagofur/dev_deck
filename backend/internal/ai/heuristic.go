@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"devdeck/internal/domain/items"
+	"heapdeck/internal/domain/items"
 )
 
 type heuristicProvider struct{}

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/store"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/store"
 
 	"github.com/google/uuid"
 )

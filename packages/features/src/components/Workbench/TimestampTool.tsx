@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Button } from '@devdeck/ui'
+import { Button } from '@heapdeck/ui'
 import { timestampToDate, dateToUnixTimestamp } from '../../workbench/utils'
 import { ToolFrame, TextArea, ResultActions, ExampleButton } from './shared'
 

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { motion, useMotionValue, useTransform, type PanInfo } from 'framer-motion'
 import { ExternalLink, GitFork, Star } from 'lucide-react'
-import type { Repo } from '@devdeck/api-client'
-import { formatCount } from '@devdeck/api-client'
+import type { Repo } from '@heapdeck/api-client'
+import { formatCount } from '@heapdeck/api-client'
 
 export type SwipeDirection = 'left' | 'right' | 'up'
 

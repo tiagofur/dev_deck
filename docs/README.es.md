@@ -1,4 +1,4 @@
-# DevDeck — Documentación
+# HeapDeck — Documentación
 
 > Índice de documentación del proyecto. Todos los docs están en esta carpeta (`docs/`).
 
@@ -9,7 +9,7 @@
 | Archivo | Descripción |
 |---------|-------------|
 | [PRD.md](PRD.md) | **Product Requirements Document.** Visión, problema, solución en capas (vault polimórfico + recuperación inteligente + acciones reutilizables), pilares, alcance (core + Workbench + fuera de scope) y métricas de éxito. Punto de entrada principal para entender el producto. |
-| [VISION.md](VISION.md) | **Visión y posicionamiento.** Qué es DevDeck (y qué no es), diferenciadores genuinos, taglines por audiencia, roadmap de posicionamiento y preguntas frecuentes de posicionamiento. |
+| [VISION.md](VISION.md) | **Visión y posicionamiento.** Qué es HeapDeck (y qué no es), diferenciadores genuinos, taglines por audiencia, roadmap de posicionamiento y preguntas frecuentes de posicionamiento. |
 | [DEV_WORKBENCH.md](DEV_WORKBENCH.md) · [DEV_WORKBENCH.es.md](DEV_WORKBENCH.es.md) | **Developer Workbench.** Evolución de memoria a acción contextual: utilities locales, paleta, requests reutilizables, límites de producto y roadmap recomendado. |
 | [CIRCLES_COMMUNITY.md](CIRCLES_COMMUNITY.md) · [CIRCLES_COMMUNITY.es.md](CIRCLES_COMMUNITY.es.md) | **Circles y contribución comunitaria.** Modelo de producto para convertir hallazgos individuales en memoria reutilizable para grupos/comunidades de developers. |
 | [COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md) | **Análisis competitivo.** Comparación detallada con GitHub Stars, Raindrop, Pocket, Notion, Obsidian, Raycast y Pieces.app. Incluye tablas de pros/contras y posicionamiento relativo. |
@@ -21,7 +21,7 @@
 
 | Archivo | Descripción |
 |---------|-------------|
-| [LANDING_COPY.md](LANDING_COPY.md) | **Copy de landing en inglés.** Copy completo para `devdeck.ai` en inglés (audiencia global de developers). Incluye hero, features, AI section, plataformas, pricing, CTA, SEO tags y notas de implementación. |
+| [LANDING_COPY.md](LANDING_COPY.md) | **Copy de landing en inglés.** Copy completo para `heapdeck.com` en inglés (audiencia global de developers). Incluye hero, features, AI section, plataformas, pricing, CTA, SEO tags y notas de implementación. |
 | [LANDING.md](LANDING.md) | **Copy de landing en español.** Misma estructura en español rioplatense (audiencia hispanohablante / versión ES del sitio). Incluye también micro-copy adicional para la UI de la app. |
 
 ---
@@ -30,7 +30,7 @@
 
 | Archivo | Descripción |
 |---------|-------------|
-| [ARCHITECTURE.es.md](ARCHITECTURE.es.md) | **Arquitectura del sistema.** Diagrama de alto nivel, stack técnico (Go + Chi + Postgres + pgvector, monorepo pnpm workspaces con Electron + React desktop y React web que comparten `@devdeck/ui` / `@devdeck/api-client` / `@devdeck/features`), decisiones de arquitectura y schema de la base de datos. |
+| [ARCHITECTURE.es.md](ARCHITECTURE.es.md) | **Arquitectura del sistema.** Diagrama de alto nivel, stack técnico (Go + Chi + Postgres + pgvector, monorepo pnpm workspaces con Electron + React desktop y React web que comparten `@heapdeck/ui` / `@heapdeck/api-client` / `@heapdeck/features`), decisiones de arquitectura y schema de la base de datos. |
 | [ARCHITECTURE_MAP.md](ARCHITECTURE_MAP.md) | **Mapa de arquitectura para contribuidores.** Orientación en una página: flujo de requests, layout del monorepo, dónde cambiar qué y cómo verificar antes de un PR. |
 | [VERSIONING.es.md](VERSIONING.es.md) | **Versionado y release.** Sistema de versionado SemVer, estrategia de release, Conventional Commits, changelog (Keep a Changelog), scripts de release, GitHub Actions para auto-release. |
 | [adr/0001-items-polymorphism.es.md](adr/0001-items-polymorphism.es.md) | **ADR 0001.** Modelo polimórfico de `items` (single-table + JSONB + generated columns). |
@@ -82,11 +82,11 @@
 
 Si llegás sin contexto, el orden recomendado es:
 
-1. **[README.md](../README.md)** — qué es DevDeck en 2 minutos
+1. **[README.md](../README.md)** — qué es HeapDeck en 2 minutos
 2. **[VISION.md](VISION.md)** — por qué existe y para quién
 3. **[PRD.md](PRD.md)** — qué hace, cómo crece, qué se decidió
 4. **[DEV_WORKBENCH.md](DEV_WORKBENCH.md)** — hacia dónde evoluciona memoria + acción
-5. **[CIRCLES_COMMUNITY.md](CIRCLES_COMMUNITY.md)** — cómo DevDeck convierte hallazgos en memoria comunitaria
+5. **[CIRCLES_COMMUNITY.md](CIRCLES_COMMUNITY.md)** — cómo HeapDeck convierte hallazgos en memoria comunitaria
 6. **[ARCHITECTURE.md](ARCHITECTURE.md)** — cómo está construido
 7. **[ROADMAP.md](../ROADMAP.md)** — qué está hecho y qué viene
 

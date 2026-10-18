@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"devdeck/internal/domain/commands"
-	"devdeck/internal/domain/repos"
-	"devdeck/internal/store"
+	"heapdeck/internal/domain/commands"
+	"heapdeck/internal/domain/repos"
+	"heapdeck/internal/store"
 
 	"github.com/google/uuid"
 )

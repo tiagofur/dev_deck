@@ -5,7 +5,7 @@ import {
   configureApiClient,
   localStorageAdapter,
   setTokenStorage,
-} from '@devdeck/api-client'
+} from '@heapdeck/api-client'
 
 // Configure the shared api-client BEFORE any test runs. Desktop tests use
 // the static-token code path with a fake base URL. Individual tests can

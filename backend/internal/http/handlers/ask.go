@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"devdeck/internal/ai"
-	"devdeck/internal/authctx"
-	"devdeck/internal/store"
+	"heapdeck/internal/ai"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -62,7 +62,7 @@ func (h *AskHandler) Ask(w http.ResponseWriter, r *http.Request) {
 		// On error, fall back to text search with a nil embedding.
 	}
 
-	result, err := h.store.AskDevDeck(r.Context(), req.Question, embedding, 5)
+	result, err := h.store.AskHeapDeck(r.Context(), req.Question, embedding, 5)
 	if err != nil {
 		writeInternal(w, err)
 		return

@@ -1,20 +1,20 @@
-# DevDeck — Known Limitations
+# HeapDeck — Known Limitations
 
 > Honest limitations of the **0.5.0 Public Beta** · Last updated: June 2026
 >
-> Trust before hype: this page exists so nobody discovers a limitation the hard way. If you hit something not listed here, please [open an issue](https://github.com/tiagofur/dev_deck/issues).
+> Trust before hype: this page exists so nobody discovers a limitation the hard way. If you hit something not listed here, please [open an issue](https://github.com/tiagofur/heapdeck/issues).
 
 ---
 
 ## Sync and offline
 
-- **There is no offline-first sync yet.** DevDeck runs in honest cloud mode: the app needs to reach the API to read and write your vault. Offline sync (local SQLite + conflict resolution) is intentionally deferred until after `1.0.0` (see [FEATURE_REVIEW_2026_06.md](archive/FEATURE_REVIEW_2026_06.md), decision A5).
+- **There is no offline-first sync yet.** HeapDeck runs in honest cloud mode: the app needs to reach the API to read and write your vault. Offline sync (local SQLite + conflict resolution) is intentionally deferred until after `1.0.0` (see [FEATURE_REVIEW_2026_06.md](archive/FEATURE_REVIEW_2026_06.md), decision A5).
 - **Workbench utilities do run fully local.** JSON formatter, JWT decoder, Base64/URL tools, UUID/timestamp, hashes, regex tester, and the secret scanner work in-app without network access.
-- **Your data has an exit door:** Settings → Export My Vault downloads everything as JSON (full fidelity) or Markdown (#146). Import of vault exports back into DevDeck is not built yet.
+- **Your data has an exit door:** Settings → Export My Vault downloads everything as JSON (full fidelity) or Markdown (#146). Import of vault exports back into HeapDeck is not built yet.
 
 ## AI features
 
-- **AI enrichment requires a configured provider.** Summaries, smart tags, semantic search, and Ask DevDeck need OpenAI, Ollama, or another supported provider. Without one, DevDeck uses a built-in heuristic tagger and text/fuzzy search, and the interactive AI surfaces are hidden rather than shown as dead buttons.
+- **AI enrichment requires a configured provider.** Summaries, smart tags, semantic search, and Ask HeapDeck need OpenAI, Ollama, or another supported provider. Without one, HeapDeck uses a built-in heuristic tagger and text/fuzzy search, and the interactive AI surfaces are hidden rather than shown as dead buttons.
 - **Heuristic tagging is more limited** than provider-backed enrichment: it works from URL patterns, metadata, and keywords, not from understanding content.
 
 ## Search

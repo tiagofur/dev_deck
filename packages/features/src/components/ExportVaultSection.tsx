@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { FileDown, FileJson, FileText } from 'lucide-react'
-import { api } from '@devdeck/api-client'
-import { Button, showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+import { api } from '@heapdeck/api-client'
+import { Button, showToast } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 
 type ExportFormat = 'json' | 'markdown'
 
@@ -23,7 +23,7 @@ export function ExportVaultSection() {
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `devdeck-vault-${date}.${extension}`
+      link.download = `heapdeck-vault-${date}.${extension}`
       document.body.appendChild(link)
       link.click()
       link.remove()

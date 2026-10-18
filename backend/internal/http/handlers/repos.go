@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"time"
 
-	"devdeck/internal/domain/cheatsheets"
-	"devdeck/internal/domain/repos"
-	"devdeck/internal/enricher"
-	"devdeck/internal/store"
+	"heapdeck/internal/domain/cheatsheets"
+	"heapdeck/internal/domain/repos"
+	"heapdeck/internal/enricher"
+	"heapdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"

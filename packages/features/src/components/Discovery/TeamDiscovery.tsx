@@ -1,7 +1,7 @@
-import { useOrgTrendingTags, useOrgRecommendations } from '@devdeck/api-client'
+import { useOrgTrendingTags, useOrgRecommendations } from '@heapdeck/api-client'
 import { Sparkles, TrendingUp, Zap, Plus, ExternalLink } from 'lucide-react'
-import { Button } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+import { Button } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function TeamDiscovery({ orgId }: { orgId: string }) {
   const { t } = useTranslation()
@@ -69,7 +69,7 @@ export function TeamDiscovery({ orgId }: { orgId: string }) {
                       className="flex-1" 
                       size="sm" 
                       onClick={() => {
-                        window.dispatchEvent(new CustomEvent('devdeck:open-capture', { detail: { url: r.url_normalized, title: r.title } }))
+                        window.dispatchEvent(new CustomEvent('heapdeck:open-capture', { detail: { url: r.url_normalized, title: r.title } }))
                       }}
                      >
                         <Plus size={12} strokeWidth={4} /> {t('topbar.capture_button')}

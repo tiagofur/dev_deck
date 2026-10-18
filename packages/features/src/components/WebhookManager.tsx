@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Trash2, Plus, Zap, Key } from 'lucide-react'
-import { useWebhooks, useCreateWebhook, useDeleteWebhook } from '@devdeck/api-client'
-import { Button, showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+import { useWebhooks, useCreateWebhook, useDeleteWebhook } from '@heapdeck/api-client'
+import { Button, showToast } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function WebhookManager() {
   const { t } = useTranslation()

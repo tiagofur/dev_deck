@@ -1,12 +1,12 @@
-# DevDeck — Developer Workbench
+# HeapDeck — Developer Workbench
 
 > Status: product proposal · Last updated: May 2026
 
-DevDeck started as external memory for developers: a place to save, organize, and retrieve repos, CLIs, snippets, prompts, commands, workflows, and notes with context. The next step is not to become an IDE, a generic launcher, or a clone of existing tools.
+HeapDeck started as external memory for developers: a place to save, organize, and retrieve repos, CLIs, snippets, prompts, commands, workflows, and notes with context. The next step is not to become an IDE, a generic launcher, or a clone of existing tools.
 
 The next step is more specific:
 
-> **DevDeck turns saved developer knowledge into reusable actions.**
+> **HeapDeck turns saved developer knowledge into reusable actions.**
 
 The goal is not to compete head-on with Raycast, Postman, DevToys, Notion, Obsidian, or secret managers. The goal is to become the personal layer where what you find, learn, and use stays connected to concrete actions: copy a command, open a runbook, test a request, format a payload, reuse a snippet, or recover a technical decision.
 
@@ -14,7 +14,7 @@ The goal is not to compete head-on with Raycast, Postman, DevToys, Notion, Obsid
 
 ## Product Principle
 
-DevDeck should become a daily tool by doing three things extremely well:
+HeapDeck should become a daily tool by doing three things extremely well:
 
 1. **Capture quickly** what a developer does not want to lose.
 2. **Retrieve by intent** even when the exact name is forgotten.
@@ -30,14 +30,14 @@ The promise is not "all developer tools in one app." The promise is:
 
 Every integrated tool should pass this test:
 
-> **Does this action become more valuable because it is connected to the DevDeck vault?**
+> **Does this action become more valuable because it is connected to the HeapDeck vault?**
 
 If not, it probably belongs in another app.
 
 | Idea | Fits when... | Does not fit when... |
 |------|--------------|----------------------|
 | JSON formatter | The formatted payload can become a snippet, request, or debugging note. | It only duplicates a generic formatter. |
-| JWT decoder | It inspects tokens locally without sending sensitive data out. | DevDeck starts storing tokens without a serious security model. |
+| JWT decoder | It inspects tokens locally without sending sensitive data out. | HeapDeck starts storing tokens without a serious security model. |
 | API tester | Quick requests become reusable project items. | It tries to replace full Postman collections. |
 | Command palette | It searches vault items, commands, tools, and runbooks. | It tries to replace the whole OS launcher. |
 | Clipboard/snippets | It expands explicitly saved snippets. | It silently watches everything by default. |
@@ -106,7 +106,7 @@ Implementation notes:
 - Basic `curl` commands can be imported back into method, URL, headers, and body fields.
 - Sent or saved requests are kept in a small local recent-history list so they can be reloaded without rebuilding context.
 
-### Phase 4 — Project-Aware DevDeck
+### Phase 4 — Project-Aware HeapDeck
 
 - Detect the current repo/folder from Desktop or CLI.
 - Surface related items.
@@ -115,7 +115,7 @@ Implementation notes:
 
 Status:
 
-- `devdeck project` detects folder/git remote context and searches related vault context without scanning files or reading `.env`.
+- `heapdeck project` detects folder/git remote context and searches related vault context without scanning files or reading `.env`.
 - Desktop exposes safe current-project detection through `electronAPI.project.detectCurrent()`.
 - Workbench includes a `Project` tool for name, remote, notes, related context search, and saving context as a note.
 - Related results can be opened/copied from the project context surface.
@@ -136,7 +136,7 @@ Status:
 
 Clipboard history, OCR, and secret management can be valuable, but they require trust. They should be opt-in, transparent, easy to disable, and designed around local-first behavior.
 
-DevDeck should not implement custom cryptography for secrets. If secret handling is added, it should use native secure storage or integrate with established tools such as macOS Keychain, Windows Credential Manager, Linux Secret Service, 1Password, Bitwarden, or `pass`.
+HeapDeck should not implement custom cryptography for secrets. If secret handling is added, it should use native secure storage or integrate with established tools such as macOS Keychain, Windows Credential Manager, Linux Secret Service, 1Password, Bitwarden, or `pass`.
 
 ---
 
@@ -150,4 +150,4 @@ DevDeck should not implement custom cryptography for secrets. If secret handling
 - **Local trust:** actions completed without network access.
 - **Search success:** searches that end in opening, copying, or using an item.
 
-The most important metric is not how many features DevDeck has. It is how often DevDeck prevents a developer from rebuilding context.
+The most important metric is not how many features HeapDeck has. It is how often HeapDeck prevents a developer from rebuilding context.

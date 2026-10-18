@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"devdeck/internal/ai/agent"
+	"heapdeck/internal/ai/agent"
 )
 
 // AgentOllama implements the agent.Agent interface using Ollama's chat API.

@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"testing"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/domain/auth"
-	"devdeck/internal/domain/items"
-	"devdeck/internal/store"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/domain/auth"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/store"
 
 	"github.com/google/uuid"
 )
@@ -30,7 +30,7 @@ type feedResp struct {
 func TestSocial_FollowUnfollowAndFeed(t *testing.T) {
 	ts := newTestServer(t)
 
-	// The test user (UUID 00000000-0000-0000-0000-000000000001, login "devdeck-test") is
+	// The test user (UUID 00000000-0000-0000-0000-000000000001, login "heapdeck-test") is
 	// inserted by truncateAll and matches the UUID that the static-token middleware
 	// hard-codes into the request context.
 	testUserID := uuid.MustParse("00000000-0000-0000-0000-000000000001")
@@ -62,9 +62,9 @@ func TestSocial_FollowUnfollowAndFeed(t *testing.T) {
 	}
 
 	// 2. Try to follow yourself -> should return 400 Bad Request.
-	// The authenticated user is "devdeck-test" (UUID 00000000-0000-0000-0000-000000000001)
+	// The authenticated user is "heapdeck-test" (UUID 00000000-0000-0000-0000-000000000001)
 	// as injected by the static-token middleware. Following that same username must be rejected.
-	selfFollowRec := ts.do(t, http.MethodPost, "/api/users/devdeck-test/follow", nil)
+	selfFollowRec := ts.do(t, http.MethodPost, "/api/users/heapdeck-test/follow", nil)
 	if selfFollowRec.Code != http.StatusBadRequest {
 		t.Errorf("expected 400 on self-follow, got %d, body: %s", selfFollowRec.Code, selfFollowRec.Body.String())
 	}

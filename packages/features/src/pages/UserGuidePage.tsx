@@ -83,10 +83,10 @@ export function UserGuidePage() {
                 User Guide
               </div>
               <h1 className="font-display text-4xl font-black uppercase tracking-tight">
-                DevDeck Manual
+                HeapDeck Manual
               </h1>
               <p className="mt-2 max-w-3xl font-mono text-sm text-ink-soft">
-                Everything you need to know about DevDeck — your AI-powered external memory for development.
+                Everything you need to know about HeapDeck — your AI-powered external memory for development.
                 Capture, organize, retrieve, and reuse knowledge across all your projects.
               </p>
             </div>
@@ -217,17 +217,17 @@ function Tip({ children }: { children: React.ReactNode }) {
 function GettingStarted({ navigate }: { navigate: (path: string) => void }) {
   return (
     <>
-      <SectionTitle>Welcome to DevDeck</SectionTitle>
+      <SectionTitle>Welcome to HeapDeck</SectionTitle>
       <SectionDesc>
-        DevDeck is your AI-powered external memory for development work. Save repos, CLIs,
+        HeapDeck is your AI-powered external memory for development work. Save repos, CLIs,
         snippets, cheat sheets, prompts, workflows, and anything else you want to reuse —
         then retrieve it instantly with semantic search and AI assistance.
       </SectionDesc>
 
       <div className="border-3 border-ink bg-accent-pink/10 p-6 mb-6">
-        <h3 className="font-display font-black text-lg uppercase mb-2">The DevDeck Loop</h3>
+        <h3 className="font-display font-black text-lg uppercase mb-2">The HeapDeck Loop</h3>
         <p className="font-mono text-sm text-ink-soft mb-4">
-          DevDeck works as a simple three-step loop:
+          HeapDeck works as a simple three-step loop:
         </p>
         <StepList
           steps={[
@@ -316,22 +316,22 @@ function CaptureSection() {
     <>
       <SectionTitle>Capturing Items</SectionTitle>
       <SectionDesc>
-        DevDeck gives you multiple ways to save items — from any device, in seconds.
+        HeapDeck gives you multiple ways to save items — from any device, in seconds.
       </SectionDesc>
 
       <h3 className="font-display font-black text-lg uppercase mb-3">Capture Methods</h3>
       <div className="space-y-3 mb-6">
         <FeatureCard icon={<Plus size={18} strokeWidth={3} />} color="bg-accent-pink" title="In-App Capture (+ Button)">
-          Click the pink + button in the top bar, or press Ctrl+N / Cmd+N. Paste a URL and DevDeck will auto-detect the type and enrich it.
+          Click the pink + button in the top bar, or press Ctrl+N / Cmd+N. Paste a URL and HeapDeck will auto-detect the type and enrich it.
         </FeatureCard>
         <FeatureCard icon={<Globe size={18} strokeWidth={3} />} color="bg-accent-cyan" title="Browser Extension">
-          Use the DevDeck browser extension to capture the current page with one click. It pre-fills the URL and title automatically.
+          Use the HeapDeck browser extension to capture the current page with one click. It pre-fills the URL and title automatically.
         </FeatureCard>
         <FeatureCard icon={<Terminal size={18} strokeWidth={3} />} color="bg-accent-lime" title="CLI">
-          Use the DevDeck CLI to capture from your terminal: <code className="bg-bg-elevated px-1 border border-ink/20">devdeck capture &lt;url&gt;</code>. Perfect for scripting.
+          Use the HeapDeck CLI to capture from your terminal: <code className="bg-bg-elevated px-1 border border-ink/20">heapdeck capture &lt;url&gt;</code>. Perfect for scripting.
         </FeatureCard>
         <FeatureCard icon={<Smartphone size={18} strokeWidth={3} />} color="bg-accent-yellow" title="Mobile Share Target">
-          On mobile (PWA or desktop), use your OS share sheet to send URLs directly to DevDeck. The app auto-opens the capture modal.
+          On mobile (PWA or desktop), use your OS share sheet to send URLs directly to HeapDeck. The app auto-opens the capture modal.
         </FeatureCard>
         <FeatureCard icon={<Link size={18} strokeWidth={3} />} color="bg-accent-orange" title="Share Link">
           Share items publicly via /deck/:slug URLs. Anyone with the link can view your public deck.
@@ -340,7 +340,7 @@ function CaptureSection() {
 
       <h3 className="font-display font-black text-lg uppercase mb-3">Auto-Enrichment</h3>
       <p className="font-mono text-sm text-ink-soft mb-4">
-        When you capture a URL, DevDeck automatically fetches metadata: OpenGraph data, GitHub stars,
+        When you capture a URL, HeapDeck automatically fetches metadata: OpenGraph data, GitHub stars,
         language, topics, README content. The AI then generates tags, a summary, and categorizes the item.
       </p>
 
@@ -367,7 +367,7 @@ function SearchSection() {
     <>
       <SectionTitle>Search & Retrieve</SectionTitle>
       <SectionDesc>
-        DevDeck offers powerful search to find anything in your vault instantly.
+        HeapDeck offers powerful search to find anything in your vault instantly.
       </SectionDesc>
 
       <div className="space-y-3 mb-6">
@@ -375,7 +375,7 @@ function SearchSection() {
           Press Ctrl+K (or Cmd+K) to open the unified command palette. Search across all items, navigate to pages, or trigger actions — all from one place.
         </FeatureCard>
         <FeatureCard icon={<Brain size={18} strokeWidth={3} />} color="bg-accent-orange" title="Semantic Search">
-          DevDeck uses AI embeddings (1536-dim pgvector) to understand meaning, not just keywords. Search "how to deploy a Go API" and find your deployment runbook.
+          HeapDeck uses AI embeddings (1536-dim pgvector) to understand meaning, not just keywords. Search "how to deploy a Go API" and find your deployment runbook.
         </FeatureCard>
         <FeatureCard icon={<Zap size={18} strokeWidth={3} />} color="bg-accent-yellow" title="Text Search">
           Full-text ILIKE search on titles, descriptions, tags, and notes. Fast and exact.
@@ -566,7 +566,7 @@ function TeamsSection() {
     <>
       <SectionTitle>Teams & Organizations</SectionTitle>
       <SectionDesc>
-        DevDeck supports multi-tenant organizations with team features, shared vaults,
+        HeapDeck supports multi-tenant organizations with team features, shared vaults,
         and role-based access control.
       </SectionDesc>
 
@@ -624,7 +624,7 @@ function SyncSection() {
     <>
       <SectionTitle>Sync & Offline</SectionTitle>
       <SectionDesc>
-        DevDeck works offline with local-first storage. Your data syncs automatically when
+        HeapDeck works offline with local-first storage. Your data syncs automatically when
         you're back online.
       </SectionDesc>
 
@@ -639,7 +639,7 @@ function SyncSection() {
           Your vault stays in sync across web, desktop, and mobile. Start on your laptop, continue on your phone.
         </FeatureCard>
         <FeatureCard icon={<Shield size={18} strokeWidth={3} />} color="bg-accent-pink" title="Conflict Resolution">
-          If the same item is edited on two devices, DevDeck merges changes intelligently. Manual resolution for complex conflicts.
+          If the same item is edited on two devices, HeapDeck merges changes intelligently. Manual resolution for complex conflicts.
         </FeatureCard>
       </div>
 
@@ -666,7 +666,7 @@ function ShortcutsSection() {
     <>
       <SectionTitle>Keyboard Shortcuts</SectionTitle>
       <SectionDesc>
-        DevDeck is keyboard-first. These shortcuts work everywhere in the app.
+        HeapDeck is keyboard-first. These shortcuts work everywhere in the app.
       </SectionDesc>
 
       <div className="space-y-2 mb-6">
@@ -712,7 +712,7 @@ function SettingsSection() {
           Your public deck (/deck/:slug) showcases your saved items to the world. Choose what to share.
         </FeatureCard>
         <FeatureCard icon={<Shield size={18} strokeWidth={3} />} color="bg-accent-pink" title="Authentication">
-          DevDeck supports multiple auth methods: email/password, GitHub OAuth, and SAML SSO for enterprise.
+          HeapDeck supports multiple auth methods: email/password, GitHub OAuth, and SAML SSO for enterprise.
         </FeatureCard>
         <FeatureCard icon={<Database size={18} strokeWidth={3} />} color="bg-accent-lime" title="Data Management">
           Export your vault as JSON or Markdown. Import from GitHub stars. Full data portability.

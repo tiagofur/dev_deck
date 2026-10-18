@@ -5,9 +5,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/config"
-	"devdeck/internal/http/middleware"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/config"
+	"heapdeck/internal/http/middleware"
 )
 
 func TestTokenAuth_EmptyAPITokenRejects(t *testing.T) {

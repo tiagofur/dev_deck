@@ -41,7 +41,7 @@ Además, el `tokens.css` del design system estaba duplicado entre los dos client
 
 ### Opción B — Monorepo pnpm workspaces con `apps/` + `packages/`
 
-Reestructurar a `apps/desktop`, `apps/web`, `packages/ui`, `packages/api-client`, `packages/features`. Los packages son **TypeScript source**, consumidos via alias (`@devdeck/ui` → `packages/ui/src/index.ts`). Ambas apps importan las mismas pages de `packages/features`.
+Reestructurar a `apps/desktop`, `apps/web`, `packages/ui`, `packages/api-client`, `packages/features`. Los packages son **TypeScript source**, consumidos via alias (`@heapdeck/ui` → `packages/ui/src/index.ts`). Ambas apps importan las mismas pages de `packages/features`.
 
 - ✅ 100% reuso de código shared.
 - ✅ Design system en un solo lugar (incluyendo `tailwind-preset.cjs` + `globals.css`).
@@ -68,7 +68,7 @@ Como Opción B pero con una capa adicional de orquestación (task caching, remot
 ### Estructura final
 
 ```
-dev_deck/
+heapdeck/
 ├── apps/
 │   ├── desktop/              # Electron + React (renderer)
 │   └── web/                  # Vite + React + BrowserRouter
@@ -87,13 +87,13 @@ dev_deck/
 
 ```
 apps/desktop ─┐
-              ├──► @devdeck/features ──► @devdeck/ui ──► @devdeck/api-client
+              ├──► @heapdeck/features ──► @heapdeck/ui ──► @heapdeck/api-client
 apps/web ─────┘
 ```
 
-- `@devdeck/api-client` es la hoja. No depende de React UI. Solo `react` + `@tanstack/react-query` como peer deps.
-- `@devdeck/ui` no depende de `@devdeck/features`.
-- `@devdeck/features` depende de ambos y es lo que apps consumen para tener las 7 pages y los componentes de dominio.
+- `@heapdeck/api-client` es la hoja. No depende de React UI. Solo `react` + `@tanstack/react-query` como peer deps.
+- `@heapdeck/ui` no depende de `@heapdeck/features`.
+- `@heapdeck/features` depende de ambos y es lo que apps consumen para tener las 7 pages y los componentes de dominio.
 - Apps solo agregan: shell de routing, AuthGuard (web), PasteInterceptor (desktop) y main.tsx con la configuración del api-client.
 
 ### Storage adapter pattern para auth
@@ -154,7 +154,7 @@ Ambos shells duplican el pattern `AnimatedRoutes` + `<PageTransition>` porque so
 `packages/ui/tailwind-preset.cjs` exporta el `theme.extend` con la paleta neo-brutalist. Ambas apps lo consumen:
 
 ```ts
-import preset from '@devdeck/ui/tailwind-preset'
+import preset from '@heapdeck/ui/tailwind-preset'
 export default {
   presets: [preset],
   content: [
@@ -169,7 +169,7 @@ export default {
 `packages/ui/styles/globals.css` es el único stylesheet. Cada app lo importa desde `main.tsx`:
 
 ```ts
-import '@devdeck/ui/styles/globals.css'
+import '@heapdeck/ui/styles/globals.css'
 ```
 
 ---
@@ -179,11 +179,11 @@ import '@devdeck/ui/styles/globals.css'
 ### Positivas
 
 - **100% reuso de pages y componentes.** Las 7 pages (`HomePage`, `ItemsPage`, `RepoDetailPage`, `DiscoveryPage`, `SettingsPage`, `CheatsheetsListPage`, `CheatsheetDetailPage`) viven una sola vez.
-- **Ola 5 se implementa una sola vez.** Auto-tagging, semantic search, capture modal con IA — todas van a `@devdeck/api-client` y `@devdeck/features` y aparecen automáticamente en ambas apps.
+- **Ola 5 se implementa una sola vez.** Auto-tagging, semantic search, capture modal con IA — todas van a `@heapdeck/api-client` y `@heapdeck/features` y aparecen automáticamente en ambas apps.
 - **67 tests pasando** post-migración (39 api-client + 5 ui + 18 features + 5 desktop), distribuidos en los packages correspondientes. La suite original de 57 tests desktop sobrevive intacta.
 - **Side effect positivo:** se removieron 3.444 archivos de `web/node_modules/` que estaban erróneamente trackeados en HEAD.
 - **Design system validado:** Tailwind content globs ahora cubren packages, así que no hay drift entre componentes "compilados" en desktop vs web — usan exactamente las mismas classes.
-- **Dev loop rápido:** sin build step para packages, Vite HMR funciona directo sobre el source de `@devdeck/features`.
+- **Dev loop rápido:** sin build step para packages, Vite HMR funciona directo sobre el source de `@heapdeck/features`.
 
 ### Neutrales
 
@@ -204,13 +204,13 @@ import '@devdeck/ui/styles/globals.css'
 ```bash
 pnpm typecheck        # ✓ 5 packages (api-client, ui, features, desktop, web)
 pnpm test             # ✓ 67 tests (39 api-client + 5 ui + 18 features + 5 desktop)
-pnpm -F @devdeck/desktop build   # ✓ electron-vite build (main + preload + renderer)
-pnpm -F @devdeck/web build       # ✓ vite build (~991 kB ungzipped)
+pnpm -F @heapdeck/desktop build   # ✓ electron-vite build (main + preload + renderer)
+pnpm -F @heapdeck/web build       # ✓ vite build (~991 kB ungzipped)
 ```
 
 Manual smoke test:
-- `pnpm -F @devdeck/desktop dev` → Electron window abre, 7 rutas funcionan, Cmd+K global search, paste interceptor.
-- `pnpm -F @devdeck/web dev` → `http://localhost:5173/login` renderiza la brutalist card. OAuth flow llega a `/auth/callback` y redirige a `/`.
+- `pnpm -F @heapdeck/desktop dev` → Electron window abre, 7 rutas funcionan, Cmd+K global search, paste interceptor.
+- `pnpm -F @heapdeck/web dev` → `http://localhost:5173/login` renderiza la brutalist card. OAuth flow llega a `/auth/callback` y redirige a `/`.
 
 ---
 
@@ -218,7 +218,7 @@ Manual smoke test:
 
 - **OpenAPI codegen:** los tipos de dominio siguen siendo hand-written en `packages/api-client/src/features/*/types.ts`. Si backend empieza a churnear más rápido, se puede evaluar `openapi-typescript` en una ADR futura.
 - **Turborepo / Nx:** no hay caching de tasks hoy. Si CI empieza a ser lento se puede agregar Turbo sin romper la estructura.
-- **Publishing de packages:** son `private: true` y consumidos via workspace — no se publican a npm. Si eventualmente sale un SDK público, se puede extraer `@devdeck/api-client` a su propio repo.
+- **Publishing de packages:** son `private: true` y consumidos via workspace — no se publican a npm. Si eventualmente sale un SDK público, se puede extraer `@heapdeck/api-client` a su propio repo.
 - **Compartir componentes entre web y mobile nativo:** fuera de alcance. Si llega React Native, la estrategia es duplicar (react-native no comparte DOM components con web).
 
 ---

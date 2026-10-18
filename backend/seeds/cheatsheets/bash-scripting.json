@@ -14,7 +14,7 @@
     },
     {
       "label": "Variable Assignment",
-      "command": "NAME=\"DevDeck\"\necho \"Hello, ${NAME}!\"",
+      "command": "NAME=\"HeapDeck\"\necho \"Hello, ${NAME}!\"",
       "description": "Assign and use variables — always quote and use ${} for clarity",
       "tags": ["variable", "string", "basics"]
     },

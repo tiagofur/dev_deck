@@ -17,7 +17,7 @@ export function RegexTool() {
         onLoad={() => {
           setPattern('(\\w+)@(\\w+)\\.dev')
           setFlags('gi')
-          setSample('Contact ana@devdeck.dev or leo@example.dev for demo access.')
+          setSample('Contact ana@heapdeck.dev or leo@example.dev for demo access.')
         }}
       />
       <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_140px]">

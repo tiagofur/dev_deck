@@ -11,14 +11,14 @@ import (
 )
 
 // SetupPostgres on darwin/arm64 normally skips due to testcontainers-go crashes
-// during init (SIGSEGV in go-m1cpu). However, if DEVDECK_TEST_DB_URL is set,
+// during init (SIGSEGV in go-m1cpu). However, if HEAPDECK_TEST_DB_URL is set,
 // we bypass testcontainers and use the provided local instance.
 func SetupPostgres(t *testing.T) *pgxpool.Pool {
 	t.Helper()
 
-	dsn := os.Getenv("DEVDECK_TEST_DB_URL")
+	dsn := os.Getenv("HEAPDECK_TEST_DB_URL")
 	if dsn == "" {
-		t.Skip("skipping DB-backed test on darwin/arm64: testcontainers-go crashes in go-m1cpu during init. Set DEVDECK_TEST_DB_URL to run anyway.")
+		t.Skip("skipping DB-backed test on darwin/arm64: testcontainers-go crashes in go-m1cpu during init. Set HEAPDECK_TEST_DB_URL to run anyway.")
 		return nil
 	}
 

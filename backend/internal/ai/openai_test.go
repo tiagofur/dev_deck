@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"devdeck/internal/domain/items"
+	"heapdeck/internal/domain/items"
 )
 
 func TestSanitizeForAI(t *testing.T) {

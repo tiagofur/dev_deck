@@ -10,10 +10,10 @@ import (
 	"strconv"
 	"strings"
 
-	"devdeck/internal/ai"
-	"devdeck/internal/authctx"
-	"devdeck/internal/domain/cheatsheets"
-	"devdeck/internal/store"
+	"heapdeck/internal/ai"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/domain/cheatsheets"
+	"heapdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -390,7 +390,7 @@ func (h *CheatsheetsHandler) Badge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	label := url.QueryEscape("DevDeck Cheatsheet")
+	label := url.QueryEscape("HeapDeck Cheatsheet")
 	title := url.QueryEscape(c.Title)
 	color := "blue"
 	if c.Color != nil && *c.Color != "" {
@@ -429,7 +429,7 @@ func (h *CheatsheetsHandler) Card(w http.ResponseWriter, r *http.Request) {
 	<text x="50" y="120" font-family="monospace" font-size="16" fill="#666666">%s</text>
 	
 	<text x="50" y="250" font-family="sans-serif" font-size="18" fill="#1A1A1A">%d Commands</text>
-	<text x="50" y="280" font-family="sans-serif" font-size="14" font-weight="bold" fill="#FFD700">DEVDECK VAULT</text>
+	<text x="50" y="280" font-family="sans-serif" font-size="14" font-weight="bold" fill="#FFD700">HEAPDECK VAULT</text>
 </svg>
 	`, html.EscapeString(detail.Title), html.EscapeString(detail.Category), len(detail.Entries))
 

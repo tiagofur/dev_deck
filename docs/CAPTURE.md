@@ -1,6 +1,6 @@
 # Capture Network Specification
 
-DevDeck is only useful if it's easy to get information *into* it. This document defines the different "Capture Channels" available.
+HeapDeck is only useful if it's easy to get information *into* it. This document defines the different "Capture Channels" available.
 
 [Leer en español](CAPTURE.es.md)
 
@@ -14,14 +14,14 @@ DevDeck is only useful if it's easy to get information *into* it. This document 
 
 ---
 
-## 2. CLI `devdeck`
+## 2. CLI `heapdeck`
 The terminal-first capture channel.
 
 - **Status:** Available (`go install`).
 - **Core Commands:**
-    - `devdeck add <url>`: Save a URL.
-    - `devdeck search <query>`: Fast terminal search.
-    - `devdeck import github-stars`: Batch import your stars.
+    - `heapdeck add <url>`: Save a URL.
+    - `heapdeck search <query>`: Fast terminal search.
+    - `heapdeck import github-stars`: Batch import your stars.
 - **Implementation:** Built with `Cobra` and `go-keyring` for secure auth storage.
 
 ---
@@ -33,14 +33,14 @@ The Electron app listens for global paste events (`Cmd/Ctrl + Shift + V`).
     - If clipboard is a URL -> Suggest saving as `Repo`.
     - If clipboard looks like a command -> Suggest saving as `CLI`.
     - If clipboard is a code block -> Suggest saving as `Snippet`.
-- **UX:** Non-intrusive toast notification in the corner: *"URL detected. Save to DevDeck?"*
+- **UX:** Non-intrusive toast notification in the corner: *"URL detected. Save to HeapDeck?"*
 
 ---
 
 ## 4. Share Target (PWA)
-When accessed as a PWA on mobile, DevDeck appears in the native "Share" menu.
+When accessed as a PWA on mobile, HeapDeck appears in the native "Share" menu.
 
-- **Flow:** User shares link from mobile browser -> DevDeck opens -> `CaptureModal` pre-filled.
+- **Flow:** User shares link from mobile browser -> HeapDeck opens -> `CaptureModal` pre-filled.
 
 ---
 

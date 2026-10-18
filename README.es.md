@@ -1,20 +1,20 @@
-# DevDeck.ai
+# HeapDeck.com
 
 > **Tu memoria externa asistida por IA para el trabajo de desarrollo.**
 
 Una app **offline-first, multi-usuario y multiplataforma** donde guardar, organizar y redescubrir todo lo útil que un dev encuentra: repos, CLIs, plugins, cheatsheets, shortcuts, snippets, agentes, prompts y workflows. Con IA que clasifica, resume y recupera por intención — no por tag exacto.
 
-Dominio: **[devdeck.ai](https://devdeck.ai)**
+Dominio: **[heapdeck.com](https://heapdeck.com)**
 
-[English](README.md) · [Roadmap](ROADMAP.md) · [Contribuir](CONTRIBUTING.es.md) · [Discusiones](https://github.com/tiagofur/dev_deck/discussions) · [Guía de discusiones](docs/DISCUSSIONS.md) · [Soporte](docs/SUPPORT.md) · [Modelo de comunidad](docs/CIRCLES_COMMUNITY.md)
+[English](README.md) · [Roadmap](ROADMAP.md) · [Contribuir](CONTRIBUTING.es.md) · [Discusiones](https://github.com/tiagofur/heapdeck/discussions) · [Guía de discusiones](docs/DISCUSSIONS.md) · [Soporte](docs/SUPPORT.md) · [Modelo de comunidad](docs/CIRCLES_COMMUNITY.md)
 
 ---
 
-## ¿Por qué DevDeck?
+## ¿Por qué HeapDeck?
 
 El problema real no es "guardar repos". Es no poder volver a encontrar lo que ya descubriste: una CLI útil que te pasaron en un chat, un plugin de IDE que no recordás cómo se llamaba, un atajo de macOS que tardaste horas en aprender, un repo que resolvía exactamente tu problema actual.
 
-DevDeck es tu **colección curada de conocimiento dev** — con IA que hace que todo lo que guardás sea encontrable semanas después, aunque no recuerdes cómo lo llamaste.
+HeapDeck es tu **colección curada de conocimiento dev** — con IA que hace que todo lo que guardás sea encontrable semanas después, aunque no recuerdes cómo lo llamaste.
 
 ---
 
@@ -27,12 +27,12 @@ DevDeck es tu **colección curada de conocimiento dev** — con IA que hace que 
 - **IA:** OpenAI API / Ollama (local)
 - **Offline:** SQLite local (Electron) + sql.js/OPFS (Web)
 - **Deploy:** VPS propio · Docker Compose · Caddy (TLS automático)
-- **Dominio:** [devdeck.ai](https://devdeck.ai) · `app.devdeck.ai` · `api.devdeck.ai`
+- **Dominio:** [heapdeck.com](https://heapdeck.com) · `app.heapdeck.com` · `api.heapdeck.com`
 
 ### Layout del repo (monorepo pnpm workspaces)
 
 ```
-dev_deck/
+heapdeck/
 ├── apps/
 │   ├── desktop/          # Electron app (React renderer)
 │   └── web/              # Web app (React + BrowserRouter)
@@ -41,20 +41,20 @@ dev_deck/
 │   ├── api-client/       # Fetch wrapper + TanStack Query hooks + auth adapters
 │   └── features/         # Pages + componentes de dominio (compartidos entre apps)
 ├── backend/              # Go API
-├── cli/                  # CLI `devdeck` (Go)
+├── cli/                  # CLI `heapdeck` (Go)
 ├── extension/            # Browser extension (Manifest v3)
 ├── deploy/               # Docker Compose + Caddy
 └── docs/                 # Documentación
 ```
 
-Ambas apps importan pages y componentes del package `@devdeck/features` — solo difieren en el shell (HashRouter + PasteInterceptor en desktop, BrowserRouter + AuthGuard en web). Ver [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md).
+Ambas apps importan pages y componentes del package `@heapdeck/features` — solo difieren en el shell (HashRouter + PasteInterceptor en desktop, BrowserRouter + AuthGuard en web). Ver [docs/adr/0003-monorepo-pnpm-workspaces.md](docs/adr/0003-monorepo-pnpm-workspaces.md).
 
 ---
 
 ## Screenshots
 ---
 
-> 📸 **Explora capturas de pantalla y demos interactivas en [DevDeck.ai](https://devdeck.ai)**
+> 📸 **Explora capturas de pantalla y demos interactivas en [HeapDeck.com](https://heapdeck.com)**
 
 ---
 
@@ -83,7 +83,7 @@ Ambas apps importan pages y componentes del package `@devdeck/features` — solo
 ### Operación y contribución
 | Doc | Contenido |
 |-----|-----------|
-| [cli/README.md](cli/README.md) | Instalación y uso real del CLI `devdeck` (P0) |
+| [cli/README.md](cli/README.md) | Instalación y uso real del CLI `heapdeck` (P0) |
 | [docs/SELF_HOSTING.md](docs/SELF_HOSTING.md) | Guía paso a paso para self-host |
 | [docs/CAPTURE.md](docs/CAPTURE.md) | Spec de canales de captura (extensión, CLI, paste, share) |
 | [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | Plan de tests y CI |
@@ -97,6 +97,6 @@ Ambas apps importan pages y componentes del package `@devdeck/features` — solo
 
 ## Estado
 
-DevDeck es un producto open-source en evolución. La dirección actual es fortalecer el vault, los flujos de captura, la recuperación semántica y el nuevo **Developer Workbench**: utilities locales, paleta, requests reutilizables, snippets y runbooks conectados al contexto guardado.
+HeapDeck es un producto open-source en evolución. La dirección actual es fortalecer el vault, los flujos de captura, la recuperación semántica y el nuevo **Developer Workbench**: utilities locales, paleta, requests reutilizables, snippets y runbooks conectados al contexto guardado.
 
 Ver [ROADMAP.md](ROADMAP.md) y [docs/DEV_WORKBENCH.md](docs/DEV_WORKBENCH.md) para la dirección de producto.

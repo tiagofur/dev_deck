@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useMemo, useState } from 'react'
 import { Menu, X } from 'lucide-react'
-import type { Item } from '@devdeck/api-client'
-import { useTranslation } from '@devdeck/i18n'
+import type { Item } from '@heapdeck/api-client'
+import { useTranslation } from '@heapdeck/i18n'
 
 interface Props {
   items: Item[]

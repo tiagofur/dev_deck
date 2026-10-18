@@ -29,9 +29,9 @@ import (
 
 const (
 	defaultPGImage = "pgvector/pgvector:pg16"
-	defaultPGUser  = "devdeck_test"
-	defaultPGPass  = "devdeck_test"
-	defaultPGDB    = "devdeck_test"
+	defaultPGUser  = "heapdeck_test"
+	defaultPGPass  = "heapdeck_test"
+	defaultPGDB    = "heapdeck_test"
 )
 
 // container holds a single shared Postgres container reused across tests
@@ -43,11 +43,11 @@ var (
 )
 
 // SetupPostgres returns a pgxpool.Pool connected to a Postgres instance with
-// all DevDeck migrations applied. Each call returns a fresh pool against a
+// all HeapDeck migrations applied. Each call returns a fresh pool against a
 // truncated DB so tests don't see each other's rows.
 //
 // If Docker isn't reachable (no daemon, no permission, etc.), the test is
-// skipped — it's a "best-effort" integration setup. Set DEVDECK_REQUIRE_DB=1
+// skipped — it's a "best-effort" integration setup. Set HEAPDECK_REQUIRE_DB=1
 // to fail instead of skip (used by CI to enforce coverage).
 func SetupPostgres(t *testing.T) *pgxpool.Pool {
 	t.Helper()
@@ -58,8 +58,8 @@ func SetupPostgres(t *testing.T) *pgxpool.Pool {
 
 	pool, err := acquirePool(t)
 	if err != nil {
-		if os.Getenv("DEVDECK_REQUIRE_DB") == "1" {
-			t.Fatalf("DEVDECK_REQUIRE_DB=1 but DB setup failed: %v", err)
+		if os.Getenv("HEAPDECK_REQUIRE_DB") == "1" {
+			t.Fatalf("HEAPDECK_REQUIRE_DB=1 but DB setup failed: %v", err)
 		}
 		t.Skipf("skipping: postgres testcontainer unavailable: %v", err)
 	}

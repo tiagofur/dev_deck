@@ -1,8 +1,8 @@
-# DevDeck — Copy y estructura de contenido para devdeck.ai (versión en inglés)
+# HeapDeck — Copy y estructura de contenido para heapdeck.com (versión en inglés)
 
 > Versión: 0.5.0 (Beta Pública) · Última actualización: Mayo 2026
 
-Este documento define el contenido, copy y estructura de secciones para la landing page de **devdeck.ai**.
+Este documento define el contenido, copy y estructura de secciones para la landing page de **heapdeck.com**.
 Refleja el estado final del producto tras completar las 17 olas del roadmap.
 
 
@@ -20,13 +20,13 @@ Refleja el estado final del producto tras completar las 17 olas del roadmap.
 ## Arquitectura de páginas
 
 ```
-devdeck.ai/
+heapdeck.com/
 ├── /                  (landing principal)
 ├── /deck/:slug        (deck público compartido)
 ├── /@:username        (perfil público de usuario)
 ├── /download          (descargas de la app desktop)
 ├── /changelog         (historial de cambios)
-└── /docs              (documentación → redirige a docs.devdeck.ai)
+└── /docs              (documentación → redirige a docs.heapdeck.com)
 ```
 
 ---
@@ -46,14 +46,14 @@ Find them again — even when you forgot what you saved.
 
 ### Descripción de apoyo
 ```
-DevDeck is an offline-first knowledge app for developers.
+HeapDeck is an offline-first knowledge app for developers.
 Add anything useful. Let AI organize it.
 Search by intent, not by exact tag.
 ```
 
 ### CTAs
 - **Primario:** `Download for Mac` (con dropdown: also available for Windows · Linux)
-- **Secundario:** `Open web app →` (enlace a `app.devdeck.ai`)
+- **Secundario:** `Open web app →` (enlace a `app.heapdeck.com`)
 - **Terciario (link):** `See a demo deck →`
 
 ### Visual del hero
@@ -91,7 +91,7 @@ You just don't remember what it was called.
 
 ---
 
-## 3. What DevDeck Does (Feature Strip)
+## 3. What HeapDeck Does (Feature Strip)
 
 > Sección visual con 4 cards horizontales o grid 2x2.
 
@@ -106,7 +106,7 @@ Body: Save GitHub repos, CLIs, VS Code extensions, macOS shortcuts,
 ### Card 2 — AI that organizes, not chatbots
 ```
 Title: AI that actually helps.
-Body: DevDeck automatically tags and summarizes what you save.
+Body: HeapDeck automatically tags and summarizes what you save.
       No manual work. No decorative chatbot.
       Just useful metadata when you come back in 6 months.
 ```
@@ -141,17 +141,17 @@ Not AI for the sake of AI.
 
 ### Sub-sección: Auto-tagging
 ```
-Headline: You save. DevDeck labels.
+Headline: You save. HeapDeck labels.
 
 Body:
-When you add a repo or link, DevDeck reads the title, description
+When you add a repo or link, HeapDeck reads the title, description
 and README to suggest:
   - Type: CLI / plugin / shortcut / agent / article
   - Stack: Go / React / macOS / terminal / AI tooling
   - Purpose: testing / deploy / productivity / devtools
   - Level: beginner / advanced
 
-You review and confirm. DevDeck learns from your edits.
+You review and confirm. HeapDeck learns from your edits.
 ```
 
 ### Sub-sección: Auto-summary
@@ -179,7 +179,7 @@ Examples:
   "repos for debugging Go applications" →
   "CLIs I saved for Docker workflows" →
 
-DevDeck finds relevant items even when the keywords don't match exactly.
+HeapDeck finds relevant items even when the keywords don't match exactly.
 ```
 
 ### Sub-sección: Related Items
@@ -187,7 +187,7 @@ DevDeck finds relevant items even when the keywords don't match exactly.
 Headline: One item leads to another.
 
 Body:
-When you open an item, DevDeck suggests:
+When you open an item, HeapDeck suggests:
   - Similar repos and tools
   - Related cheatsheets
   - Relevant commands from your saved workflows
@@ -198,7 +198,7 @@ Turns a single lookup into a useful session.
 ### Nota honesta al pie de la sección (importante para el trust)
 ```
 A note on AI:
-DevDeck sends item titles and descriptions to the AI model
+HeapDeck sends item titles and descriptions to the AI model
 to generate tags and summaries. We never send your private notes
 without your explicit opt-in. You can also run a local model
 with Ollama — your data never leaves your machine.
@@ -212,7 +212,7 @@ with Ollama — your data never leaves your machine.
 Headline: Your commands, organized.
 
 Body:
-DevDeck ships with curated cheatsheets for:
+HeapDeck ships with curated cheatsheets for:
 git · docker · npm · pnpm · vim · tmux · ssh · kubectl · gh CLI · make
 
 Create your own. Link them to repos. Search across all of them
@@ -231,7 +231,7 @@ Discovery mode shows you items you haven't opened in months.
 Swipe to keep or archive. It's how you turn a growing vault
 into an actually useful collection.
 
-Snarkel, the DevDeck mascot, will nudge you when things go
+Snarkel, the HeapDeck mascot, will nudge you when things go
 unvisited for too long.
 ```
 
@@ -266,7 +266,7 @@ Platforms:
   🖥  Mac         — native Electron app (Apple Silicon + Intel)
   🪟  Windows     — native Electron app (.exe installer)
   🐧  Linux       — AppImage
-  🌐  Web         — browser app at app.devdeck.ai
+  🌐  Web         — browser app at app.heapdeck.com
   📱  Mobile      — coming later
 
 All connected to the same vault.
@@ -280,11 +280,11 @@ All working offline.
 > Por ahora, usar una quote del fundador o una cita interna. Reemplazar con usuarios reales en cuanto haya.
 
 ```
-"I built DevDeck because I kept losing track of useful repos
+"I built HeapDeck because I kept losing track of useful repos
 people shared in chats. Bookmarks didn't cut it.
 Now I use it every day to find things I forgot I saved."
 
-— Tiago, creator of DevDeck
+— Tiago, creator of HeapDeck
 ```
 
 ---
@@ -298,13 +298,13 @@ Stop losing useful things you find.
 
 ### Sub-copy
 ```
-DevDeck is free to download.
+HeapDeck is free to download.
 Your vault is yours, offline-first, always exportable.
 ```
 
 ### CTAs
-- **Primario:** `Download DevDeck — it's free`
-- **Secundario:** `Open web app` (enlace a `app.devdeck.ai`)
+- **Primario:** `Download HeapDeck — it's free`
+- **Secundario:** `Open web app` (enlace a `app.heapdeck.com`)
 
 ### Nota de descarga
 ```
@@ -340,8 +340,8 @@ No account required to get started.
 
 ### Footer copy
 ```
-© 2026 DevDeck · Made by devs, for devs.
-devdeck.ai
+© 2026 HeapDeck · Made by devs, for devs.
+heapdeck.com
 ```
 
 ---
@@ -350,11 +350,11 @@ devdeck.ai
 
 ### Meta tags para SEO/OG
 ```html
-<title>DevDeck — The dev knowledge vault that finds things for you</title>
+<title>HeapDeck — The dev knowledge vault that finds things for you</title>
 <meta name="description" content="Save repos, CLIs, plugins, shortcuts and workflows. Find them again — even when you forgot what you saved. Offline-first, AI-powered, free.">
-<meta property="og:title" content="DevDeck — The dev knowledge vault">
+<meta property="og:title" content="HeapDeck — The dev knowledge vault">
 <meta property="og:description" content="Offline-first knowledge app for developers. AI that organizes. Search by intent.">
-<meta property="og:image" content="https://devdeck.ai/og-image.png">
+<meta property="og:image" content="https://heapdeck.com/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 ```
 
@@ -371,9 +371,9 @@ devdeck.ai
 - Deck share link follows
 - Scroll depth por sección
 - CTA conversion (landing → download)
-# DevDeck.ai — Copy de landing page
+# HeapDeck.com — Copy de landing page
 
-> Documento de referencia para el sitio `devdeck.ai`.
+> Documento de referencia para el sitio `heapdeck.com`.
 > Idioma: Español (rioplatense, casual). Tono: directo, honesto, para devs.
 > Versión: 1.0 · Última actualización: 2026-04-08
 
@@ -381,7 +381,7 @@ devdeck.ai
 
 ## Reposicionamiento del producto (1 línea)
 
-> **DevDeck.ai es tu memoria externa para desarrollo. Guarda todo lo útil. Encuéntralo cuando lo necesitás. Con IA que organiza, no que charla.**
+> **HeapDeck.com es tu memoria externa para desarrollo. Guarda todo lo útil. Encuéntralo cuando lo necesitás. Con IA que organiza, no que charla.**
 
 ---
 
@@ -401,7 +401,7 @@ devdeck.ai
 
 ### Subtítulo (H2 / subhero)
 
-DevDeck guarda cualquier cosa útil para un dev: repos recomendados por amigos, CLIs que encontraste en Twitter, plugins de IDE con IA, atajos de macOS, cheatsheets de stack, comandos por proyecto. La IA los organiza y los hace buscables por intención — sin que tengas que hacer nada a mano.
+HeapDeck guarda cualquier cosa útil para un dev: repos recomendados por amigos, CLIs que encontraste en Twitter, plugins de IDE con IA, atajos de macOS, cheatsheets de stack, comandos por proyecto. La IA los organiza y los hace buscables por intención — sin que tengas que hacer nada a mano.
 
 Funciona offline. Se sincroniza en todos tus dispositivos. Disponible en desktop (Win/Mac/Linux) y en el browser.
 
@@ -414,7 +414,7 @@ Funciona offline. Se sincroniza en todos tus dispositivos. Disponible en desktop
 ### Social proof / trust inicial
 
 > *"Era uno de esos repos que un amigo te manda y perdés en el chat.
-> Ahora lo busco en DevDeck cuando lo necesito."*
+> Ahora lo busco en HeapDeck cuando lo necesito."*
 > — Dev de backend, Buenos Aires
 
 *(Placeholder para testimonios reales en el lanzamiento)*
@@ -437,11 +437,11 @@ Funciona offline. Se sincroniza en todos tus dispositivos. Disponible en desktop
 
 ### Cierre de sección
 
-DevDeck existe para que **nada útil se pierda y todo sea encontrable** — en el momento exacto que lo necesitás.
+HeapDeck existe para que **nada útil se pierda y todo sea encontrable** — en el momento exacto que lo necesitás.
 
 ---
 
-## Sección "Qué guardás en DevDeck"
+## Sección "Qué guardás en HeapDeck"
 
 ### Título
 
@@ -464,7 +464,7 @@ DevDeck existe para que **nada útil se pierda y todo sea encontrable** — en e
 
 ### Tagline de cierre
 
-> Si alguna vez te sirvió, DevDeck lo guarda y te lo devuelve cuando lo necesitás.
+> Si alguna vez te sirvió, HeapDeck lo guarda y te lo devuelve cuando lo necesitás.
 
 ---
 
@@ -483,7 +483,7 @@ Repo de GitHub, link a un plugin, nombre de un CLI, URL de un artículo — lo q
 Detecta qué tipo de cosa es, para qué stack sirve, cuándo usarlo y por qué podría interesarte. Vos solo confirmás (o editás si querés).
 
 **3. Buscás cuando lo necesitás**
-Escribís lo que recordás — aunque sea vago: *"herramientas para agentes en terminal"*. DevDeck busca por intención, no por título exacto.
+Escribís lo que recordás — aunque sea vago: *"herramientas para agentes en terminal"*. HeapDeck busca por intención, no por título exacto.
 
 **4. Siempre disponible**
 Offline en desktop, en el browser, sincronizado entre tus dispositivos.
@@ -499,13 +499,13 @@ Offline en desktop, en el browser, sincronizado entre tus dispositivos.
 ### Copys de features IA (honesto, sin humo)
 
 #### 🏷️ Auto-tagging inteligente
-Cuando guardás algo, DevDeck detecta qué es, qué stack toca y para qué sirve. Te propone los tags; vos los confirmás. Nunca empezás desde cero.
+Cuando guardás algo, HeapDeck detecta qué es, qué stack toca y para qué sirve. Te propone los tags; vos los confirmás. Nunca empezás desde cero.
 
 #### 📝 Resumen automático: "¿para qué sirve esto?"
 Cada item tiene un resumen corto generado por IA: qué es, cuándo usarlo, por qué podría interesarte. El antídoto para *"guardé esto hace 3 meses y ya no sé por qué"*.
 
 #### 🔍 Búsqueda por intención (no por tag exacto)
-Buscá en lenguaje natural sobre tu propia colección. No necesitás recordar cómo etiquetaste algo — describís lo que necesitás y DevDeck lo encuentra.
+Buscá en lenguaje natural sobre tu propia colección. No necesitás recordar cómo etiquetaste algo — describís lo que necesitás y HeapDeck lo encuentra.
 
 **Ejemplos reales:**
 - *"herramientas para agents en terminal"*
@@ -514,7 +514,7 @@ Buscá en lenguaje natural sobre tu propia colección. No necesitás recordar c�
 - *"comandos útiles para debugging en Go"*
 
 #### 🔗 Items relacionados automáticos
-Al ver un repo o tool, DevDeck sugiere cheatsheets, comandos y herramientas relacionadas de tu propia colección. Conecta lo que ya tenés.
+Al ver un repo o tool, HeapDeck sugiere cheatsheets, comandos y herramientas relacionadas de tu propia colección. Conecta lo que ya tenés.
 
 ### Bloque de honestidad (texto explícito)
 
@@ -538,7 +538,7 @@ Al ver un repo o tool, DevDeck sugiere cheatsheets, comandos y herramientas rela
 
 🖥️ **Desktop** — App Electron para Windows, macOS y Linux. Atajos globales, integración con el SO.
 
-🌐 **Web** — `app.devdeck.ai` desde cualquier browser. Sin instalar nada.
+🌐 **Web** — `app.heapdeck.com` desde cualquier browser. Sin instalar nada.
 
 📡 **Sync automático** — Tus items sincronizados entre desktop y web. Conflictos resueltos sin drama.
 
@@ -591,7 +591,7 @@ Al ver un repo o tool, DevDeck sugiere cheatsheets, comandos y herramientas rela
 ❌ Necesitás gestión de proyectos o tareas.
 ❌ Querés un chatbot de IA general.
 
-*(DevDeck es específico y opinionated. Eso es una feature, no un bug.)*
+*(HeapDeck es específico y opinionated. Eso es una feature, no un bug.)*
 
 ---
 
@@ -601,7 +601,7 @@ Al ver un repo o tool, DevDeck sugiere cheatsheets, comandos y herramientas rela
 **Empezar gratis — Login con GitHub →**
 
 ### CTA para sección de features
-**Ver DevDeck en acción →** *(link a demo / video)*
+**Ver HeapDeck en acción →** *(link a demo / video)*
 
 ### CTA para el final de la página
 **¿Qué estás esperando? Todo lo que encontraste útil sigue perdiéndose.**
@@ -614,11 +614,11 @@ Al ver un repo o tool, DevDeck sugiere cheatsheets, comandos y herramientas rela
 
 ## Footer copy
 
-**DevDeck.ai** — Tu knowledge OS para developers.
+**HeapDeck.com** — Tu knowledge OS para developers.
 
-- `app.devdeck.ai` — Web app
-- `docs.devdeck.ai` — Documentación
-- `download.devdeck.ai` — Desktop (Win/Mac/Linux)
+- `app.heapdeck.com` — Web app
+- `docs.heapdeck.com` — Documentación
+- `download.heapdeck.com` — Desktop (Win/Mac/Linux)
 
 Hecho con ☕ y demasiados repositorios olvidados.
 

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Button } from '@devdeck/ui'
+import { Button } from '@heapdeck/ui'
 import { hashText } from '../../workbench/utils'
 import { ToolFrame, TextArea, ResultActions, ExampleButton } from './shared'
 
@@ -15,7 +15,7 @@ export function HashTool() {
 
   return (
     <ToolFrame title="Hash generator">
-      <ExampleButton onLoad={() => setInput('devdeck demo input — hash me')} />
+      <ExampleButton onLoad={() => setInput('heapdeck demo input — hash me')} />
       <form onSubmit={submit} className="grid gap-5">
         <div className="flex gap-2">
           {(['SHA-256', 'SHA-1'] as const).map((nextAlgorithm) => (

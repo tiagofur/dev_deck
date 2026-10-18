@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"devdeck/internal/domain/items"
-	"devdeck/internal/store"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/store"
 
 	"github.com/google/uuid"
 )
@@ -176,7 +176,7 @@ func DefaultTools(st *store.Store) []Tool {
 				if err != nil {
 					return nil, err
 				}
-				req.Header.Set("User-Agent", "DevDeck-Agent/1.0")
+				req.Header.Set("User-Agent", "HeapDeck-Agent/1.0")
 
 				resp, err := client.Do(req)
 				if err != nil {

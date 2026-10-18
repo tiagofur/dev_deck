@@ -1,8 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Download, ExternalLink, Library, Sparkles } from 'lucide-react'
-import { usePublicDeck, useImportDeck, isLoggedIn } from '@devdeck/api-client'
-import { Button, TagChip, hashIndex, showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+import { usePublicDeck, useImportDeck, isLoggedIn } from '@heapdeck/api-client'
+import { Button, TagChip, hashIndex, showToast } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function PublicDeckPage() {
 	const { t } = useTranslation()
@@ -154,7 +154,7 @@ export function PublicDeckPage() {
 			<footer className="max-w-4xl mx-auto p-12 text-center">
 				<p className="text-[10px] font-mono text-ink-soft uppercase tracking-widest flex items-center justify-center gap-2">
 					<Sparkles size={12} className="text-accent-pink" />
-					Powered by DevDeck.ai
+					Powered by HeapDeck.com
 				</p>
 			</footer>
 		</div>

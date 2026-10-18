@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"sort"
 
-	"devdeck/internal/domain/cheatsheets"
-	"devdeck/internal/store"
+	"heapdeck/internal/domain/cheatsheets"
+	"heapdeck/internal/store"
 )
 
 // LoadCheatsheets reads all .json files from the embedded seeds directory

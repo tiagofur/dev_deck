@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Loader2, Mail, ArrowLeft, CheckCircle2 } from 'lucide-react'
-import { useJoinWaitlist } from '@devdeck/api-client'
-import { Button } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+import { useJoinWaitlist } from '@heapdeck/api-client'
+import { Button } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function WaitlistPage() {
   const { t } = useTranslation()

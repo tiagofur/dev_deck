@@ -1,4 +1,4 @@
-# DevDeck — Documentation
+# HeapDeck — Documentation
 
 > Documentation index for the project. All docs live in this folder (`docs/`).
 >
@@ -11,7 +11,7 @@
 | File | Description |
 |------|-------------|
 | [PRD.md](PRD.md) | **Product Requirements Document.** Vision, problem, layered solution (polymorphic vault + intelligent retrieval + reusable actions), pillars, scope (core + Workbench + out of scope), and success metrics. Main entry point to understand the product. |
-| [VISION.md](VISION.md) | **Vision and positioning.** What DevDeck is (and is not), genuine differentiators, target audience, and current focus. |
+| [VISION.md](VISION.md) | **Vision and positioning.** What HeapDeck is (and is not), genuine differentiators, target audience, and current focus. |
 | [DEV_WORKBENCH.md](DEV_WORKBENCH.md) | **Developer Workbench.** From memory to contextual action: local utilities, palette, reusable requests, product boundaries, and per-phase status. |
 | [CIRCLES_COMMUNITY.md](CIRCLES_COMMUNITY.md) | **Circles and community contribution.** Product model for turning individual findings into reusable memory for groups/communities of developers. |
 | [COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md) | **Competitive analysis.** Comparison against GitHub Stars, Raindrop, Pocket, Notion, Obsidian, and Raycast. |
@@ -23,7 +23,7 @@
 
 | File | Description |
 |------|-------------|
-| [LANDING_COPY.md](LANDING_COPY.md) | **Landing copy in English.** Full copy for `devdeck.ai` (global developer audience): hero, features, AI section, platforms, pricing, CTA, SEO tags, and implementation notes. |
+| [LANDING_COPY.md](LANDING_COPY.md) | **Landing copy in English.** Full copy for `heapdeck.com` (global developer audience): hero, features, AI section, platforms, pricing, CTA, SEO tags, and implementation notes. |
 | [LANDING.md](LANDING.md) | **Landing copy in Spanish.** Same structure for the Spanish-speaking audience, plus extra micro-copy for the app UI. |
 
 ---
@@ -32,7 +32,7 @@
 
 | File | Description |
 |------|-------------|
-| [ARCHITECTURE.md](ARCHITECTURE.md) | **System architecture.** High-level diagram, stack (Go + Chi + Postgres + pgvector; pnpm monorepo with Electron + React desktop and React web sharing `@devdeck/ui` / `@devdeck/api-client` / `@devdeck/features`), architecture decisions, and database schema. |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | **System architecture.** High-level diagram, stack (Go + Chi + Postgres + pgvector; pnpm monorepo with Electron + React desktop and React web sharing `@heapdeck/ui` / `@heapdeck/api-client` / `@heapdeck/features`), architecture decisions, and database schema. |
 | [ARCHITECTURE_MAP.md](ARCHITECTURE_MAP.md) | **Architecture map for contributors.** One-page orientation: request flow, monorepo layout, where to change what, and how to verify before a PR. |
 | [VERSIONING.md](VERSIONING.md) | **Versioning and releases.** SemVer, release strategy, Conventional Commits, changelog, release scripts, and auto-release GitHub Actions. |
 | [adr/0001-items-polymorphism.md](adr/0001-items-polymorphism.md) | **ADR 0001.** Polymorphic `items` model (single table + JSONB + generated columns). |
@@ -75,7 +75,7 @@
 
 If you are new here, the recommended order is:
 
-1. **[README.md](../README.md)** — what DevDeck is in 2 minutes
+1. **[README.md](../README.md)** — what HeapDeck is in 2 minutes
 2. **[VISION.md](VISION.md)** — why it exists and for whom
 3. **[PRD.md](PRD.md)** — what it does and what was decided
 4. **[DEV_WORKBENCH.md](DEV_WORKBENCH.md)** — memory + action, with per-phase status

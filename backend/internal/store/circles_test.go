@@ -1,13 +1,13 @@
 package store_test
 
 import (
-	"devdeck/internal/authctx"
 	"errors"
+	"heapdeck/internal/authctx"
 	"testing"
 
-	"devdeck/internal/domain/auth"
-	"devdeck/internal/domain/items"
-	"devdeck/internal/store"
+	"heapdeck/internal/domain/auth"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/store"
 
 	"github.com/google/uuid"
 )

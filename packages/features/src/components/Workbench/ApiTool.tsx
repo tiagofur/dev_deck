@@ -1,7 +1,7 @@
 import { useState, useMemo, type FormEvent } from 'react'
 import { Send, Save } from 'lucide-react'
-import { Button, showToast } from '@devdeck/ui'
-import { useCapture } from '@devdeck/api-client'
+import { Button, showToast } from '@heapdeck/ui'
+import { useCapture } from '@heapdeck/api-client'
 import {
   parseHeaders,
   serializeRequestConfig,
@@ -10,7 +10,7 @@ import {
 } from '../../workbench/utils'
 import { ToolFrame, TextArea, ResultActions, ExampleButton } from './shared'
 
-const API_REQUEST_HISTORY_STORAGE_KEY = 'devdeck.workbench.apiRequests.v1'
+const API_REQUEST_HISTORY_STORAGE_KEY = 'heapdeck.workbench.apiRequests.v1'
 
 interface SavedApiRequest {
   id: string
@@ -175,7 +175,7 @@ export function ApiTool() {
         title_hint: `${method} ${url || 'API request'}`,
         type_hint: 'workflow',
         tags: ['workbench', 'api-request'],
-        why_saved: 'Reusable API request saved from DevDeck Workbench.',
+        why_saved: 'Reusable API request saved from HeapDeck Workbench.',
       })
       rememberCurrentRequest()
       showToast('Request saved to your vault', 'success')
@@ -253,7 +253,7 @@ export function ApiTool() {
         </div>
         <TextArea label="Headers" value={headers} onChange={setHeaders} />
         {method !== 'GET' && method !== 'HEAD' && (
-          <TextArea label="Body" value={body} onChange={setBody} placeholder='{"hello":"devdeck"}' />
+          <TextArea label="Body" value={body} onChange={setBody} placeholder='{"hello":"heapdeck"}' />
         )}
         <div className="grid gap-3 border-3 border-ink bg-bg-elevated p-4">
           <ExampleButton

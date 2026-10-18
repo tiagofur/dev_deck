@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Star, Download } from 'lucide-react'
-import { useImportGithubStars, useMe } from '@devdeck/api-client'
-import { Button, showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+import { useImportGithubStars, useMe } from '@heapdeck/api-client'
+import { Button, showToast } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 
 /**
  * One-time import of public GitHub stars into the vault. Uses the

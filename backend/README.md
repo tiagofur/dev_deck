@@ -1,4 +1,4 @@
-# DevDeck Backend
+# HeapDeck Backend
 
 Go API (Wave 5). Provides the core logic for capturing, organizing, and enriching development resources with AI.
 
@@ -23,7 +23,7 @@ make run
 
 ## Auth Strategy (GitHub-only)
 
-DevDeck uses **GitHub OAuth** as the exclusive authentication provider.
+HeapDeck uses **GitHub OAuth** as the exclusive authentication provider.
 - **Access Tokens:** Short-lived JWTs sent via `Authorization: Bearer <token>`.
 - **Refresh Tokens:** Stored in secure `HttpOnly` cookies (Web) or secure storage (Desktop).
 - **OAuth State:** Handled via encrypted/secure cookies to maintain statelessness.

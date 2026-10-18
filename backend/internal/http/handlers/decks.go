@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/cache"
-	"devdeck/internal/store"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/cache"
+	"heapdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"

@@ -5,10 +5,10 @@ import {
   useCreateOrg, 
   usePreferences, 
   setPreferences 
-} from '@devdeck/api-client'
+} from '@heapdeck/api-client'
 import { useQueryClient } from '@tanstack/react-query'
-import { useTranslation } from '@devdeck/i18n'
-import { showToast } from '@devdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
+import { showToast } from '@heapdeck/ui'
 
 export function WorkspaceSwitcher() {
   const { t } = useTranslation()

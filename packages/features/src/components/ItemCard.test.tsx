@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ItemCard } from './ItemCard'
-import type { Item } from '@devdeck/api-client'
+import type { Item } from '@heapdeck/api-client'
 
 const mocks = vi.hoisted(() => ({
   useAIEnrichItem: vi.fn(),
@@ -13,8 +13,8 @@ const mocks = vi.hoisted(() => ({
   useUpdateItem: vi.fn(),
 }))
 
-vi.mock('@devdeck/api-client', async () => {
-  const actual = await vi.importActual<typeof import('@devdeck/api-client')>('@devdeck/api-client')
+vi.mock('@heapdeck/api-client', async () => {
+  const actual = await vi.importActual<typeof import('@heapdeck/api-client')>('@heapdeck/api-client')
   return {
     ...actual,
     useAIEnrichItem: mocks.useAIEnrichItem,

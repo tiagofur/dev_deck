@@ -1,4 +1,4 @@
-# DevDeck — Architecture Map for Contributors
+# HeapDeck — Architecture Map for Contributors
 
 > One page to orient your first PR. For diagrams, schema, and decisions, see [ARCHITECTURE.md](ARCHITECTURE.md) and the [ADRs](adr/).
 
@@ -10,7 +10,7 @@
 apps/web (React 18 + Vite) ──────┐
 apps/desktop (Electron + React) ─┼──> packages/features ──> packages/api-client ──> backend (Go API) ──> Postgres 16
 apps/extension (Manifest V3) ────┤      (pages + UI)        (fetch + TanStack       (Chi router)          (+ pg_trgm,
-cli/ (devdeck, Go) ──────────────┘                            Query hooks)                                  pgvector)
+cli/ (heapdeck, Go) ──────────────┘                            Query hooks)                                  pgvector)
 ```
 
 Web and Desktop render the **same pages** from `packages/features`. The extension and CLI talk to the API directly. Most UI work happens in `packages/features`; most server work follows the `router → handler → store → Postgres` path.
@@ -42,7 +42,7 @@ Supporting packages: `cache`, `email`, `jobs`, `metrics`, `seed`, `webhooks`, `t
 | `apps/web` | Web shell: routing + providers |
 | `apps/desktop` | Electron shell. Main-process IPC: API tester sender, project detection, global shortcuts |
 | `apps/extension` | Browser capture extension (Manifest V3 + Vite) |
-| `cli/` | `devdeck` CLI (Go) |
+| `cli/` | `heapdeck` CLI (Go) |
 
 ## Where to change what
 

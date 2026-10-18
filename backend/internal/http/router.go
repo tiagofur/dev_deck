@@ -6,17 +6,17 @@ import (
 	"strings"
 	"time"
 
-	"devdeck/internal/ai"
-	"devdeck/internal/authservice"
-	"devdeck/internal/cache"
-	"devdeck/internal/config"
-	"devdeck/internal/email"
-	"devdeck/internal/enricher"
-	"devdeck/internal/http/handlers"
-	mw "devdeck/internal/http/middleware"
-	"devdeck/internal/jobs"
-	"devdeck/internal/metrics"
-	"devdeck/internal/store"
+	"heapdeck/internal/ai"
+	"heapdeck/internal/authservice"
+	"heapdeck/internal/cache"
+	"heapdeck/internal/config"
+	"heapdeck/internal/email"
+	"heapdeck/internal/enricher"
+	"heapdeck/internal/http/handlers"
+	mw "heapdeck/internal/http/middleware"
+	"heapdeck/internal/jobs"
+	"heapdeck/internal/metrics"
+	"heapdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
@@ -140,7 +140,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	agentH := handlers.NewAgentHandler(st, deps.AI)
 	onboardingH := handlers.NewOnboardingHandler(st)
 	samlH := handlers.NewSAMLHandler(st, as, handlers.SAMLHandlerConfig{
-		EntityID:    "devdeck-sp",
+		EntityID:    "heapdeck-sp",
 		BaseURL:     cfg.FrontendURL, // Best effort base
 		FrontendURL: cfg.FrontendURL,
 	})

@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/domain/items"
-	"devdeck/internal/domain/repos"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/domain/repos"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -885,8 +885,8 @@ type AskResult struct {
 	Citations []Citation          `json:"citations"`
 }
 
-// AskDevDeck searches the user's vault and returns an answer with sources (RAG).
-func (s *Store) AskDevDeck(ctx context.Context, question string, embedding []float32, limit int) (*AskResult, error) {
+// AskHeapDeck searches the user's vault and returns an answer with sources (RAG).
+func (s *Store) AskHeapDeck(ctx context.Context, question string, embedding []float32, limit int) (*AskResult, error) {
 	if limit <= 0 || limit > 10 {
 		limit = 5
 	}

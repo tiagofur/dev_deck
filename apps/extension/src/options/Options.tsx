@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Settings, ShieldCheck, LogOut, ExternalLink, Server } from 'lucide-react'
-import { isLoggedIn, logoutCurrentSession, loginLocal, configureApiClient } from '@devdeck/api-client'
-import { Button, showToast, Toaster } from '@devdeck/ui'
+import { isLoggedIn, logoutCurrentSession, loginLocal, configureApiClient } from '@heapdeck/api-client'
+import { Button, showToast, Toaster } from '@heapdeck/ui'
 import { getBaseUrl, setBaseUrl, DEFAULT_BASE_URL } from '../lib/config'
 
 export function Options() {
@@ -61,7 +61,7 @@ export function Options() {
           </h2>
           <form onSubmit={handleSaveServer} className="space-y-3">
             <p className="font-mono text-xs text-ink-soft">
-              URL del servidor DevDeck (cambialo si te self-hosteás o usás un backend local).
+              URL del servidor HeapDeck (cambialo si te self-hosteás o usás un backend local).
             </p>
             <div className="flex gap-2">
               <input
@@ -95,9 +95,9 @@ export function Options() {
           ) : (
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-1">
-                <label htmlFor="devdeck-email" className="block font-display font-bold uppercase text-[10px]">Email</label>
+                <label htmlFor="heapdeck-email" className="block font-display font-bold uppercase text-[10px]">Email</label>
                 <input
-                  id="devdeck-email"
+                  id="heapdeck-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -106,9 +106,9 @@ export function Options() {
                 />
               </div>
               <div className="space-y-1">
-                <label htmlFor="devdeck-password" className="block font-display font-bold uppercase text-[10px]">Contraseña</label>
+                <label htmlFor="heapdeck-password" className="block font-display font-bold uppercase text-[10px]">Contraseña</label>
                 <input
-                  id="devdeck-password"
+                  id="heapdeck-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -139,7 +139,7 @@ export function Options() {
              <Button 
                 variant="secondary" 
                 className="w-full"
-                onClick={() => window.open('https://devdeck.ai', '_blank')}
+                onClick={() => window.open('https://heapdeck.com', '_blank')}
              >
                 <span className="flex items-center gap-2">
                   Ir a la Web <ExternalLink size={14} />
@@ -151,7 +151,7 @@ export function Options() {
 
       <footer className="text-center pt-12 border-t-2 border-ink/10">
         <p className="font-mono text-[10px] text-ink-soft uppercase tracking-widest">
-          DevDeck Extension v0.5.0
+          HeapDeck Extension v0.5.0
         </p>
       </footer>
       

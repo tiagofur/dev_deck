@@ -1,4 +1,4 @@
-// @devdeck/features — page components + feature modals/cards.
+// @heapdeck/features — page components + feature modals/cards.
 //
 // Apps (desktop, web) import pages from here and mount them inside their
 // own App shell (HashRouter vs BrowserRouter). App shells own routing and

@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"strings"
 
-	"devdeck/internal/authctx"
-	"devdeck/internal/domain/items"
-	"devdeck/internal/domain/repos"
-	"devdeck/internal/enricher"
-	"devdeck/internal/store"
+	"heapdeck/internal/authctx"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/domain/repos"
+	"heapdeck/internal/enricher"
+	"heapdeck/internal/store"
 )
 
 // StarsImportHandler imports a user's public GitHub stars into the vault.

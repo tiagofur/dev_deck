@@ -6,9 +6,9 @@ import {
   useCustomEnrichers,
   useWebhooks,
   type PluginTemplate,
-} from '@devdeck/api-client'
-import { Button, showToast } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
+} from '@heapdeck/api-client'
+import { Button, showToast } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
 
 /**
  * Compact list of available enricher/webhook integrations.

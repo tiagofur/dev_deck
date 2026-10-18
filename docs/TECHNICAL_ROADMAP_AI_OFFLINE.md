@@ -14,7 +14,7 @@ We move from keyword search to vector-based search.
 - **Database:** `pgvector` extension for Postgres.
 - **Pipeline:** When an item is saved, a background job fetches the content -> generates summary -> generates embedding -> stores in `embeddings` table.
 
-### 1.2 "Ask DevDeck" (RAG)
+### 1.2 "Ask HeapDeck" (RAG)
 Implementation of a Retrieval-Augmented Generation system over the user's vault.
 1. User asks a question.
 2. System generates an embedding for the question.

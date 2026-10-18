@@ -37,9 +37,9 @@ export interface DeckItem {
 const DECKS_KEY = ['decks']
 
 // Recent deck keys for quick access (stored in localStorage)
-const RECENT_DECKS_KEY = 'devdeck_recent_decks'
+const RECENT_DECKS_KEY = 'heapdeck_recent_decks'
 const MAX_RECENT_DECKS = 5
-const LAST_DECK_KEY = 'devdeck_last_deck'
+const LAST_DECK_KEY = 'heapdeck_last_deck'
 
 export function addRecentDeck(deckId: string): void {
   try {

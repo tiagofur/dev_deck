@@ -9,9 +9,9 @@ import {
   localStorageAdapter,
   setTokenStorage,
   startSyncEngine,
-} from '@devdeck/api-client'
+} from '@heapdeck/api-client'
 import { App } from './App'
-import '@devdeck/ui/styles/globals.css'
+import '@heapdeck/ui/styles/globals.css'
 
 // Configure the shared api-client + auth storage BEFORE the first fetch.
 // Desktop: use Electron safeStorage when available, fall back to localStorage

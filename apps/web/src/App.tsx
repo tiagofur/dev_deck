@@ -38,11 +38,11 @@ import {
   useGlobalShortcuts,
   ExplorePage,
   UserGuidePage,
-} from '@devdeck/features'
-import { CaptureModal, ShortcutsModal } from '@devdeck/features'
-import { ConfirmHost, PageTransition, Toaster } from '@devdeck/ui'
-import { useTranslation } from '@devdeck/i18n'
-import { isLoggedIn, useMe } from '@devdeck/api-client'
+} from '@heapdeck/features'
+import { CaptureModal, ShortcutsModal } from '@heapdeck/features'
+import { ConfirmHost, PageTransition, Toaster } from '@heapdeck/ui'
+import { useTranslation } from '@heapdeck/i18n'
+import { isLoggedIn, useMe } from '@heapdeck/api-client'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
@@ -159,11 +159,11 @@ function AnimatedRoutes(): ReactElement {
     const onOpenSearch = () => {
       setGlobalSearchOpen(true)
     }
-    window.addEventListener('devdeck:open-capture', onOpenCapture)
-    window.addEventListener('devdeck:open-search', onOpenSearch)
+    window.addEventListener('heapdeck:open-capture', onOpenCapture)
+    window.addEventListener('heapdeck:open-search', onOpenSearch)
     return () => {
-      window.removeEventListener('devdeck:open-capture', onOpenCapture)
-      window.removeEventListener('devdeck:open-search', onOpenSearch)
+      window.removeEventListener('heapdeck:open-capture', onOpenCapture)
+      window.removeEventListener('heapdeck:open-search', onOpenSearch)
     }
   }, [])
 

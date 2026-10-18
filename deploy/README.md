@@ -1,4 +1,4 @@
-# DevDeck — Deploy
+# HeapDeck — Deploy
 
 Deploy completo: Postgres + API Go + Web React + Caddy a un VPS Linux.
 
@@ -8,7 +8,7 @@ Deploy completo: Postgres + API Go + Web React + Caddy a un VPS Linux.
 - Docker + Docker Compose plugin instalados
 - Puertos `80` y `443` abiertos
 - Un dominio (o subdominio) apuntando al IP del VPS via registro `A`
-  - Ejemplo: `devdeck.tudominio.com  →  1.2.3.4`
+  - Ejemplo: `heapdeck.tudominio.com  →  1.2.3.4`
 
 ### Instalar Docker (si no lo tenés)
 
@@ -21,8 +21,8 @@ sudo usermod -aG docker $USER
 ## 1. Clonar el repo
 
 ```bash
-git clone https://github.com/tu-usuario/devdeck.git
-cd devdeck/deploy
+git clone https://github.com/tu-usuario/heapdeck.git
+cd heapdeck/deploy
 ```
 
 ## 2. Generar secretos
@@ -43,8 +43,8 @@ Creá `deploy/.env` con este contenido:
 
 ```env
 # Dominio que apunta al VPS
-DOMAIN=devdeck.ai
-FRONTEND_URL=https://devdeck.ai
+DOMAIN=heapdeck.com
+FRONTEND_URL=https://heapdeck.com
 
 # Postgres
 PG_PASS=<password-segura>
@@ -53,7 +53,7 @@ PG_PASS=<password-segura>
 AUTH_MODE=jwt
 GITHUB_CLIENT_ID=...
 GITHUB_CLIENT_SECRET=...
-GITHUB_OAUTH_CALLBACK_URL=https://devdeck.ai/api/auth/callback
+GITHUB_OAUTH_CALLBACK_URL=https://heapdeck.com/api/auth/callback
 ALLOWED_GITHUB_LOGINS=tu-usuario,otro-colega
 
 # JWT Secrets
@@ -67,7 +67,7 @@ OPENAI_MODEL=gpt-4o
 
 # Opcional tuning
 LOG_LEVEL=info
-CORS_ORIGINS=https://devdeck.ai,app://.
+CORS_ORIGINS=https://heapdeck.com,app://.
 ```
 
 > ⚠️ **Nunca** commitees `.env`. Está en `.gitignore`.
@@ -79,8 +79,8 @@ docker compose up -d --build
 ```
 
 Esto va a:
-1. Buildear `devdeck-api:latest` desde `../backend/Dockerfile`
-2. Buildear `devdeck-web:latest` desde `../apps/web/Dockerfile`
+1. Buildear `heapdeck-api:latest` desde `../backend/Dockerfile`
+2. Buildear `heapdeck-web:latest` desde `../apps/web/Dockerfile`
 3. Bajar `pgvector/pgvector:pg16`, `nginx:alpine`, y `caddy:2-alpine`
 4. Levantar los 4 servicios (db, api, web, caddy)
 5. **Caddy provisiona el certificado TLS automáticamente**
@@ -95,12 +95,12 @@ docker compose logs -f web
 
 ## 5. Aplicar migraciones (0.5.0 beta)
 
-DevDeck 0.5.0 beta requiere aplicar las migraciones del core disponibles:
+HeapDeck 0.5.0 beta requiere aplicar las migraciones del core disponibles:
 
 ```bash
 for f in ../backend/migrations/*.sql; do
   echo "Aplicando $f..."
-  docker compose exec -T db psql -U devdeck devdeck -v ON_ERROR_STOP=1 -f - < "$f"
+  docker compose exec -T db psql -U heapdeck heapdeck -v ON_ERROR_STOP=1 -f - < "$f"
 done
 ```
 
@@ -108,20 +108,20 @@ done
 
 ```bash
 # Health (público - incluye DB ping en v0.5 beta)
-curl https://devdeck.ai/healthz
+curl https://heapdeck.com/healthz
 
 # Métricas (Prometheus)
-curl https://devdeck.ai/metrics
+curl https://heapdeck.com/metrics
 ```
 
-Si todo está bien, vas a ver `{"status":"ok"}` y una lista de métricas que incluyen `devdeck_agent_tool_calls_total`.
+Si todo está bien, vas a ver `{"status":"ok"}` y una lista de métricas que incluyen `heapdeck_agent_tool_calls_total`.
 
 ## 7. Observabilidad (0.5.0 beta)
 
-DevDeck incluye un stack de monitoreo integrado:
+HeapDeck incluye un stack de monitoreo integrado:
 
 - **Prometheus**: Recolecta métricas de la API y de los Agentes.
-- **Grafana**: Visualización en `https://monitor.devdeck.ai`.
+- **Grafana**: Visualización en `https://monitor.heapdeck.com`.
   - Usuario por defecto: `admin`
   - Password: La que definas en `GF_PASS` (.env).
 
@@ -171,10 +171,10 @@ DevDeck incluye un stack de monitoreo integrado:
 cd backend && go run ./cmd/api
 
 # Web app (puerto 5173)
-pnpm dev -F @devdeck/web
+pnpm dev -F @heapdeck/web
 
 # Desktop (con electron)
-pnpm dev -F @devdeck/desktop
+pnpm dev -F @heapdeck/desktop
 ```
 
 Con docker-compose local:
@@ -202,19 +202,19 @@ docker compose logs -f caddy
 
 ### Backup de Postgres
 ```bash
-docker compose exec -T db pg_dump -U devdeck devdeck \
-  | gzip > backups/devdeck-$(date +%F).sql.gz
+docker compose exec -T db pg_dump -U heapdeck heapdeck \
+  | gzip > backups/heapdeck-$(date +%F).sql.gz
 ```
 
 ### Restore
 ```bash
-gunzip -c backups/devdeck-2026-04-07.sql.gz \
-  | docker compose exec -T db psql -U devdeck devdeck
+gunzip -c backups/heapdeck-2026-04-07.sql.gz \
+  | docker compose exec -T db psql -U heapdeck heapdeck
 ```
 
 ### Shell en Postgres
 ```bash
-docker compose exec db psql -U devdeck devdeck
+docker compose exec db psql -U heapdeck heapdeck
 ```
 
 ### Rotar el API token
@@ -228,7 +228,7 @@ docker compose exec db psql -U devdeck devdeck
 ## Troubleshooting
 
 ### Caddy no consigue el cert
-- Confirmá que el DNS resuelve al IP correcto: `dig devdeck.tudominio.com`
+- Confirmá que el DNS resuelve al IP correcto: `dig heapdeck.tudominio.com`
 - Confirmá que los puertos 80/443 están abiertos: `sudo ufw status`
 - Logs: `docker compose logs caddy`
 

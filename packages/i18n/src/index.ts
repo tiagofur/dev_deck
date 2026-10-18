@@ -17,7 +17,7 @@ export type TranslationKeys = typeof en;
 
 export type AppLanguage = 'en' | 'es';
 
-const STORAGE_KEY = 'devdeck_lang';
+const STORAGE_KEY = 'heapdeck_lang';
 
 // Lightweight inline language detection (no extra dependency):
 // 1. Stored preference in localStorage, else

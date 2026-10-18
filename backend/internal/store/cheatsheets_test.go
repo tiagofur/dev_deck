@@ -4,10 +4,10 @@ import (
 	"errors"
 	"testing"
 
-	"devdeck/internal/domain/cheatsheets"
-	"devdeck/internal/domain/items"
-	"devdeck/internal/domain/repos"
-	"devdeck/internal/store"
+	"heapdeck/internal/domain/cheatsheets"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/domain/repos"
+	"heapdeck/internal/store"
 )
 
 func TestStore_CreateCheatsheet_RejectsDuplicateSlug(t *testing.T) {

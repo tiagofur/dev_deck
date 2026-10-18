@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Sparkles, Loader2, ChevronLeft } from 'lucide-react'
-import { Button, showToast } from '@devdeck/ui'
-import { useJoinCircle } from '@devdeck/api-client'
-import { useTranslation, Trans } from '@devdeck/i18n'
+import { Button, showToast } from '@heapdeck/ui'
+import { useJoinCircle } from '@heapdeck/api-client'
+import { useTranslation, Trans } from '@heapdeck/i18n'
 
 export function CircleJoinPage() {
   const { t } = useTranslation()

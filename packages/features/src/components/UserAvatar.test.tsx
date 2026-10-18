@@ -5,10 +5,10 @@ import { getAvatarImageCandidates, UserAvatar } from './UserAvatar'
 describe('getAvatarImageCandidates', () => {
   it('adds the API upload host for web origins', () => {
     expect(
-      getAvatarImageCandidates('/uploads/avatars/me.png', 'https://dev-deck.creapolis.dev'),
+      getAvatarImageCandidates('/uploads/avatars/me.png', 'https://heapdeck.creapolis.dev'),
     ).toEqual([
       '/uploads/avatars/me.png',
-      'https://api.dev-deck.creapolis.dev/uploads/avatars/me.png',
+      'https://api.heapdeck.creapolis.dev/uploads/avatars/me.png',
     ])
   })
 
@@ -20,7 +20,7 @@ describe('getAvatarImageCandidates', () => {
 
   it('does not rewrite non-upload URLs', () => {
     expect(
-      getAvatarImageCandidates('https://cdn.example.com/avatar.png', 'https://dev-deck.creapolis.dev'),
+      getAvatarImageCandidates('https://cdn.example.com/avatar.png', 'https://heapdeck.creapolis.dev'),
     ).toEqual(['https://cdn.example.com/avatar.png'])
   })
 })

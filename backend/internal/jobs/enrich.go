@@ -18,11 +18,11 @@ import (
 	"log/slog"
 	"time"
 
-	"devdeck/internal/ai"
-	"devdeck/internal/domain/items"
-	"devdeck/internal/enricher"
-	"devdeck/internal/metrics"
-	"devdeck/internal/store"
+	"heapdeck/internal/ai"
+	"heapdeck/internal/domain/items"
+	"heapdeck/internal/enricher"
+	"heapdeck/internal/metrics"
+	"heapdeck/internal/store"
 
 	"github.com/google/uuid"
 )

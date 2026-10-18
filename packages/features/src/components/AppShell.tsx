@@ -40,8 +40,8 @@ export function AppShell({
         <Topbar
           query={currentQuery}
           onQueryChange={setQuery}
-          onAdd={() => window.dispatchEvent(new CustomEvent('devdeck:open-capture'))}
-          onGlobalSearch={() => window.dispatchEvent(new CustomEvent('devdeck:open-search'))}
+          onAdd={() => window.dispatchEvent(new CustomEvent('heapdeck:open-capture'))}
+          onGlobalSearch={() => window.dispatchEvent(new CustomEvent('heapdeck:open-search'))}
           onMenuToggle={() => setSidebarOpen(true)}
           reviewCount={reviewCount}
         />

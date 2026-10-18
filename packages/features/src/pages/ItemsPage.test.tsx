@@ -36,8 +36,8 @@ vi.mock('../components/AppShell', () => ({
   ),
 }))
 
-vi.mock('@devdeck/api-client', async () => {
-  const actual = await vi.importActual<typeof import('@devdeck/api-client')>('@devdeck/api-client')
+vi.mock('@heapdeck/api-client', async () => {
+  const actual = await vi.importActual<typeof import('@heapdeck/api-client')>('@heapdeck/api-client')
   return {
     ...actual,
     useItems: mocks.useItems,
@@ -97,7 +97,7 @@ describe('<ItemsPage>', () => {
   it('shows a useful empty state instead of staying on loading forever', async () => {
     const user = userEvent.setup()
     const captureListener = vi.fn()
-    window.addEventListener('devdeck:open-capture', captureListener)
+    window.addEventListener('heapdeck:open-capture', captureListener)
 
     renderPage()
 
@@ -110,6 +110,6 @@ describe('<ItemsPage>', () => {
     await user.click(screen.getByRole('button', { name: /capture your first item/i }))
     expect(captureListener).toHaveBeenCalledTimes(1)
 
-    window.removeEventListener('devdeck:open-capture', captureListener)
+    window.removeEventListener('heapdeck:open-capture', captureListener)
   })
 })

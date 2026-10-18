@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useTranslation } from '@devdeck/i18n'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function NotFoundPage() {
   const { t } = useTranslation()

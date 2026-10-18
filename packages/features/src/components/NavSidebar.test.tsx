@@ -19,8 +19,8 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
-vi.mock('@devdeck/api-client', async () => {
-  const actual = await vi.importActual<typeof import('@devdeck/api-client')>('@devdeck/api-client')
+vi.mock('@heapdeck/api-client', async () => {
+  const actual = await vi.importActual<typeof import('@heapdeck/api-client')>('@heapdeck/api-client')
   return {
     ...actual,
     usePreferences: mocks.usePreferences,
@@ -63,7 +63,7 @@ describe('<NavSidebar>', () => {
     const sidebar = screen.getByTestId('desktop-sidebar')
 
     // Title / Logo
-    expect(within(sidebar).getByRole('heading', { name: /devdeck/i })).toBeInTheDocument()
+    expect(within(sidebar).getByRole('heading', { name: /heapdeck/i })).toBeInTheDocument()
 
     // Sections
     expect(within(sidebar).getByText('Vault')).toBeInTheDocument()

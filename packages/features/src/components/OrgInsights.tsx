@@ -1,6 +1,6 @@
-import { useOrgInsights } from '@devdeck/api-client'
+import { useOrgInsights } from '@heapdeck/api-client'
 import { Activity, BarChart3, Users, LayoutGrid } from 'lucide-react'
-import { useTranslation } from '@devdeck/i18n'
+import { useTranslation } from '@heapdeck/i18n'
 
 export function OrgInsights({ orgId }: { orgId: string }) {
   const { t } = useTranslation()

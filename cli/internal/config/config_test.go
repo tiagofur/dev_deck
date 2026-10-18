@@ -33,7 +33,7 @@ func TestLoad_ReturnsDefaultsWhenFileMissing(t *testing.T) {
 
 func TestSaveLoad_RoundTrip(t *testing.T) {
 	withTempHome(t)
-	in := Config{APIURL: "https://api.devdeck.ai", DefaultSource: "cli"}
+	in := Config{APIURL: "https://api.heapdeck.com", DefaultSource: "cli"}
 	if err := Save(in); err != nil {
 		t.Fatalf("Save: %v", err)
 	}
@@ -54,7 +54,7 @@ func TestSave_CreatesParentDirAndFilePermissions(t *testing.T) {
 	if err := Save(Default()); err != nil {
 		t.Fatalf("Save: %v", err)
 	}
-	p := filepath.Join(dir, "config", "devdeck", "config.toml")
+	p := filepath.Join(dir, "config", "heapdeck", "config.toml")
 	info, err := os.Stat(p)
 	if err != nil {
 		t.Fatalf("stat: %v", err)

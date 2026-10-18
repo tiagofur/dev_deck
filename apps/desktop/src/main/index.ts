@@ -285,7 +285,7 @@ function createWindow(): void {
     backgroundColor: '#FFFBF0',
     show: false,
     autoHideMenuBar: true,
-    title: 'DevDeck',
+    title: 'HeapDeck',
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -335,7 +335,7 @@ function createWindow(): void {
 }
 
 function dispatchAuthCallback(url: string): void {
-  if (!url.startsWith('devdeck://')) return
+  if (!url.startsWith('heapdeck://')) return
   pendingAuthCallbackURL = url
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.show()
@@ -356,7 +356,7 @@ if (!singleInstance) {
 }
 
 app.on('second-instance', (_event, argv) => {
-  const authURL = argv.find((arg) => arg.startsWith('devdeck://'))
+  const authURL = argv.find((arg) => arg.startsWith('heapdeck://'))
   if (authURL) {
     dispatchAuthCallback(authURL)
   } else if (mainWindow && !mainWindow.isDestroyed()) {
@@ -371,7 +371,7 @@ app.on('open-url', (event, url) => {
 })
 
 app.whenReady().then(() => {
-  app.setAsDefaultProtocolClient('devdeck')
+  app.setAsDefaultProtocolClient('heapdeck')
   registerIpcHandlers()
   createWindow()
 

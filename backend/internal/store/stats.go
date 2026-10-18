@@ -6,7 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"devdeck/internal/domain/stats"
+	"heapdeck/internal/domain/stats"
 
 	"github.com/jackc/pgx/v5"
 )
