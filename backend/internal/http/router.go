@@ -1,7 +1,9 @@
 package http
 
 import (
+	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"devdeck/internal/ai"
@@ -46,11 +48,29 @@ func NewRouter(cfg config.Config, st *store.Store, en *enricher.Service, as *aut
 	})
 }
 
+// clientIP returns the client IP used for rate limiting. All external
+// traffic arrives through Caddy, which appends the real client address to
+// X-Forwarded-For; the rightmost entry is the only one the trusted proxy
+// controls, so attacker-supplied leftmost entries are ignored (the removed
+// chi RealIP middleware took the leftmost one and was trivially spoofable).
+// Direct access without a proxy — local dev — falls back to the socket.
+func clientIP(r *http.Request) string {
+	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		if i := strings.LastIndex(xff, ","); i >= 0 {
+			return strings.TrimSpace(xff[i+1:])
+		}
+		return strings.TrimSpace(xff)
+	}
+	if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
+		return host
+	}
+	return r.RemoteAddr
+}
+
 func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(chimw.RequestID)
-	r.Use(chimw.RealIP) //nolint:staticcheck // SA1019: RealIP is vulnerable to IP spoofing, but keeping for compatibility
 	r.Use(mw.Logger)
 	r.Use(metrics.Instrument)
 	r.Use(chimw.Recoverer)
@@ -181,7 +201,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 						r.Use(httprate.LimitBy(
 							cfg.AuthRateLimitPerMinute,
 							1*time.Minute,
-							func(r *http.Request) (string, error) { return r.RemoteAddr, nil },
+							func(r *http.Request) (string, error) { return clientIP(r), nil },
 							httprate.WithLimitHandler(func(w http.ResponseWriter, _ *http.Request) {
 								w.Header().Set("Content-Type", "application/json")
 								w.WriteHeader(http.StatusTooManyRequests)
@@ -217,7 +237,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				r.Use(httprate.LimitBy(
 					cfg.RateLimitPerMinute,
 					1*time.Minute,
-					func(r *http.Request) (string, error) { return r.RemoteAddr, nil },
+					func(r *http.Request) (string, error) { return clientIP(r), nil },
 					httprate.WithLimitHandler(func(w http.ResponseWriter, _ *http.Request) {
 						w.Header().Set("Content-Type", "application/json")
 						w.WriteHeader(http.StatusTooManyRequests)

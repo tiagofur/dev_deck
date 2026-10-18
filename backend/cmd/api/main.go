@@ -112,7 +112,10 @@ func main() {
 			logger.Error("JWT_SECRET is required when AUTH_MODE=jwt")
 			os.Exit(1)
 		}
-		authService = authservice.New(cfg.JWTSecret, 30*24*time.Hour, 90*24*time.Hour) // 30d access, 90d refresh
+		// Short-lived access tokens bound the blast radius of a leaked
+		// bearer to minutes instead of weeks; web/desktop and the CLI all
+		// refresh silently on 401.
+		authService = authservice.New(cfg.JWTSecret, 60*time.Minute, 14*24*time.Hour) // 60m access, 14d refresh
 		logger.Info("JWT auth initialized")
 	}
 

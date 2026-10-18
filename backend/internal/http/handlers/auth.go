@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -579,8 +581,16 @@ func normalizeAuthDevice(device string) string {
 	return "web"
 }
 
+// randomState returns 32 bytes of CSPRNG entropy, base64url-encoded, for the
+// OAuth anti-CSRF state parameter. A timestamp (the previous implementation)
+// is predictable and enabled login CSRF.
 func randomState() string {
-	return strconv.FormatInt(time.Now().UnixNano(), 36)
+	buf := make([]byte, 32)
+	if _, err := rand.Read(buf); err != nil {
+		// crypto/rand failing means we cannot build a safe OAuth flow.
+		panic("crypto/rand unavailable: " + err.Error())
+	}
+	return base64.RawURLEncoding.EncodeToString(buf)
 }
 
 func appendTokenPair(redirectURI string, pair *auth.TokenPair) (string, error) {
