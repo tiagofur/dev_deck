@@ -132,6 +132,22 @@ func validateScrapeURL(ctx context.Context, rawURL string) error {
 	return nil
 }
 
+// ValidatePublicURL reports whether rawURL is safe to fetch from the server:
+// http/https only, with the full private-network blocklist applied (scheme,
+// literal IPs and resolved DNS). Use it to reject user-supplied URLs at write
+// time; pair it with SSRFSafeTransport to also cover DNS rebinding at dial
+// time.
+func ValidatePublicURL(ctx context.Context, rawURL string) error {
+	return validateScrapeURL(ctx, rawURL)
+}
+
+// SSRFSafeTransport returns an http.Transport that refuses to dial
+// private/blocked addresses. This closes the DNS-rebinding gap that a
+// single-shot ValidatePublicURL call can't cover on its own.
+func SSRFSafeTransport(timeout time.Duration) *http.Transport {
+	return ssrfSafeTransport(timeout)
+}
+
 // ssrfSafeTransport returns an http.Transport whose DialContext checks
 // the resolved address against the blocklist before opening the socket.
 // This closes the DNS-rebinding gap that a single-shot

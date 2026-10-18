@@ -74,6 +74,9 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	r.Use(mw.Logger)
 	r.Use(metrics.Instrument)
 	r.Use(chimw.Recoverer)
+	// Global body cap (matches the avatar upload limit); JSON endpoints
+	// previously accepted unbounded bodies.
+	r.Use(chimw.RequestSize(5 << 20))
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   cfg.CORSOriginList(),
 		AllowedMethods:   []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
@@ -452,8 +455,15 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		})
 	})
 
-	// Serve static files from the uploads directory
-	r.Handle("/uploads/*", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
+	// Serve static files from the uploads directory. http.FileServer lists
+	// directories, so only file paths are served.
+	r.Handle("/uploads/*", http.StripPrefix("/uploads/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/") {
+			http.NotFound(w, r)
+			return
+		}
+		http.FileServer(http.Dir("./uploads")).ServeHTTP(w, r)
+	})))
 
 	return r
 }
