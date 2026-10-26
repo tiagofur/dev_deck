@@ -70,7 +70,7 @@ export function NavSidebar({ isOpen, onClose, reviewCount }: NavSidebarProps) {
             }
           }}
         >
-          Dev<span className="border-2 border-ink bg-accent-pink px-1.5 ml-1 select-none">Deck</span>
+          Heap<span className="border-2 border-ink bg-accent-pink px-1.5 ml-1 select-none">Deck</span>
         </h1>
         {/* Mobile Close Button */}
         <button
