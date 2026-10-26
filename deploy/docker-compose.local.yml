@@ -61,7 +61,7 @@ services:
       OAUTH_REDIRECT_URL: ${OAUTH_REDIRECT_URL:-http://localhost:5173/auth/callback}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       LOG_LEVEL: ${LOG_LEVEL:-debug}
-      CORS_ORIGINS: ${CORS_ORIGINS:-app://.,http://localhost:5173,http://localhost:5174,http://localhost:4173}
+      CORS_ORIGINS: ${CORS_ORIGINS:-app://.,http://localhost:5173,http://localhost:5174,http://localhost:4173,tauri://localhost,http://tauri.localhost}
       REFRESH_INTERVAL_HOURS: ${REFRESH_INTERVAL_HOURS:-168}
       SEED_CHEATSHEETS: ${SEED_CHEATSHEETS:-true}
     ports:

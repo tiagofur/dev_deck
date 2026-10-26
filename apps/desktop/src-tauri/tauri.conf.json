@@ -1,0 +1,77 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "HeapDeck",
+  "version": "../package.json",
+  "identifier": "com.heapdeck.desktop",
+  "build": {
+    "beforeDevCommand": "pnpm vite",
+    "devUrl": "http://localhost:5174",
+    "beforeBuildCommand": "pnpm vite build",
+    "frontendDist": "../dist/renderer"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "create": false,
+        "title": "HeapDeck",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 900,
+        "minHeight": 600,
+        "center": true,
+        "backgroundColor": "#FFFBF0"
+      }
+    ],
+    "security": {
+      "csp": {
+        "default-src": "'self'",
+        "script-src": "'self'",
+        "style-src": "'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src": "'self' data: https://fonts.gstatic.com",
+        "img-src": "'self' data: blob: https: http:",
+        "connect-src": "'self' ipc: http://ipc.localhost https: wss: http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* ws://localhost:*",
+        "worker-src": "'self' blob:",
+        "frame-src": "'none'",
+        "object-src": "'none'",
+        "base-uri": "'self'",
+        "form-action": "'self'"
+      },
+      "devCsp": {
+        "default-src": "'self'",
+        "script-src": "'self' 'unsafe-inline' 'unsafe-eval'",
+        "style-src": "'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src": "'self' data: https://fonts.gstatic.com",
+        "img-src": "'self' data: blob: https: http:",
+        "connect-src": "'self' ipc: http://ipc.localhost https: wss: http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* ws://localhost:*",
+        "worker-src": "'self' blob:",
+        "frame-src": "'none'",
+        "object-src": "'none'",
+        "base-uri": "'self'",
+        "form-action": "'self'"
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "DeveloperTool",
+    "copyright": "Copyright © 2026 HeapDeck",
+    "shortDescription": "Your personal dev multi-tool.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "10.15"
+    },
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
+  }
+}

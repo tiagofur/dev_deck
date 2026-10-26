@@ -66,7 +66,8 @@ OPENAI_MODEL=gpt-4o
 
 # Opcional tuning
 LOG_LEVEL=info
-CORS_ORIGINS=https://heapdeck.com,app://.
+# Incluí los orígenes del webview de Tauri (macOS/Linux + Windows) para la app desktop
+CORS_ORIGINS=https://heapdeck.com,app://.,tauri://localhost,http://tauri.localhost
 ```
 
 > ⚠️ **Nunca** commitees `.env`. Está en `.gitignore`.

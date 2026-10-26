@@ -4,9 +4,11 @@
   "description": "HeapDeck monorepo — desktop, web, shared packages.",
   "scripts": {
     "dev:desktop": "pnpm -F @heapdeck/desktop dev",
+    "dev:tauri": "pnpm -F @heapdeck/desktop dev:tauri",
     "dev:web": "pnpm -F @heapdeck/web dev",
     "dev:landing": "pnpm -F @heapdeck/landing dev",
     "build:desktop": "pnpm -F @heapdeck/desktop build",
+    "build:tauri": "pnpm -F @heapdeck/desktop build:tauri",
     "build:web": "pnpm -F @heapdeck/web build",
     "build:landing": "pnpm -F @heapdeck/landing build",
     "test": "pnpm -r test",

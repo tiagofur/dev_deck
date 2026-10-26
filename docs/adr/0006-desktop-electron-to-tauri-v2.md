@@ -178,7 +178,7 @@ export const tauriTokenStorage: TokenStorage & { hydrate(): Promise<void> } = {
 `main.tsx` becomes an async bootstrap: `await hydrate()` **before**
 `ReactDOM.createRoot().render(...)` so the first `isLoggedIn()` check sees
 tokens. Rust side is `keyring::Entry` get/set/delete for `access_token` /
-`refresh_token` under service `com.heapdeck.app`.
+`refresh_token` under service `com.heapdeck.desktop`.
 
 ### Native SQLite (desktop)
 
@@ -225,7 +225,7 @@ Window created in `setup` via `WebviewWindowBuilder::from_config` +
 | Phase | Content | Estimate |
 |---|---|---|
 | **0 — Bridge refactor** (Electron still shipping) — **✅ done 2026-10-26** | `DesktopBridge` in api-client; 11 touchpoints ported; `createElectronBridge` adapter; preload `satisfies ElectronPreloadAPI`; `electron.d.ts` removed; +11 unit tests; typecheck/tests/lint/build green | 0.5–1 d |
-| **1 — Tauri scaffold** | `src-tauri/` (Cargo.toml, tauri.conf.json, capabilities, icons), plain `vite.config.ts` (reuse port 5174 + /api proxy), window + CSP + opener + navigation guard, dev loop running the full app | 0.5 d |
+| **1 — Tauri scaffold** — **✅ done 2026-10-26** | `src-tauri/` (Cargo.toml, tauri.conf.json, capabilities, icons from the brand SVG), plain `vite.config.ts` (port 5174 + /api proxy), window built in `setup` with `on_navigation` guard + opener, CSP/devCsp, `platform/shell.ts` detection (`electron \| tauri \| browser`), `window.open` → opener polyfill, CORS defaults for Tauri origins; `tauri dev` renders the full app, `tauri build --debug` bundles `HeapDeck.app` | 0.5 d |
 | **2 — Auth** | keyring tokens + hydrate bootstrap, deep-link + single-instance, AuthBridge/LoginPage port. *macOS caveat below* | 1–1.5 d |
 | **3 — Tools** | `run_command`, `detect_current`, api-tester (plugin-http), shortcuts port, `TauriSqlAdapter` + injection | 1 d |
 | **4 — Quality & pipeline** | vitest mocks, e2e switches `electron-vite --rendererOnly` → plain `vite`, CI Rust job (toolchain + `cargo check/clippy` + Linux webkit deps + rust-cache), `tauri-action` release matrix, README rewrite, drop `electron`/`electron-builder`/`electron-vite` deps + `pnpm.onlyBuiltDependencies` entry | 1 d |
@@ -288,6 +288,33 @@ testing (requires bundling on macOS) and cross-platform QA — not code volume.
    keeps the renderer diff minimal and reviewable.**
 3. Flatten `src/renderer/src/*` → `src/*` while touching the configs?
    *(Recommend: no, keep the tree; separate chore.)*
+
+## Follow-ups noticed during Phase 1
+
+- **Bundle identifier is `com.heapdeck.desktop`**, not Electron's
+  `com.heapdeck.app`: the Tauri CLI warns that identifiers ending in `.app`
+  conflict with the macOS bundle extension. App data therefore lives under
+  `com.heapdeck.desktop/`; nothing to migrate (pre-launch).
+- **CORS.** The Tauri webview origin is `tauri://localhost` (macOS/Linux) /
+  `http://tauri.localhost` (Windows), `http://localhost:5174` in dev. Added to
+  the backend `CORS_ORIGINS` default, `docker-compose.local.yml` and the deploy
+  examples. **Production VPS must add the two Tauri origins before the Tauri
+  app ships** (Phase 4/5 checklist). The remote dev API
+  (`api.dev-deck.creapolis.dev`, the desktop `.env` default) does not allow
+  `http://localhost:5174`, so `tauri dev` against it shows "Load failed" on
+  the OAuth providers call — environmental, identical under Electron dev; use
+  the local backend for the dev loop.
+- **`window.open` is a no-op in the Tauri webview.** Shared features call
+  `window.open(url, '_blank')`; `platform/tauri.ts` routes http(s) URLs to the
+  opener plugin. `<a target="_blank">` clicks are already intercepted by the
+  opener plugin's init script. Together with the Rust `on_navigation` guard
+  this reproduces Electron's `setWindowOpenHandler` + `will-navigate` policy.
+- Debug bundle is 33 MB unstripped; measure the release build (`lto`,
+  `opt-level = "s"`, `strip`) in Phase 5.
+- `vite.config.ts` and `vite.e2e.config.ts` are near-duplicates; Phase 4
+  should point the e2e `webServer` at `vite.config.ts` and delete the e2e one.
+- `tauri dev` on macOS cannot test the `heapdeck://` deep link (Phase 2 will
+  use `tauri build --debug` + install to /Applications, as planned).
 
 ## Follow-ups noticed during Phase 0
 

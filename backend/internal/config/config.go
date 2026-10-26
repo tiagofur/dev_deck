@@ -20,7 +20,10 @@ type Config struct {
 	APIToken      string `env:"API_TOKEN"`
 	GithubToken   string `env:"GITHUB_TOKEN"`
 	LogLevel      string `env:"LOG_LEVEL" envDefault:"info"`
-	CORSOrigins   string `env:"CORS_ORIGINS" envDefault:"app://.,http://localhost:5173"`
+	// Default allowlist covers the web dev server, the desktop renderer dev
+	// server (5174) and the Tauri webview origins (tauri://localhost on
+	// macOS/Linux, http://tauri.localhost on Windows). Production sets its own.
+	CORSOrigins string `env:"CORS_ORIGINS" envDefault:"app://.,http://localhost:5173,http://localhost:5174,tauri://localhost,http://tauri.localhost"`
 
 	// RefreshIntervalHours: a repo whose last_fetched_at is older than this
 	// gets re-enriched by the cron worker. Default 168h = 7 days.

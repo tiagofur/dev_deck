@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capabilities of the main HeapDeck window. Native features arrive per phase of ADR 0006; each one adds its plugin permission here.",
+  "windows": ["main"],
+  "permissions": ["core:default", "opener:default"]
+}

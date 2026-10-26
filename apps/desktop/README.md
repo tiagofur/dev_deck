@@ -2,6 +2,30 @@
 
 Electron + React + TypeScript + Tailwind. Frontend de HeapDeck en estilo neo-brutalist.
 
+> **Migración a Tauri v2 en curso** ([ADR 0006](../../docs/adr/0006-desktop-electron-to-tauri-v2.md)).
+> El mismo renderer corre bajo dos shells mientras dura la migración; Electron
+> sigue siendo el shell que se publica hasta que Tauri alcance paridad.
+
+## Tauri shell
+
+Requisitos: Rust ≥ 1.90 (`rustup`), Xcode CLT en macOS, WebView2 + MSVC en
+Windows, `libwebkit2gtk-4.1-dev` y compañía en Linux (ver
+[prerequisitos de Tauri](https://v2.tauri.app/start/prerequisites/)).
+
+```bash
+pnpm dev:tauri      # Vite en :5174 + cargo build + ventana nativa
+pnpm build:tauri    # bundle en apps/desktop/src-tauri/target/release/bundle/
+```
+
+Estructura: `src-tauri/` (Rust: `src/lib.rs` ventana + guard de navegación,
+`tauri.conf.json`, `capabilities/`, `icons/`), `vite.config.ts` (renderer
+plano) y `src/renderer/src/platform/` (detección de shell y bootstrap Tauri).
+Las capacidades nativas (keychain, deep link, atajos globales, shell, SQLite
+nativo) llegan en las fases 2–3 del ADR a través del `DesktopBridge` de
+`@heapdeck/api-client`; hasta entonces Tauri corre la app sin ellas.
+
+Para regenerar iconos: `pnpm -F @heapdeck/desktop exec tauri icon <png-1024>`.
+
 ## Quick start
 
 ### 1. Asegurate de tener el backend corriendo
