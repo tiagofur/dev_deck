@@ -3,27 +3,32 @@ import ReactDOM from 'react-dom/client'
 import {
   clearTokens,
   configureApiClient,
+  createElectronBridge,
   electronSafeStorageAdapter,
   getAccessToken,
   getRefreshToken,
+  isDesktopApp,
   localStorageAdapter,
+  setDesktopBridge,
   setTokenStorage,
   startSyncEngine,
 } from '@heapdeck/api-client'
 import { App } from './App'
 import '@heapdeck/ui/styles/globals.css'
 
-// Configure the shared api-client + auth storage BEFORE the first fetch.
-// Desktop: use Electron safeStorage when available, fall back to localStorage
-// for tests or dev-in-browser. API URL defaults to localhost:8080.
-const isElectron =
-  typeof window !== 'undefined' && !!(window as unknown as { electronAPI?: unknown }).electronAPI
+// Register the desktop bridge and configure the shared api-client + auth
+// storage BEFORE the first fetch. Inside Electron the preload exposes the
+// native bridge and tokens live in OS-encrypted safeStorage; outside it
+// (vitest, browser dev, e2e) there is no bridge and we fall back to
+// localStorage. API URL defaults to localhost:8080.
+setDesktopBridge(createElectronBridge())
+const isDesktop = isDesktopApp()
 
-setTokenStorage(isElectron ? electronSafeStorageAdapter : localStorageAdapter)
+setTokenStorage(isDesktop ? electronSafeStorageAdapter : localStorageAdapter)
 
-// In E2E tests/browser-dev (where isElectron is false), force 'token' authMode
-// and empty baseUrl to use Vite's local /api proxy.
-const authMode = !isElectron
+// In E2E tests/browser-dev (no bridge), force 'token' authMode and empty
+// baseUrl to use Vite's local /api proxy.
+const authMode = !isDesktop
   ? 'token'
   : ((import.meta.env.VITE_AUTH_MODE as 'jwt' | 'token' | undefined) ?? 'jwt')
 
@@ -36,9 +41,9 @@ if (authMode === 'jwt') {
 }
 
 configureApiClient({
-  baseUrl: !isElectron ? '' : (import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8080'),
+  baseUrl: !isDesktop ? '' : (import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8080'),
   authMode,
-  staticToken: !isElectron
+  staticToken: !isDesktop
     ? (import.meta.env.VITE_API_TOKEN || 'test-api-token')
     : (import.meta.env.VITE_API_TOKEN || undefined),
 })

@@ -1,11 +1,11 @@
 import { Check, Globe, Monitor, MessageSquare } from 'lucide-react'
 import { Button } from '@heapdeck/ui'
+import { isDesktopApp } from '@heapdeck/api-client'
 import { useTranslation } from '@heapdeck/i18n'
 
 export function OnboardingChecklist() {
   const { t } = useTranslation()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- window.electronAPI is an untyped external bridge injected by the desktop preload script
-  const isDesktop = typeof (window as any).electronAPI !== 'undefined'
+  const isDesktop = isDesktopApp()
 
   return (
     <div className="max-w-md w-full bg-bg-card border-3 border-ink shadow-hard p-6 text-left">

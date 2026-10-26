@@ -1,34 +1,33 @@
 import { contextBridge, ipcRenderer } from 'electron'
+import type { ElectronPreloadAPI } from '@heapdeck/api-client'
 
 // Expose a safe, typed API to the renderer process.
 // The renderer NEVER gets direct access to Node/Electron APIs.
-contextBridge.exposeInMainWorld('electronAPI', {
+//
+// The shape is checked against `ElectronPreloadAPI` (type-only import, erased
+// at build time) so this script and the `createElectronBridge` adapter that
+// consumes `window.electronAPI` cannot drift apart.
+const electronAPI = {
   store: {
-    getToken: (): string | null => ipcRenderer.sendSync('store:get-token'),
-    getRefreshToken: (): string | null => ipcRenderer.sendSync('store:get-refresh-token'),
-    setTokens: (access: string, refresh: string): void =>
-      ipcRenderer.send('store:set-tokens', access, refresh),
-    clearTokens: (): void => ipcRenderer.send('store:clear-tokens'),
+    getToken: () => ipcRenderer.sendSync('store:get-token'),
+    getRefreshToken: () => ipcRenderer.sendSync('store:get-refresh-token'),
+    setTokens: (access, refresh) => ipcRenderer.send('store:set-tokens', access, refresh),
+    clearTokens: () => ipcRenderer.send('store:clear-tokens'),
   },
 
   // Register a listener for OS-level global shortcuts fired by main.
   // Returns an unsubscribe function.
-  onShortcut: (callback: (name: string) => void): (() => void) => {
+  onShortcut: (callback) => {
     const handler = (_event: Electron.IpcRendererEvent, name: string) => callback(name)
     ipcRenderer.on('global-shortcut', handler)
     return () => ipcRenderer.removeListener('global-shortcut', handler)
   },
 
   shortcuts: {
-    getStatus: (): Promise<Record<string, { accelerator: string; registered: boolean }>> =>
-      ipcRenderer.invoke('shortcuts:get-status'),
-    getConfig: (): Promise<{ enabled: boolean; search: string; add: string }> =>
-      ipcRenderer.invoke('shortcuts:get-config'),
-    setConfig: (config: { enabled: boolean; search: string; add: string }): Promise<{ enabled: boolean; search: string; add: string }> =>
-      ipcRenderer.invoke('shortcuts:set-config', config),
-    onStatus: (
-      callback: (status: Record<string, { accelerator: string; registered: boolean }>) => void,
-    ): (() => void) => {
+    getStatus: () => ipcRenderer.invoke('shortcuts:get-status'),
+    getConfig: () => ipcRenderer.invoke('shortcuts:get-config'),
+    setConfig: (config) => ipcRenderer.invoke('shortcuts:set-config', config),
+    onStatus: (callback) => {
       const handler = (
         _event: Electron.IpcRendererEvent,
         status: Record<string, { accelerator: string; registered: boolean }>,
@@ -39,9 +38,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
 
   auth: {
-    openExternal: (url: string): void => ipcRenderer.send('auth:open-external', url),
-    getPendingCallbackURL: (): string | null => ipcRenderer.sendSync('auth:get-pending-url'),
-    onCallbackURL: (callback: (url: string) => void): (() => void) => {
+    openExternal: (url) => ipcRenderer.send('auth:open-external', url),
+    getPendingCallbackURL: () => ipcRenderer.sendSync('auth:get-pending-url'),
+    onCallbackURL: (callback) => {
       const handler = (_event: Electron.IpcRendererEvent, url: string) => callback(url)
       ipcRenderer.on('auth-callback-url', handler)
       return () => ipcRenderer.removeListener('auth-callback-url', handler)
@@ -49,30 +48,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
 
   shell: {
-    runCommand: (cmd: string): Promise<string> => ipcRenderer.invoke('shell:run', cmd),
+    runCommand: (cmd) => ipcRenderer.invoke('shell:run', cmd),
   },
 
   project: {
-    detectCurrent: (): Promise<{
-      name: string
-      path: string
-      gitRemote: string
-      gitSlug: string
-    }> => ipcRenderer.invoke('project:detect-current'),
+    detectCurrent: () => ipcRenderer.invoke('project:detect-current'),
   },
 
   apiTester: {
-    send: (request: {
-      method: string
-      url: string
-      headers: Record<string, string>
-      body?: string
-    }): Promise<{
-      status: number
-      statusText: string
-      durationMs: number
-      headers: Record<string, string>
-      body: string
-    }> => ipcRenderer.invoke('api-tester:send', request),
+    send: (request) => ipcRenderer.invoke('api-tester:send', request),
   },
-})
+} satisfies ElectronPreloadAPI
+
+contextBridge.exposeInMainWorld('electronAPI', electronAPI)

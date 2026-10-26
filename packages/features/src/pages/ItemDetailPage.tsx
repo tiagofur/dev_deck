@@ -33,6 +33,7 @@ import {
 	useCircles,
 	useShareToCircle,
 	useUserOrgs,
+	getDesktopBridge,
 	type Item,
 	type Runbook,
 	type RunbookStep,
@@ -485,15 +486,13 @@ function RunbookStepItem({ step }: { step: RunbookStep }) {
 	const { t } = useTranslation()
 	const updateStep = useUpdateRunbookStep()
 	const [running, setRunning] = useState(false)
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- window.electronAPI is an untyped external bridge injected by the desktop preload script
-	const isDesktop = typeof (window as any).electronAPI !== 'undefined'
+	const desktop = getDesktopBridge()
 
 	async function handleRun() {
-		if (!step.command || !isDesktop) return
+		if (!step.command || !desktop) return
 		setRunning(true)
 		try {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any -- window.electronAPI is an untyped external bridge injected by the desktop preload script
-			await (window as any).electronAPI.shell.runCommand(step.command)
+			await desktop.shell.runCommand(step.command)
 			showToast(t('item_detail.runbook.execution_success'))
 		} catch (err) {
 			showToast(`${t('common.error')}: ${err}`, 'error')
@@ -515,9 +514,9 @@ function RunbookStepItem({ step }: { step: RunbookStep }) {
 					/>
 				</div>
 				<div className="flex flex-col gap-1">
-					{step.command && (
-						<div className="flex gap-1">
-							{isDesktop && (
+						{step.command && (
+							<div className="flex gap-1">
+								{desktop && (
 								<button
 									onClick={handleRun}
 									disabled={running}

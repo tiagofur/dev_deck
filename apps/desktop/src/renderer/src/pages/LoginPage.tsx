@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { Apple, Globe, Loader2, ArrowRight } from 'lucide-react'
 import { GithubIcon as Github } from '../components/icons/GithubIcon'
-import { fetchAuthProviders, loginLocal, loginStep1, setTokens, type AuthProviderInfo } from '@heapdeck/api-client'
+import { fetchAuthProviders, getDesktopBridge, loginLocal, loginStep1, setTokens, type AuthProviderInfo } from '@heapdeck/api-client'
 import { useTranslation } from '@heapdeck/i18n'
 
 export function LoginPage() {
@@ -48,7 +48,7 @@ export function LoginPage() {
     try {
       const res = await loginStep1(email)
       if (res.type === 'saml' && res.login_url) {
-        window.electronAPI?.auth.openExternal(res.login_url)
+        getDesktopBridge()?.auth.openExternal(res.login_url)
         return
       }
       setLoginType(res.type)
@@ -76,7 +76,7 @@ export function LoginPage() {
 
   function startLogin(provider: AuthProviderInfo['provider']) {
     const url = `${apiUrl}/api/auth/${provider}/login?device=desktop`
-    window.electronAPI?.auth.openExternal(url)
+    getDesktopBridge()?.auth.openExternal(url)
   }
 
   function providerIcon(provider: AuthProviderInfo['provider']) {

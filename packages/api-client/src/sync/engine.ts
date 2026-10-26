@@ -3,6 +3,7 @@ import { getPreferences, setPreferences } from '../preferences';
 import { getPendingOps, markSynced } from './queue';
 import { execLocal } from '../local-db/client';
 import { isLoggedIn } from '../auth/auth';
+import { isDesktopApp } from '../platform/bridge';
 
 /**
  * A single change pulled from the backend delta feed. The payload is an
@@ -401,14 +402,13 @@ export async function registerCurrentDevice() {
     if (!isLoggedIn()) return;
 
     const { clientId } = getPreferences();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- window.electronAPI is an untyped external bridge injected by the desktop preload script
-    const isElectron = typeof (window as any).electronAPI !== 'undefined';
+    const desktop = isDesktopApp();
     
     try {
         await api.post('/api/me/devices/register', {
             client_id: clientId,
-            name: isElectron ? 'Desktop App' : 'Web Browser',
-            device_type: isElectron ? 'desktop' : 'web',
+            name: desktop ? 'Desktop App' : 'Web Browser',
+            device_type: desktop ? 'desktop' : 'web',
         });
     } catch (err) {
         // Silently fail, it's a best-effort background task

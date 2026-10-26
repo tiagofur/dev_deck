@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { FolderGit2 } from 'lucide-react'
 import { Button, showToast } from '@heapdeck/ui'
 import {
+  getDesktopBridge,
   useCapture,
   useGlobalSearch,
   useItem,
@@ -12,15 +13,6 @@ import {
 import { ToolFrame, TextArea } from './shared'
 
 const PROJECT_STORAGE_KEY = 'heapdeck.workbench.project.v1'
-
-interface DesktopProjectAPI {
-  detectCurrent: () => Promise<{
-    name: string
-    path: string
-    gitRemote: string
-    gitSlug: string
-  }>
-}
 
 function readProjectDraft(): { name: string; remote: string; notes: string } {
   try {
@@ -64,9 +56,7 @@ export function ProjectContextTool() {
   const query = [name.trim(), remoteToSlug(remote)].filter(Boolean).join(' ')
   const projectTag = projectContextTag(name, remote)
   const { data: results = [], isLoading } = useGlobalSearch(query, 'text')
-  const desktopProject = typeof window !== 'undefined'
-    ? (window as unknown as { electronAPI?: { project?: DesktopProjectAPI } }).electronAPI?.project
-    : undefined
+  const desktopProject = getDesktopBridge()?.project
 
   function persist() {
     const next = { name, remote, notes }

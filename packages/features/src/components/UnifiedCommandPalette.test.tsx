@@ -26,6 +26,8 @@ vi.mock('@heapdeck/api-client', () => ({
   useAsk: mocks.useAsk,
   useCapture: mocks.useCapture,
   useSystemConfig: mocks.useSystemConfig,
+  // AgentChat (rendered by the Ask flow) reads the desktop bridge; web has none.
+  getDesktopBridge: () => null,
 }))
 
 vi.mock('@heapdeck/ui', async () => {

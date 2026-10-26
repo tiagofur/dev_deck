@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, Loader2, Play, Terminal, Shield, X } from 'lucide-react'
 import { Button, showToast } from '@heapdeck/ui'
-import { getAccessToken, getConfig } from '@heapdeck/api-client'
+import { getAccessToken, getConfig, getDesktopBridge } from '@heapdeck/api-client'
 import { useTranslation } from '@heapdeck/i18n'
 
 interface Message {
@@ -34,8 +34,7 @@ export function AgentChat({ initialQuery }: Props) {
   const [loading, setLoading] = useState(false)
   const [executingToolId, setExecutingToolId] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- window.electronAPI is an untyped external bridge injected by the desktop preload script
-  const isDesktop = typeof (window as any).electronAPI !== 'undefined'
+  const desktop = getDesktopBridge()
 
   useEffect(() => {
     if (initialQuery) {
@@ -111,7 +110,7 @@ export function AgentChat({ initialQuery }: Props) {
   }
 
   async function handleExecuteTool(tc: ToolCall) {
-    if (!isDesktop) {
+    if (!desktop) {
         showToast(t('agent.desktop_only_execution'), 'error')
         return
     }
@@ -121,8 +120,7 @@ export function AgentChat({ initialQuery }: Props) {
 
     setExecutingToolId(tc.id)
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- window.electronAPI is an untyped external bridge injected by the desktop preload script
-        const output = await (window as any).electronAPI.shell.runCommand(cmd)
+        const output = await desktop.shell.runCommand(cmd)
         const toolMessage: Message = {
             role: 'tool',
             tool_call_id: tc.id,

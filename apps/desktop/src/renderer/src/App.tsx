@@ -32,7 +32,7 @@ import {
 } from '@heapdeck/features'
 import { ConfirmHost, PageTransition, Toaster } from '@heapdeck/ui'
 import { useTranslation } from '@heapdeck/i18n'
-import { isLoggedIn, useMe } from '@heapdeck/api-client'
+import { getDesktopBridge, isLoggedIn, useMe } from '@heapdeck/api-client'
 import { PasteInterceptor } from './components/PasteInterceptor'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -131,11 +131,13 @@ function AuthBridge(): null {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const pending = window.electronAPI?.auth.getPendingCallbackURL()
+    const auth = getDesktopBridge()?.auth
+    if (!auth) return
+    const pending = auth.getPendingCallbackURL()
     if (pending) {
       navigate(desktopCallbackPath(pending), { replace: true })
     }
-    return window.electronAPI?.auth.onCallbackURL((url: string) => {
+    return auth.onCallbackURL((url: string) => {
       navigate(desktopCallbackPath(url), { replace: true })
     })
   }, [navigate])
@@ -182,7 +184,7 @@ function AnimatedRoutes() {
   }, [])
 
   useEffect(() => {
-    const api = window.electronAPI
+    const api = getDesktopBridge()
     if (!api) return
 
     return api.onShortcut((name) => {

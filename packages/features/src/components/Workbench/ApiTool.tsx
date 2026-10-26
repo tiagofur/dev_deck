@@ -1,7 +1,7 @@
 import { useState, useMemo, type FormEvent } from 'react'
 import { Send, Save } from 'lucide-react'
 import { Button, showToast } from '@heapdeck/ui'
-import { useCapture } from '@heapdeck/api-client'
+import { getDesktopBridge, useCapture, type ApiTesterResponse } from '@heapdeck/api-client'
 import {
   parseHeaders,
   serializeRequestConfig,
@@ -20,21 +20,6 @@ interface SavedApiRequest {
   headers: string
   body: string
   updatedAt: string
-}
-
-interface DesktopApiTesterAPI {
-  send: (request: {
-    method: string
-    url: string
-    headers: Record<string, string>
-    body?: string
-  }) => Promise<{
-    status: number
-    statusText: string
-    durationMs: number
-    headers: Record<string, string>
-    body: string
-  }>
 }
 
 function readApiRequestHistory(): SavedApiRequest[] {
@@ -92,17 +77,9 @@ export function ApiTool() {
   const [curlImport, setCurlImport] = useState('')
   const [requestHistory, setRequestHistory] = useState<SavedApiRequest[]>(() => readApiRequestHistory())
   const [isSending, setIsSending] = useState(false)
-  const [result, setResult] = useState<{
-    status: number
-    statusText: string
-    durationMs: number
-    headers: Record<string, string>
-    body: string
-  } | null>(null)
+  const [result, setResult] = useState<ApiTesterResponse | null>(null)
   const [error, setError] = useState('')
-  const desktopApiTester = typeof window !== 'undefined'
-    ? (window as unknown as { electronAPI?: { apiTester?: DesktopApiTesterAPI } }).electronAPI?.apiTester
-    : undefined
+  const desktopApiTester = getDesktopBridge()?.apiTester
 
   const requestConfig = useMemo(
     () => {

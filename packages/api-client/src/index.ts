@@ -32,6 +32,20 @@ export {
 export type { TokenStorage } from './auth/storage/types'
 export { localStorageAdapter } from './auth/storage/localStorage'
 export { electronSafeStorageAdapter } from './auth/storage/electron'
+
+// Desktop bridge — native capabilities injected by the desktop shell
+export { setDesktopBridge, getDesktopBridge, isDesktopApp } from './platform/bridge'
+export type {
+  DesktopBridge,
+  DesktopShell,
+  DesktopProjectContext,
+  GlobalShortcutConfig,
+  GlobalShortcutStatus,
+  ApiTesterRequest,
+  ApiTesterResponse,
+} from './platform/bridge'
+export { createElectronBridge } from './platform/electron'
+export type { ElectronPreloadAPI } from './platform/electron'
 // Shared utilities
 export { formatCount } from './format'
 export {

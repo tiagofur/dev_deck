@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Keyboard, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { getDesktopBridge, type GlobalShortcutConfig, type GlobalShortcutStatus } from '@heapdeck/api-client'
 import { useTranslation } from '@heapdeck/i18n'
 
 interface Props {
@@ -15,8 +16,8 @@ interface Shortcut {
 
 export function ShortcutsModal({ open, onClose }: Props) {
   const { t } = useTranslation()
-  const [desktopStatus, setDesktopStatus] = useState<Record<string, { accelerator: string; registered: boolean }> | null>(null)
-  const [desktopConfig, setDesktopConfig] = useState<{ enabled: boolean; search: string; add: string } | null>(null)
+  const [desktopStatus, setDesktopStatus] = useState<Record<string, GlobalShortcutStatus> | null>(null)
+  const [desktopConfig, setDesktopConfig] = useState<GlobalShortcutConfig | null>(null)
   const [savingDesktopConfig, setSavingDesktopConfig] = useState(false)
 
   const shortcuts: Shortcut[] = [
@@ -40,18 +41,7 @@ export function ShortcutsModal({ open, onClose }: Props) {
 
   useEffect(() => {
     if (!open) return
-    const api = (window as unknown as {
-      electronAPI?: {
-        shortcuts?: {
-          getStatus: () => Promise<Record<string, { accelerator: string; registered: boolean }>>
-          getConfig: () => Promise<{ enabled: boolean; search: string; add: string }>
-          setConfig: (config: { enabled: boolean; search: string; add: string }) => Promise<{ enabled: boolean; search: string; add: string }>
-          onStatus: (
-            callback: (status: Record<string, { accelerator: string; registered: boolean }>) => void,
-          ) => () => void
-        }
-      }
-    }).electronAPI?.shortcuts
+    const api = getDesktopBridge()?.shortcuts
     if (!api) {
       setDesktopStatus(null)
       return
@@ -71,14 +61,8 @@ export function ShortcutsModal({ open, onClose }: Props) {
     }
   }, [open])
 
-  async function saveDesktopConfig(nextConfig: { enabled: boolean; search: string; add: string }) {
-    const api = (window as unknown as {
-      electronAPI?: {
-        shortcuts?: {
-          setConfig: (config: { enabled: boolean; search: string; add: string }) => Promise<{ enabled: boolean; search: string; add: string }>
-        }
-      }
-    }).electronAPI?.shortcuts
+  async function saveDesktopConfig(nextConfig: GlobalShortcutConfig) {
+    const api = getDesktopBridge()?.shortcuts
     if (!api) return
     setSavingDesktopConfig(true)
     try {
