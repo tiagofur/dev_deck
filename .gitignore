@@ -15,6 +15,8 @@ pnpm-debug.log*
 .env
 .env.*
 !.env.example
+# Build-time public config (no secrets): baked into the web bundle
+!apps/web/.env.production
 
 # Root/node workspaces
 node_modules/
