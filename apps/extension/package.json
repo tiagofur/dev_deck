@@ -14,20 +14,20 @@
     "@heapdeck/api-client": "workspace:*",
     "@heapdeck/features": "workspace:*",
     "@heapdeck/ui": "workspace:*",
-    "@tanstack/react-query": "^5.104.1",
-    "framer-motion": "^14.0.0",
-    "lucide-react": "^1.53.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "@tanstack/react-query": "^5.104.5",
+    "framer-motion": "^14.6.0",
+    "lucide-react": "^1.61.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^3.0.0",
-    "@types/chrome": "^0.3.4",
+    "@types/chrome": "^0.3.6",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.6.1",
-    "postcss": "^8.5.29",
+    "postcss": "^8.5.31",
     "tailwindcss": "^3.4.13",
     "typescript": "^6.0.3",
     "vite": "^6.0.0"
