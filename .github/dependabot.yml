@@ -20,6 +20,12 @@ updates:
     commit-message:
       prefix: "chore(deps)"
       prefix-development: "chore(deps-dev)"
+    ignore:
+      # Tailwind 4 is a CSS-first rewrite (new Vite/PostCSS plugins, no
+      # tailwind.config.ts, different Astro integration): migrate deliberately,
+      # not through a weekly bump.
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
 
   # Go backend.
   - package-ecosystem: gomod
