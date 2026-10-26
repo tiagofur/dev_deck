@@ -94,7 +94,7 @@ export function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-bg-primary p-8">
       <div className="bg-bg-card border-5 border-ink shadow-hard-xl p-10 max-w-md w-full text-center">
         <h1 className="font-display font-black text-5xl uppercase tracking-tight mb-2">
-          Dev
+          Heap
           <span className="bg-accent-pink px-2 border-3 border-ink">Deck</span>
         </h1>
         <p className="font-mono text-sm text-ink-soft mb-8">

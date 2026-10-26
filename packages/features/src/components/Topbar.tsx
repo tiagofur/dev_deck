@@ -58,7 +58,7 @@ export function Topbar({
               }
             }}
           >
-            Dev<span className="border-2 border-ink bg-accent-pink px-1 ml-1 select-none">Deck</span>
+            Heap<span className="border-2 border-ink bg-accent-pink px-1 ml-1 select-none">Deck</span>
           </h1>
         </div>
 
