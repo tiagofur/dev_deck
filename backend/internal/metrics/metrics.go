@@ -77,6 +77,16 @@ var AgentChatDuration = promauto.NewHistogram(
 	},
 )
 
+// GitHubSearch counts need-based discovery searches by outcome. Spikes in
+// "error" usually mean GitHub's search quota (30/min) is spent.
+var GitHubSearch = promauto.NewCounterVec(
+	prometheus.CounterOpts{
+		Name: "heapdeck_github_search_total",
+		Help: "GitHub discovery searches via GET /api/discovery/github, labelled by outcome (ok/error).",
+	},
+	[]string{"outcome"},
+)
+
 // Instrument wraps an http.Handler so every request observes the
 // latency histogram and (if 5xx) the error counter. Call from the
 // router right after chi is set up but before your routes — chi's

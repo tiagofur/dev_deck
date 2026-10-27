@@ -119,6 +119,14 @@ export {
 } from './features/discovery/api'
 export type { TrendingItem, CuratorRanking } from './features/discovery/api'
 
+// Feature hooks — GitHub need-based discovery (Pro)
+export { useGitHubDiscovery } from './features/discovery/github'
+export type {
+  GitHubDiscoveryResult,
+  GitHubDiscoveryResponse,
+  GitHubDiscoveryParams,
+} from './features/discovery/github'
+
 // Feature hooks — repos
 export {
   useRepos,

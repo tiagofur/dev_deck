@@ -123,6 +123,8 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	if cfg.BillingEnabled {
 		meter = metering.New(st, cfg.AIMonthlyBudgetCents, cfg.AIProvider)
 	}
+	ghDiscoveryH := handlers.NewGitHubDiscoveryHandler(st, en,
+		ai.NewDiscoveryBuilder(cfg.GeminiAPIKey, cfg.GeminiModel), meter, deps.Cache)
 	cheatsH := handlers.NewCheatsheetsHandler(st, embSvc, proGater, meter)
 	suggestionsH := handlers.NewSuggestionsHandler(st)
 	captureH := handlers.NewCaptureHandler(st, deps.EnrichQueue)
@@ -314,6 +316,11 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				dr.Get("/next", discoveryH.Next)
 				dr.Get("/trending", discoveryH.Trending)
 				dr.Get("/leaderboard", discoveryH.Leaderboard)
+				dr.Group(func(gr chi.Router) {
+					gr.Use(proGater.RequirePro)
+					gr.Use(mw.IARateLimit(100, 10))
+					gr.Get("/github", ghDiscoveryH.Search)
+				})
 			})
 
 			r.Route("/feed", func(fr chi.Router) {
