@@ -209,6 +209,15 @@ func NewEmbeddingsServiceFromConfig(cfg config.Config) *EmbeddingsService {
 		return NewEmbeddingsService(NewOpenAIEmbedder(cfg.OpenAIAPIKey))
 	case "qwen":
 		return NewEmbeddingsService(NewQwenEmbedder(cfg.QwenAPIKey))
+	case "gemini":
+		// Gemini's embedding model is 768-dim, incompatible with the
+		// vector(1536) column, so Gemini chat pairs with OpenAI's
+		// text-embedding-3-small when its key is present. Embeddings cost
+		// fractions of a cent; running both keys is the pragmatic setup.
+		if strings.TrimSpace(cfg.OpenAIAPIKey) != "" {
+			return NewEmbeddingsService(NewOpenAIEmbedder(cfg.OpenAIAPIKey))
+		}
+		return NewEmbeddingsService(nil)
 	default:
 		// Other providers (heuristic, deepseek, disabled) don't have embeddings yet
 		return NewEmbeddingsService(nil)

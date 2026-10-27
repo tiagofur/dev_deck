@@ -105,6 +105,8 @@ type Config struct {
 	QwenModel       string `env:"QWEN_MODEL" envDefault:"qwen-turbo"`
 	DeepSeekAPIKey  string `env:"DEEPSEEK_API_KEY"`
 	DeepSeekModel   string `env:"DEEPSEEK_MODEL" envDefault:"deepseek-chat"`
+	GeminiAPIKey    string `env:"GEMINI_API_KEY"`
+	GeminiModel     string `env:"GEMINI_MODEL" envDefault:"gemini-3.8-flash"`
 	LMStudioBaseURL string `env:"LM_STUDIO_BASE_URL" envDefault:"http://localhost:1234"`
 	LMStudioModel   string `env:"LM_STUDIO_MODEL" envDefault:""`
 	AIExternalOptIn bool   `env:"AI_EXTERNAL_OPT_IN" envDefault:"false"`
@@ -165,9 +167,9 @@ func Load() (Config, error) {
 		}
 	}
 	switch strings.ToLower(strings.TrimSpace(c.AIProvider)) {
-	case "", "heuristic", "local", "disabled", "off", "none", "openai", "qwen", "deepseek", "ollama", "lmstudio":
+	case "", "heuristic", "local", "disabled", "off", "none", "openai", "qwen", "deepseek", "gemini", "ollama", "lmstudio":
 	default:
-		return c, errors.New("AI_PROVIDER must be one of: heuristic, local, disabled, openai, qwen, deepseek, ollama, lmstudio")
+		return c, errors.New("AI_PROVIDER must be one of: heuristic, local, disabled, openai, qwen, deepseek, gemini, ollama, lmstudio")
 	}
 	if strings.EqualFold(strings.TrimSpace(c.AIProvider), "openai") {
 		if !c.AIExternalOptIn {
@@ -191,6 +193,14 @@ func Load() (Config, error) {
 		}
 		if strings.TrimSpace(c.DeepSeekAPIKey) == "" {
 			return c, errors.New("DEEPSEEK_API_KEY is required when AI_PROVIDER=deepseek")
+		}
+	}
+	if strings.EqualFold(strings.TrimSpace(c.AIProvider), "gemini") {
+		if !c.AIExternalOptIn {
+			return c, errors.New("AI_EXTERNAL_OPT_IN=true is required when AI_PROVIDER=gemini")
+		}
+		if strings.TrimSpace(c.GeminiAPIKey) == "" {
+			return c, errors.New("GEMINI_API_KEY is required when AI_PROVIDER=gemini")
 		}
 	}
 	return c, nil

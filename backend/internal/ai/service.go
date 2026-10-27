@@ -76,6 +76,8 @@ func New(provider string) *Service {
 		return &Service{} // caller must call NewQwen() with API key
 	case "deepseek":
 		return &Service{} // caller must call NewDeepSeek() with API key
+	case "gemini":
+		return &Service{} // caller must call NewGemini() with API key
 	case "disabled", "off", "none":
 		return NewDisabled()
 	default:
@@ -99,6 +101,8 @@ func NewFromConfig(cfg config.Config) *Service {
 		s = NewQwen(cfg.QwenAPIKey, cfg.QwenModel)
 	case "deepseek":
 		s = NewDeepSeek(cfg.DeepSeekAPIKey, cfg.DeepSeekModel)
+	case "gemini":
+		s = NewGemini(cfg.GeminiAPIKey, cfg.GeminiModel)
 	default:
 		s = New(cfg.AIProvider)
 	}

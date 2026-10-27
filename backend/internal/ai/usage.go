@@ -32,9 +32,12 @@ var modelCosts = []struct {
 	{"gpt-4o-mini", ModelCost{InputPer1M: 0.15, OutputPer1M: 0.60}},
 	{"text-embedding-3-small", ModelCost{InputPer1M: 0.02, OutputPer1M: 0.0}},
 	{"gpt-4o", ModelCost{InputPer1M: 2.50, OutputPer1M: 10.00}},
-	// Google Gemini
+	// Google Gemini. 3.8-flash is the stable pick as of 2026-10-27 and
+	// carries promo pricing through 2026-12-31 ($0.75/$3.75 per 1M);
+	// standard rates double on 2027-01-01 — revisit this entry then.
+	{"gemini-3.8-flash", ModelCost{InputPer1M: 0.75, OutputPer1M: 3.75}},
+	{"gemini-flash", ModelCost{InputPer1M: 0.75, OutputPer1M: 3.75}},
 	{"gemini-2.5-flash", ModelCost{InputPer1M: 0.30, OutputPer1M: 2.50}},
-	{"gemini-flash", ModelCost{InputPer1M: 0.30, OutputPer1M: 2.50}},
 	// DeepSeek (approximate public pricing, re-verify)
 	{"deepseek-chat", ModelCost{InputPer1M: 0.27, OutputPer1M: 1.10}},
 	{"deepseek", ModelCost{InputPer1M: 0.27, OutputPer1M: 1.10}},

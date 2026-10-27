@@ -16,8 +16,8 @@ func TestEstimateCents_KnownModels(t *testing.T) {
 		{"gpt-4o-mini-2024-07-18", 1000, 100, 0.021}, // substring match
 		// text-embedding-3-small: $0.02/1M in, $0 out
 		{"text-embedding-3-small", 1000, 0, 0.002},
-		// gemini-2.5-flash: $0.30/$2.50 per 1M
-		{"gemini-2.5-flash", 1000, 100, 0.055},
+		// gemini-3.8-flash: $0.75/$3.75 per 1M (promo through 2026-12-31)
+		{"gemini-3.8-flash", 1000, 100, 0.1125},
 		// deepseek-chat: $0.27/$1.10 per 1M
 		{"deepseek-chat", 1000, 100, 0.038},
 		// unknown models price at zero, never block
