@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/hex"
 	"math"
 	"net/http"
@@ -111,7 +111,7 @@ func (h *GitHubDiscoveryHandler) Search(w http.ResponseWriter, r *http.Request) 
 }
 
 func cacheKeyOf(need, language string, limit int) string {
-	sum := sha1.Sum([]byte(strings.ToLower(need) + "|" + strings.ToLower(language) + "|" + string(rune(limit))))
+	sum := sha256.Sum256([]byte(strings.ToLower(need) + "|" + strings.ToLower(language) + "|" + string(rune(limit))))
 	return hex.EncodeToString(sum[:])
 }
 

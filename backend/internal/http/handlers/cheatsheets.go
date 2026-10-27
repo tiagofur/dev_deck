@@ -360,10 +360,10 @@ func (h *CheatsheetsHandler) Search(w http.ResponseWriter, r *http.Request) {
 		results = []store.SearchResult{}
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
-		"query":        q,
-		"mode":         mode,
+		"query":         q,
+		"mode":          mode,
 		"ai_downgraded": downgraded,
-		"results":      results,
+		"results":       results,
 	})
 }
 

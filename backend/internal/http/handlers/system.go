@@ -31,9 +31,9 @@ func NewSystemConfigHandler(aiProvider string, syncEnabled bool, billingEnabled 
 
 func (h *SystemConfigHandler) GetConfig(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{
-		"ai_provider":    h.aiProvider,
-		"sync_enabled":   h.syncEnabled,
+		"ai_provider":     h.aiProvider,
+		"sync_enabled":    h.syncEnabled,
 		"billing_enabled": h.billingEnabled,
-		"features":       h.features,
+		"features":        h.features,
 	})
 }

@@ -19,11 +19,11 @@ const (
 
 // AIUsageEvent is one priced AI call.
 type AIUsageEvent struct {
-	Action        string
-	Provider      string
-	Model         string
-	InputTokens   int
-	OutputTokens  int
+	Action         string
+	Provider       string
+	Model          string
+	InputTokens    int
+	OutputTokens   int
 	EstimatedCents float64
 }
 

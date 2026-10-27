@@ -147,10 +147,10 @@ type checkoutSessionObject struct {
 }
 
 type subscriptionObject struct {
-	ID              string `json:"id"`
-	Status          string `json:"status"`
-	Customer        string `json:"customer"`
-	CurrentPeriodEnd int64 `json:"current_period_end"`
+	ID               string `json:"id"`
+	Status           string `json:"status"`
+	Customer         string `json:"customer"`
+	CurrentPeriodEnd int64  `json:"current_period_end"`
 }
 
 func (h *BillingHandler) applyEvent(r *http.Request, event stripe.Event) error {

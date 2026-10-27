@@ -29,7 +29,7 @@ type fakeEmbedder struct{}
 func (fakeEmbedder) Embed(_ context.Context, _ string) ([]float32, error) {
 	return make([]float32, 1536), nil
 }
-func (fakeEmbedder) Dim() int  { return 1536 }
+func (fakeEmbedder) Dim() int      { return 1536 }
 func (fakeEmbedder) Enabled() bool { return true }
 
 type proTestServer struct {
@@ -169,8 +169,8 @@ func TestProGating_SearchVectorRequiresProHybridDowngrades(t *testing.T) {
 		t.Fatalf("free hybrid search: expected 200, got %d, body: %s", rec.Code, rec.Body.String())
 	}
 	type searchResp struct {
-		Mode        string `json:"mode"`
-		AIDowngraded bool  `json:"ai_downgraded"`
+		Mode         string `json:"mode"`
+		AIDowngraded bool   `json:"ai_downgraded"`
 	}
 	out := decodeJSON[searchResp](t, rec)
 	if out.Mode != "text" || !out.AIDowngraded {

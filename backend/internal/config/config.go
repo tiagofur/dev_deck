@@ -98,11 +98,11 @@ type Config struct {
 	// Required only when BillingEnabled. WebhookSecret verifies the
 	// Stripe-Signature header on POST /api/billing/webhook; never commit
 	// real values (see backend/.env.example).
-	StripeSecretKey    string `env:"STRIPE_SECRET_KEY"`
+	StripeSecretKey     string `env:"STRIPE_SECRET_KEY"`
 	StripeWebhookSecret string `env:"STRIPE_WEBHOOK_SECRET"`
-	StripeProPriceID   string `env:"STRIPE_PRO_PRICE_ID"`
-	BillingSuccessURL  string `env:"BILLING_SUCCESS_URL" envDefault:"http://localhost:5173/billing/success"`
-	BillingCancelURL   string `env:"BILLING_CANCEL_URL" envDefault:"http://localhost:5173/billing/cancel"`
+	StripeProPriceID    string `env:"STRIPE_PRO_PRICE_ID"`
+	BillingSuccessURL   string `env:"BILLING_SUCCESS_URL" envDefault:"http://localhost:5173/billing/success"`
+	BillingCancelURL    string `env:"BILLING_CANCEL_URL" envDefault:"http://localhost:5173/billing/cancel"`
 
 	// ─── Wave 5 Fase 18: local AI enrichment ───
 	AIProvider      string `env:"AI_PROVIDER" envDefault:"heuristic"`

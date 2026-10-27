@@ -293,6 +293,7 @@ func derefOrEmpty(s *string) string {
 	}
 	return *s
 }
+
 // aiFor picks the AI service for a job. Pro users (or everyone when no
 // plan resolver is wired) get the configured cloud AI; Free users get the
 // deterministic heuristic so background enrichment costs $0 on them.
