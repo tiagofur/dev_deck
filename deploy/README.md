@@ -146,15 +146,15 @@ HeapDeck incluye un stack de monitoreo integrado:
 │  :80 :443    │
 └──────┬───────┘
        │
-   ┌───┴───┐
-   │       │
-┌──┴──┐ ┌┴────┐
-│ api  │ │web  │
-│:8080 │ │:3000│
-└──┬──┘ └──┬──┘
-   │        │
-   └────┬──┘
-        │
+   ┌───┼────┐
+   │   │    │
+┌──┴─┐┌┴───┐┌┴───────┐
+│ api ││web ││landing │
+│:8080││:3000││ :3000  │
+└──┬──┘└──┬─┘└────────┘
+   │      │
+   └───┬──┘
+       │
    ┌───┴────┐
    │   db   │
    │ :5432  │
@@ -166,7 +166,21 @@ HeapDeck incluye un stack de monitoreo integrado:
 | db | 5432 | Postgres 16 |
 | api | 8080 | Go API |
 | web | 3000 | Nginx + SPA |
+| landing | 3000 | Nginx + landing estática (Astro) |
 | caddy | 80/443 | Reverse proxy + TLS |
+
+### Routing de Caddy en el dominio principal
+
+ heapdeck.com reparte el tráfico así (ver `Caddyfile`):
+
+| Path | Destino | Qué es |
+|------|---------|--------|
+| `/api/*`, `/uploads/*`, `/healthz` | api:8080 | Backend |
+| `/`, `/es`, `/es/*`, `/favicon.svg`, `/og-image.svg`, `/_astro/*` | landing:3000 | Landing marketing (estática) |
+| todo lo demás (`/login`, `/register`, `/items`, ...) | web:3000 | SPA React |
+
+Los visitantes nuevos ven la landing primero; la app sigue alcanzable en
+sus rutas de siempre sin cambiar DNS, CORS ni callbacks de OAuth.
 
 ---
 
@@ -246,6 +260,11 @@ docker compose exec db psql -U heapdeck heapdeck
 - Verificá que el servicio web esté corriendo: `docker compose ps web`
 - Logs: `docker compose logs web`
 - Puede ser que el build no completó bien
+
+### La landing no aparece (sigue la app en `/`)
+- Verificá el servicio: `docker compose ps landing` (primera vez: `docker compose up -d --build landing`)
+- El Caddy enruta `/` y `/es` al contenedor `landing`; si no está corriendo, Caddy da 502 solo en esas rutas
+- Después de actualizar el repo: `docker compose up -d --build landing caddy`
 
 ### "API_TOKEN is required when AUTH_MODE=token"
 - Olvidaste setear `API_TOKEN` en `.env`. Editá y `docker compose up -d api`.

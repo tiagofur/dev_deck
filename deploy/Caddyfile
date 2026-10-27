@@ -1,4 +1,8 @@
 # Caddyfile — HeapDeck reverse proxy with automatic HTTPS
+#
+# heapdeck.com serves the marketing landing at / and /es (static Astro);
+# the React app owns every other path (/login, /register, /items, ...) and
+# the API sits behind /api, /uploads and /healthz.
 
 # Main Domain (Web App)
 {$DOMAIN} {
@@ -27,6 +31,16 @@
     # Uploaded user assets
     handle /uploads/* {
         reverse_proxy api:8080
+    }
+
+    # Marketing landing (static Astro): root page, Spanish version, assets.
+    # Visitors see this first; the app lives right next to it at /login,
+    # /register, /items, ... — no DNS, CORS or OAuth changes needed.
+    handle path / /es /es/* /favicon.svg /og-image.svg {
+        reverse_proxy landing:3000
+    }
+    handle /_astro/* {
+        reverse_proxy landing:3000
     }
 
     # SPA — serve React app
