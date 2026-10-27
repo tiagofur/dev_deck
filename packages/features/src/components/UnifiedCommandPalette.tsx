@@ -8,6 +8,7 @@ import {
   useGlobalSearch,
   useCapture,
   useSystemConfig,
+  useMe,
   type SearchResult,
 } from '@heapdeck/api-client'
 import { useTranslation } from '@heapdeck/i18n'
@@ -19,6 +20,7 @@ import {
   BookOpen,
   MessageSquare,
   Wrench,
+  Crown,
 } from 'lucide-react'
 import { AgentChat } from './AgentChat'
 
@@ -122,7 +124,9 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
   const { data: systemConfig } = useSystemConfig()
   const isAiDisabled = !systemConfig?.ai_provider || ['disabled', 'heuristic', 'local'].includes(systemConfig.ai_provider)
   
-  const { data: searchResults = [], isLoading: searchLoading } = useGlobalSearch(query)
+  const { data: searchRes, isLoading: searchLoading } = useGlobalSearch(query)
+  const searchResults = searchRes?.results ?? []
+  const { data: meUser } = useMe()
 
   React.useEffect(() => {
     if (open) {
@@ -170,6 +174,16 @@ export function UnifiedCommandPalette({ open, onClose }: Props) {
       subtitle: t('palette.ask_ai_subtitle'),
       icon: <Brain size={16} strokeWidth={3} className="text-accent-orange" />,
       onSelect: handleAsk,
+    }] : []),
+    ...(systemConfig?.billing_enabled && meUser?.plan !== 'pro' ? [{
+      id: 'upgrade-pro',
+      title: t('palette.upgrade_title'),
+      subtitle: t('palette.upgrade_subtitle'),
+      icon: <Crown size={16} strokeWidth={3} className="text-accent-lavender" />,
+      onSelect: () => {
+        onClose()
+        navigate('/billing')
+      },
     }] : []),
     {
       id: 'capture',

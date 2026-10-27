@@ -188,12 +188,10 @@ export interface GlobalSearchResponse {
 export function useGlobalSearch(query: string, mode: 'text' | 'semantic' | 'hybrid' = 'text') {
   return useQuery({
     queryKey: ['search', query, mode],
-    queryFn: async () => {
-      const res = await api.get<GlobalSearchResponse>(
+    queryFn: () =>
+      api.get<GlobalSearchResponse>(
         `/api/search?q=${encodeURIComponent(query)}&limit=20&mode=${mode}`,
-      )
-      return res.results
-    },
+      ),
     enabled: query.length >= 2,
     staleTime: 0,
   })

@@ -31,6 +31,7 @@ import { ImportStarsSection } from '../components/ImportStarsSection'
 import { ExportVaultSection } from '../components/ExportVaultSection'
 import { DemoDataSection } from '../components/DemoDataSection'
 import { OrgInsights } from '../components/OrgInsights'
+import { BillingPanel } from '../components/Billing/BillingPanel'
 
 const APP_VERSION = '1.0.0'
 
@@ -86,6 +87,11 @@ export function SettingsPage() {
       </header>
 
       <main className="max-w-2xl mx-auto p-6 space-y-6">
+        {/* Plan (Pro billing) */}
+        <Section title={t('settings.plan_section')}>
+          <BillingPanel />
+        </Section>
+
         {/* Personalidad */}
         <Section title={t('settings.personality')}>
           <Toggle

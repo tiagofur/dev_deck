@@ -63,7 +63,8 @@ export function ProjectContextTool() {
   const [detecting, setDetecting] = useState(false)
   const query = [name.trim(), remoteToSlug(remote)].filter(Boolean).join(' ')
   const projectTag = projectContextTag(name, remote)
-  const { data: results = [], isLoading } = useGlobalSearch(query, 'text')
+  const { data: searchRes, isLoading } = useGlobalSearch(query, 'text')
+  const results = searchRes?.results ?? []
   const desktopProject = typeof window !== 'undefined'
     ? (window as unknown as { electronAPI?: { project?: DesktopProjectAPI } }).electronAPI?.project
     : undefined
