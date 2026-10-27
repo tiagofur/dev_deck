@@ -88,6 +88,19 @@ services:
     networks:
       - web
 
+  # Marketing landing (static Astro) — served at / and /es by Caddy
+  landing:
+    build:
+      context: ..
+      dockerfile: apps/landing/Dockerfile
+    image: ghcr.io/tiagofur/heapdeck-landing:latest
+    container_name: heapdeck-landing
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3051:3000"
+    networks:
+      - web
+
   # Monitoring (v1.0.0)
   prometheus:
     image: prom/prometheus:v2.54.1
