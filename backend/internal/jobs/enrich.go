@@ -27,6 +27,7 @@ import (
 	"heapdeck/internal/ai"
 	"heapdeck/internal/domain/items"
 	"heapdeck/internal/enricher"
+	"heapdeck/internal/metering"
 	"heapdeck/internal/metrics"
 	"heapdeck/internal/store"
 
@@ -69,6 +70,8 @@ type EnrichQueue struct {
 	enricher *enricher.Service
 	timeout  time.Duration
 	isPro    PlanResolver
+	meter    *metering.Recorder
+	embed    *ai.EmbeddingsService
 }
 
 // NewEnrichQueue allocates a queue with the given buffer size. A buffer
@@ -87,6 +90,24 @@ func NewEnrichQueue(st *store.Store, en *enricher.Service, aiSvc *ai.Service, bu
 		timeout:  15 * time.Second,
 		isPro:    isPro,
 	}
+}
+
+// SetMeter wires the AI usage recorder. A nil recorder disables metering
+// (self-host / tests). Main sets it when BILLING_ENABLED=true.
+func (q *EnrichQueue) SetMeter(m *metering.Recorder) {
+	if q == nil {
+		return
+	}
+	q.meter = m
+}
+
+// SetEmbeddings wires the embedding service so the worker can persist item
+// vectors for semantic search. Nil disables embedding generation.
+func (q *EnrichQueue) SetEmbeddings(e *ai.EmbeddingsService) {
+	if q == nil {
+		return
+	}
+	q.embed = e
 }
 
 // CanProcess returns true when the queue has at least one stage that can do
@@ -192,10 +213,21 @@ func (q *EnrichQueue) run(parent context.Context, job EnrichJob) {
 			slog.Warn("enrich: load item for ai failed", "err", err, "id", job.ID)
 			hadError = true
 		} else {
-			out, err := q.aiFor(job).EnrichItem(ctx, it)
+			svc := q.aiFor(job)
+			metered := svc != q.freeAI && q.meter != nil
+			// Past the monthly cap, background work must not spend: fall
+			// back to the $0 heuristic instead of failing the job.
+			if metered && !q.meter.Allowed(ctx, job.UserID) {
+				svc = q.freeAI
+				metered = false
+			}
+			out, err := svc.EnrichItemDetailed(ctx, it)
 			if err != nil {
 				slog.Warn("enrich: ai enrich failed", "err", err, "id", job.ID)
 				hadError = true
+			}
+			if metered && err == nil {
+				q.meter.RecordUsage(ctx, job.UserID, store.AIActionEnrich, out.Model, metering.FromAI(out.Usage))
 			}
 			if err := q.store.UpdateItemAIFields(ctx, job.ID, out.Summary, out.Tags); err != nil {
 				slog.Warn("enrich: update item ai fields failed", "err", err, "id", job.ID)
@@ -203,6 +235,10 @@ func (q *EnrichQueue) run(parent context.Context, job EnrichJob) {
 			} else {
 				processed = true
 			}
+			// Persist the semantic vector for Pro users with budget left.
+			// Embeddings are metered separately (embed_item) because they
+			// use a different model with its own price.
+			q.maybeEmbedItem(ctx, job, it, metered, &processed, &hadError)
 		}
 	}
 
@@ -223,6 +259,40 @@ func (q *EnrichQueue) canRunAI(job EnrichJob) bool {
 	return svc != nil && svc.Enabled()
 }
 
+// maybeEmbedItem generates and persists the item's semantic vector. It runs
+// only when the enrich stage spent cloud AI (Pro with budget): Free users
+// and capped users keep NULL embeddings and text-only search. Best-effort:
+// failures degrade to no-vector, never to a failed job.
+func (q *EnrichQueue) maybeEmbedItem(ctx context.Context, job EnrichJob, it *items.Item, metered bool, processed, hadError *bool) {
+	if q == nil || q.embed == nil || !q.embed.Enabled() || !metered {
+		return
+	}
+	if q.meter != nil && !q.meter.Allowed(ctx, job.UserID) {
+		return
+	}
+	vec, usage, model, err := q.embed.EmbedItemDetailed(ctx, it.Title, derefOrEmpty(it.Description), derefOrEmpty(it.URL))
+	if err != nil {
+		slog.Warn("enrich: embed item failed", "err", err, "id", job.ID)
+		*hadError = true
+		return
+	}
+	if q.meter != nil {
+		q.meter.RecordUsage(ctx, job.UserID, store.AIActionEmbedItem, model, metering.FromAI(usage))
+	}
+	if err := q.store.UpdateItemEmbedding(ctx, job.ID, vec); err != nil {
+		slog.Warn("enrich: update item embedding failed", "err", err, "id", job.ID)
+		*hadError = true
+		return
+	}
+	*processed = true
+}
+
+func derefOrEmpty(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
 // aiFor picks the AI service for a job. Pro users (or everyone when no
 // plan resolver is wired) get the configured cloud AI; Free users get the
 // deterministic heuristic so background enrichment costs $0 on them.

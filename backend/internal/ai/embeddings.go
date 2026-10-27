@@ -221,8 +221,16 @@ func (s *EmbeddingsService) Enabled() bool {
 
 // EmbedItem generates embedding for an item's content.
 func (s *EmbeddingsService) EmbedItem(ctx context.Context, title, description, url string) ([]float32, error) {
+	vec, _, _, err := s.EmbedItemDetailed(ctx, title, description, url)
+	return vec, err
+}
+
+// EmbedItemDetailed pairs the vector with priced usage for metering.
+// Embeddings APIs report input tokens only; when the provider doesn't
+// report usage we estimate from the text length.
+func (s *EmbeddingsService) EmbedItemDetailed(ctx context.Context, title, description, url string) ([]float32, *Usage, string, error) {
 	if !s.Enabled() {
-		return nil, errors.New("embeddings service not enabled")
+		return nil, nil, "", errors.New("embeddings service not enabled")
 	}
 
 	// Combine text fields for embedding
@@ -231,15 +239,43 @@ func (s *EmbeddingsService) EmbedItem(ctx context.Context, title, description, u
 		text = "empty item"
 	}
 
-	return s.embedder.Embed(ctx, text)
+	vec, err := s.embedder.Embed(ctx, text)
+	if err != nil {
+		return nil, nil, "", err
+	}
+	usage := &Usage{InputTokens: EstimateTokens(text)}
+	return vec, usage, s.embedderModel(), nil
 }
 
 // EmbedSearch generates embedding for a search query.
 func (s *EmbeddingsService) EmbedSearch(ctx context.Context, query string) ([]float32, error) {
+	vec, _, _, err := s.EmbedSearchDetailed(ctx, query)
+	return vec, err
+}
+
+// EmbedSearchDetailed pairs the vector with priced usage for metering.
+func (s *EmbeddingsService) EmbedSearchDetailed(ctx context.Context, query string) ([]float32, *Usage, string, error) {
 	if !s.Enabled() {
-		return nil, errors.New("embeddings service not enabled")
+		return nil, nil, "", errors.New("embeddings service not enabled")
 	}
-	return s.embedder.Embed(ctx, query)
+	vec, err := s.embedder.Embed(ctx, query)
+	if err != nil {
+		return nil, nil, "", err
+	}
+	usage := &Usage{InputTokens: EstimateTokens(query)}
+	return vec, usage, s.embedderModel(), nil
+}
+
+// embedderModel returns the concrete embedding model for cost lookup.
+func (s *EmbeddingsService) embedderModel() string {
+	switch s.embedder.(type) {
+	case *openAIEmbedder:
+		return "text-embedding-3-small"
+	case *qwenEmbedder:
+		return "text-embedding-3"
+	default:
+		return ""
+	}
 }
 
 func (s *EmbeddingsService) Dim() int {

@@ -23,6 +23,7 @@ import (
 	"heapdeck/internal/enricher"
 	httpapi "heapdeck/internal/http"
 	"heapdeck/internal/jobs"
+	"heapdeck/internal/metering"
 	"heapdeck/internal/seed"
 	"heapdeck/internal/store"
 	"heapdeck/internal/webhooks"
@@ -151,6 +152,10 @@ func main() {
 		logger.Info("pro gating enabled: cloud AI is Pro-only")
 	}
 	enrichQueue := jobs.NewEnrichQueue(st, en, aiSvc, 128, isPro)
+	if cfg.BillingEnabled {
+		enrichQueue.SetMeter(metering.New(st, cfg.AIMonthlyBudgetCents, cfg.AIProvider))
+	}
+	enrichQueue.SetEmbeddings(embSvc)
 	enrichQueue.Start(ctx)
 
 	router := httpapi.NewRouterWithDeps(cfg, httpapi.Deps{

@@ -73,3 +73,53 @@ func TestOpenAIProviderSummarizeAndTags(t *testing.T) {
 		t.Fatalf("summary = %q", summary)
 	}
 }
+
+func TestOpenAIProviderDetailedReportsUsage(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"[\"cli\"]"}}],"usage":{"prompt_tokens":120,"completion_tokens":8}}`))
+	}))
+	defer server.Close()
+
+	oldURL := openAIBaseURLForTests
+	openAIBaseURLForTests = server.URL
+	defer func() { openAIBaseURLForTests = oldURL }()
+
+	svc := NewOpenAI("test", "gpt-4o-mini")
+	if svc.Model() != "gpt-4o-mini" {
+		t.Fatalf("Model() = %q, want gpt-4o-mini", svc.Model())
+	}
+	out, err := svc.EnrichItemDetailed(context.Background(), &items.Item{
+		Type:  items.TypeCLI,
+		Title: "ripgrep",
+	})
+	if err != nil {
+		t.Fatalf("EnrichItemDetailed error = %v", err)
+	}
+	if out.Usage == nil {
+		t.Fatal("expected summed usage from both calls, got nil")
+	}
+	// Two calls (summarize + tags) × (120 in + 8 out).
+	if out.Usage.InputTokens != 240 || out.Usage.OutputTokens != 16 {
+		t.Fatalf("usage = %+v, want {240 16}", out.Usage)
+	}
+	if got := CostOf(out.Model, *out.Usage); got <= 0 {
+		t.Fatalf("expected priced usage > 0, got %v", got)
+	}
+}
+
+func TestServiceModelEmptyForHeuristic(t *testing.T) {
+	if got := NewHeuristic().Model(); got != "" {
+		t.Fatalf("heuristic Model() = %q, want empty (priced $0)", got)
+	}
+	out, err := NewHeuristic().EnrichItemDetailed(context.Background(), &items.Item{
+		Type:  items.TypeCLI,
+		Title: "ripgrep",
+	})
+	if err != nil {
+		t.Fatalf("heuristic enrich error = %v", err)
+	}
+	if out.Usage != nil {
+		t.Fatalf("heuristic usage must be nil, got %+v", out.Usage)
+	}
+}

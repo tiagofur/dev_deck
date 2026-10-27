@@ -38,30 +38,50 @@ func (p *openAIProvider) Enabled() bool {
 	return p != nil && p.apiKey != ""
 }
 
+// AIConfigModel exposes the model for cost lookup.
+func (p *openAIProvider) AIConfigModel() string {
+	if p == nil {
+		return ""
+	}
+	return p.model
+}
+
 func (p *openAIProvider) Summarize(ctx context.Context, in Input) (string, error) {
-	resp, err := p.complete(ctx, []openAIMessage{
+	summary, _, err := p.SummarizeDetailed(ctx, in)
+	return summary, err
+}
+
+// SummarizeDetailed reports the provider's token usage for metering.
+func (p *openAIProvider) SummarizeDetailed(ctx context.Context, in Input) (string, *Usage, error) {
+	resp, usage, err := p.complete(ctx, []openAIMessage{
 		{Role: "system", Content: "You summarize developer-saved items. Return exactly one concise sentence, max 160 characters. No markdown, no bullets."},
 		{Role: "user", Content: summarizePrompt(in)},
 	})
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
-	return truncate(strings.TrimSpace(resp), 160), nil
+	return truncate(strings.TrimSpace(resp), 160), usage, nil
 }
 
 func (p *openAIProvider) SuggestTags(ctx context.Context, in Input) ([]string, error) {
-	resp, err := p.complete(ctx, []openAIMessage{
+	tags, _, err := p.SuggestTagsDetailed(ctx, in)
+	return tags, err
+}
+
+// SuggestTagsDetailed reports the provider's token usage for metering.
+func (p *openAIProvider) SuggestTagsDetailed(ctx context.Context, in Input) ([]string, *Usage, error) {
+	resp, usage, err := p.complete(ctx, []openAIMessage{
 		{Role: "system", Content: "You suggest tags for developer-saved items. Return ONLY a JSON array of up to 6 short lowercase tags. No prose."},
 		{Role: "user", Content: tagsPrompt(in)},
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var tags []string
 	if err := json.Unmarshal([]byte(strings.TrimSpace(resp)), &tags); err != nil {
-		return nil, fmt.Errorf("decode openai tags json: %w", err)
+		return nil, usage, fmt.Errorf("decode openai tags json: %w", err)
 	}
-	return uniqueTags(tags), nil
+	return uniqueTags(tags), usage, nil
 }
 
 type openAIMessage struct {
@@ -79,14 +99,18 @@ type openAIResponse struct {
 	Choices []struct {
 		Message openAIMessage `json:"message"`
 	} `json:"choices"`
+	Usage *struct {
+		PromptTokens     int `json:"prompt_tokens"`
+		CompletionTokens int `json:"completion_tokens"`
+	} `json:"usage,omitempty"`
 	Error *struct {
 		Message string `json:"message"`
 	} `json:"error,omitempty"`
 }
 
-func (p *openAIProvider) complete(ctx context.Context, messages []openAIMessage) (string, error) {
+func (p *openAIProvider) complete(ctx context.Context, messages []openAIMessage) (string, *Usage, error) {
 	if !p.Enabled() {
-		return "", errors.New("openai provider disabled")
+		return "", nil, errors.New("openai provider disabled")
 	}
 	body, err := json.Marshal(openAIRequest{
 		Model:       p.model,
@@ -94,38 +118,42 @@ func (p *openAIProvider) complete(ctx context.Context, messages []openAIMessage)
 		Messages:    messages,
 	})
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, openAIBaseURLForTests, bytes.NewReader(body))
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	req.Header.Set("Authorization", "Bearer "+p.apiKey)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := p.httpc.Do(req)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 	raw, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	var decoded openAIResponse
 	if err := json.Unmarshal(raw, &decoded); err != nil {
-		return "", fmt.Errorf("decode openai response: %w", err)
+		return "", nil, fmt.Errorf("decode openai response: %w", err)
 	}
 	if decoded.Error != nil {
-		return "", errors.New(decoded.Error.Message)
+		return "", nil, errors.New(decoded.Error.Message)
 	}
 	if resp.StatusCode >= 300 {
-		return "", fmt.Errorf("openai http %d", resp.StatusCode)
+		return "", nil, fmt.Errorf("openai http %d", resp.StatusCode)
 	}
 	if len(decoded.Choices) == 0 {
-		return "", errors.New("openai returned no choices")
+		return "", nil, errors.New("openai returned no choices")
 	}
-	return strings.TrimSpace(decoded.Choices[0].Message.Content), nil
+	var usage *Usage
+	if decoded.Usage != nil {
+		usage = &Usage{InputTokens: decoded.Usage.PromptTokens, OutputTokens: decoded.Usage.CompletionTokens}
+	}
+	return strings.TrimSpace(decoded.Choices[0].Message.Content), usage, nil
 }
 
 func summarizePrompt(in Input) string {

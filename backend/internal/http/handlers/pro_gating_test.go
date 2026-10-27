@@ -45,12 +45,13 @@ func newProTestServer(t *testing.T, billingEnabled bool) *proTestServer {
 	as := authservice.New("test-jwt-secret", 15*time.Minute, 24*time.Hour)
 
 	cfg := config.Config{
-		Port:              "0",
-		AuthMode:          "jwt",
-		JWTSecret:         "test-jwt-secret",
-		LocalAuthEnabled:  true,
-		RateLimitDisabled: true,
-		BillingEnabled:    billingEnabled,
+		Port:                 "0",
+		AuthMode:             "jwt",
+		JWTSecret:            "test-jwt-secret",
+		LocalAuthEnabled:     true,
+		RateLimitDisabled:    true,
+		BillingEnabled:       billingEnabled,
+		AIMonthlyBudgetCents: 300,
 	}
 
 	router := httpapi.NewRouterWithDeps(cfg, httpapi.Deps{
@@ -222,5 +223,103 @@ func TestProGating_SystemConfigExposesBilling(t *testing.T) {
 		if out.BillingEnabled != enabled {
 			t.Errorf("billing=%v: config reports billing_enabled=%v", enabled, out.BillingEnabled)
 		}
+	}
+}
+
+func TestProGating_CapBlocksSyncEndpoints(t *testing.T) {
+	ts := newProTestServer(t, true)
+	u := ts.createLocalUser(t, "capped@example.test")
+	token := ts.loginAs(t, "capped@example.test")
+	ctx := context.Background()
+
+	if err := ts.store.SetUserPlan(ctx, u.ID, auth.PlanPro); err != nil {
+		t.Fatalf("SetUserPlan: %v", err)
+	}
+
+	// Spend the whole budget with one synthetic event.
+	if err := ts.store.RecordAIUsage(ctx, u.ID, store.AIUsageEvent{
+		Action: store.AIActionEnrich, Provider: "openai", Model: "gpt-4o-mini",
+		InputTokens: 1000000, EstimatedCents: 300,
+	}); err != nil {
+		t.Fatalf("RecordAIUsage: %v", err)
+	}
+
+	rec := ts.do(t, http.MethodPost, "/api/ask", map[string]string{"question": "anything"}, token)
+	if rec.Code != http.StatusTooManyRequests {
+		t.Fatalf("capped ask: expected 429, got %d, body: %s", rec.Code, rec.Body.String())
+	}
+
+	rec = ts.do(t, http.MethodGet, "/api/search?q=docker&mode=vector", nil, token)
+	if rec.Code != http.StatusTooManyRequests {
+		t.Fatalf("capped vector: expected 429, got %d, body: %s", rec.Code, rec.Body.String())
+	}
+
+	// Hybrid degrades to text (search must keep working).
+	rec = ts.do(t, http.MethodGet, "/api/search?q=docker&mode=hybrid", nil, token)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("capped hybrid: expected 200 degraded, got %d, body: %s", rec.Code, rec.Body.String())
+	}
+	type searchResp struct {
+		Mode         string `json:"mode"`
+		AIDowngraded bool   `json:"ai_downgraded"`
+	}
+	out := decodeJSON[searchResp](t, rec)
+	if out.Mode != "text" || !out.AIDowngraded {
+		t.Fatalf("capped hybrid must degrade to text, got %+v", out)
+	}
+
+	// Text search is untouched by the cap.
+	rec = ts.do(t, http.MethodGet, "/api/search?q=docker&mode=text", nil, token)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("capped text: expected 200, got %d, body: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestProGating_AIUsageEndpoint(t *testing.T) {
+	ts := newProTestServer(t, true)
+	u := ts.createLocalUser(t, "usage-ep@example.test")
+	token := ts.loginAs(t, "usage-ep@example.test")
+	ctx := context.Background()
+
+	if err := ts.store.RecordAIUsage(ctx, u.ID, store.AIUsageEvent{
+		Action: store.AIActionEnrich, Provider: "openai", Model: "gpt-4o-mini",
+		InputTokens: 1000, OutputTokens: 100, EstimatedCents: 0.021,
+	}); err != nil {
+		t.Fatalf("RecordAIUsage: %v", err)
+	}
+
+	rec := ts.do(t, http.MethodGet, "/api/me/ai-usage", nil, token)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("ai-usage: expected 200, got %d, body: %s", rec.Code, rec.Body.String())
+	}
+	type actionUsage struct {
+		Action string  `json:"action"`
+		Events int     `json:"events"`
+		Cents  float64 `json:"cents"`
+	}
+	type usageResp struct {
+		Plan      string        `json:"plan"`
+		UsedCents float64       `json:"used_cents"`
+		CapCents  int           `json:"cap_cents"`
+		ByAction  []actionUsage `json:"by_action"`
+	}
+	out := decodeJSON[usageResp](t, rec)
+	if out.Plan != auth.PlanFree {
+		t.Errorf("plan = %q, want free", out.Plan)
+	}
+	if diff := out.UsedCents - 0.021; diff > 0.0001 || diff < -0.0001 {
+		t.Errorf("used_cents = %v, want 0.021", out.UsedCents)
+	}
+	if out.CapCents != 300 {
+		t.Errorf("cap_cents = %d, want 300", out.CapCents)
+	}
+	if len(out.ByAction) != 1 || out.ByAction[0].Action != store.AIActionEnrich {
+		t.Errorf("by_action = %+v, want one enrich entry", out.ByAction)
+	}
+
+	// Unauthenticated → 401.
+	rec = ts.do(t, http.MethodGet, "/api/me/ai-usage", nil, "")
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("anonymous ai-usage: expected 401, got %d", rec.Code)
 	}
 }

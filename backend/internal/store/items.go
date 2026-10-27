@@ -508,6 +508,29 @@ func (s *Store) UpdateItemAIFields(ctx context.Context, id uuid.UUID, summary st
 	return nil
 }
 
+// UpdateItemEmbedding persists a pre-computed embedding vector. The caller
+// owns generation + metering; this is a dumb writer. The literal goes
+// through $1::vector because pgx ships no vector codec (see
+// formatVectorLiteral).
+func (s *Store) UpdateItemEmbedding(ctx context.Context, id uuid.UUID, vec []float32) error {
+	if len(vec) == 0 {
+		return errors.New("empty embedding")
+	}
+	tag, err := s.Writer().Exec(ctx, `
+		UPDATE items
+		SET embedding = $1::vector,
+		    updated_at = NOW()
+		WHERE id = $2
+	`, formatVectorLiteral(vec), id)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
 // ReviewItemAITags updates the editable AI suggestion set and optionally
 // merges the reviewed suggestions into the user's manual tags.
 func (s *Store) ReviewItemAITags(ctx context.Context, id uuid.UUID, in items.ReviewAITagsInput) (*items.Item, error) {

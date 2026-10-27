@@ -43,30 +43,50 @@ func (p *qwenProvider) Enabled() bool {
 	return p != nil && p.apiKey != ""
 }
 
+// AIConfigModel exposes the model for cost lookup.
+func (p *qwenProvider) AIConfigModel() string {
+	if p == nil {
+		return ""
+	}
+	return p.model
+}
+
 func (p *qwenProvider) Summarize(ctx context.Context, in Input) (string, error) {
-	resp, err := p.complete(ctx, []qwenMessage{
+	summary, _, err := p.SummarizeDetailed(ctx, in)
+	return summary, err
+}
+
+// SummarizeDetailed reports the provider's token usage for metering.
+func (p *qwenProvider) SummarizeDetailed(ctx context.Context, in Input) (string, *Usage, error) {
+	resp, usage, err := p.complete(ctx, []qwenMessage{
 		{Role: "system", Content: "You summarize developer-saved items. Return exactly one concise sentence, max 160 characters. No markdown, no bullets."},
 		{Role: "user", Content: summarizePrompt(in)},
 	})
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
-	return truncate(strings.TrimSpace(resp), 160), nil
+	return truncate(strings.TrimSpace(resp), 160), usage, nil
 }
 
 func (p *qwenProvider) SuggestTags(ctx context.Context, in Input) ([]string, error) {
-	resp, err := p.complete(ctx, []qwenMessage{
+	tags, _, err := p.SuggestTagsDetailed(ctx, in)
+	return tags, err
+}
+
+// SuggestTagsDetailed reports the provider's token usage for metering.
+func (p *qwenProvider) SuggestTagsDetailed(ctx context.Context, in Input) ([]string, *Usage, error) {
+	resp, usage, err := p.complete(ctx, []qwenMessage{
 		{Role: "system", Content: "You suggest tags for developer-saved items. Return ONLY a JSON array of up to 6 short lowercase tags. No prose."},
 		{Role: "user", Content: tagsPrompt(in)},
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var tags []string
 	if err := json.Unmarshal([]byte(strings.TrimSpace(resp)), &tags); err != nil {
-		return nil, fmt.Errorf("decode qwen tags json: %w", err)
+		return nil, usage, fmt.Errorf("decode qwen tags json: %w", err)
 	}
-	return uniqueTags(tags), nil
+	return uniqueTags(tags), usage, nil
 }
 
 type qwenMessage struct {
@@ -109,9 +129,9 @@ type qwenUsage struct {
 	OutputTokens int `json:"output_tokens"`
 }
 
-func (p *qwenProvider) complete(ctx context.Context, messages []qwenMessage) (string, error) {
+func (p *qwenProvider) complete(ctx context.Context, messages []qwenMessage) (string, *Usage, error) {
 	if !p.Enabled() {
-		return "", errors.New("qwen provider disabled")
+		return "", nil, errors.New("qwen provider disabled")
 	}
 	body, err := json.Marshal(qwenRequest{
 		Model: p.model,
@@ -123,11 +143,11 @@ func (p *qwenProvider) complete(ctx context.Context, messages []qwenMessage) (st
 		},
 	})
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, dashScopeBaseURLForTests+"/services/aigc/text-generation/generation", bytes.NewReader(body))
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	req.Header.Set("Authorization", "Bearer "+p.apiKey)
 	req.Header.Set("Content-Type", "application/json")
@@ -135,25 +155,26 @@ func (p *qwenProvider) complete(ctx context.Context, messages []qwenMessage) (st
 
 	resp, err := p.httpc.Do(req)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 	raw, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	var decoded qwenResponse
 	if err := json.Unmarshal(raw, &decoded); err != nil {
-		return "", fmt.Errorf("decode qwen response: %w", err)
+		return "", nil, fmt.Errorf("decode qwen response: %w", err)
 	}
 	if decoded.Code != "" && decoded.Code != "Success" {
-		return "", fmt.Errorf("qwen error: %s", decoded.Message)
+		return "", nil, fmt.Errorf("qwen error: %s", decoded.Message)
 	}
 	if resp.StatusCode >= 300 {
-		return "", fmt.Errorf("qwen http %d: %s", resp.StatusCode, string(raw))
+		return "", nil, fmt.Errorf("qwen http %d: %s", resp.StatusCode, string(raw))
 	}
 	if len(decoded.Output.Choices) == 0 {
-		return "", errors.New("qwen returned no choices")
+		return "", nil, errors.New("qwen returned no choices")
 	}
-	return strings.TrimSpace(decoded.Output.Choices[0].Message.Content), nil
+	usage := &Usage{InputTokens: decoded.Usage.InputTokens, OutputTokens: decoded.Usage.OutputTokens}
+	return strings.TrimSpace(decoded.Output.Choices[0].Message.Content), usage, nil
 }

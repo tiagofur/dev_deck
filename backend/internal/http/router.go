@@ -15,6 +15,7 @@ import (
 	"heapdeck/internal/http/handlers"
 	mw "heapdeck/internal/http/middleware"
 	"heapdeck/internal/jobs"
+	"heapdeck/internal/metering"
 	"heapdeck/internal/metrics"
 	"heapdeck/internal/store"
 
@@ -116,12 +117,16 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	discoveryH := handlers.NewDiscoveryHandler(st, deps.Cache)
 	commandsH := handlers.NewCommandsHandler(st)
 	proGater := mw.NewProGater(cfg, st)
-	cheatsH := handlers.NewCheatsheetsHandler(st, embSvc, proGater)
+	var meter *metering.Recorder
+	if cfg.BillingEnabled {
+		meter = metering.New(st, cfg.AIMonthlyBudgetCents, cfg.AIProvider)
+	}
+	cheatsH := handlers.NewCheatsheetsHandler(st, embSvc, proGater, meter)
 	suggestionsH := handlers.NewSuggestionsHandler(st)
 	captureH := handlers.NewCaptureHandler(st, deps.EnrichQueue)
 	itemsH := handlers.NewItemsHandler(st, deps.EnrichQueue)
 	previewH := handlers.NewPreviewHandler(deps.Enricher)
-	askH := handlers.NewAskHandler(st, embSvc)
+	askH := handlers.NewAskHandler(st, embSvc, meter)
 	relatedH := handlers.NewItemRelatedHandler(st)
 	syncH := handlers.NewSyncHandler(st)
 	devicesH := handlers.NewDevicesHandler(st)
@@ -143,7 +148,8 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	webhooksH := handlers.NewWebhooksHandler(st)
 	pluginsH := handlers.NewPluginsHandler()
 	socialH := handlers.NewSocialHandler(st)
-	agentH := handlers.NewAgentHandler(st, deps.AI)
+	agentH := handlers.NewAgentHandler(st, deps.AI, meter)
+	usageH := handlers.NewUsageHandler(st, cfg.AIMonthlyBudgetCents)
 	onboardingH := handlers.NewOnboardingHandler(st)
 	samlH := handlers.NewSAMLHandler(st, as, handlers.SAMLHandlerConfig{
 		EntityID:    "heapdeck-sp",
@@ -381,6 +387,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Get("/me/devices", devicesH.List)
 			r.Post("/me/devices/register", devicesH.Register)
 			r.Delete("/me/devices/{clientId}", devicesH.Delete)
+			r.Get("/me/ai-usage", usageH.Get)
 
 			r.Route("/me/notifications", func(nr chi.Router) {
 				nr.Get("/", notificationsH.List)

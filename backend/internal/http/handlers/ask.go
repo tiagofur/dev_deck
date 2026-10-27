@@ -7,6 +7,7 @@ import (
 
 	"heapdeck/internal/ai"
 	"heapdeck/internal/authctx"
+	"heapdeck/internal/metering"
 	"heapdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
@@ -17,10 +18,11 @@ import (
 type AskHandler struct {
 	store      *store.Store
 	embeddings *ai.EmbeddingsService
+	meter      *metering.Recorder
 }
 
-func NewAskHandler(s *store.Store, emb *ai.EmbeddingsService) *AskHandler {
-	return &AskHandler{store: s, embeddings: emb}
+func NewAskHandler(s *store.Store, emb *ai.EmbeddingsService, meter *metering.Recorder) *AskHandler {
+	return &AskHandler{store: s, embeddings: emb, meter: meter}
 }
 
 type AskRequest struct {
@@ -47,17 +49,27 @@ func (h *AskHandler) Ask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, ok := authctx.UserID(r.Context()); !ok {
+	userID, ok := authctx.UserID(r.Context())
+	if !ok {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+		return
+	}
+
+	// Pro-only route (RequirePro runs first); the cap check keeps margin.
+	if h.meter != nil && !h.meter.Allowed(r.Context(), userID) {
+		writeError(w, http.StatusTooManyRequests, "AI_QUOTA_EXCEEDED", "monthly AI budget spent; resets next month")
 		return
 	}
 
 	// Generate embedding for the question
 	var embedding []float32
 	if h.embeddings != nil && h.embeddings.Enabled() {
-		emb, err := h.embeddings.EmbedSearch(r.Context(), req.Question)
+		emb, usage, model, err := h.embeddings.EmbedSearchDetailed(r.Context(), req.Question)
 		if err == nil {
 			embedding = emb
+			if h.meter != nil {
+				h.meter.RecordUsage(r.Context(), userID, store.AIActionEmbedSearch, model, metering.FromAI(usage))
+			}
 		}
 		// On error, fall back to text search with a nil embedding.
 	}

@@ -13,6 +13,7 @@ import (
 	"heapdeck/internal/ai"
 	"heapdeck/internal/authctx"
 	"heapdeck/internal/domain/cheatsheets"
+	"heapdeck/internal/metering"
 	"heapdeck/internal/store"
 
 	"github.com/go-chi/chi/v5"
@@ -23,6 +24,7 @@ type CheatsheetsHandler struct {
 	store      *store.Store
 	embeddings *ai.EmbeddingsService
 	pro        proChecker
+	meter      *metering.Recorder
 }
 
 // proChecker reports whether the request's user may use Pro AI surfaces.
@@ -32,8 +34,8 @@ type proChecker interface {
 	IsPro(r *http.Request) bool
 }
 
-func NewCheatsheetsHandler(s *store.Store, emb *ai.EmbeddingsService, pro proChecker) *CheatsheetsHandler {
-	return &CheatsheetsHandler{store: s, embeddings: emb, pro: pro}
+func NewCheatsheetsHandler(s *store.Store, emb *ai.EmbeddingsService, pro proChecker, meter *metering.Recorder) *CheatsheetsHandler {
+	return &CheatsheetsHandler{store: s, embeddings: emb, pro: pro, meter: meter}
 }
 
 // GET /api/cheatsheets
@@ -300,7 +302,8 @@ func (h *CheatsheetsHandler) Search(w http.ResponseWriter, r *http.Request) {
 		mode = store.SearchModeText
 	}
 
-	if _, ok := authctx.UserID(r.Context()); !ok {
+	userID, ok := authctx.UserID(r.Context())
+	if !ok {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
 		return
 	}
@@ -318,9 +321,20 @@ func (h *CheatsheetsHandler) Search(w http.ResponseWriter, r *http.Request) {
 		downgraded = true
 	}
 
+	// Past the monthly cap, Pro users degrade like Free users instead of
+	// hard-failing: search must keep working, just without AI.
+	if mode != store.SearchModeText && h.meter != nil && !h.meter.Allowed(r.Context(), userID) {
+		if mode == store.SearchModeVector {
+			writeError(w, http.StatusTooManyRequests, "AI_QUOTA_EXCEEDED", "monthly AI budget spent; resets next month")
+			return
+		}
+		mode = store.SearchModeText
+		downgraded = true
+	}
+
 	var embedding []float32
 	if (mode == store.SearchModeVector || mode == store.SearchModeHybrid) && h.embeddings != nil && h.embeddings.Enabled() {
-		emb, err := h.embeddings.EmbedSearch(r.Context(), q)
+		emb, usage, model, err := h.embeddings.EmbedSearchDetailed(r.Context(), q)
 		if err != nil {
 			// Log error but fallback to text search if hybrid, or fail if semantic-only
 			if mode == store.SearchModeVector {
@@ -331,6 +345,9 @@ func (h *CheatsheetsHandler) Search(w http.ResponseWriter, r *http.Request) {
 			downgraded = true
 		} else {
 			embedding = emb
+			if h.meter != nil {
+				h.meter.RecordUsage(r.Context(), userID, store.AIActionEmbedSearch, model, metering.FromAI(usage))
+			}
 		}
 	}
 
