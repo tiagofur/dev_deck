@@ -84,6 +84,26 @@ type Config struct {
 	// the config has no dedicated environment/debug indicator.
 	AuthCookieSecure bool `env:"AUTH_COOKIE_SECURE" envDefault:"true"`
 
+	// ─── Pro billing (Free/Pro gating) ───
+	// BillingEnabled turns on per-user Free/Pro gating for cloud AI
+	// surfaces. Default off so self-hosted deployments — where the
+	// operator pays for their own provider — behave exactly as before.
+	BillingEnabled bool `env:"BILLING_ENABLED" envDefault:"false"`
+	// AIMonthlyBudgetCents caps priced AI spend per Pro user per UTC
+	// calendar month (~$3 at default). Past the cap, AI actions 429 and
+	// background enrich falls back to the $0 heuristic; the vault keeps
+	// working. Only enforced when BillingEnabled.
+	AIMonthlyBudgetCents int `env:"AI_MONTHLY_BUDGET_CENTS" envDefault:"300"`
+	// ─── Stripe billing (Pro $5/mo) ───
+	// Required only when BillingEnabled. WebhookSecret verifies the
+	// Stripe-Signature header on POST /api/billing/webhook; never commit
+	// real values (see backend/.env.example).
+	StripeSecretKey     string `env:"STRIPE_SECRET_KEY"`
+	StripeWebhookSecret string `env:"STRIPE_WEBHOOK_SECRET"`
+	StripeProPriceID    string `env:"STRIPE_PRO_PRICE_ID"`
+	BillingSuccessURL   string `env:"BILLING_SUCCESS_URL" envDefault:"http://localhost:5173/billing/success"`
+	BillingCancelURL    string `env:"BILLING_CANCEL_URL" envDefault:"http://localhost:5173/billing/cancel"`
+
 	// ─── Wave 5 Fase 18: local AI enrichment ───
 	AIProvider      string `env:"AI_PROVIDER" envDefault:"heuristic"`
 	OpenAIAPIKey    string `env:"OPENAI_API_KEY"`
@@ -94,6 +114,8 @@ type Config struct {
 	QwenModel       string `env:"QWEN_MODEL" envDefault:"qwen-turbo"`
 	DeepSeekAPIKey  string `env:"DEEPSEEK_API_KEY"`
 	DeepSeekModel   string `env:"DEEPSEEK_MODEL" envDefault:"deepseek-chat"`
+	GeminiAPIKey    string `env:"GEMINI_API_KEY"`
+	GeminiModel     string `env:"GEMINI_MODEL" envDefault:"gemini-3.8-flash"`
 	LMStudioBaseURL string `env:"LM_STUDIO_BASE_URL" envDefault:"http://localhost:1234"`
 	LMStudioModel   string `env:"LM_STUDIO_MODEL" envDefault:""`
 	AIExternalOptIn bool   `env:"AI_EXTERNAL_OPT_IN" envDefault:"false"`
@@ -154,9 +176,9 @@ func Load() (Config, error) {
 		}
 	}
 	switch strings.ToLower(strings.TrimSpace(c.AIProvider)) {
-	case "", "heuristic", "local", "disabled", "off", "none", "openai", "qwen", "deepseek", "ollama", "lmstudio":
+	case "", "heuristic", "local", "disabled", "off", "none", "openai", "qwen", "deepseek", "gemini", "ollama", "lmstudio":
 	default:
-		return c, errors.New("AI_PROVIDER must be one of: heuristic, local, disabled, openai, qwen, deepseek, ollama, lmstudio")
+		return c, errors.New("AI_PROVIDER must be one of: heuristic, local, disabled, openai, qwen, deepseek, gemini, ollama, lmstudio")
 	}
 	if strings.EqualFold(strings.TrimSpace(c.AIProvider), "openai") {
 		if !c.AIExternalOptIn {
@@ -180,6 +202,25 @@ func Load() (Config, error) {
 		}
 		if strings.TrimSpace(c.DeepSeekAPIKey) == "" {
 			return c, errors.New("DEEPSEEK_API_KEY is required when AI_PROVIDER=deepseek")
+		}
+	}
+	if strings.EqualFold(strings.TrimSpace(c.AIProvider), "gemini") {
+		if !c.AIExternalOptIn {
+			return c, errors.New("AI_EXTERNAL_OPT_IN=true is required when AI_PROVIDER=gemini")
+		}
+		if strings.TrimSpace(c.GeminiAPIKey) == "" {
+			return c, errors.New("GEMINI_API_KEY is required when AI_PROVIDER=gemini")
+		}
+	}
+	if c.BillingEnabled {
+		if strings.TrimSpace(c.StripeSecretKey) == "" {
+			return c, errors.New("STRIPE_SECRET_KEY is required when BILLING_ENABLED=true")
+		}
+		if strings.TrimSpace(c.StripeWebhookSecret) == "" {
+			return c, errors.New("STRIPE_WEBHOOK_SECRET is required when BILLING_ENABLED=true")
+		}
+		if strings.TrimSpace(c.StripeProPriceID) == "" {
+			return c, errors.New("STRIPE_PRO_PRICE_ID is required when BILLING_ENABLED=true")
 		}
 	}
 	return c, nil

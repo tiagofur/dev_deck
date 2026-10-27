@@ -15,17 +15,21 @@ import (
 
 	"heapdeck/internal/ai"
 	"heapdeck/internal/authservice"
+	"heapdeck/internal/billing"
 	"heapdeck/internal/cache"
 	"heapdeck/internal/config"
 	"heapdeck/internal/cron"
+	"heapdeck/internal/domain/auth"
 	"heapdeck/internal/email"
 	"heapdeck/internal/enricher"
 	httpapi "heapdeck/internal/http"
 	"heapdeck/internal/jobs"
+	"heapdeck/internal/metering"
 	"heapdeck/internal/seed"
 	"heapdeck/internal/store"
 	"heapdeck/internal/webhooks"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -138,7 +142,21 @@ func main() {
 
 	// Background enrich queue (Wave 4.5 §16.9) — handlers that need
 	// async metadata fetches (capture + create repo) push jobs here.
-	enrichQueue := jobs.NewEnrichQueue(st, en, aiSvc, 128)
+	// With billing on, the worker spends cloud AI only on Pro users;
+	// Free users get the deterministic heuristic ($0). Self-host keeps
+	// the legacy behavior where everyone uses the configured provider.
+	var isPro jobs.PlanResolver
+	if cfg.BillingEnabled {
+		isPro = func(ctx context.Context, userID uuid.UUID) bool {
+			return st.GetUserPlan(ctx, userID) == auth.PlanPro
+		}
+		logger.Info("pro gating enabled: cloud AI is Pro-only")
+	}
+	enrichQueue := jobs.NewEnrichQueue(st, en, aiSvc, 128, isPro)
+	if cfg.BillingEnabled {
+		enrichQueue.SetMeter(metering.New(st, cfg.AIMonthlyBudgetCents, cfg.AIProvider))
+	}
+	enrichQueue.SetEmbeddings(embSvc)
 	enrichQueue.Start(ctx)
 
 	router := httpapi.NewRouterWithDeps(cfg, httpapi.Deps{
@@ -150,6 +168,7 @@ func main() {
 		AI:          aiSvc,
 		Embeddings:  embSvc,
 		Cache:       c,
+		Billing:     billingClient(cfg),
 	})
 
 	// Background refresher: re-enriches stale repos so stars/desc don't drift.
@@ -213,6 +232,15 @@ func main() {
 		logger.Error("shutdown error", "err", err)
 	}
 	logger.Info("bye")
+}
+
+// billingClient returns the Stripe client when billing is on, nil otherwise.
+// Handlers check BillingEnabled first, so a nil client is never called.
+func billingClient(cfg config.Config) billing.Client {
+	if !cfg.BillingEnabled {
+		return nil
+	}
+	return billing.NewClient(cfg.StripeSecretKey)
 }
 
 // newLogger builds a slog.Logger. Format is controlled by LOG_FORMAT

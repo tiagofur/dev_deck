@@ -508,6 +508,29 @@ func (s *Store) UpdateItemAIFields(ctx context.Context, id uuid.UUID, summary st
 	return nil
 }
 
+// UpdateItemEmbedding persists a pre-computed embedding vector. The caller
+// owns generation + metering; this is a dumb writer. The literal goes
+// through $1::vector because pgx ships no vector codec (see
+// formatVectorLiteral).
+func (s *Store) UpdateItemEmbedding(ctx context.Context, id uuid.UUID, vec []float32) error {
+	if len(vec) == 0 {
+		return errors.New("empty embedding")
+	}
+	tag, err := s.Writer().Exec(ctx, `
+		UPDATE items
+		SET embedding = $1::vector,
+		    updated_at = NOW()
+		WHERE id = $2
+	`, formatVectorLiteral(vec), id)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
 // ReviewItemAITags updates the editable AI suggestion set and optionally
 // merges the reviewed suggestions into the user's manual tags.
 func (s *Store) ReviewItemAITags(ctx context.Context, id uuid.UUID, in items.ReviewAITagsInput) (*items.Item, error) {
@@ -697,21 +720,23 @@ func (s *Store) searchItemsText(ctx context.Context, query string, limit int) ([
 
 func (s *Store) searchItemsHybrid(ctx context.Context, query string, embedding []float32, limit int, useText bool) ([]SearchItemsResult, error) {
 	scopeSQL, scopeArgs := ownerClause(ctx, "i.user_id", 3)
-	// Get vector results
+	// pgx has no pgvector codec, so a []float32 bind would serialize as a
+	// Postgres array literal ("{1,2,...}") which the vector type rejects.
+	// Format the pgvector text literal ("[1,2,...]") ourselves and cast.
 	vecQ := fmt.Sprintf(`
 		SELECT i.id, i.item_type, i.title, i.why_saved, i.url,
-		       1 - (i.embedding <=> $1) as sim,
+		       1 - (i.embedding <=> $1::vector) as sim,
 		       i.org_id, COALESCE(u.username, '') as curator_name, COALESCE(u.avatar_url, '') as curator_avatar
 		FROM items i
 		LEFT JOIN users u ON u.id = i.user_id
 		WHERE %s
 		  AND i.archived = false
 		  AND i.embedding IS NOT NULL
-		ORDER BY i.embedding <=> $1
+		ORDER BY i.embedding <=> $1::vector
 		LIMIT $2
 	`, scopeSQL)
 
-	args := append([]any{embedding, limit}, scopeArgs...)
+	args := append([]any{formatVectorLiteral(embedding), limit}, scopeArgs...)
 	rows, err := s.Reader().Query(ctx, vecQ, args...)
 	if err != nil {
 		return nil, err
@@ -808,6 +833,23 @@ func normalizeSim(sim float64) float64 {
 	return sim
 }
 
+// formatVectorLiteral renders a Go float slice as a pgvector text literal
+// ("[0.1,0.2,...]"). Used for $1::vector binds because pgx ships no vector
+// codec and would otherwise send a Postgres array literal ("{...}") that
+// the vector operators reject.
+func formatVectorLiteral(vec []float32) string {
+	var b strings.Builder
+	b.WriteByte('[')
+	for i, v := range vec {
+		if i > 0 {
+			b.WriteByte(',')
+		}
+		fmt.Fprintf(&b, "%g", v)
+	}
+	b.WriteByte(']')
+	return b.String()
+}
+
 // GetRelatedItems returns K items most similar to the given item by embedding.
 func (s *Store) GetRelatedItems(ctx context.Context, itemID uuid.UUID, limit int) ([]SearchItemsResult, error) {
 	if limit <= 0 || limit > 20 {
@@ -819,19 +861,22 @@ func (s *Store) GetRelatedItems(ctx context.Context, itemID uuid.UUID, limit int
 	// Get the source item's embedding. A saved item may exist before async
 	// enrichment has produced an embedding; in that case there simply are no
 	// related items yet.
-	var srcEmbedding []float32
 	args := append([]any{itemID}, scopeArgs...)
+	// Read the vector back in pgvector text format ("[1,2,...]") so it can be
+	// passed straight back as the $1::vector bind below. pgx has no vector
+	// codec and cannot scan the binary format into a Go slice.
+	var srcLiteral *string
 	err := s.Reader().QueryRow(ctx, `
-		SELECT embedding FROM items WHERE id = $1 AND `+scopeSQL,
+		SELECT embedding::text FROM items WHERE id = $1 AND `+scopeSQL,
 		args...,
-	).Scan(&srcEmbedding)
+	).Scan(&srcLiteral)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrNotFound
 		}
 		return nil, err
 	}
-	if srcEmbedding == nil {
+	if srcLiteral == nil {
 		return []SearchItemsResult{}, nil
 	}
 
@@ -839,16 +884,16 @@ func (s *Store) GetRelatedItems(ctx context.Context, itemID uuid.UUID, limit int
 	relatedScopeSQL, relatedScopeArgs := ownerClause(ctx, "user_id", 4)
 	q := `
 		SELECT id, item_type, title, why_saved, url,
-		       1 - (embedding <=> $1) as sim
+		       1 - (embedding <=> $1::vector) as sim
 		FROM items
 		WHERE id != $2
 		  AND ` + relatedScopeSQL + `
 		  AND archived = false
 		  AND embedding IS NOT NULL
-		ORDER BY embedding <=> $1
+		ORDER BY embedding <=> $1::vector
 		LIMIT $3
 	`
-	relatedArgs := append([]any{srcEmbedding, itemID, limit}, relatedScopeArgs...)
+	relatedArgs := append([]any{*srcLiteral, itemID, limit}, relatedScopeArgs...)
 	rows, err := s.Reader().Query(ctx, q, relatedArgs...)
 	if err != nil {
 		return nil, err

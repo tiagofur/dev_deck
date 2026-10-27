@@ -39,7 +39,7 @@ func newOrgAuthzServer(t *testing.T) *orgAuthzServer {
 	aiSvc := ai.NewHeuristic()
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
-	q := jobs.NewEnrichQueue(st, en, aiSvc, 32)
+	q := jobs.NewEnrichQueue(st, en, aiSvc, 32, nil)
 	q.Start(ctx)
 
 	const secret = "org-authz-test-secret"

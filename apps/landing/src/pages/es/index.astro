@@ -3,8 +3,8 @@ import Layout from '../../layouts/Layout.astro';
 ---
 
 <Layout 
-  title="HeapDeck.com — Tu memoria externa para desarrollo, asistida por IA" 
-  description="Guarda repos, CLIs, plugins, atajos, prompts y workflows. La IA los organiza. Vos los encontrás cuando los necesitás."
+  title="HeapDeck.com — Tu memoria externa para desarrollo. Gratis siempre, Pro con IA $5/mes" 
+  description="Guardá repos, CLIs, snippets y atajos. HeapDeck es gratis para siempre con todas las funciones centrales — sumá acciones puntuales de IA por $5/mes."
   lang="es"
 >
   <!-- Navigation Header -->
@@ -14,13 +14,16 @@ import Layout from '../../layouts/Layout.astro';
         <div class="bg-accent-yellow border-2 border-ink p-1.5 shadow-hard-sm">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-ink"><path d="M4 3h16a2 2 0 0 1 2 2v6a10 10 0 0 1-10 10A10 10 0 0 1 2 11V5a2 2 0 0 1 2-2z"/><polyline points="8 10 12 14 16 10"/></svg>
         </div>
-        <span class="font-display font-black text-2xl uppercase tracking-wider text-ink">
+        <a href="/es" class="font-display font-black text-2xl uppercase tracking-wider text-ink">
           HeapDeck<span class="text-accent-pink">.com</span>
-        </span>
+        </a>
       </div>
 
       <nav class="hidden md:flex items-center gap-8 font-mono text-sm font-bold">
         <a href="https://heapdeck.com/register" class="hover:text-accent-pink transition-colors">Probar la beta</a>
+        <a href="#features" class="hover:text-accent-pink transition-colors">Funciones</a>
+        <a href="#ai" class="hover:text-accent-pink transition-colors">IA</a>
+        <a href="#pricing" class="hover:text-accent-pink transition-colors">Precios</a>
         <a href="https://github.com/tiagofur/heapdeck#readme" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">Docs</a>
         <a href="https://github.com/tiagofur/heapdeck/releases" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">Changelog</a>
         <a href="/" class="border-2 border-ink px-2.5 py-0.5 bg-bg-primary hover:bg-accent-yellow shadow-hard-sm transition-all flex items-center gap-1">
@@ -30,12 +33,10 @@ import Layout from '../../layouts/Layout.astro';
       
       <div class="flex items-center gap-2">
         <a 
-          href="https://github.com/tiagofur/heapdeck" 
-          target="_blank" 
-          rel="noopener"
+          href="#pricing" 
           class="border-3 border-ink bg-accent-lime px-4 py-2 font-display font-black uppercase text-sm shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg transition-all"
         >
-          Star en GitHub
+          Gratis / Pro $5
         </a>
       </div>
     </div>
@@ -45,19 +46,19 @@ import Layout from '../../layouts/Layout.astro';
   <section class="max-w-6xl mx-auto px-6 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
     <div class="lg:col-span-7 space-y-6">
       <div class="inline-block border-2 border-ink bg-accent-lavender text-xs font-mono font-black uppercase px-3 py-1.5 shadow-hard-sm">
-        🚀 Open Source & Self-Hosteable
+        Gratis para siempre · Pro con IA $5/mes
       </div>
       
       <h1 class="font-display font-black text-4xl sm:text-6xl uppercase tracking-tight leading-none text-ink">
-        Tu memoria externa para desarrollo, <span class="bg-accent-yellow border-b-5 border-ink px-1">asistida por IA</span>.
+        Tu memoria externa para desarrollo, <span class="bg-accent-yellow border-b-5 border-ink px-1">gratis siempre</span>.
       </h1>
       
       <div class="space-y-4">
         <p class="font-mono text-base sm:text-lg font-bold text-ink leading-relaxed max-w-xl">
-          Guarda repos, CLIs, plugins, atajos, prompts y workflows. La IA los organiza. Vos los encontrás cuando los necesitás.
+          Guardá repos, CLIs, plugins, atajos, prompts y workflows. Sin IA, sin costo, sin límites.
         </p>
         <p class="font-mono text-xs sm:text-sm text-ink-soft leading-relaxed max-w-xl">
-          Dejá de perder herramientas útiles. HeapDeck recuerda por vos — con contexto real de para qué sirve cada cosa y búsqueda por intención.
+          Y si querés IA, es puntual: acciones concretas dentro de tu flujo por $5/mes. Sin chatbot — eso ya lo tenés en todos lados.
         </p>
       </div>
       
@@ -93,7 +94,7 @@ import Layout from '../../layouts/Layout.astro';
         <span class="text-ink/30">•</span>
         <span class="flex items-center gap-1.5">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-danger"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-          100% Gratis
+          100% Gratis, sin IA obligatoria
         </span>
       </div>
     </div>
@@ -173,13 +174,13 @@ import Layout from '../../layouts/Layout.astro';
   </section>
 
   <!-- Features Grid Section -->
-  <section class="max-w-6xl mx-auto px-6 py-20 space-y-12">
+  <section id="features" class="max-w-6xl mx-auto px-6 py-20 space-y-12 scroll-mt-20">
     <div class="text-center space-y-4 max-w-2xl mx-auto">
       <h2 class="font-display font-black text-4xl sm:text-5xl uppercase tracking-tight text-ink">
         No solo repos. Todo lo útil para desarrollar.
       </h2>
       <p class="font-mono text-sm text-ink-soft">
-        Guardá atajos, comandos y configuraciones. Dejá que la IA indexe los detalles.
+        Guardá atajos, comandos y configuraciones — gratis para siempre. La IA es un opcional de $5/mes.
       </p>
     </div>
     
@@ -229,6 +230,250 @@ import Layout from '../../layouts/Layout.astro';
     </div>
   </section>
 
+  <!-- AI Features Section (Pro) -->
+  <section id="ai" class="border-y-3 border-ink bg-bg-elevated scroll-mt-20">
+    <div class="max-w-6xl mx-auto px-6 py-20 space-y-12">
+      <div class="text-center space-y-4 max-w-2xl mx-auto">
+        <div class="inline-block border-2 border-ink bg-ink text-bg-primary text-xs font-mono font-black uppercase px-3 py-1.5 shadow-hard-sm">
+          HeapDeck Pro · $5/mes
+        </div>
+        <h2 class="font-display font-black text-4xl sm:text-5xl uppercase tracking-tight text-ink">
+          IA Pro: acciones puntuales, no otro chatbot.
+        </h2>
+        <p class="font-mono text-sm text-ink-soft">
+          Sin ventana de chat que atender. Acciones chicas dentro de tu flujo — con modelos eficientes y uso justo generoso incluido cada mes.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 font-mono text-xs">
+        <div class="border-3 border-ink p-5 bg-bg-card shadow-hard space-y-3 hover:-translate-y-1 hover:shadow-hard-lg transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-lg bg-accent-yellow border-2 border-ink p-1">🧠</span>
+            <span class="text-[10px] font-black uppercase bg-ink text-bg-primary px-2 py-0.5">Pro</span>
+          </div>
+          <h3 class="font-display font-black text-base uppercase">Auto-summary</h3>
+          <p class="text-ink-soft leading-relaxed">Guardás un repo o una herramienta. HeapDeck escribe qué es, cuándo usarlo y qué stack toca — solo, en background.</p>
+          <p class="text-[11px] bg-bg-elevated border border-ink/20 p-2 italic">"fzf → buscador difuso para terminal. Úsalo para historial, archivos, procesos."</p>
+        </div>
+        <div class="border-3 border-ink p-5 bg-bg-card shadow-hard space-y-3 hover:-translate-y-1 hover:shadow-hard-lg transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-lg bg-accent-pink border-2 border-ink p-1">🏷️</span>
+            <span class="text-[10px] font-black uppercase bg-ink text-bg-primary px-2 py-0.5">Pro</span>
+          </div>
+          <h3 class="font-display font-black text-base uppercase">Auto-tagging</h3>
+          <p class="text-ink-soft leading-relaxed">Tipo, stack, propósito y nivel sugeridos al capturar. Vos confirmás o editás. Menos trabajo manual, más contexto útil.</p>
+          <p class="text-[11px] bg-bg-elevated border border-ink/20 p-2 italic">Sugeridos: go · cli · imágenes · backend</p>
+        </div>
+        <div class="border-3 border-ink p-5 bg-bg-card shadow-hard space-y-3 hover:-translate-y-1 hover:shadow-hard-lg transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-lg bg-accent-cyan border-2 border-ink p-1">🔍</span>
+            <span class="text-[10px] font-black uppercase bg-ink text-bg-primary px-2 py-0.5">Pro</span>
+          </div>
+          <h3 class="font-display font-black text-base uppercase">Búsqueda semántica</h3>
+          <p class="text-ink-soft leading-relaxed">Buscá tu vault por intención, no por títulos exactos. Híbrido fuzzy + vectores sobre títulos, notas, READMEs y tu "por qué lo guardé".</p>
+          <p class="text-[11px] bg-bg-elevated border border-ink/20 p-2 italic">"herramientas para agents en terminal"</p>
+        </div>
+        <div class="border-3 border-ink p-5 bg-bg-card shadow-hard space-y-3 hover:-translate-y-1 hover:shadow-hard-lg transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-lg bg-accent-lime border-2 border-ink p-1">🌐</span>
+            <span class="text-[10px] font-black uppercase bg-ink text-bg-primary px-2 py-0.5">Pro</span>
+          </div>
+          <h3 class="font-display font-black text-base uppercase">Descubrimiento por necesidad</h3>
+          <p class="text-ink-soft leading-relaxed">Describí la necesidad, recibí repos de GitHub rankeados: stars, mantenimiento, señales del README. Guardalos con un click.</p>
+          <p class="text-[11px] bg-bg-elevated border border-ink/20 p-2 italic">"CLI liviano en Go para redimensionar imágenes"</p>
+        </div>
+        <div class="border-3 border-ink p-5 bg-bg-card shadow-hard space-y-3 hover:-translate-y-1 hover:shadow-hard-lg transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-lg bg-accent-orange border-2 border-ink p-1">✨</span>
+            <span class="text-[10px] font-black uppercase bg-ink text-bg-primary px-2 py-0.5">Pro</span>
+          </div>
+          <h3 class="font-display font-black text-base uppercase">Contenido → Conocimiento</h3>
+          <p class="text-ink-soft leading-relaxed">Pegá una URL, README o texto. Obtené resumen, tags, comandos detectados, prerrequisitos. Guardalo como cheatsheet, item o runbook.</p>
+          <p class="text-[11px] bg-bg-elevated border border-ink/20 p-2 italic">Contenido bruto → conocimiento accionable.</p>
+        </div>
+        <div class="border-3 border-ink p-5 bg-bg-card shadow-hard space-y-3 hover:-translate-y-1 hover:shadow-hard-lg transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-lg bg-accent-lavender border-2 border-ink p-1">🔗</span>
+            <span class="text-[10px] font-black uppercase bg-ink text-bg-primary px-2 py-0.5">Pro</span>
+          </div>
+          <h3 class="font-display font-black text-base uppercase">Relacionados + joyas olvidadas</h3>
+          <p class="text-ink-soft leading-relaxed">En cada item: repos similares, cheatsheets relacionadas, comandos del mismo stack. Más un resumen de gemas que no abrís hace 30+ días.</p>
+          <p class="text-[11px] bg-bg-elevated border border-ink/20 p-2 italic">Tu vault se interconecta solo.</p>
+        </div>
+      </div>
+
+      <!-- AI search in action -->
+      <div class="bg-ink border-3 border-ink shadow-hard-xl p-6 md:p-8 font-mono text-xs space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-dashed border-bg-primary/30 pb-3">
+          <span class="font-black uppercase text-sm text-bg-primary">La búsqueda IA en acción</span>
+          <span class="text-[10px] uppercase bg-accent-yellow text-ink font-black px-2 py-0.5 border border-bg-primary/30">Ejemplo ilustrativo</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-bg-primary border-2 border-bg-primary/20 p-4 space-y-3">
+            <div class="text-[10px] font-black uppercase text-ink-soft">Tu vault · semántico</div>
+            <p class="text-ink italic">"ese CLI en Go para optimizar imágenes"</p>
+            <ul class="space-y-2 text-ink-soft text-[11px] leading-relaxed">
+              <li class="border-l-4 border-accent-lime pl-2"><span class="font-bold text-ink">h2non/bimg</span> — redimensionado de imágenes en Go con libvips. Guardado para thumbnails de API.</li>
+              <li class="border-l-4 border-accent-yellow pl-2"><span class="font-bold text-ink">Cheatsheet ImageMagick</span> — one-liners mogrify para resize en lote.</li>
+              <li class="border-l-4 border-accent-pink pl-2"><span class="font-bold text-ink">squoosh-cli</span> — compresión rápida por CLI antes de subir.</li>
+            </ul>
+          </div>
+          <div class="bg-bg-primary border-2 border-bg-primary/20 p-4 space-y-3">
+            <div class="text-[10px] font-black uppercase text-ink-soft">GitHub · descubrimiento por necesidad</div>
+            <p class="text-ink italic">"CLI liviano en Go para redimensionar imágenes"</p>
+            <ul class="space-y-2 text-ink-soft text-[11px] leading-relaxed">
+              <li class="border-l-4 border-accent-cyan pl-2"><span class="font-bold text-ink">disintegration/imaging</span> ★ 4.2k · mantenido · "imaging simple en Go, resize/blur/rotate". <span class="bg-accent-lime/40 px-1 border border-ink/20 font-bold text-ink">[+ Guardar]</span></li>
+              <li class="border-l-4 border-accent-cyan pl-2"><span class="font-bold text-ink">h2non/bimg</span> ★ 3.1k · mantenido · "chico, rápido, bindings libvips". <span class="bg-accent-lime/40 px-1 border border-ink/20 font-bold text-ink">[+ Guardar]</span></li>
+              <li class="border-l-4 border-accent-cyan pl-2"><span class="font-bold text-ink">anthonynsimon/bild</span> ★ 1.8k · estable · "procesamiento de imágenes en Go puro". <span class="bg-accent-lime/40 px-1 border border-ink/20 font-bold text-ink">[+ Guardar]</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- No-chat callout -->
+      <div class="border-3 border-ink bg-accent-yellow p-6 shadow-hard flex flex-col md:flex-row gap-4 items-start md:items-center">
+        <span class="text-2xl bg-bg-card border-2 border-ink p-2 shadow-hard-sm shrink-0">🚫💬</span>
+        <div class="font-mono text-sm space-y-1">
+          <p class="font-black uppercase font-display text-lg">¿Por qué sin chat? Porque chat hay en todos lados.</p>
+          <p class="text-ink-soft text-xs leading-relaxed">HeapDeck Pro pone la IA donde pasa el recuerdo: capturar, buscar, reutilizar. Un click, sin prompts. Seguimos sumando acciones puntuales que ahorran minutos reales — y las listamos todas acá.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="max-w-6xl mx-auto px-6 py-20 space-y-12 scroll-mt-20">
+    <div class="text-center space-y-4 max-w-2xl mx-auto">
+      <h2 class="font-display font-black text-4xl sm:text-5xl uppercase tracking-tight text-ink">
+        Precios simples. Gratis siempre, Pro si querés IA.
+      </h2>
+      <p class="font-mono text-sm text-ink-soft">
+        Todas las funciones centrales son gratis. La IA cuesta plata real, así que Pro es un fijo de $5 — con uso justo generoso incluido y sin sorpresas.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+      <!-- Free -->
+      <div class="bg-bg-card border-3 border-ink shadow-hard p-8 space-y-6 flex flex-col">
+        <div class="space-y-2">
+          <div class="font-mono text-xs font-black uppercase bg-accent-lime border-2 border-ink px-2 py-0.5 inline-block">Gratis</div>
+          <div class="flex items-end gap-2">
+            <span class="font-display font-black text-5xl">$0</span>
+            <span class="font-mono text-xs text-ink-soft pb-2">para siempre</span>
+          </div>
+          <p class="font-mono text-xs text-ink-soft">Todas las funciones centrales. Sin tarjeta. Sin llamadas IA a la nube.</p>
+        </div>
+        <ul class="font-mono text-xs space-y-3 flex-1">
+          <li class="flex gap-2"><span class="font-black text-accent-lime">✓</span> Vault ilimitado: repos, CLIs, snippets, prompts, atajos…</li>
+          <li class="flex gap-2"><span class="font-black text-accent-lime">✓</span> Captura: extensión, CLI, pegado rápido</li>
+          <li class="flex gap-2"><span class="font-black text-accent-lime">✓</span> Búsqueda fuzzy instantánea + Ctrl+K + filtros + tags</li>
+          <li class="flex gap-2"><span class="font-black text-accent-lime">✓</span> Workbench, runbooks y comandos guardados</li>
+          <li class="flex gap-2"><span class="font-black text-accent-lime">✓</span> Circles: vaults compartidos con tu gente</li>
+          <li class="flex gap-2"><span class="font-black text-accent-lime">✓</span> Desktop offline-first + self-hosting</li>
+          <li class="flex gap-2 text-ink-soft"><span class="font-black text-ink/40">✕</span> Resúmenes, tags y búsqueda semántica con IA</li>
+          <li class="flex gap-2 text-ink-soft"><span class="font-black text-ink/40">✕</span> Descubrimiento en GitHub por necesidad</li>
+        </ul>
+        <a 
+          href="https://github.com/tiagofur/heapdeck/releases" 
+          target="_blank"
+          rel="noopener"
+          class="border-3 border-ink bg-bg-primary text-center px-6 py-3 font-display font-black uppercase text-md shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg transition-all"
+        >
+          Descargar gratis
+        </a>
+      </div>
+
+      <!-- Pro -->
+      <div class="bg-ink text-bg-primary border-3 border-ink shadow-hard-xl p-8 space-y-6 flex flex-col relative">
+        <div class="absolute -top-4 left-1/2 -translate-x-1/2 font-mono text-xs font-black uppercase bg-accent-pink text-ink border-2 border-ink px-3 py-1 shadow-hard-sm whitespace-nowrap">
+          Para superpoderes IA
+        </div>
+        <div class="space-y-2">
+          <div class="font-mono text-xs font-black uppercase bg-accent-yellow text-ink border-2 border-bg-primary/40 px-2 py-0.5 inline-block">Pro</div>
+          <div class="flex items-end gap-2">
+            <span class="font-display font-black text-5xl text-accent-yellow">$5</span>
+            <span class="font-mono text-xs text-bg-primary/70 pb-2">/ mes, fijo</span>
+          </div>
+          <p class="font-mono text-xs text-bg-primary/70">Todo lo Gratis, más cada acción IA. Puntual, en tu flujo — nunca un chatbot.</p>
+        </div>
+        <ul class="font-mono text-xs space-y-3 flex-1">
+          <li class="flex gap-2"><span class="font-black text-accent-yellow">✓</span> Todo lo Gratis, ilimitado</li>
+          <li class="flex gap-2"><span class="font-black text-accent-yellow">✓</span> Auto-summary + auto-tagging al capturar</li>
+          <li class="flex gap-2"><span class="font-black text-accent-yellow">✓</span> Búsqueda semántica por intención</li>
+          <li class="flex gap-2"><span class="font-black text-accent-yellow">✓</span> Descubrimiento en GitHub por necesidad, guardado en 1 click</li>
+          <li class="flex gap-2"><span class="font-black text-accent-yellow">✓</span> Contenido → Conocimiento (URL/README → runbook)</li>
+          <li class="flex gap-2"><span class="font-black text-accent-yellow">✓</span> Relacionados + resumen de joyas olvidadas</li>
+          <li class="flex gap-2"><span class="font-black text-accent-yellow">✓</span> ~$3 de uso de modelos incluido / mes (uso justo)</li>
+        </ul>
+        <a 
+          href="https://github.com/tiagofur/heapdeck/discussions" 
+          target="_blank"
+          rel="noopener"
+          class="border-3 border-bg-primary/60 bg-accent-pink text-ink text-center px-6 py-3 font-display font-black uppercase text-md shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg transition-all"
+        >
+          Unirme a la waitlist Pro
+        </a>
+        <p class="font-mono text-[11px] text-bg-primary/60 text-center">El cobro Pro se está habilitando — la waitlist entra primero.</p>
+      </div>
+    </div>
+
+    <!-- Fair-use box -->
+    <div class="border-3 border-ink bg-bg-card shadow-hard p-6 md:p-8 space-y-6">
+      <h3 class="font-display font-black text-xl uppercase text-center">Cómo $5 cubren la IA, con honestidad.</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs text-center">
+        <div class="space-y-2 border-2 border-ink bg-bg-elevated p-4">
+          <div class="font-display font-black text-3xl text-accent-pink">~$3</div>
+          <p class="text-ink-soft leading-relaxed">de costo de modelos incluido por usuario / mes — alcanza para miles de enriquecimientos + cientos de búsquedas semánticas.</p>
+        </div>
+        <div class="space-y-2 border-2 border-ink bg-bg-elevated p-4">
+          <div class="font-display font-black text-3xl text-accent-yellow">Flash</div>
+          <p class="text-ink-soft leading-relaxed">Solo modelos eficientes (clase Gemini Flash / DeepSeek). Acciones puntuales, prompts cortos — sin quemar tokens.</p>
+        </div>
+        <div class="space-y-2 border-2 border-ink bg-bg-elevated p-4">
+          <div class="font-display font-black text-3xl text-accent-lime">$0</div>
+          <p class="text-ink-soft leading-relaxed">en cargos extra, siempre. Si llegás al tope, la IA pausa hasta el próximo ciclo — tu vault sigue andando completo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="max-w-4xl mx-auto px-6 pb-20 space-y-8 scroll-mt-20">
+    <h2 class="font-display font-black text-3xl sm:text-4xl uppercase tracking-tight text-ink text-center">
+      Preguntas, respondidas.
+    </h2>
+    <div class="space-y-4 font-mono text-sm">
+      <details class="border-3 border-ink bg-bg-card shadow-hard p-5 group">
+        <summary class="font-display font-black uppercase text-base cursor-pointer list-none flex items-center justify-between gap-4">
+          ¿Necesito Pro para usar HeapDeck?
+          <span class="border-2 border-ink bg-accent-yellow px-2 shadow-hard-sm group-open:rotate-45 transition-transform">+</span>
+        </summary>
+        <p class="text-xs text-ink-soft leading-relaxed pt-3">No. Captura, organización, búsqueda fuzzy, Workbench, runbooks y Circles son gratis para siempre. Pro solo suma acciones IA encima — tu vault nunca se bloquea.</p>
+      </details>
+      <details class="border-3 border-ink bg-bg-card shadow-hard p-5 group">
+        <summary class="font-display font-black uppercase text-base cursor-pointer list-none flex items-center justify-between gap-4">
+          ¿Qué cuenta como uso de IA?
+          <span class="border-2 border-ink bg-accent-yellow px-2 shadow-hard-sm group-open:rotate-45 transition-transform">+</span>
+        </summary>
+        <p class="text-xs text-ink-soft leading-relaxed pt-3">Cada acción puntual: un resumen, una sugerencia de tags, una búsqueda semántica, una consulta de descubrimiento, una conversión de contenido. Cortas, cacheadas y en lote — por eso ~$3 cubren un mes de uso diario.</p>
+      </details>
+      <details class="border-3 border-ink bg-bg-card shadow-hard p-5 group">
+        <summary class="font-display font-black uppercase text-base cursor-pointer list-none flex items-center justify-between gap-4">
+          ¿Puedo self-hostear con IA, mi propia key u Ollama?
+          <span class="border-2 border-ink bg-accent-yellow px-2 shadow-hard-sm group-open:rotate-45 transition-transform">+</span>
+        </summary>
+        <p class="text-xs text-ink-soft leading-relaxed pt-3">Sí. Los self-hosters pueden conectar su propia key o correr 100% local con Ollama. Pro hosteado solo te ahorra el setup — modelos eficientes en la nube, ya conectados.</p>
+      </details>
+      <details class="border-3 border-ink bg-bg-card shadow-hard p-5 group">
+        <summary class="font-display font-black uppercase text-base cursor-pointer list-none flex items-center justify-between gap-4">
+          ¿Qué pasa si llego al tope de uso justo o cancelo?
+          <span class="border-2 border-ink bg-accent-yellow px-2 shadow-hard-sm group-open:rotate-45 transition-transform">+</span>
+        </summary>
+        <p class="text-xs text-ink-soft leading-relaxed pt-3">Las acciones IA pausan hasta el próximo ciclo (o bajás a Gratis) — nada se borra, nada se bloquea. Los resúmenes y tags ya generados quedan tuyos.</p>
+      </details>
+    </div>
+  </section>
+
   <!-- Support Section -->
   <section class="bg-bg-elevated border-t-3 border-ink">
     <div class="max-w-4xl mx-auto px-6 py-16 text-center space-y-6">
@@ -262,7 +507,9 @@ import Layout from '../../layouts/Layout.astro';
         <span>© {new Date().getFullYear()}</span>
       </div>
       
-      <div class="flex gap-6">
+      <div class="flex flex-wrap justify-center gap-6">
+        <a href="#ai" class="hover:text-accent-pink transition-colors">IA</a>
+        <a href="#pricing" class="hover:text-accent-pink transition-colors">Precios</a>
         <a href="https://github.com/tiagofur/heapdeck" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">GitHub</a>
         <a href="https://github.com/tiagofur/heapdeck#readme" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">Docs</a>
         <a href="https://github.com/tiagofur/heapdeck/releases" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">Changelog</a>

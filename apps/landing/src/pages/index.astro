@@ -3,8 +3,8 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout 
-  title="HeapDeck.com — Your AI-assisted external memory for development work" 
-  description="Stop losing track of the tools you discover. HeapDeck captures repos, CLIs, snippets, and shortcuts—organizing them automatically with AI."
+  title="HeapDeck.com — Your external memory for dev work. Free forever, Pro with AI $5/mo" 
+  description="Stop losing track of the tools you discover. HeapDeck captures repos, CLIs, snippets, and shortcuts. Free forever with all core features — add punctual AI actions for $5/mo."
 >
   <!-- Navigation Header -->
   <header class="border-b-3 border-ink bg-bg-card sticky top-0 z-50">
@@ -13,13 +13,16 @@ import Layout from '../layouts/Layout.astro';
         <div class="bg-accent-yellow border-2 border-ink p-1.5 shadow-hard-sm">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-ink"><path d="M4 3h16a2 2 0 0 1 2 2v6a10 10 0 0 1-10 10A10 10 0 0 1 2 11V5a2 2 0 0 1 2-2z"/><polyline points="8 10 12 14 16 10"/></svg>
         </div>
-        <span class="font-display font-black text-2xl uppercase tracking-wider text-ink">
+        <a href="/" class="font-display font-black text-2xl uppercase tracking-wider text-ink">
           HeapDeck<span class="text-accent-pink">.com</span>
-        </span>
+        </a>
       </div>
       
       <nav class="hidden md:flex items-center gap-8 font-mono text-sm font-bold">
         <a href="https://heapdeck.com/register" class="hover:text-accent-pink transition-colors">Try the beta</a>
+        <a href="#features" class="hover:text-accent-pink transition-colors">Features</a>
+        <a href="#ai" class="hover:text-accent-pink transition-colors">AI</a>
+        <a href="#pricing" class="hover:text-accent-pink transition-colors">Pricing</a>
         <a href="https://github.com/tiagofur/heapdeck#readme" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">Docs</a>
         <a href="https://github.com/tiagofur/heapdeck/releases" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">Changelog</a>
         <a href="/es" class="border-2 border-ink px-2.5 py-0.5 bg-bg-primary hover:bg-accent-yellow shadow-hard-sm transition-all flex items-center gap-1">
@@ -29,12 +32,10 @@ import Layout from '../layouts/Layout.astro';
       
       <div class="flex items-center gap-2">
         <a 
-          href="https://github.com/tiagofur/heapdeck" 
-          target="_blank" 
-          rel="noopener"
+          href="#pricing" 
           class="border-3 border-ink bg-accent-lime px-4 py-2 font-display font-black uppercase text-sm shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg transition-all"
         >
-          Star on GitHub
+          Free / $5 Pro
         </a>
       </div>
     </div>
@@ -44,15 +45,15 @@ import Layout from '../layouts/Layout.astro';
   <section class="max-w-6xl mx-auto px-6 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
     <div class="lg:col-span-7 space-y-6">
       <div class="inline-block border-2 border-ink bg-accent-lavender text-xs font-mono font-black uppercase px-3 py-1.5 shadow-hard-sm">
-        🚀 Open Source & Self-Hostable
+        Free forever · Pro with AI $5/mo
       </div>
       
       <h1 class="font-display font-black text-4xl sm:text-6xl uppercase tracking-tight leading-none text-ink">
-        Your AI-assisted <span class="bg-accent-yellow border-b-5 border-ink px-1">external memory</span> for dev work.
+        Your <span class="bg-accent-yellow border-b-5 border-ink px-1">external memory</span> for dev work.
       </h1>
       
       <p class="font-mono text-base sm:text-lg text-ink-soft leading-relaxed max-w-xl">
-        Stop losing track of the tools you discover. HeapDeck captures repos, CLIs, snippets, and shortcuts—organizing them automatically with AI.
+        Stop losing track of the tools you discover. HeapDeck captures repos, CLIs, snippets, and shortcuts — free forever with all core features. Add punctual AI actions for $5/mo. No chatbot, just shortcuts that organize and find for you.
       </p>
       
       <div class="flex flex-col sm:flex-row gap-4 pt-4">
@@ -87,7 +88,7 @@ import Layout from '../layouts/Layout.astro';
         <span class="text-ink/30">•</span>
         <span class="flex items-center gap-1.5">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-danger"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-          100% Free
+          Free forever, no AI required
         </span>
       </div>
     </div>
@@ -132,54 +133,63 @@ import Layout from '../layouts/Layout.astro';
         <div class="text-xs uppercase font-bold text-ink-soft">Search Latency</div>
       </div>
       <div class="space-y-1">
-        <div class="font-display font-black text-4xl text-accent-lime uppercase">100%</div>
-        <div class="text-xs uppercase font-bold text-ink-soft">Open Source</div>
+        <div class="font-display font-black text-4xl text-accent-lime uppercase">$0 / $5</div>
+        <div class="text-xs uppercase font-bold text-ink-soft">Free forever · Pro with AI</div>
       </div>
     </div>
   </section>
 
   <!-- Features Section -->
-  <section class="max-w-6xl mx-auto px-6 py-20 space-y-12">
+  <section id="features" class="max-w-6xl mx-auto px-6 py-20 space-y-12 scroll-mt-20">
     <div class="text-center space-y-4 max-w-2xl mx-auto">
       <h2 class="font-display font-black text-4xl sm:text-5xl uppercase tracking-tight text-ink">
         Built for developers who save tools.
       </h2>
       <p class="font-mono text-sm text-ink-soft">
-        HeapDeck acts as your secondary memory, cataloging and explaining everything you bookmark.
+        HeapDeck acts as your secondary memory, cataloging everything you bookmark. Every feature below is free forever — AI is an optional $5 upgrade.
       </p>
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       <!-- Capture -->
       <div class="bg-bg-card border-3 border-ink p-6 shadow-hard space-y-4 hover:-translate-y-1 hover:shadow-hard-lg transition-all">
-        <div class="w-12 h-12 border-2 border-ink bg-accent-yellow flex items-center justify-center shadow-hard-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-ink"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        <div class="flex items-center justify-between">
+          <div class="w-12 h-12 border-2 border-ink bg-accent-yellow flex items-center justify-center shadow-hard-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-ink"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+          </div>
+          <span class="font-mono text-[10px] font-black uppercase bg-accent-lime border-2 border-ink px-2 py-0.5">Free</span>
         </div>
         <h3 class="font-display font-black text-xl uppercase tracking-wider text-ink">
           Capture from anywhere
         </h3>
         <p class="font-mono text-xs text-ink-soft leading-relaxed">
-          Whether you're in the browser, the terminal, or just copied a URL, HeapDeck is ready to save it. No friction, no manual tagging.
+          Whether you're in the browser, the terminal, or just copied a URL, HeapDeck is ready to save it. Extension, CLI, and quick capture — no manual tagging required.
         </p>
       </div>
 
       <!-- Search -->
       <div class="bg-bg-card border-3 border-ink p-6 shadow-hard space-y-4 hover:-translate-y-1 hover:shadow-hard-lg transition-all">
-        <div class="w-12 h-12 border-2 border-ink bg-accent-pink flex items-center justify-center shadow-hard-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-ink"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <div class="flex items-center justify-between">
+          <div class="w-12 h-12 border-2 border-ink bg-accent-pink flex items-center justify-center shadow-hard-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-ink"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+          <span class="font-mono text-[10px] font-black uppercase bg-accent-yellow border-2 border-ink px-2 py-0.5">Free + Pro</span>
         </div>
         <h3 class="font-display font-black text-xl uppercase tracking-wider text-ink">
           Find by intent
         </h3>
         <p class="font-mono text-xs text-ink-soft leading-relaxed">
-          Can't remember the name? Just search for what it does. <span class="bg-accent-yellow/20 px-1 border border-ink/10 italic">"That Go CLI for image optimization"</span>—the AI knows exactly what you mean.
+          Free: instant fuzzy search with Ctrl+K, filters, and tags. Pro adds semantic search that understands intent — <span class="bg-accent-yellow/20 px-1 border border-ink/10 italic">"That Go CLI for image optimization"</span> — plus need-based GitHub discovery.
         </p>
       </div>
 
       <!-- Privacy -->
       <div class="bg-bg-card border-3 border-ink p-6 shadow-hard space-y-4 hover:-translate-y-1 hover:shadow-hard-lg transition-all">
-        <div class="w-12 h-12 border-2 border-ink bg-accent-lime flex items-center justify-center shadow-hard-sm">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-ink"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <div class="flex items-center justify-between">
+          <div class="w-12 h-12 border-2 border-ink bg-accent-lime flex items-center justify-center shadow-hard-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-ink"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <span class="font-mono text-[10px] font-black uppercase bg-accent-lime border-2 border-ink px-2 py-0.5">Free</span>
         </div>
         <h3 class="font-display font-black text-xl uppercase tracking-wider text-ink">
           Self-hostable & open
@@ -188,6 +198,250 @@ import Layout from '../layouts/Layout.astro';
           Your data belongs to you. Use the hosted beta, or run HeapDeck on your own VPS with Docker Compose. Full vault export included.
         </p>
       </div>
+    </div>
+  </section>
+
+  <!-- AI Features Section (Pro) -->
+  <section id="ai" class="border-y-3 border-ink bg-bg-elevated scroll-mt-20">
+    <div class="max-w-6xl mx-auto px-6 py-20 space-y-12">
+      <div class="text-center space-y-4 max-w-2xl mx-auto">
+        <div class="inline-block border-2 border-ink bg-ink text-bg-primary text-xs font-mono font-black uppercase px-3 py-1.5 shadow-hard-sm">
+          HeapDeck Pro · $5/mo
+        </div>
+        <h2 class="font-display font-black text-4xl sm:text-5xl uppercase tracking-tight text-ink">
+          Pro AI: punctual actions, not another chatbot.
+        </h2>
+        <p class="font-mono text-sm text-ink-soft">
+          No chat window to babysit. Small actions inside your flow — powered by efficient models with generous fair-use included every month.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 font-mono text-xs">
+        <div class="border-3 border-ink p-5 bg-bg-card shadow-hard space-y-3 hover:-translate-y-1 hover:shadow-hard-lg transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-lg bg-accent-yellow border-2 border-ink p-1">🧠</span>
+            <span class="text-[10px] font-black uppercase bg-ink text-bg-primary px-2 py-0.5">Pro</span>
+          </div>
+          <h3 class="font-display font-black text-base uppercase">Auto-summary</h3>
+          <p class="text-ink-soft leading-relaxed">Save a repo or tool. HeapDeck writes what it is, when to use it, and which stack it touches — automatically, in the background.</p>
+          <p class="text-[11px] bg-bg-elevated border border-ink/20 p-2 italic">"fzf → fuzzy finder for terminal. Use for history, files, processes."</p>
+        </div>
+        <div class="border-3 border-ink p-5 bg-bg-card shadow-hard space-y-3 hover:-translate-y-1 hover:shadow-hard-lg transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-lg bg-accent-pink border-2 border-ink p-1">🏷️</span>
+            <span class="text-[10px] font-black uppercase bg-ink text-bg-primary px-2 py-0.5">Pro</span>
+          </div>
+          <h3 class="font-display font-black text-base uppercase">Auto-tagging</h3>
+          <p class="text-ink-soft leading-relaxed">Type, stack, purpose, and level suggested on capture. You confirm or edit. Less manual work, more useful context.</p>
+          <p class="text-[11px] bg-bg-elevated border border-ink/20 p-2 italic">Suggested: go · cli · images · backend</p>
+        </div>
+        <div class="border-3 border-ink p-5 bg-bg-card shadow-hard space-y-3 hover:-translate-y-1 hover:shadow-hard-lg transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-lg bg-accent-cyan border-2 border-ink p-1">🔍</span>
+            <span class="text-[10px] font-black uppercase bg-ink text-bg-primary px-2 py-0.5">Pro</span>
+          </div>
+          <h3 class="font-display font-black text-base uppercase">Semantic vault search</h3>
+          <p class="text-ink-soft leading-relaxed">Search your vault by intent, not exact titles. Hybrid fuzzy + vector search over titles, notes, READMEs, and your "why saved".</p>
+          <p class="text-[11px] bg-bg-elevated border border-ink/20 p-2 italic">"tools for agents in the terminal"</p>
+        </div>
+        <div class="border-3 border-ink p-5 bg-bg-card shadow-hard space-y-3 hover:-translate-y-1 hover:shadow-hard-lg transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-lg bg-accent-lime border-2 border-ink p-1">🌐</span>
+            <span class="text-[10px] font-black uppercase bg-ink text-bg-primary px-2 py-0.5">Pro</span>
+          </div>
+          <h3 class="font-display font-black text-base uppercase">Need-based discovery</h3>
+          <p class="text-ink-soft leading-relaxed">Describe the need, get ranked GitHub repos: stars, maintenance, README signals. Save to your vault in one click.</p>
+          <p class="text-[11px] bg-bg-elevated border border-ink/20 p-2 italic">"lightweight Go CLI to resize images"</p>
+        </div>
+        <div class="border-3 border-ink p-5 bg-bg-card shadow-hard space-y-3 hover:-translate-y-1 hover:shadow-hard-lg transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-lg bg-accent-orange border-2 border-ink p-1">✨</span>
+            <span class="text-[10px] font-black uppercase bg-ink text-bg-primary px-2 py-0.5">Pro</span>
+          </div>
+          <h3 class="font-display font-black text-base uppercase">Content → Knowledge</h3>
+          <p class="text-ink-soft leading-relaxed">Paste a URL, README, or text. Get summary, tags, detected commands, prerequisites. Save as cheatsheet, item, or runbook.</p>
+          <p class="text-[11px] bg-bg-elevated border border-ink/20 p-2 italic">Raw content → actionable knowledge.</p>
+        </div>
+        <div class="border-3 border-ink p-5 bg-bg-card shadow-hard space-y-3 hover:-translate-y-1 hover:shadow-hard-lg transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-lg bg-accent-lavender border-2 border-ink p-1">🔗</span>
+            <span class="text-[10px] font-black uppercase bg-ink text-bg-primary px-2 py-0.5">Pro</span>
+          </div>
+          <h3 class="font-display font-black text-base uppercase">Related + Forgotten gems</h3>
+          <p class="text-ink-soft leading-relaxed">On any item: similar repos, related cheatsheets, same-stack commands. Plus a digest of gems you haven't opened in 30+ days.</p>
+          <p class="text-[11px] bg-bg-elevated border border-ink/20 p-2 italic">Your vault interconnects itself.</p>
+        </div>
+      </div>
+
+      <!-- AI search in action -->
+      <div class="bg-ink border-3 border-ink shadow-hard-xl p-6 md:p-8 font-mono text-xs space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-dashed border-bg-primary/30 pb-3">
+          <span class="font-black uppercase text-sm text-bg-primary">AI search in action</span>
+          <span class="text-[10px] uppercase bg-accent-yellow text-ink font-black px-2 py-0.5 border border-bg-primary/30">Illustrative example</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-bg-primary border-2 border-bg-primary/20 p-4 space-y-3">
+            <div class="text-[10px] font-black uppercase text-ink-soft">Your vault · semantic</div>
+            <p class="text-ink italic">"that Go CLI for image optimization"</p>
+            <ul class="space-y-2 text-ink-soft text-[11px] leading-relaxed">
+              <li class="border-l-4 border-accent-lime pl-2"><span class="font-bold text-ink">h2non/bimg</span> — Go image resizing with libvips. Saved for API thumbnails.</li>
+              <li class="border-l-4 border-accent-yellow pl-2"><span class="font-bold text-ink">ImageMagick cheatsheet</span> — mogrify one-liners for batch resize.</li>
+              <li class="border-l-4 border-accent-pink pl-2"><span class="font-bold text-ink">squoosh-cli</span> — quick CLI compression before upload.</li>
+            </ul>
+          </div>
+          <div class="bg-bg-primary border-2 border-bg-primary/20 p-4 space-y-3">
+            <div class="text-[10px] font-black uppercase text-ink-soft">GitHub · need-based discovery</div>
+            <p class="text-ink italic">"lightweight Go CLI to resize images"</p>
+            <ul class="space-y-2 text-ink-soft text-[11px] leading-relaxed">
+              <li class="border-l-4 border-accent-cyan pl-2"><span class="font-bold text-ink">disintegration/imaging</span> ★ 4.2k · maintained · "simple Go imaging, resize/blur/rotate". <span class="bg-accent-lime/40 px-1 border border-ink/20 font-bold text-ink">[+ Save]</span></li>
+              <li class="border-l-4 border-accent-cyan pl-2"><span class="font-bold text-ink">h2non/bimg</span> ★ 3.1k · maintained · "small, fast, libvips bindings". <span class="bg-accent-lime/40 px-1 border border-ink/20 font-bold text-ink">[+ Save]</span></li>
+              <li class="border-l-4 border-accent-cyan pl-2"><span class="font-bold text-ink">anthonynsimon/bild</span> ★ 1.8k · stable · "pure-Go image processing". <span class="bg-accent-lime/40 px-1 border border-ink/20 font-bold text-ink">[+ Save]</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- No-chat callout -->
+      <div class="border-3 border-ink bg-accent-yellow p-6 shadow-hard flex flex-col md:flex-row gap-4 items-start md:items-center">
+        <span class="text-2xl bg-bg-card border-2 border-ink p-2 shadow-hard-sm shrink-0">🚫💬</span>
+        <div class="font-mono text-sm space-y-1">
+          <p class="font-black uppercase font-display text-lg">Why no chat? Because chat is everywhere.</p>
+          <p class="text-ink-soft text-xs leading-relaxed">HeapDeck Pro puts AI where recall happens: capture, search, reuse. One click, no prompting. We keep adding punctual actions that save real minutes — and we list every one of them here.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="max-w-6xl mx-auto px-6 py-20 space-y-12 scroll-mt-20">
+    <div class="text-center space-y-4 max-w-2xl mx-auto">
+      <h2 class="font-display font-black text-4xl sm:text-5xl uppercase tracking-tight text-ink">
+        Simple pricing. Free forever, Pro when you want AI.
+      </h2>
+      <p class="font-mono text-sm text-ink-soft">
+        All core features are free. AI costs real money, so Pro is a flat $5 — with generous fair-use included and no surprise bills.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+      <!-- Free -->
+      <div class="bg-bg-card border-3 border-ink shadow-hard p-8 space-y-6 flex flex-col">
+        <div class="space-y-2">
+          <div class="font-mono text-xs font-black uppercase bg-accent-lime border-2 border-ink px-2 py-0.5 inline-block">Free</div>
+          <div class="flex items-end gap-2">
+            <span class="font-display font-black text-5xl">$0</span>
+            <span class="font-mono text-xs text-ink-soft pb-2">forever</span>
+          </div>
+          <p class="font-mono text-xs text-ink-soft">Every core feature. No credit card. No AI cloud calls.</p>
+        </div>
+        <ul class="font-mono text-xs space-y-3 flex-1">
+          <li class="flex gap-2"><span class="font-black text-accent-lime">✓</span> Unlimited vault: repos, CLIs, snippets, prompts, shortcuts…</li>
+          <li class="flex gap-2"><span class="font-black text-accent-lime">✓</span> Capture: extension, CLI, quick paste</li>
+          <li class="flex gap-2"><span class="font-black text-accent-lime">✓</span> Instant fuzzy search + Ctrl+K + filters + tags</li>
+          <li class="flex gap-2"><span class="font-black text-accent-lime">✓</span> Workbench, runbooks & saved commands</li>
+          <li class="flex gap-2"><span class="font-black text-accent-lime">✓</span> Circles: shared vaults with your crew</li>
+          <li class="flex gap-2"><span class="font-black text-accent-lime">✓</span> Offline-first desktop + self-hosting</li>
+          <li class="flex gap-2 text-ink-soft"><span class="font-black text-ink/40">✕</span> AI summaries, tags & semantic search</li>
+          <li class="flex gap-2 text-ink-soft"><span class="font-black text-ink/40">✕</span> GitHub need-based discovery</li>
+        </ul>
+        <a 
+          href="https://github.com/tiagofur/heapdeck/releases" 
+          target="_blank"
+          rel="noopener"
+          class="border-3 border-ink bg-bg-primary text-center px-6 py-3 font-display font-black uppercase text-md shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg transition-all"
+        >
+          Download Free
+        </a>
+      </div>
+
+      <!-- Pro -->
+      <div class="bg-ink text-bg-primary border-3 border-ink shadow-hard-xl p-8 space-y-6 flex flex-col relative">
+        <div class="absolute -top-4 left-1/2 -translate-x-1/2 font-mono text-xs font-black uppercase bg-accent-pink text-ink border-2 border-ink px-3 py-1 shadow-hard-sm whitespace-nowrap">
+          For AI superpowers
+        </div>
+        <div class="space-y-2">
+          <div class="font-mono text-xs font-black uppercase bg-accent-yellow text-ink border-2 border-bg-primary/40 px-2 py-0.5 inline-block">Pro</div>
+          <div class="flex items-end gap-2">
+            <span class="font-display font-black text-5xl text-accent-yellow">$5</span>
+            <span class="font-mono text-xs text-bg-primary/70 pb-2">/ month, flat</span>
+          </div>
+          <p class="font-mono text-xs text-bg-primary/70">Everything in Free, plus every AI action. Punctual, in-flow — never a chatbot.</p>
+        </div>
+        <ul class="font-mono text-xs space-y-3 flex-1">
+          <li class="flex gap-2"><span class="font-black text-accent-yellow">✓</span> Everything in Free, unlimited</li>
+          <li class="flex gap-2"><span class="font-black text-accent-yellow">✓</span> Auto-summary + auto-tagging on capture</li>
+          <li class="flex gap-2"><span class="font-black text-accent-yellow">✓</span> Semantic vault search by intent</li>
+          <li class="flex gap-2"><span class="font-black text-accent-yellow">✓</span> Need-based GitHub discovery, 1-click save</li>
+          <li class="flex gap-2"><span class="font-black text-accent-yellow">✓</span> Content → Knowledge (URL/README → runbook)</li>
+          <li class="flex gap-2"><span class="font-black text-accent-yellow">✓</span> Related items + forgotten-gems digest</li>
+          <li class="flex gap-2"><span class="font-black text-accent-yellow">✓</span> ~$3 of model usage included / month (fair-use)</li>
+        </ul>
+        <a 
+          href="https://github.com/tiagofur/heapdeck/discussions" 
+          target="_blank"
+          rel="noopener"
+          class="border-3 border-bg-primary/60 bg-accent-pink text-ink text-center px-6 py-3 font-display font-black uppercase text-md shadow-hard hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg transition-all"
+        >
+          Join Pro waitlist
+        </a>
+        <p class="font-mono text-[11px] text-bg-primary/60 text-center">Pro billing is rolling out — waitlist gets early access.</p>
+      </div>
+    </div>
+
+    <!-- Fair-use box -->
+    <div class="border-3 border-ink bg-bg-card shadow-hard p-6 md:p-8 space-y-6">
+      <h3 class="font-display font-black text-xl uppercase text-center">How $5 covers AI, honestly.</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs text-center">
+        <div class="space-y-2 border-2 border-ink bg-bg-elevated p-4">
+          <div class="font-display font-black text-3xl text-accent-pink">~$3</div>
+          <p class="text-ink-soft leading-relaxed">of model cost included per user / month — enough for thousands of enrichments + hundreds of semantic searches.</p>
+        </div>
+        <div class="space-y-2 border-2 border-ink bg-bg-elevated p-4">
+          <div class="font-display font-black text-3xl text-accent-yellow">Flash</div>
+          <p class="text-ink-soft leading-relaxed">Efficient models only (Gemini Flash / DeepSeek class). Punctual actions, short prompts — no token bonfires.</p>
+        </div>
+        <div class="space-y-2 border-2 border-ink bg-bg-elevated p-4">
+          <div class="font-display font-black text-3xl text-accent-lime">$0</div>
+          <p class="text-ink-soft leading-relaxed">in overages, ever. If you hit the cap, AI pauses until next cycle — your vault keeps working fully.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="max-w-4xl mx-auto px-6 pb-20 space-y-8 scroll-mt-20">
+    <h2 class="font-display font-black text-3xl sm:text-4xl uppercase tracking-tight text-ink text-center">
+      Questions, answered.
+    </h2>
+    <div class="space-y-4 font-mono text-sm">
+      <details class="border-3 border-ink bg-bg-card shadow-hard p-5 group">
+        <summary class="font-display font-black uppercase text-base cursor-pointer list-none flex items-center justify-between gap-4">
+          Do I need Pro to use HeapDeck?
+          <span class="border-2 border-ink bg-accent-yellow px-2 shadow-hard-sm group-open:rotate-45 transition-transform">+</span>
+        </summary>
+        <p class="text-xs text-ink-soft leading-relaxed pt-3">No. Capture, organize, fuzzy search, Workbench, runbooks, and Circles are free forever. Pro only adds AI actions on top — your vault never gets locked.</p>
+      </details>
+      <details class="border-3 border-ink bg-bg-card shadow-hard p-5 group">
+        <summary class="font-display font-black uppercase text-base cursor-pointer list-none flex items-center justify-between gap-4">
+          What counts as AI usage?
+          <span class="border-2 border-ink bg-accent-yellow px-2 shadow-hard-sm group-open:rotate-45 transition-transform">+</span>
+        </summary>
+        <p class="text-xs text-ink-soft leading-relaxed pt-3">Each punctual action: a summary, a tag suggestion, a semantic search, a discovery query, a content conversion. Short, cached, and batched — that's how ~$3 covers a month of daily use.</p>
+      </details>
+      <details class="border-3 border-ink bg-bg-card shadow-hard p-5 group">
+        <summary class="font-display font-black uppercase text-base cursor-pointer list-none flex items-center justify-between gap-4">
+          Can I self-host with AI, my own key, or Ollama?
+          <span class="border-2 border-ink bg-accent-yellow px-2 shadow-hard-sm group-open:rotate-45 transition-transform">+</span>
+        </summary>
+        <p class="text-xs text-ink-soft leading-relaxed pt-3">Yes. Self-hosters can plug their own provider key or run 100% local with Ollama. Hosted Pro just spares you the setup — efficient cloud models, already wired.</p>
+      </details>
+      <details class="border-3 border-ink bg-bg-card shadow-hard p-5 group">
+        <summary class="font-display font-black uppercase text-base cursor-pointer list-none flex items-center justify-between gap-4">
+          What happens if I hit the fair-use cap or cancel?
+          <span class="border-2 border-ink bg-accent-yellow px-2 shadow-hard-sm group-open:rotate-45 transition-transform">+</span>
+        </summary>
+        <p class="text-xs text-ink-soft leading-relaxed pt-3">AI actions pause until the next cycle (or you downgrade to Free) — nothing is deleted, nothing is locked. Summaries and tags already generated stay yours.</p>
+      </details>
     </div>
   </section>
 
@@ -224,7 +478,9 @@ import Layout from '../layouts/Layout.astro';
         <span>© {new Date().getFullYear()}</span>
       </div>
       
-      <div class="flex gap-6">
+      <div class="flex flex-wrap justify-center gap-6">
+        <a href="#ai" class="hover:text-accent-pink transition-colors">AI</a>
+        <a href="#pricing" class="hover:text-accent-pink transition-colors">Pricing</a>
         <a href="https://github.com/tiagofur/heapdeck" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">GitHub</a>
         <a href="https://github.com/tiagofur/heapdeck#readme" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">Docs</a>
         <a href="https://github.com/tiagofur/heapdeck/releases" target="_blank" rel="noopener" class="hover:text-accent-pink transition-colors">Changelog</a>

@@ -14,12 +14,12 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-const userColumns = `id, github_id, login, username, bio, plan, avatar_url, display_name, role, region, onboarding_completed, created_at, stack_tags, website, location, github_url`
-const userColumnsWithHash = `id, github_id, login, username, bio, plan, avatar_url, display_name, role, password_hash, region, onboarding_completed, created_at, stack_tags, website, location, github_url`
+const userColumns = `id, github_id, login, username, bio, plan, avatar_url, display_name, role, region, onboarding_completed, created_at, stack_tags, website, location, github_url, stripe_customer_id`
+const userColumnsWithHash = `id, github_id, login, username, bio, plan, avatar_url, display_name, role, password_hash, region, onboarding_completed, created_at, stack_tags, website, location, github_url, stripe_customer_id`
 
 func scanUser(row pgx.Row) (*auth.User, error) {
 	var u auth.User
-	err := row.Scan(&u.ID, &u.GitHubID, &u.Login, &u.Username, &u.Bio, &u.Plan, &u.AvatarURL, &u.DisplayName, &u.Role, &u.Region, &u.OnboardingCompleted, &u.CreatedAt, &u.StackTags, &u.Website, &u.Location, &u.GitHubURL)
+	err := row.Scan(&u.ID, &u.GitHubID, &u.Login, &u.Username, &u.Bio, &u.Plan, &u.AvatarURL, &u.DisplayName, &u.Role, &u.Region, &u.OnboardingCompleted, &u.CreatedAt, &u.StackTags, &u.Website, &u.Location, &u.GitHubURL, &u.StripeCustomerID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrNotFound
@@ -32,7 +32,7 @@ func scanUser(row pgx.Row) (*auth.User, error) {
 func scanUserWithHash(row pgx.Row) (*auth.User, string, error) {
 	var u auth.User
 	var hash *string
-	err := row.Scan(&u.ID, &u.GitHubID, &u.Login, &u.Username, &u.Bio, &u.Plan, &u.AvatarURL, &u.DisplayName, &u.Role, &hash, &u.Region, &u.OnboardingCompleted, &u.CreatedAt, &u.StackTags, &u.Website, &u.Location, &u.GitHubURL)
+	err := row.Scan(&u.ID, &u.GitHubID, &u.Login, &u.Username, &u.Bio, &u.Plan, &u.AvatarURL, &u.DisplayName, &u.Role, &hash, &u.Region, &u.OnboardingCompleted, &u.CreatedAt, &u.StackTags, &u.Website, &u.Location, &u.GitHubURL, &u.StripeCustomerID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, "", ErrNotFound
@@ -50,6 +50,29 @@ func (s *Store) GetUserByGitHubID(ctx context.Context, githubID int64) (*auth.Us
 func (s *Store) GetUserByID(ctx context.Context, id uuid.UUID) (*auth.User, error) {
 	row := s.Reader().QueryRow(ctx, `SELECT `+userColumns+` FROM users WHERE id = $1`, id)
 	return scanUser(row)
+}
+
+// GetUserPlan returns the user's billing plan with a single-column lookup,
+// so Pro gating doesn't pay for a full user row. Unknown users and any
+// unrecognized stored value fall back to auth.PlanFree (fail closed).
+func (s *Store) GetUserPlan(ctx context.Context, id uuid.UUID) string {
+	var plan *string
+	err := s.Reader().QueryRow(ctx, `SELECT plan FROM users WHERE id = $1`, id).Scan(&plan)
+	if err != nil || plan == nil {
+		return auth.PlanFree
+	}
+	if *plan == auth.PlanPro {
+		return auth.PlanPro
+	}
+	return auth.PlanFree
+}
+
+// SetUserPlan switches a user's billing plan. Used by the billing webhook
+// and admin overrides; unknown plan strings are rejected by the caller,
+// this layer just persists.
+func (s *Store) SetUserPlan(ctx context.Context, id uuid.UUID, plan string) error {
+	_, err := s.Writer().Exec(ctx, `UPDATE users SET plan = $2, updated_at = NOW() WHERE id = $1`, id, plan)
+	return err
 }
 
 // UpsertUser creates or updates the user behind a GitHub identity. If a

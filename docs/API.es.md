@@ -53,7 +53,18 @@ Gestión del vault de conocimiento central.
 
 ### 3.5 Búsqueda Global
 - `GET /api/search?q=query&mode=hybrid`: Búsqueda unificada en items y cheatsheets.
-- Modos: `text` (fuzzy), `vector` (semántica), `hybrid` (fusión RRF).
+- Modos: `text` (fuzzy), `vector` (semántica, Pro), `hybrid` (fusión RRF; Gratis degrada a texto con `ai_downgraded:true`).
+
+### 3.6 Pro, Facturación y Uso de IA
+- `GET /api/me/ai-usage`: Gasto IA mensual vs tope con desglose por acción.
+- `POST /api/billing/checkout`: Crear sesión de checkout de suscripción Pro.
+- `POST /api/billing/portal`: Abrir el portal de cliente de Stripe.
+- `POST /api/billing/webhook`: Entrega de eventos Stripe (firmado, público).
+- `POST /api/admin/users/:id/plan`: Override de plan para soporte (admin).
+- `GET /api/discovery/github?q=necesidad&language=&limit=`: Repos GitHub rankeados (Pro).
+- `POST /api/ask`: Respuestas RAG sobre el vault (Pro).
+- `POST /api/agent/chat`: Stream de chat con agente (Pro).
+- Ver [PRO_BILLING.es.md](PRO_BILLING.es.md) para gating, medición y setup.
 
 ---
 

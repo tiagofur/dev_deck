@@ -3,6 +3,8 @@ package store_test
 import (
 	"testing"
 
+	"github.com/google/uuid"
+
 	"heapdeck/internal/authctx"
 	"heapdeck/internal/domain/auth"
 	"heapdeck/internal/domain/items"
@@ -259,5 +261,29 @@ func TestStore_Auth_UpsertGoogleUser(t *testing.T) {
 	}
 	if bySub.ID != u2.ID {
 		t.Fatalf("sub resolves to %s, want %s", bySub.ID, u2.ID)
+	}
+}
+
+func TestStore_UserPlan_GetAndSet(t *testing.T) {
+	st, ctx := newStore(t)
+
+	u, err := st.CreateUserLocal(ctx, "plan-user@example.test", "not-a-real-hash")
+	if err != nil {
+		t.Fatalf("create user: %v", err)
+	}
+
+	if got := st.GetUserPlan(ctx, u.ID); got != auth.PlanFree {
+		t.Fatalf("new user plan = %q, want %q", got, auth.PlanFree)
+	}
+
+	if err := st.SetUserPlan(ctx, u.ID, auth.PlanPro); err != nil {
+		t.Fatalf("SetUserPlan: %v", err)
+	}
+	if got := st.GetUserPlan(ctx, u.ID); got != auth.PlanPro {
+		t.Fatalf("plan after set = %q, want %q", got, auth.PlanPro)
+	}
+
+	if got := st.GetUserPlan(ctx, uuid.New()); got != auth.PlanFree {
+		t.Fatalf("unknown user plan = %q, want fail-closed %q", got, auth.PlanFree)
 	}
 }

@@ -119,6 +119,14 @@ export {
 } from './features/discovery/api'
 export type { TrendingItem, CuratorRanking } from './features/discovery/api'
 
+// Feature hooks — GitHub need-based discovery (Pro)
+export { useGitHubDiscovery } from './features/discovery/github'
+export type {
+  GitHubDiscoveryResult,
+  GitHubDiscoveryResponse,
+  GitHubDiscoveryParams,
+} from './features/discovery/github'
+
 // Feature hooks — repos
 export {
   useRepos,
@@ -296,4 +304,8 @@ export type { StarsImportInput, StarsImportResult } from './features/import/api'
 
 export { useSystemConfig, useFeatureFlags } from './features/system/api'
 export type { SystemConfig, SystemFeatures } from './features/system/api'
+
+// Feature hooks — billing (Pro plan + AI usage)
+export { useAIUsage, useCheckout, usePortal } from './features/billing/api'
+export type { AIUsage, AIActionUsage } from './features/billing/api'
 

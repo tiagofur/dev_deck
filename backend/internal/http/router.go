@@ -8,6 +8,7 @@ import (
 
 	"heapdeck/internal/ai"
 	"heapdeck/internal/authservice"
+	"heapdeck/internal/billing"
 	"heapdeck/internal/cache"
 	"heapdeck/internal/config"
 	"heapdeck/internal/email"
@@ -15,6 +16,7 @@ import (
 	"heapdeck/internal/http/handlers"
 	mw "heapdeck/internal/http/middleware"
 	"heapdeck/internal/jobs"
+	"heapdeck/internal/metering"
 	"heapdeck/internal/metrics"
 	"heapdeck/internal/store"
 
@@ -34,6 +36,7 @@ type Deps struct {
 	AI          *ai.Service
 	Embeddings  *ai.EmbeddingsService
 	Cache       *cache.Cache
+	Billing     billing.Client
 }
 
 func NewRouter(cfg config.Config, st *store.Store, en *enricher.Service, as *authservice.Service, aiSvc *ai.Service, embSvc *ai.EmbeddingsService, c *cache.Cache) http.Handler {
@@ -115,12 +118,19 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	statsH := handlers.NewStatsHandler(st)
 	discoveryH := handlers.NewDiscoveryHandler(st, deps.Cache)
 	commandsH := handlers.NewCommandsHandler(st)
-	cheatsH := handlers.NewCheatsheetsHandler(st, embSvc)
+	proGater := mw.NewProGater(cfg, st)
+	var meter *metering.Recorder
+	if cfg.BillingEnabled {
+		meter = metering.New(st, cfg.AIMonthlyBudgetCents, cfg.AIProvider)
+	}
+	ghDiscoveryH := handlers.NewGitHubDiscoveryHandler(st, en,
+		ai.NewDiscoveryBuilder(cfg.GeminiAPIKey, cfg.GeminiModel), meter, deps.Cache)
+	cheatsH := handlers.NewCheatsheetsHandler(st, embSvc, proGater, meter)
 	suggestionsH := handlers.NewSuggestionsHandler(st)
 	captureH := handlers.NewCaptureHandler(st, deps.EnrichQueue)
 	itemsH := handlers.NewItemsHandler(st, deps.EnrichQueue)
 	previewH := handlers.NewPreviewHandler(deps.Enricher)
-	askH := handlers.NewAskHandler(st, embSvc)
+	askH := handlers.NewAskHandler(st, embSvc, meter)
 	relatedH := handlers.NewItemRelatedHandler(st)
 	syncH := handlers.NewSyncHandler(st)
 	devicesH := handlers.NewDevicesHandler(st)
@@ -142,7 +152,11 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	webhooksH := handlers.NewWebhooksHandler(st)
 	pluginsH := handlers.NewPluginsHandler()
 	socialH := handlers.NewSocialHandler(st)
-	agentH := handlers.NewAgentHandler(st, deps.AI)
+	agentH := handlers.NewAgentHandler(st, deps.AI, meter)
+	usageH := handlers.NewUsageHandler(st, cfg.AIMonthlyBudgetCents)
+	billingH := handlers.NewBillingHandler(st, deps.Billing, cfg.BillingEnabled,
+		cfg.StripeProPriceID, cfg.StripeWebhookSecret,
+		cfg.BillingSuccessURL, cfg.BillingCancelURL, cfg.FrontendURL)
 	onboardingH := handlers.NewOnboardingHandler(st)
 	samlH := handlers.NewSAMLHandler(st, as, handlers.SAMLHandlerConfig{
 		EntityID:    "heapdeck-sp",
@@ -150,7 +164,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		FrontendURL: cfg.FrontendURL,
 	})
 	scimH := handlers.NewSCIMHandler(st)
-	systemH := handlers.NewSystemConfigHandler(cfg.AIProvider, false, handlers.SystemFeatures{
+	systemH := handlers.NewSystemConfigHandler(cfg.AIProvider, false, cfg.BillingEnabled, handlers.SystemFeatures{
 		Explore:    cfg.FeatureExplore,
 		Reputation: cfg.FeatureReputation,
 		TeamReview: cfg.FeatureTeamReview,
@@ -170,6 +184,14 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			1*time.Minute,
 			func(r *http.Request) (string, error) { return clientIP(r), nil },
 		)).Post("/waitlist", invitesH.JoinWaitlist)
+
+		// Stripe webhook: public (verified by signature), flood-guarded.
+		// Stripe retries from a small IP set; 60/min is generous.
+		r.With(httprate.LimitBy(
+			60,
+			1*time.Minute,
+			func(r *http.Request) (string, error) { return clientIP(r), nil },
+		)).Post("/billing/webhook", billingH.Webhook)
 
 		// Cheatsheet management (Consolidated to avoid Chi router panics)
 		r.Route("/cheatsheets", func(cr chi.Router) {
@@ -294,6 +316,11 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				dr.Get("/next", discoveryH.Next)
 				dr.Get("/trending", discoveryH.Trending)
 				dr.Get("/leaderboard", discoveryH.Leaderboard)
+				dr.Group(func(gr chi.Router) {
+					gr.Use(proGater.RequirePro)
+					gr.Use(mw.IARateLimit(100, 10))
+					gr.Get("/github", ghDiscoveryH.Search)
+				})
 			})
 
 			r.Route("/feed", func(fr chi.Router) {
@@ -354,6 +381,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			})
 
 			r.Group(func(ir chi.Router) {
+				ir.Use(proGater.RequirePro)
 				ir.Use(mw.IARateLimit(100, 10))
 				ir.Post("/ask", askH.Ask)
 			})
@@ -379,6 +407,9 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Get("/me/devices", devicesH.List)
 			r.Post("/me/devices/register", devicesH.Register)
 			r.Delete("/me/devices/{clientId}", devicesH.Delete)
+			r.Get("/me/ai-usage", usageH.Get)
+			r.Post("/billing/checkout", billingH.Checkout)
+			r.Post("/billing/portal", billingH.Portal)
 
 			r.Route("/me/notifications", func(nr chi.Router) {
 				nr.Get("/", notificationsH.List)
@@ -399,7 +430,11 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				er.Delete("/{id}", enrichersH.Delete)
 			})
 
-			r.Post("/agent/chat", agentH.Chat)
+			r.Group(func(ar chi.Router) {
+				ar.Use(proGater.RequirePro)
+				ar.Use(mw.IARateLimit(100, 10))
+				ar.Post("/agent/chat", agentH.Chat)
+			})
 
 			r.Route("/me/webhooks", func(wr chi.Router) {
 				wr.Get("/", webhooksH.List)
@@ -436,6 +471,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Route("/admin", func(ar chi.Router) {
 				ar.Use(mw.RequireAdmin)
 				ar.Get("/users", adminH.ListUsers)
+				ar.Post("/users/{id}/plan", billingH.SetPlan)
 				ar.Get("/waitlist", invitesH.ListWaitlist)
 				ar.Get("/invites", invitesH.ListInvites)
 				ar.Post("/invites", invitesH.CreateInvite)

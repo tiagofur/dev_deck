@@ -11,6 +11,8 @@ export interface SystemFeatures {
 export interface SystemConfig {
   ai_provider: string
   sync_enabled: boolean
+  /** True when the hosted API gates cloud AI behind the Pro plan. */
+  billing_enabled?: boolean
   features?: Partial<SystemFeatures>
 }
 
