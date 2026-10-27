@@ -10,6 +10,7 @@ env:
   # Image names must be lowercase
   IMAGE_NAME_API: heapdeck-api
   IMAGE_NAME_WEB: heapdeck-web
+  IMAGE_NAME_LANDING: heapdeck-landing
 
 jobs:
   build-and-push:
@@ -47,6 +48,16 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_WEB }}:latest
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_WEB }}:${{ github.sha }}
+
+      - name: Build and push Landing image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./apps/landing/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_LANDING }}:latest
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_LANDING }}:${{ github.sha }}
 
   deploy:
     needs: build-and-push
