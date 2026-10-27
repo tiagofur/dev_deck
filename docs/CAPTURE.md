@@ -18,6 +18,7 @@ HeapDeck is only useful if it's easy to get information *into* it. This document
 The terminal-first capture channel.
 
 - **Status:** Available (`go install`).
+- **Backend:** point it at the hosted beta (`heapdeck config set api-url https://api.heapdeck.com`) or a self-hosted instance (`http://localhost:8080`).
 - **Core Commands:**
     - `heapdeck add <url>`: Save a URL.
     - `heapdeck search <query>`: Fast terminal search.

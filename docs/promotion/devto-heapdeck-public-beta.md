@@ -21,7 +21,7 @@ Bookmarks become a graveyard. GitHub stars are too broad. Notes become scattered
 That is the problem I am trying to solve with **HeapDeck**.
 
 Repo: https://github.com/tiagofur/heapdeck  
-Site: https://heapdeck.com
+Try the live beta: https://heapdeck.com (free email signup, no install)
 
 ## What is HeapDeck?
 
@@ -85,7 +85,7 @@ That is the direction I want HeapDeck to grow toward: not only personal memory, 
 
 ## Current status
 
-HeapDeck is currently at **0.5.0 Public Beta**.
+HeapDeck is currently at **0.6.0 Public Beta**, live at https://heapdeck.com.
 
 I am intentionally not calling it stable or 1.0 yet.
 
@@ -134,6 +134,7 @@ Contributors are also welcome, especially for small focused improvements.
 
 The project has a first contribution guide and GitHub Discussions open:
 
+- Try it: https://heapdeck.com
 - Repo: https://github.com/tiagofur/heapdeck
 - Discussions: https://github.com/tiagofur/heapdeck/discussions
 - Call for contributors: https://github.com/tiagofur/heapdeck/discussions/100
@@ -170,5 +171,5 @@ And if you work with a team, Discord, Slack, study group, or open-source communi
 ---
 
 GitHub: https://github.com/tiagofur/heapdeck  
-Site: https://heapdeck.com  
+Try it: https://heapdeck.com  
 Discussions: https://github.com/tiagofur/heapdeck/discussions

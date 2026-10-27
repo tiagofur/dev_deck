@@ -1,20 +1,51 @@
 # HeapDeck.com
 
+[![CI](https://github.com/tiagofur/heapdeck/actions/workflows/ci.yml/badge.svg)](https://github.com/tiagofur/heapdeck/actions/workflows/ci.yml)
+[![Beta viva](https://img.shields.io/badge/🌐_beta_viva-heapdeck.com-00c853?style=for-the-badge)](https://heapdeck.com)
+[![Versión](https://img.shields.io/badge/versión-0.6.0-blue?style=for-the-badge)](CHANGELOG.md)
+[![Licencia](https://img.shields.io/badge/licencia-Apache--2.0-green?style=for-the-badge)](LICENSE)
+
 > **Tu memoria externa asistida por IA para el trabajo de desarrollo.**
+
+> 🚀 **Beta pública viva — [probá HeapDeck ahora mismo, sin instalar nada](https://heapdeck.com/register).** Creá una cuenta gratis con tu email y guardá tu primer repo, CLI o snippet en menos de un minuto.
 
 Una app **offline-first, multi-usuario y multiplataforma** donde guardar, organizar y redescubrir todo lo útil que un dev encuentra: repos, CLIs, plugins, cheatsheets, shortcuts, snippets, agentes, prompts y workflows. Con IA que clasifica, resume y recupera por intención — no por tag exacto.
 
-Dominio: **[heapdeck.com](https://heapdeck.com)**
+Dominio: **[heapdeck.com](https://heapdeck.com)** — la app web corre ahí directamente ([registro](https://heapdeck.com/register) · [login](https://heapdeck.com/login)); API en `https://api.heapdeck.com`.
+
+Versión actual: **0.6.0 Beta Pública** — funcional, útil y en polish activo antes de un 1.0 estable.
 
 [English](README.md) · [Roadmap](ROADMAP.md) · [Contribuir](CONTRIBUTING.es.md) · [Discusiones](https://github.com/tiagofur/heapdeck/discussions) · [Guía de discusiones](docs/DISCUSSIONS.md) · [Soporte](docs/SUPPORT.md) · [Modelo de comunidad](docs/CIRCLES_COMMUNITY.md)
 
 ---
 
-## ¿Por qué HeapDeck?
+## ¿Por qué HeapDeck? (el loop diario)
 
-El problema real no es "guardar repos". Es no poder volver a encontrar lo que ya descubriste: una CLI útil que te pasaron en un chat, un plugin de IDE que no recordás cómo se llamaba, un atajo de macOS que tardaste horas en aprender, un repo que resolvía exactamente tu problema actual.
+1. **Capturá** un repo, CLI, snippet, atajo, prompt, artículo, runbook o nota.
+2. **Agregá contexto**: por qué importa, cuándo usarlo, tags, fuente y gotchas.
+3. **Recuperá por intención** con búsqueda fuzzy y semántica, no solo nombres exactos.
+4. **Usalo en el Workbench** para workflows reusables, snippets, requests y contexto de proyecto.
+5. **Compartí a Circles** para que un grupo construya memoria colectiva en vez de perder señal en el chat.
 
-HeapDeck es tu **colección curada de conocimiento dev** — con IA que hace que todo lo que guardás sea encontrable semanas después, aunque no recuerdes cómo lo llamaste.
+## Screenshots y demo
+
+![Demo de la beta pública de HeapDeck](docs/assets/launch/heapdeck-demo-loop.gif)
+
+Capturas generadas con datos demo locales, no con registros privados de usuarios.
+
+| Vault | Workbench |
+|-------|-----------|
+| ![Captura del Vault de HeapDeck](docs/assets/launch/heapdeck-vault.png) | ![Captura del Workbench de HeapDeck](docs/assets/launch/heapdeck-workbench.png) |
+| *Guardá repos, CLIs, snippets, prompts y atajos con contexto.* | *Utilities locales reusables, snippets, requests y runbooks.* |
+
+| Circles | Vault compartido de un Circle |
+|---------|-------------------------------|
+| ![Captura de Circles de HeapDeck](docs/assets/launch/heapdeck-circles.png) | ![Captura del vault compartido](docs/assets/launch/heapdeck-circle-detail.png) |
+| *Espacios privados compartidos para grupos de confianza.* | *Hallazgos con contexto, atribución y metadata de fuente.* |
+
+El path demo central es: capturar artefactos útiles, agregar contexto, usarlos en el Workbench y compartir los hallazgos con un Circle de confianza.
+
+Ver [docs/assets/launch/README.md](docs/assets/launch/README.md) para regenerar estos assets.
 
 ---
 
@@ -27,22 +58,25 @@ HeapDeck es tu **colección curada de conocimiento dev** — con IA que hace que
 - **IA:** OpenAI API / Ollama (local)
 - **Offline:** SQLite local (Electron) + sql.js/OPFS (Web)
 - **Deploy:** VPS propio · Docker Compose · Caddy (TLS automático)
-- **Dominio:** [heapdeck.com](https://heapdeck.com) · `app.heapdeck.com` · `api.heapdeck.com`
+- **Dominio:** [heapdeck.com](https://heapdeck.com) (app web) · `api.heapdeck.com` (API Go)
 
 ### Layout del repo (monorepo pnpm workspaces)
 
 ```
 heapdeck/
 ├── apps/
-│   ├── desktop/          # Electron app (React renderer)
-│   └── web/              # Web app (React + BrowserRouter)
+│   ├── desktop/          # App Electron (renderer React)
+│   ├── extension/        # Extensión de browser (Manifest V3)
+│   ├── landing/          # Landing de marketing (Astro, sin deploy aún)
+│   └── web/              # App web (React + BrowserRouter)
 ├── packages/
 │   ├── ui/               # Design system: Button, TagChip, Toaster, tailwind-preset
-│   ├── api-client/       # Fetch wrapper + TanStack Query hooks + auth adapters
-│   └── features/         # Pages + componentes de dominio (compartidos entre apps)
-├── backend/              # Go API
+│   ├── api-client/       # Fetch wrapper + hooks TanStack Query + auth adapters
+│   ├── features/         # Pages + componentes de dominio (compartidos entre apps)
+│   ├── i18n/             # Recursos de idioma
+│   └── realtime-client/  # Cliente de colaboración realtime
+├── backend/              # API Go (Chi + pgx + Postgres 16)
 ├── cli/                  # CLI `heapdeck` (Go)
-├── extension/            # Browser extension (Manifest v3)
 ├── deploy/               # Docker Compose + Caddy
 └── docs/                 # Documentación
 ```
@@ -52,9 +86,8 @@ Ambas apps importan pages y componentes del package `@heapdeck/features` — sol
 ---
 
 ## Screenshots
----
 
-> 📸 **Explora capturas de pantalla y demos interactivas en [HeapDeck.com](https://heapdeck.com)**
+*Ver [Screenshots y demo](#screenshots-y-demo) arriba.*
 
 ---
 
@@ -97,6 +130,8 @@ Ambas apps importan pages y componentes del package `@heapdeck/features` — sol
 
 ## Estado
 
-HeapDeck es un producto open-source en evolución. La dirección actual es fortalecer el vault, los flujos de captura, la recuperación semántica y el nuevo **Developer Workbench**: utilities locales, paleta, requests reutilizables, snippets y runbooks conectados al contexto guardado.
+Versión actual: **0.6.0 Beta Pública** — [beta viva en heapdeck.com](https://heapdeck.com/register), funcional y en polish activo rumbo a 1.0.
+
+HeapDeck es un producto open-source en evolución. La dirección actual es fortalecer el vault, los flujos de captura, la recuperación semántica y el **Developer Workbench**: utilities locales, paleta, requests reutilizables, snippets y runbooks conectados al contexto guardado.
 
 Ver [ROADMAP.md](ROADMAP.md) y [docs/DEV_WORKBENCH.md](docs/DEV_WORKBENCH.md) para la dirección de producto.

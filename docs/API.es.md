@@ -1,4 +1,4 @@
-# Especificación de la API de HeapDeck.com (v0.5 beta)
+# Especificación de la API de HeapDeck.com (v0.6 beta)
 
 Este documento describe la API REST de **HeapDeck.com**.
 
@@ -86,4 +86,4 @@ Los errores siguen una estructura predecible:
 
 ---
 
-*Última actualización: Mayo 2026 (v1.0.0 Estable)*
+*Última actualización: Octubre 2026 (v0.6.0 Beta Pública, viva en heapdeck.com)*

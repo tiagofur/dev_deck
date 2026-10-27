@@ -1,6 +1,8 @@
 # HeapDeck — Copy y estructura de contenido para heapdeck.com (versión en inglés)
 
-> Versión: 0.5.0 (Beta Pública) · Última actualización: Mayo 2026
+> Versión: 0.6.0 (Beta Pública) · Última actualización: Octubre 2026
+>
+> **Nota (Oct 2026):** copy legacy de Mayo 2026. El plan de dominios cambió: la web app corre en el apex `heapdeck.com` (viva), la API en `api.heapdeck.com`. `app.heapdeck.com`, `docs.heapdeck.com` y `download.heapdeck.com` nunca se crearon — donde este doc los menciona como futuro, siguen a futuro; desktop hoy se distribuye vía GitHub Releases.
 
 Este documento define el contenido, copy y estructura de secciones para la landing page de **heapdeck.com**.
 Refleja el estado final del producto tras completar las 17 olas del roadmap.
@@ -26,7 +28,7 @@ heapdeck.com/
 ├── /@:username        (perfil público de usuario)
 ├── /download          (descargas de la app desktop)
 ├── /changelog         (historial de cambios)
-└── /docs              (documentación → redirige a docs.heapdeck.com)
+└── /docs              (documentación → en el repo por ahora; docs.heapdeck.com a futuro)
 ```
 
 ---
@@ -53,7 +55,7 @@ Search by intent, not by exact tag.
 
 ### CTAs
 - **Primario:** `Download for Mac` (con dropdown: also available for Windows · Linux)
-- **Secundario:** `Open web app →` (enlace a `app.heapdeck.com`)
+- **Secundario:** `Open web app →` (enlace a `heapdeck.com/register`)
 - **Terciario (link):** `See a demo deck →`
 
 ### Visual del hero
@@ -266,7 +268,7 @@ Platforms:
   🖥  Mac         — native Electron app (Apple Silicon + Intel)
   🪟  Windows     — native Electron app (.exe installer)
   🐧  Linux       — AppImage
-  🌐  Web         — browser app at app.heapdeck.com
+  🌐  Web         — browser app at heapdeck.com
   📱  Mobile      — coming later
 
 All connected to the same vault.
@@ -304,7 +306,7 @@ Your vault is yours, offline-first, always exportable.
 
 ### CTAs
 - **Primario:** `Download HeapDeck — it's free`
-- **Secundario:** `Open web app` (enlace a `app.heapdeck.com`)
+- **Secundario:** `Open web app` (enlace a `heapdeck.com/register`)
 
 ### Nota de descarga
 ```
@@ -538,7 +540,7 @@ Al ver un repo o tool, HeapDeck sugiere cheatsheets, comandos y herramientas rel
 
 🖥️ **Desktop** — App Electron para Windows, macOS y Linux. Atajos globales, integración con el SO.
 
-🌐 **Web** — `app.heapdeck.com` desde cualquier browser. Sin instalar nada.
+🌐 **Web** — `heapdeck.com` desde cualquier browser. Sin instalar nada.
 
 📡 **Sync automático** — Tus items sincronizados entre desktop y web. Conflictos resueltos sin drama.
 
@@ -616,9 +618,9 @@ Al ver un repo o tool, HeapDeck sugiere cheatsheets, comandos y herramientas rel
 
 **HeapDeck.com** — Tu knowledge OS para developers.
 
-- `app.heapdeck.com` — Web app
-- `docs.heapdeck.com` — Documentación
-- `download.heapdeck.com` — Desktop (Win/Mac/Linux)
+- `heapdeck.com` — Web app (viva)
+- `docs.heapdeck.com` — Documentación (a futuro; hoy en el repo)
+- GitHub Releases — Desktop (Win/Mac/Linux)
 
 Hecho con ☕ y demasiados repositorios olvidados.
 

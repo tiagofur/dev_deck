@@ -14,7 +14,7 @@ HeapDeck usa [Semantic Versioning](https://semver.org/) (SemVer) con el formato 
 | **MINOR** | Nuevas funcionalidades compatibles o hitos de beta pública | `0.5.0` → `0.6.0` |
 | **PATCH** | Bug fixes compatibles | `0.5.0` → `0.5.1` |
 
-**Estado actual:** `0.5.0` — beta pública / hito de launch-readiness.
+**Estado actual:** `0.6.0` — beta pública, viva en [heapdeck.com](https://heapdeck.com).
 
 > HeapDeck todavía no es un producto estable `1.0.0`. La posición pública honesta es: beta open-source funcional, con dirección clara de memoria para developers, polish activo y lanzamiento comunitario en progreso.
 
@@ -131,9 +131,9 @@ pnpm release          # Release local: bump + tag + changelog
 Los tags siguen el formato `v<versión>`:
 
 ```bash
-v0.5.0    # Beta pública / hito de launch-readiness
-v0.5.1    # Patch para fixes beta
-v0.6.0    # Próximo hito beta
+v0.5.0    # Hito beta pasado
+v0.6.0    # Beta pública actual (viva en heapdeck.com)
+v0.6.1    # Patch para fixes beta
 v1.0.0    # Primer release estable, solo al cumplir criterios de launch-readiness
 ```
 

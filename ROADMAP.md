@@ -1,6 +1,6 @@
 # HeapDeck.com Roadmap
 
-This roadmap reflects the current public position of HeapDeck: **0.5.0 Public Beta**.
+This roadmap reflects the current public position of HeapDeck: **0.6.0 Public Beta**, live at [heapdeck.com](https://heapdeck.com).
 
 [Leer en español](ROADMAP.es.md)
 
@@ -71,8 +71,9 @@ Offline-first sync is intentionally deferred until after `1.0.0` (see [docs/arch
 
 ---
 
-## 0.6.x — Stronger beta
+## 0.6.x — Live beta hardening
 
+- [x] Ship the hosted public beta at [heapdeck.com](https://heapdeck.com) (web app + Go API, Docker Compose on VPS).
 - [ ] Ship demo data and guided first-run path.
 - [ ] Improve responsive UI polish for public screenshots.
 - [ ] Harden extension and CLI capture flows.
@@ -108,4 +109,4 @@ Until then, HeapDeck stays honest: useful public beta, improving in the open.
 
 ---
 
-*Last updated: June 2026 — 0.5.0 Public Beta*
+*Last updated: October 2026 — 0.6.0 Public Beta (live at heapdeck.com)*

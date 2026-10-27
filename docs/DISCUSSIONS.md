@@ -10,7 +10,7 @@ Use Discussions for:
 - Rough product ideas that still need shape.
 - Community workflows, Circle use cases, and collaboration patterns.
 - Show-and-tell posts with screenshots, demos, or personal HeapDeck setups.
-- Feedback from people trying HeapDeck before a public launch.
+- Feedback from people trying the live beta at heapdeck.com.
 
 Use Issues for:
 

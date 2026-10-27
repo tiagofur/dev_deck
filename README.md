@@ -1,8 +1,14 @@
 # HeapDeck.com
 
+[![CI](https://github.com/tiagofur/heapdeck/actions/workflows/ci.yml/badge.svg)](https://github.com/tiagofur/heapdeck/actions/workflows/ci.yml)
+[![Live beta](https://img.shields.io/badge/🌐_live_beta-heapdeck.com-00c853?style=for-the-badge)](https://heapdeck.com)
+[![Version](https://img.shields.io/badge/version-0.6.0-blue?style=for-the-badge)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green?style=for-the-badge)](LICENSE)
 [![Buy Me a Coffee](https://img.shields.io/badge/Support-Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/tiagofur)
 
 > **The developer memory layer for everything useful you discover, build, and share.**
+
+> 🚀 **Live public beta — [try HeapDeck right now, no install needed](https://heapdeck.com/register).** Create a free account with your email and save your first repo, CLI, or snippet in under a minute.
 
 [Leer en español](README.es.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md) · [First contribution](docs/FIRST_CONTRIBUTION.md) · [Discussions](https://github.com/tiagofur/heapdeck/discussions) · [Discussions guide](docs/DISCUSSIONS.md) · [Support](docs/SUPPORT.md) · [Community model](docs/CIRCLES_COMMUNITY.md)
 
@@ -10,7 +16,7 @@ HeapDeck is an open-source desktop/web app for developers who keep losing useful
 
 It turns scattered discoveries into a searchable engineering memory: capture useful artifacts, enrich them with context, retrieve them by intent, use them inside a developer workbench, and share high-signal findings with trusted Circles.
 
-Domain: **[heapdeck.com](https://heapdeck.com)**
+Domain: **[heapdeck.com](https://heapdeck.com)** — the web app runs there directly ([sign up](https://heapdeck.com/register) · [log in](https://heapdeck.com/login)); API at `https://api.heapdeck.com`.
 
 Current version: **0.6.0 Public Beta** — functional, useful, and actively being polished before a stable 1.0 release.
 
@@ -60,9 +66,15 @@ HeapDeck is still evolving. If something is rough, that is exactly where contrib
 
 Launch-safe demo screenshots are generated from local demo data, not private user records.
 
-| Vault | Workbench | Circles | Shared Circle vault |
-|-------|-----------|---------|---------------------|
-| ![HeapDeck Vault screenshot](docs/assets/launch/heapdeck-vault.png) | ![HeapDeck Workbench screenshot](docs/assets/launch/heapdeck-workbench.png) | ![HeapDeck Circles screenshot](docs/assets/launch/heapdeck-circles.png) | ![HeapDeck shared Circle vault screenshot](docs/assets/launch/heapdeck-circle-detail.png) |
+| Vault | Workbench |
+|-------|-----------|
+| ![HeapDeck Vault screenshot](docs/assets/launch/heapdeck-vault.png) | ![HeapDeck Workbench screenshot](docs/assets/launch/heapdeck-workbench.png) |
+| *Save repos, CLIs, snippets, prompts and shortcuts with context.* | *Reusable local utilities, snippets, requests and runbooks.* |
+
+| Circles | Shared Circle vault |
+|---------|---------------------|
+| ![HeapDeck Circles screenshot](docs/assets/launch/heapdeck-circles.png) | ![HeapDeck shared Circle vault screenshot](docs/assets/launch/heapdeck-circle-detail.png) |
+| *Private shared spaces for trusted groups.* | *Findings with context, attribution and source metadata.* |
 
 The core demo path is: capture useful developer artifacts, add context, use them in Workbench, then share high-signal findings with a trusted Circle.
 
@@ -104,6 +116,8 @@ heapdeck/
 ---
 
 ## Quick start for contributors
+
+> Just want to use it? [Create a free beta account](https://heapdeck.com/register) — no install, no self-hosting, no invite code needed.
 
 ```bash
 pnpm install

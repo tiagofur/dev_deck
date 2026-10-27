@@ -1,4 +1,4 @@
-# HeapDeck — Browser Extension (v0.5.0 Public Beta)
+# HeapDeck — Browser Extension (v0.6.0 Public Beta)
 
 > The browser companion for your Knowledge OS. Capture repositories, documentation, and technical notes with a single click or keyboard shortcut.
 
@@ -31,4 +31,4 @@ Located in `apps/extension/` within the HeapDeck monorepo.
 Default: `Cmd/Ctrl+Shift+D`. You can customize this in `chrome://extensions/shortcuts`.
 
 ---
-*Part of the HeapDeck v0.5.0 Public Beta release.*
+*Part of the HeapDeck v0.6.0 Public Beta release — works against the live beta at heapdeck.com.*

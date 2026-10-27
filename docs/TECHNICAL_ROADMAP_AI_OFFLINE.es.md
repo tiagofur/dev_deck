@@ -1,6 +1,6 @@
-# HeapDeck — Roadmap Técnico: Offline-first + Sync + Multi-usuario + IA (v0.5 beta)
+# HeapDeck — Roadmap Técnico: Offline-first + Sync + Multi-usuario + IA (v0.6 beta)
 
-> Versión: 0.5.0 (Beta Pública) · Última actualización: Mayo 2026
+> Versión: 0.6.0 (Beta Pública) · Última actualización: Octubre 2026
 
 Este documento detalla la arquitectura implementada para las Olas 5 y 6.
 Todas las fases técnicas descritas aquí se encuentran **COMPLETADAS** y en producción.

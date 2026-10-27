@@ -1,6 +1,6 @@
 # HeapDeck — Known Limitations
 
-> Honest limitations of the **0.5.0 Public Beta** · Last updated: June 2026
+> Honest limitations of the **0.6.0 Public Beta** (live at [heapdeck.com](https://heapdeck.com)) · Last updated: October 2026
 >
 > Trust before hype: this page exists so nobody discovers a limitation the hard way. If you hit something not listed here, please [open an issue](https://github.com/tiagofur/heapdeck/issues).
 
@@ -24,7 +24,8 @@
 ## Social and team features
 
 - **Circles are built for groups.** Solo users can create one, but the value appears when a team or community shares findings. Activity feed, reactions, and Circle digests are planned for `0.7.x`.
-- **Explore/Trending depends on a community** and may look sparse while the user base grows.
+- **Explore/Trending depends on a community** and may look sparse while the user base grows. The `/explore` surface is also behind a disabled-by-default feature flag, so it is not part of the current live beta.
+- **GitHub login on the hosted beta is being re-pointed** at the production OAuth callback; until that console change lands, hosted sign-in works with email + password.
 - **Organizations, SAML SSO, and SCIM exist in the backend** but their UI is hidden unless you belong to an org. They are early enterprise capabilities, not polished products.
 
 ## Platform

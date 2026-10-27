@@ -5,6 +5,8 @@
 > Este documento contiene el copy completo **en español** para la landing page de [heapdeck.com](https://heapdeck.com).
 > Incluye: hero, secciones de features, social proof, pricing y CTA.
 >
+> **Nota (Oct 2026):** este doc es copy legacy de Abril 2026. El plan de dominios cambió: la web app corre en el apex `heapdeck.com` (viva en producción), la API en `api.heapdeck.com`. `app.heapdeck.com` y `docs.heapdeck.com` nunca se crearon — donde este doc los menciona, leé `heapdeck.com`.
+>
 > **Idioma:** español rioplatense (para audiencia hispanohablante / versión ES del sitio).
 > Para la versión en inglés (audiencia global), ver [LANDING_COPY.md](LANDING_COPY.md).
 
@@ -44,7 +46,7 @@ con contexto real de para qué sirve cada cosa y búsqueda por intención.
 ### CTAs
 ```
 [Descargar para Mac / Windows / Linux]     → /download
-[Probar en el browser]                     → app.heapdeck.com
+[Probar en el browser]                     → heapdeck.com/register
 ```
 
 ### Social proof debajo del CTA
@@ -293,7 +295,7 @@ Donde vos trabajás.
 ```
 🖥️  Desktop                     🌐  Web
 Electron para macOS,            React 18 en cualquier browser.
-Windows y Linux.                app.heapdeck.com
+Windows y Linux.                heapdeck.com
 Atajos globales de sistema.     GitHub OAuth. Mismos datos.
 Offline-first.                  Mismo UI que desktop — un solo codebase.
 ```
@@ -340,7 +342,7 @@ O usás la versión hosteada en heapdeck.com — tu elección.
 ### Links
 ```
 [Ver en GitHub]    → github.com/tiagofur/heapdeck
-[Docs de deploy]   → docs.heapdeck.com/self-hosting
+[Docs de deploy]   → docs en el repo (docs/SELF_HOSTING.md; docs.heapdeck.com a futuro)
 ```
 
 ---
@@ -385,7 +387,7 @@ HeapDeck recuerda por vos.
 ### CTAs
 ```
 [Descargar desktop →]          → /download
-[Abrir en el browser →]        → app.heapdeck.com
+[Abrir en el browser →]        → heapdeck.com/register
 [Ver en GitHub →]              → github.com/tiagofur/heapdeck
 ```
 
@@ -409,15 +411,14 @@ Open-source · Self-hosteable · Offline-first · Hecho con ☕ por @tiagofur
 - **Framework:** Astro (estático, fast, SEO) o Next.js (si quieren SSR)
 - **Estilos:** Mismo design system neo-brutalist — tokens desde `packages/ui/styles/globals.css` + `packages/ui/tailwind-preset.cjs` del monorepo principal
 - **Deploy:** Vercel / Netlify / Cloudflare Pages — gratis para sitios estáticos
-- **Dominio:** `heapdeck.com` → landing, `app.heapdeck.com` → React web app (`apps/web`), `api.heapdeck.com` → backend Go
+- **Dominio (plan original, superseded):** `heapdeck.com` → landing, `app.heapdeck.com` → React web app (`apps/web`), `api.heapdeck.com` → backend Go. **Lo que se hizo en producción:** web app en el apex `heapdeck.com`, API en `api.heapdeck.com`, sin `app.` ni `docs.`.
 
-### DNS setup recomendado
+### DNS setup recomendado (histórico — ver nota arriba)
 ```
-heapdeck.com          A/CNAME → Vercel/Netlify (landing)
-www.heapdeck.com      CNAME   → heapdeck.com
-app.heapdeck.com      A       → VPS (React web app via Caddy)
-api.heapdeck.com      A       → VPS (Go API via Caddy)
-docs.heapdeck.com     CNAME   → docs hosting (GitBook/Starlight/Mintlify)
+heapdeck.com          A     → VPS (React web app, lo que corre hoy)
+api.heapdeck.com      A     → VPS (Go API via proxy)
+www.heapdeck.com      CNAME → heapdeck.com (a futuro)
+docs.heapdeck.com     —     → no creado; docs en el repo por ahora
 ```
 
 ### Animaciones recomendadas

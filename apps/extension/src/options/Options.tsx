@@ -151,7 +151,7 @@ export function Options() {
 
       <footer className="text-center pt-12 border-t-2 border-ink/10">
         <p className="font-mono text-[10px] text-ink-soft uppercase tracking-widest">
-          HeapDeck Extension v0.5.0
+          HeapDeck Extension v0.6.0
         </p>
       </footer>
       

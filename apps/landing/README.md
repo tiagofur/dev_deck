@@ -1,43 +1,13 @@
-# Astro Starter Kit: Minimal
+# @heapdeck/landing
 
-```sh
-npm create astro@latest -- --template minimal
-```
+Marketing landing page for HeapDeck (Astro + shared neo-brutalist design tokens). English at `/`, Spanish at `/es`.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+**Status:** built in CI (`pnpm -F @heapdeck/landing build`) but not deployed yet — production traffic goes straight to the web app at [heapdeck.com](https://heapdeck.com). The landing stays as the future marketing front door; keep its CTAs pointing at the live beta (`https://heapdeck.com/register`) until a deploy target is wired.
 
-## 🚀 Project Structure
+## Commands
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+| Command          | Action                                  |
+| :--------------- | :-------------------------------------- |
+| `pnpm dev`       | Local dev server at `localhost:4321`    |
+| `pnpm build`     | Production build to `./dist/`           |
+| `pnpm preview`   | Preview the production build locally    |

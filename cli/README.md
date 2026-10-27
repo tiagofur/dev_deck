@@ -27,9 +27,13 @@ go install ./cmd/heapdeck
 ## Getting Started
 
 ```bash
-heapdeck config set api-url http://localhost:8080       # or your hosted instance
+# Against the hosted beta (create your free account at https://heapdeck.com/register first)
+heapdeck config set api-url https://api.heapdeck.com
 heapdeck login --token your-api-token
 heapdeck status                                          # verify setup
+
+# Against a local/self-hosted backend instead:
+# heapdeck config set api-url http://localhost:8080
 ```
 
 ---

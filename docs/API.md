@@ -1,4 +1,4 @@
-# HeapDeck.com API Specification (0.5.0 Public Beta)
+# HeapDeck.com API Specification (0.6.0 Public Beta)
 
 This document describes the REST API for **HeapDeck.com**.
 
@@ -69,4 +69,4 @@ Errors follow a predictable structure:
 
 ---
 
-*Last updated: June 2026 (0.5.0 Public Beta)*
+*Last updated: October 2026 (0.6.0 Public Beta, live at heapdeck.com)*

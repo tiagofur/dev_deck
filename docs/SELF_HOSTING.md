@@ -2,7 +2,9 @@
 
 This guide explains how to deploy your own **HeapDeck.com** instance on a small
 VPS using the repository's current production stack: **Docker Compose + Caddy +
-Postgres + HeapDeck API + Web app**.
+Postgres + HeapDeck API + Web app**. It mirrors the same stack that powers
+the hosted beta at [heapdeck.com](https://heapdeck.com) (web app at the apex
+domain, Go API at `api.heapdeck.com`).
 
 [Leer en español](SELF_HOSTING.es.md)
 
@@ -169,7 +171,7 @@ GitHub login flow returns to `/auth/callback` successfully.
 
 ## 8. Public Beta Notes
 
-Current `0.5.0` public beta limitations worth knowing up front:
+Current `0.6.0` public beta limitations worth knowing up front:
 
 - Self-hosting is workable, but the docs and deployment flow are still being
   tightened up.
