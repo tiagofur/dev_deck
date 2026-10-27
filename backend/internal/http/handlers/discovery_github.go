@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"math"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -111,7 +112,7 @@ func (h *GitHubDiscoveryHandler) Search(w http.ResponseWriter, r *http.Request) 
 }
 
 func cacheKeyOf(need, language string, limit int) string {
-	sum := sha256.Sum256([]byte(strings.ToLower(need) + "|" + strings.ToLower(language) + "|" + string(rune(limit))))
+	sum := sha256.Sum256([]byte(strings.ToLower(need) + "|" + strings.ToLower(language) + "|" + strconv.Itoa(limit)))
 	return hex.EncodeToString(sum[:])
 }
 
