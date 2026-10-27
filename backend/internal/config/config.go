@@ -94,6 +94,15 @@ type Config struct {
 	// background enrich falls back to the $0 heuristic; the vault keeps
 	// working. Only enforced when BillingEnabled.
 	AIMonthlyBudgetCents int `env:"AI_MONTHLY_BUDGET_CENTS" envDefault:"300"`
+	// ─── Stripe billing (Pro $5/mo) ───
+	// Required only when BillingEnabled. WebhookSecret verifies the
+	// Stripe-Signature header on POST /api/billing/webhook; never commit
+	// real values (see backend/.env.example).
+	StripeSecretKey    string `env:"STRIPE_SECRET_KEY"`
+	StripeWebhookSecret string `env:"STRIPE_WEBHOOK_SECRET"`
+	StripeProPriceID   string `env:"STRIPE_PRO_PRICE_ID"`
+	BillingSuccessURL  string `env:"BILLING_SUCCESS_URL" envDefault:"http://localhost:5173/billing/success"`
+	BillingCancelURL   string `env:"BILLING_CANCEL_URL" envDefault:"http://localhost:5173/billing/cancel"`
 
 	// ─── Wave 5 Fase 18: local AI enrichment ───
 	AIProvider      string `env:"AI_PROVIDER" envDefault:"heuristic"`
@@ -201,6 +210,17 @@ func Load() (Config, error) {
 		}
 		if strings.TrimSpace(c.GeminiAPIKey) == "" {
 			return c, errors.New("GEMINI_API_KEY is required when AI_PROVIDER=gemini")
+		}
+	}
+	if c.BillingEnabled {
+		if strings.TrimSpace(c.StripeSecretKey) == "" {
+			return c, errors.New("STRIPE_SECRET_KEY is required when BILLING_ENABLED=true")
+		}
+		if strings.TrimSpace(c.StripeWebhookSecret) == "" {
+			return c, errors.New("STRIPE_WEBHOOK_SECRET is required when BILLING_ENABLED=true")
+		}
+		if strings.TrimSpace(c.StripeProPriceID) == "" {
+			return c, errors.New("STRIPE_PRO_PRICE_ID is required when BILLING_ENABLED=true")
 		}
 	}
 	return c, nil

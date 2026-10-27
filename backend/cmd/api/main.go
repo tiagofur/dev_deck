@@ -15,6 +15,7 @@ import (
 
 	"heapdeck/internal/ai"
 	"heapdeck/internal/authservice"
+	"heapdeck/internal/billing"
 	"heapdeck/internal/cache"
 	"heapdeck/internal/config"
 	"heapdeck/internal/cron"
@@ -167,6 +168,7 @@ func main() {
 		AI:          aiSvc,
 		Embeddings:  embSvc,
 		Cache:       c,
+		Billing:     billingClient(cfg),
 	})
 
 	// Background refresher: re-enriches stale repos so stars/desc don't drift.
@@ -230,6 +232,15 @@ func main() {
 		logger.Error("shutdown error", "err", err)
 	}
 	logger.Info("bye")
+}
+
+// billingClient returns the Stripe client when billing is on, nil otherwise.
+// Handlers check BillingEnabled first, so a nil client is never called.
+func billingClient(cfg config.Config) billing.Client {
+	if !cfg.BillingEnabled {
+		return nil
+	}
+	return billing.NewClient(cfg.StripeSecretKey)
 }
 
 // newLogger builds a slog.Logger. Format is controlled by LOG_FORMAT

@@ -24,6 +24,7 @@ type User struct {
 	Website             *string   `json:"website,omitempty"`
 	Location            *string   `json:"location,omitempty"`
 	GitHubURL           *string   `json:"github_url,omitempty"`
+	StripeCustomerID    *string   `json:"-"`
 }
 
 // TokenPair is the response body for login/refresh.

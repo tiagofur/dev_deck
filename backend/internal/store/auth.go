@@ -14,12 +14,12 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-const userColumns = `id, github_id, login, username, bio, plan, avatar_url, display_name, role, region, onboarding_completed, created_at, stack_tags, website, location, github_url`
-const userColumnsWithHash = `id, github_id, login, username, bio, plan, avatar_url, display_name, role, password_hash, region, onboarding_completed, created_at, stack_tags, website, location, github_url`
+const userColumns = `id, github_id, login, username, bio, plan, avatar_url, display_name, role, region, onboarding_completed, created_at, stack_tags, website, location, github_url, stripe_customer_id`
+const userColumnsWithHash = `id, github_id, login, username, bio, plan, avatar_url, display_name, role, password_hash, region, onboarding_completed, created_at, stack_tags, website, location, github_url, stripe_customer_id`
 
 func scanUser(row pgx.Row) (*auth.User, error) {
 	var u auth.User
-	err := row.Scan(&u.ID, &u.GitHubID, &u.Login, &u.Username, &u.Bio, &u.Plan, &u.AvatarURL, &u.DisplayName, &u.Role, &u.Region, &u.OnboardingCompleted, &u.CreatedAt, &u.StackTags, &u.Website, &u.Location, &u.GitHubURL)
+	err := row.Scan(&u.ID, &u.GitHubID, &u.Login, &u.Username, &u.Bio, &u.Plan, &u.AvatarURL, &u.DisplayName, &u.Role, &u.Region, &u.OnboardingCompleted, &u.CreatedAt, &u.StackTags, &u.Website, &u.Location, &u.GitHubURL, &u.StripeCustomerID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrNotFound
@@ -32,7 +32,7 @@ func scanUser(row pgx.Row) (*auth.User, error) {
 func scanUserWithHash(row pgx.Row) (*auth.User, string, error) {
 	var u auth.User
 	var hash *string
-	err := row.Scan(&u.ID, &u.GitHubID, &u.Login, &u.Username, &u.Bio, &u.Plan, &u.AvatarURL, &u.DisplayName, &u.Role, &hash, &u.Region, &u.OnboardingCompleted, &u.CreatedAt, &u.StackTags, &u.Website, &u.Location, &u.GitHubURL)
+	err := row.Scan(&u.ID, &u.GitHubID, &u.Login, &u.Username, &u.Bio, &u.Plan, &u.AvatarURL, &u.DisplayName, &u.Role, &hash, &u.Region, &u.OnboardingCompleted, &u.CreatedAt, &u.StackTags, &u.Website, &u.Location, &u.GitHubURL, &u.StripeCustomerID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, "", ErrNotFound

@@ -298,6 +298,6 @@ export { useSystemConfig, useFeatureFlags } from './features/system/api'
 export type { SystemConfig, SystemFeatures } from './features/system/api'
 
 // Feature hooks — billing (Pro plan + AI usage)
-export { useAIUsage } from './features/billing/api'
+export { useAIUsage, useCheckout, usePortal } from './features/billing/api'
 export type { AIUsage, AIActionUsage } from './features/billing/api'
 

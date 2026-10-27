@@ -8,6 +8,7 @@ import (
 
 	"heapdeck/internal/ai"
 	"heapdeck/internal/authservice"
+	"heapdeck/internal/billing"
 	"heapdeck/internal/cache"
 	"heapdeck/internal/config"
 	"heapdeck/internal/email"
@@ -35,6 +36,7 @@ type Deps struct {
 	AI          *ai.Service
 	Embeddings  *ai.EmbeddingsService
 	Cache       *cache.Cache
+	Billing     billing.Client
 }
 
 func NewRouter(cfg config.Config, st *store.Store, en *enricher.Service, as *authservice.Service, aiSvc *ai.Service, embSvc *ai.EmbeddingsService, c *cache.Cache) http.Handler {
@@ -150,6 +152,9 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	socialH := handlers.NewSocialHandler(st)
 	agentH := handlers.NewAgentHandler(st, deps.AI, meter)
 	usageH := handlers.NewUsageHandler(st, cfg.AIMonthlyBudgetCents)
+	billingH := handlers.NewBillingHandler(st, deps.Billing, cfg.BillingEnabled,
+		cfg.StripeProPriceID, cfg.StripeWebhookSecret,
+		cfg.BillingSuccessURL, cfg.BillingCancelURL, cfg.FrontendURL)
 	onboardingH := handlers.NewOnboardingHandler(st)
 	samlH := handlers.NewSAMLHandler(st, as, handlers.SAMLHandlerConfig{
 		EntityID:    "heapdeck-sp",
@@ -177,6 +182,14 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			1*time.Minute,
 			func(r *http.Request) (string, error) { return clientIP(r), nil },
 		)).Post("/waitlist", invitesH.JoinWaitlist)
+
+		// Stripe webhook: public (verified by signature), flood-guarded.
+		// Stripe retries from a small IP set; 60/min is generous.
+		r.With(httprate.LimitBy(
+			60,
+			1*time.Minute,
+			func(r *http.Request) (string, error) { return clientIP(r), nil },
+		)).Post("/billing/webhook", billingH.Webhook)
 
 		// Cheatsheet management (Consolidated to avoid Chi router panics)
 		r.Route("/cheatsheets", func(cr chi.Router) {
@@ -388,6 +401,8 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Post("/me/devices/register", devicesH.Register)
 			r.Delete("/me/devices/{clientId}", devicesH.Delete)
 			r.Get("/me/ai-usage", usageH.Get)
+			r.Post("/billing/checkout", billingH.Checkout)
+			r.Post("/billing/portal", billingH.Portal)
 
 			r.Route("/me/notifications", func(nr chi.Router) {
 				nr.Get("/", notificationsH.List)
@@ -449,6 +464,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			r.Route("/admin", func(ar chi.Router) {
 				ar.Use(mw.RequireAdmin)
 				ar.Get("/users", adminH.ListUsers)
+				ar.Post("/users/{id}/plan", billingH.SetPlan)
 				ar.Get("/waitlist", invitesH.ListWaitlist)
 				ar.Get("/invites", invitesH.ListInvites)
 				ar.Post("/invites", invitesH.CreateInvite)
