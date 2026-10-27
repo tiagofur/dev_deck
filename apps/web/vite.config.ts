@@ -39,7 +39,16 @@ export default defineConfig({
         },
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,wasm}'],
+        // HTML must NOT be precached: the SW sits at scope "/" and a
+        // precached index.html makes it hijack navigations to "/" — which
+        // is now the marketing landing (see apps/landing). Navigations go
+        // through navigateFallback instead; the marketing root and its
+        // Spanish version are denylisted so they always hit the network.
+        // Tradeoff: hard offline reloads of app routes lose the cached
+        // shell — offline-first lives in the desktop app today.
+        globPatterns: ['**/*.{js,css,ico,png,svg,wasm}'],
+        navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/$/, /^\/es(\/.*)?$/],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB for WASM
         runtimeCaching: [
           {
