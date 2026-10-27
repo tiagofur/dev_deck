@@ -89,6 +89,11 @@ type Config struct {
 	// surfaces. Default off so self-hosted deployments — where the
 	// operator pays for their own provider — behave exactly as before.
 	BillingEnabled bool `env:"BILLING_ENABLED" envDefault:"false"`
+	// AIMonthlyBudgetCents caps priced AI spend per Pro user per UTC
+	// calendar month (~$3 at default). Past the cap, AI actions 429 and
+	// background enrich falls back to the $0 heuristic; the vault keeps
+	// working. Only enforced when BillingEnabled.
+	AIMonthlyBudgetCents int `env:"AI_MONTHLY_BUDGET_CENTS" envDefault:"300"`
 
 	// ─── Wave 5 Fase 18: local AI enrichment ───
 	AIProvider      string `env:"AI_PROVIDER" envDefault:"heuristic"`
