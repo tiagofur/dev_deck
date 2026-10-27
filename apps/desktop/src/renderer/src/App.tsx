@@ -15,6 +15,8 @@ import {
   ItemsPage,
   RepoDetailPage,
   SettingsPage,
+  BillingPage,
+  BillingResultPage,
   OnboardingPage,
   AdminDashboardPage,
   PublicDeckPage,
@@ -274,6 +276,24 @@ function AnimatedRoutes() {
             path="/settings"
             element={
               <AuthGuard>{withTransition(<SettingsPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/billing"
+            element={
+              <AuthGuard>{withTransition(<BillingPage />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/billing/success"
+            element={
+              <AuthGuard>{withTransition(<BillingResultPage variant="success" />)}</AuthGuard>
+            }
+          />
+          <Route
+            path="/billing/cancel"
+            element={
+              <AuthGuard>{withTransition(<BillingResultPage variant="cancel" />)}</AuthGuard>
             }
           />
           <Route

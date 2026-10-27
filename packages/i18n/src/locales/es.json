@@ -147,7 +147,8 @@
     "notifications_toast": {
       "title": "¡HeapDeck conectado!",
       "body": "Ahora recibirás alertas importantes en tu dispositivo."
-    }
+    },
+    "plan_section": "Plan"
   },
   "sync": {
     "offline": "Sin conexión",
@@ -396,7 +397,9 @@
     "results_count": "{{count}} resultados encontrados",
     "no_results_title": "No se encontraron coincidencias",
     "no_results_desc": "La búsqueda revisa ítems, repos, cheatsheets y comandos. Prueba con palabras de intención o captura \"{{query}}\" en su lugar.",
-    "capture_instead": "Capturarlo en su lugar"
+    "capture_instead": "Capturarlo en su lugar",
+    "pro_required_desc": "La búsqueda semántica usa embeddings en la nube y necesita el plan Pro. La búsqueda por texto es gratis para siempre.",
+    "ai_downgraded": "La búsqueda IA necesita Pro — mostrando resultados de texto gratis"
   },
   "notifications": {
     "title": "Notificaciones",
@@ -777,7 +780,9 @@
     "actions_label": "Acciones",
     "results_label": "Resultados",
     "navigate_label": "Navegar",
-    "select_label": "Seleccionar"
+    "select_label": "Seleccionar",
+    "upgrade_title": "Mejorar a Pro",
+    "upgrade_subtitle": "Resúmenes IA, búsqueda semántica, discovery en GitHub — $5/mes."
   },
   "capture": {
     "modal_title": "Capturar",
@@ -920,7 +925,8 @@
       "review": "Revisión",
       "trending": "Tendencias",
       "team": "Equipo",
-      "top": "Top"
+      "top": "Top",
+      "github": "GitHub"
     },
     "marked_seen": "Marcado como visto",
     "archived_toast": "Archivado",
@@ -949,6 +955,18 @@
       "subtitle": "Las herramientas más guardadas a nivel global",
       "calculating": "Calculando tendencias globales...",
       "not_enough_data": "Aún no hay suficientes datos para el ranking."
+    },
+    "github": {
+      "placeholder": "¿Qué necesitás? ej. CLI liviano en Go para redimensionar imágenes",
+      "language_label": "Lenguaje",
+      "language_any": "Cualquiera",
+      "search": "Buscar repos",
+      "hint": "Describí la necesidad — HeapDeck arma la query de GitHub, rankea por ajuste y guardás con un click.",
+      "pro_feature": "Describí qué necesitás y recibí repos de GitHub rankeados — con guardado de un click a tu vault.",
+      "error": "La búsqueda en GitHub falló. Puede estar limitada por cuota — probá de nuevo en un minuto.",
+      "retry": "Reintentar",
+      "empty": "Nada coincidió con esa necesidad. Probá reformularla.",
+      "open_repo": "Abrir en GitHub"
     }
   },
   "agent": {
@@ -963,7 +981,8 @@
     "run": "Ejecutar",
     "ignore": "Ignorar",
     "connection_error": "Error al conectar con el agente",
-    "execution_success_empty": "Comando ejecutado con éxito (sin salida)."
+    "execution_success_empty": "Comando ejecutado con éxito (sin salida).",
+    "pro_feature": "El agente corre IA en la nube con el plan Pro. Tu vault y todas las funciones centrales siguen gratis."
   },
   "cheatsheets": {
     "title": "Cheatsheets",
@@ -1071,5 +1090,40 @@
     "create_team": "Crear equipo",
     "team_name_prompt": "Ingresa el nombre de tu nuevo equipo:",
     "unknown": "Espacio de trabajo desconocido"
+  },
+  "billing": {
+    "title": "Plan y facturación",
+    "upsell_title": "Esta necesita Pro",
+    "upgrade_cta": "Mejorar — $5/mes",
+    "upsell_fine_print": "~$3 de IA incluidos cada mes. Sin chatbot: solo acciones que te ahorran minutos.",
+    "selfhost_title": "Self-hosted",
+    "selfhost_desc": "La facturación está apagada en este servidor. Configura tu propio proveedor de IA (OpenAI, DeepSeek, Gemini, Ollama...) — sin planes por usuario. Ver PRO_BILLING.md.",
+    "already_pro": "Ya estás en Pro.",
+    "current_plan": "Plan actual",
+    "manage": "Gestionar suscripción",
+    "usage_title": "Uso de IA este mes",
+    "usage_resets": "renueva",
+    "usage_note": "Pasada la IA mensual incluida, las acciones IA pausan hasta el próximo ciclo — tu vault sigue andando completo. Sin cargos extra, nunca.",
+    "plan_free": "Gratis",
+    "plan_pro": "Pro",
+    "pro_tag": "Superpoderes IA",
+    "free_vault": "Vault ilimitado, captura, búsqueda fuzzy",
+    "free_capture": "Extensión, CLI y Workbench",
+    "free_search": "Circles, offline-first, self-hosting",
+    "free_no_ai": "Sin acciones IA en la nube",
+    "pro_summary": "Auto-summary y auto-tagging al capturar",
+    "pro_semantic": "Búsqueda semántica por intención",
+    "pro_discovery": "Descubrimiento en GitHub por necesidad",
+    "pro_knowledge": "Contenido → conocimiento (URL/README → runbook)",
+    "checkout_loading": "Abriendo checkout…",
+    "cancel_title": "Checkout cancelado",
+    "cancel_desc": "No se hizo ningún cargo. Puedes mejorar cuando quieras.",
+    "cancel_retry": "Volver a facturación",
+    "success_title": "¡Bienvenido a Pro!",
+    "success_desc": "La IA en la nube ya está activa en tu cuenta. A probarla.",
+    "success_cta": "Probar discovery IA",
+    "success_pending_title": "Pago recibido",
+    "success_pending_desc": "Tu plan se está activando — suele tardar unos segundos.",
+    "success_refresh": "Refrescar estado"
   }
 }

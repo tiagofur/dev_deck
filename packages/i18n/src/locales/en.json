@@ -147,7 +147,8 @@
     "notifications_toast": {
       "title": "HeapDeck Connected!",
       "body": "Now you will receive important alerts on your device."
-    }
+    },
+    "plan_section": "Plan"
   },
   "sync": {
     "offline": "Offline",
@@ -396,7 +397,9 @@
     "results_count": "{{count}} results found",
     "no_results_title": "No matches found",
     "no_results_desc": "Search checks items, repos, cheatsheets, and commands. Try intent words, or capture \"{{query}}\" instead.",
-    "capture_instead": "Capture it instead"
+    "capture_instead": "Capture it instead",
+    "pro_required_desc": "Semantic search runs on cloud embeddings and needs the Pro plan. Text search stays free forever.",
+    "ai_downgraded": "AI search needs Pro — showing free text results"
   },
   "notifications": {
     "title": "Notifications",
@@ -777,7 +780,9 @@
     "actions_label": "Actions",
     "results_label": "Results",
     "navigate_label": "Navigate",
-    "select_label": "Select"
+    "select_label": "Select",
+    "upgrade_title": "Upgrade to Pro",
+    "upgrade_subtitle": "AI summaries, semantic search, GitHub discovery — $5/mo."
   },
   "capture": {
     "modal_title": "Capture",
@@ -920,7 +925,8 @@
       "review": "Review",
       "trending": "Trending",
       "team": "Team",
-      "top": "Top"
+      "top": "Top",
+      "github": "GitHub"
     },
     "marked_seen": "Marked as seen",
     "archived_toast": "Archived",
@@ -949,6 +955,18 @@
       "subtitle": "The most saved tools globally",
       "calculating": "Calculating global trends...",
       "not_enough_data": "Not enough data for the ranking yet."
+    },
+    "github": {
+      "placeholder": "What do you need? e.g. lightweight Go CLI to resize images",
+      "language_label": "Language",
+      "language_any": "Any language",
+      "search": "Find repos",
+      "hint": "Describe the need — HeapDeck builds the GitHub query, ranks by fit, and you save with one click.",
+      "pro_feature": "Describe what you need and get ranked GitHub repos — with one-click save to your vault.",
+      "error": "GitHub search failed. It may be rate-limited — try again in a minute.",
+      "retry": "Retry",
+      "empty": "Nothing matched that need. Try rephrasing it.",
+      "open_repo": "Open on GitHub"
     }
   },
   "agent": {
@@ -963,7 +981,8 @@
     "run": "Run",
     "ignore": "Ignore",
     "connection_error": "Error connecting to agent",
-    "execution_success_empty": "Command executed successfully (no output)."
+    "execution_success_empty": "Command executed successfully (no output).",
+    "pro_feature": "The agent runs cloud AI on the Pro plan. Your vault and all core features stay free."
   },
   "cheatsheets": {
     "title": "Cheatsheets",
@@ -1071,5 +1090,40 @@
     "create_team": "Create Team",
     "team_name_prompt": "Enter the name for your new team:",
     "unknown": "Unknown workspace"
+  },
+  "billing": {
+    "title": "Plan & Billing",
+    "upsell_title": "This one needs Pro",
+    "upgrade_cta": "Upgrade — $5/mo",
+    "upsell_fine_print": "~$3 of AI included every month. No chatbot: just actions that save you minutes.",
+    "selfhost_title": "Self-hosted",
+    "selfhost_desc": "Billing is off on this server. Configure your own AI provider (OpenAI, DeepSeek, Gemini, Ollama...) — no per-user plans here. See PRO_BILLING.md.",
+    "already_pro": "You are already on Pro.",
+    "current_plan": "Current plan",
+    "manage": "Manage subscription",
+    "usage_title": "AI usage this month",
+    "usage_resets": "resets",
+    "usage_note": "Past the included monthly AI, AI actions pause until next cycle — your vault keeps working fully. No overage charges, ever.",
+    "plan_free": "Free",
+    "plan_pro": "Pro",
+    "pro_tag": "For AI superpowers",
+    "free_vault": "Unlimited vault, capture, fuzzy search",
+    "free_capture": "Extension, CLI and Workbench",
+    "free_search": "Circles, offline-first, self-hosting",
+    "free_no_ai": "No cloud AI actions",
+    "pro_summary": "Auto-summary and auto-tagging on capture",
+    "pro_semantic": "Semantic vault search by intent",
+    "pro_discovery": "Need-based GitHub discovery",
+    "pro_knowledge": "Content → knowledge (URL/README → runbook)",
+    "checkout_loading": "Opening checkout…",
+    "cancel_title": "Checkout cancelled",
+    "cancel_desc": "No charge was made. You can upgrade whenever you want.",
+    "cancel_retry": "Back to billing",
+    "success_title": "Welcome to Pro!",
+    "success_desc": "Cloud AI is now enabled on your account. Go break it in.",
+    "success_cta": "Try AI discovery",
+    "success_pending_title": "Payment received",
+    "success_pending_desc": "Your plan is activating — this usually takes a few seconds.",
+    "success_refresh": "Refresh status"
   }
 }

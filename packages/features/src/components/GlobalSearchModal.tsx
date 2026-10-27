@@ -1,7 +1,7 @@
-import { BookOpen, Boxes, Code2, Plus, Search, X } from 'lucide-react'
+import { BookOpen, Boxes, Code2, Crown, Plus, Search, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useGlobalSearch, useSystemConfig } from '@heapdeck/api-client'
+import { isProRequired, useGlobalSearch, useSystemConfig } from '@heapdeck/api-client'
 import type { SearchResult } from '@heapdeck/api-client'
 import { useTranslation } from '@heapdeck/i18n'
 
@@ -16,7 +16,9 @@ export function GlobalSearchModal({ open, onClose }: Props) {
   const [mode, setMode] = useState<'text' | 'semantic' | 'hybrid'>('text')
   const { data: systemConfig } = useSystemConfig()
   const isAiDisabled = !systemConfig?.ai_provider || ['disabled', 'heuristic', 'local'].includes(systemConfig.ai_provider)
-  const { data: results = [], isLoading } = useGlobalSearch(query, isAiDisabled ? 'text' : mode)
+  const { data, isLoading, error } = useGlobalSearch(query, isAiDisabled ? 'text' : mode)
+  const results = data?.results ?? []
+  const downgraded = data?.ai_downgraded === true
   const navigate = useNavigate()
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -112,13 +114,52 @@ export function GlobalSearchModal({ open, onClose }: Props) {
           </div>
         )}
 
+        {/* Pro paywall: Free user picked an AI-only mode */}
+        {error && isProRequired(error) && query.length >= 2 && (
+          <div className="p-4">
+            <div className="border-3 border-ink bg-bg-card p-4 text-center space-y-3">
+              <div className="inline-block bg-accent-lavender border-2 border-ink p-2 shadow-hard-sm">
+                <Crown size={18} strokeWidth={3} />
+              </div>
+              <p className="font-display font-black uppercase text-sm">{t('billing.upsell_title')}</p>
+              <p className="font-mono text-xs text-ink-soft">{t('search.pro_required_desc')}</p>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose()
+                  navigate('/billing')
+                }}
+                className="border-3 border-ink bg-accent-yellow px-4 py-2 font-display font-bold uppercase shadow-hard text-xs hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-lg transition-all"
+              >
+                {t('billing.upgrade_cta')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Downgrade notice: hybrid fell back to text on a Free plan */}
+        {downgraded && !(error && isProRequired(error)) && (
+          <button
+            type="button"
+            onClick={() => {
+              onClose()
+              navigate('/billing')
+            }}
+            className="w-full flex items-center gap-2 px-4 py-2 bg-accent-lavender/40 border-b-3 border-ink font-mono text-[10px] uppercase font-bold text-left hover:bg-accent-lavender/70 transition-colors"
+          >
+            <Crown size={12} strokeWidth={3} className="shrink-0" />
+            <span className="flex-1">{t('search.ai_downgraded')}</span>
+            <span className="underline">{t('billing.upgrade_cta')}</span>
+          </button>
+        )}
+
         {/* Results */}
         <div className="flex-1 overflow-y-auto min-h-0">
           {query.length < 2 ? (
             <div className="p-8 text-center font-mono text-sm text-ink-soft">
               {t('search.min_chars')}
             </div>
-          ) : results.length === 0 && !isLoading ? (
+          ) : error && isProRequired(error) ? null : results.length === 0 && !isLoading ? (
             <div className="p-8 text-center">
               <p className="font-display text-lg font-black uppercase">{t('search.no_results_title')}</p>
               <p className="mx-auto mt-2 max-w-md font-mono text-sm text-ink-soft">

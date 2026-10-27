@@ -3,6 +3,7 @@ import { Send, Bot, User, Loader2, Play, Terminal, Shield, X } from 'lucide-reac
 import { Button, showToast } from '@heapdeck/ui'
 import { getAccessToken, getConfig } from '@heapdeck/api-client'
 import { useTranslation } from '@heapdeck/i18n'
+import { ProUpsell } from './Billing/ProUpsell'
 
 interface Message {
   role: 'user' | 'assistant' | 'system' | 'tool'
@@ -32,6 +33,7 @@ export function AgentChat({ initialQuery }: Props) {
   )
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [proRequired, setProRequired] = useState(false)
   const [executingToolId, setExecutingToolId] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- window.electronAPI is an untyped external bridge injected by the desktop preload script
@@ -80,7 +82,14 @@ export function AgentChat({ initialQuery }: Props) {
         body: JSON.stringify({ history: nextHistory })
       })
 
-      if (!response.ok) throw new Error(t('agent.connection_error'))
+      if (!response.ok) {
+        // 402 = Pro-gated surface: show the upsell instead of a generic error.
+        if (response.status === 402) {
+          setProRequired(true)
+          throw new Error(t('billing.upsell_title'))
+        }
+        throw new Error(t('agent.connection_error'))
+      }
 
       const reader = response.body?.getReader()
       const decoder = new TextDecoder()
@@ -149,7 +158,10 @@ export function AgentChat({ initialQuery }: Props) {
 
   return (
     <div className="flex flex-col h-[50vh]">
-      <div 
+      {proRequired && (
+        <ProUpsell compact feature={t('agent.pro_feature')} />
+      )}
+      <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar border-b-3 border-ink bg-bg-primary/30"
       >

@@ -1,11 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { Sparkles, Flame, Trophy, Layers, Users } from 'lucide-react'
+import { Sparkles, Flame, Trophy, Layers, Users, GitBranch } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@heapdeck/ui'
 import { SwipeCard, type SwipeDirection } from './SwipeCard'
 import { TrendingFeed } from './TrendingFeed'
 import { CuratorLeaderboard } from './CuratorLeaderboard'
 import { TeamDiscovery } from './TeamDiscovery'
+import { GitHubDiscoveryTab } from './GitHubDiscoveryTab'
 import {
   useDiscoveryNext,
   useMarkSeen,
@@ -15,7 +16,7 @@ import {
 import { showToast } from '@heapdeck/ui'
 import { useTranslation } from '@heapdeck/i18n'
 
-type Tab = 'swipe' | 'trending' | 'leaderboard' | 'team'
+type Tab = 'swipe' | 'trending' | 'leaderboard' | 'team' | 'github'
 
 export function DiscoverySurface() {
   const { t } = useTranslation()
@@ -68,6 +69,7 @@ export function DiscoverySurface() {
            {activeOrgId && (
              <TabButton active={activeTab === 'team'} onClick={() => setActiveTab('team')} icon={<Users size={14} />} label={t('discovery.tabs.team')} />
            )}
+           <TabButton active={activeTab === 'github'} onClick={() => setActiveTab('github')} icon={<GitBranch size={14} />} label={t('discovery.tabs.github')} />
            <TabButton active={activeTab === 'leaderboard'} onClick={() => setActiveTab('leaderboard')} icon={<Trophy size={14} />} label={t('discovery.tabs.top')} />
         </div>
       </header>
@@ -105,6 +107,7 @@ export function DiscoverySurface() {
         {activeTab === 'trending' && <TrendingFeed />}
         {activeTab === 'leaderboard' && <CuratorLeaderboard />}
         {activeTab === 'team' && activeOrgId && <TeamDiscovery orgId={activeOrgId} />}
+        {activeTab === 'github' && <GitHubDiscoveryTab />}
       </main>
     </div>
   )

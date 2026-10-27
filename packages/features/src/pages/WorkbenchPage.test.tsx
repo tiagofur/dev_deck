@@ -99,15 +99,18 @@ describe('<WorkbenchPage>', () => {
 
   it('copies related project commands from the project context surface', async () => {
     mocks.useGlobalSearch.mockReturnValue({
-      data: [
-        {
-          type: 'entry',
-          id: 'cmd-1',
-          title: 'Run tests',
-          subtitle: 'package scripts',
-          extra: 'pnpm test',
-        },
-      ],
+      data: {
+        results: [
+          {
+            type: 'entry',
+            id: 'cmd-1',
+            title: 'Run tests',
+            subtitle: 'package scripts',
+            extra: 'pnpm test',
+          },
+        ],
+        ai_downgraded: false,
+      },
       isLoading: false,
     })
 
@@ -144,15 +147,18 @@ describe('<WorkbenchPage>', () => {
   it('links an existing item to the current project with a project tag', async () => {
     const mutateAsync = vi.fn().mockResolvedValue({})
     mocks.useGlobalSearch.mockReturnValue({
-      data: [
-        {
-          type: 'item',
-          id: 'item-1',
-          title: 'Deploy checklist',
-          subtitle: 'workflow',
-          extra: '',
-        },
-      ],
+      data: {
+        results: [
+          {
+            type: 'item',
+            id: 'item-1',
+            title: 'Deploy checklist',
+            subtitle: 'workflow',
+            extra: '',
+          },
+        ],
+        ai_downgraded: false,
+      },
       isLoading: false,
     })
     mocks.useItem.mockReturnValue({

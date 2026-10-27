@@ -106,6 +106,15 @@ export function Topbar({
           <SyncStatusIndicator />
           <NotificationCenter />
 
+          {user?.plan === 'pro' && (
+            <span
+              title="HeapDeck Pro"
+              className="hidden sm:inline-block bg-accent-lavender border-2 border-ink px-1.5 py-0.5 font-mono text-[9px] font-black uppercase shadow-hard-sm"
+            >
+              Pro
+            </span>
+          )}
+
           {user && (
             <button
               type="button"

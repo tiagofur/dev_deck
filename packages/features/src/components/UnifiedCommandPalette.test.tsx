@@ -6,6 +6,7 @@ import { MemoryRouter } from 'react-router-dom'
 
 const mocks = vi.hoisted(() => ({
   useGlobalSearch: vi.fn(),
+  useMe: vi.fn(),
   useAsk: vi.fn(),
   useCapture: vi.fn(),
   useSystemConfig: vi.fn(),
@@ -23,6 +24,7 @@ vi.mock('react-router-dom', async () => {
 
 vi.mock('@heapdeck/api-client', () => ({
   useGlobalSearch: mocks.useGlobalSearch,
+  useMe: mocks.useMe,
   useAsk: mocks.useAsk,
   useCapture: mocks.useCapture,
   useSystemConfig: mocks.useSystemConfig,
@@ -52,7 +54,8 @@ function renderPalette(open = true, onClose = vi.fn()) {
 describe('<UnifiedCommandPalette>', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.useGlobalSearch.mockReturnValue({ data: [], isLoading: false })
+    mocks.useGlobalSearch.mockReturnValue({ data: { results: [], ai_downgraded: false }, isLoading: false })
+    mocks.useMe.mockReturnValue({ data: { plan: 'free' } })
     mocks.useAsk.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
     mocks.useCapture.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
     mocks.useSystemConfig.mockReturnValue({ data: { ai_provider: 'openai', sync_enabled: true }, isLoading: false })
@@ -114,15 +117,18 @@ describe('<UnifiedCommandPalette>', () => {
   it('copies command search results directly', async () => {
     const onClose = vi.fn()
     mocks.useGlobalSearch.mockReturnValue({
-      data: [
-        {
-          type: 'entry',
-          id: 'cmd-1',
-          title: 'Run tests',
-          subtitle: 'Node',
-          extra: 'pnpm test',
-        },
-      ],
+      data: {
+        results: [
+          {
+            type: 'entry',
+            id: 'cmd-1',
+            title: 'Run tests',
+            subtitle: 'Node',
+            extra: 'pnpm test',
+          },
+        ],
+        ai_downgraded: false,
+      },
       isLoading: false,
     })
 
@@ -150,7 +156,8 @@ describe('<UnifiedCommandPalette>', () => {
 
   it('filters palette search results by result type', async () => {
     mocks.useGlobalSearch.mockReturnValue({
-      data: [
+      data: {
+        results: [
         {
           type: 'item',
           id: 'item-1',
@@ -166,6 +173,8 @@ describe('<UnifiedCommandPalette>', () => {
           extra: 'pnpm test',
         },
       ],
+        ai_downgraded: false,
+      },
       isLoading: false,
     })
 

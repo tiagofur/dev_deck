@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { api } from '../../api-client'
+import { api, APIError } from '../../api-client'
 
 export interface AIActionUsage {
   action: string
@@ -36,4 +36,12 @@ export function usePortal() {
   return useMutation({
     mutationFn: () => api.post<{ portal_url: string }>('/api/billing/portal', {}),
   })
+}
+
+/**
+ * True when an error is the server saying "this surface needs the Pro
+ * plan" (402 PRO_REQUIRED). UI turns these into upsells, not errors.
+ */
+export function isProRequired(err: unknown): boolean {
+  return err instanceof APIError && err.status === 402
 }
