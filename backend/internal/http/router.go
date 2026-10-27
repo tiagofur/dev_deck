@@ -115,7 +115,8 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 	statsH := handlers.NewStatsHandler(st)
 	discoveryH := handlers.NewDiscoveryHandler(st, deps.Cache)
 	commandsH := handlers.NewCommandsHandler(st)
-	cheatsH := handlers.NewCheatsheetsHandler(st, embSvc)
+	proGater := mw.NewProGater(cfg, st)
+	cheatsH := handlers.NewCheatsheetsHandler(st, embSvc, proGater)
 	suggestionsH := handlers.NewSuggestionsHandler(st)
 	captureH := handlers.NewCaptureHandler(st, deps.EnrichQueue)
 	itemsH := handlers.NewItemsHandler(st, deps.EnrichQueue)
@@ -150,7 +151,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 		FrontendURL: cfg.FrontendURL,
 	})
 	scimH := handlers.NewSCIMHandler(st)
-	systemH := handlers.NewSystemConfigHandler(cfg.AIProvider, false, handlers.SystemFeatures{
+	systemH := handlers.NewSystemConfigHandler(cfg.AIProvider, false, cfg.BillingEnabled, handlers.SystemFeatures{
 		Explore:    cfg.FeatureExplore,
 		Reputation: cfg.FeatureReputation,
 		TeamReview: cfg.FeatureTeamReview,
@@ -354,6 +355,7 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 			})
 
 			r.Group(func(ir chi.Router) {
+				ir.Use(proGater.RequirePro)
 				ir.Use(mw.IARateLimit(100, 10))
 				ir.Post("/ask", askH.Ask)
 			})
@@ -399,7 +401,11 @@ func NewRouterWithDeps(cfg config.Config, deps Deps) http.Handler {
 				er.Delete("/{id}", enrichersH.Delete)
 			})
 
-			r.Post("/agent/chat", agentH.Chat)
+			r.Group(func(ar chi.Router) {
+				ar.Use(proGater.RequirePro)
+				ar.Use(mw.IARateLimit(100, 10))
+				ar.Post("/agent/chat", agentH.Chat)
+			})
 
 			r.Route("/me/webhooks", func(wr chi.Router) {
 				wr.Get("/", webhooksH.List)

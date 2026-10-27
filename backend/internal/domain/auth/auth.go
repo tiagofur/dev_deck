@@ -47,6 +47,13 @@ const (
 	ProviderGitHub Provider = "github"
 )
 
+// Billing plans. Users default to PlanFree; PlanPro unlocks cloud AI
+// surfaces. The users.plan column stores these exact strings.
+const (
+	PlanFree = "free"
+	PlanPro  = "pro"
+)
+
 type OAuthState struct {
 	State        string
 	Provider     Provider

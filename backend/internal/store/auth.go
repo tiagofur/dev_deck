@@ -52,6 +52,29 @@ func (s *Store) GetUserByID(ctx context.Context, id uuid.UUID) (*auth.User, erro
 	return scanUser(row)
 }
 
+// GetUserPlan returns the user's billing plan with a single-column lookup,
+// so Pro gating doesn't pay for a full user row. Unknown users and any
+// unrecognized stored value fall back to auth.PlanFree (fail closed).
+func (s *Store) GetUserPlan(ctx context.Context, id uuid.UUID) string {
+	var plan *string
+	err := s.Reader().QueryRow(ctx, `SELECT plan FROM users WHERE id = $1`, id).Scan(&plan)
+	if err != nil || plan == nil {
+		return auth.PlanFree
+	}
+	if *plan == auth.PlanPro {
+		return auth.PlanPro
+	}
+	return auth.PlanFree
+}
+
+// SetUserPlan switches a user's billing plan. Used by the billing webhook
+// and admin overrides; unknown plan strings are rejected by the caller,
+// this layer just persists.
+func (s *Store) SetUserPlan(ctx context.Context, id uuid.UUID, plan string) error {
+	_, err := s.Writer().Exec(ctx, `UPDATE users SET plan = $2, updated_at = NOW() WHERE id = $1`, id, plan)
+	return err
+}
+
 // UpsertUser creates or updates the user behind a GitHub identity. If a
 // local account registered before login validation already owns the same
 // login, the GitHub identity is stored under a "-gh" suffixed login instead

@@ -18,6 +18,7 @@ import (
 	"heapdeck/internal/cache"
 	"heapdeck/internal/config"
 	"heapdeck/internal/cron"
+	"heapdeck/internal/domain/auth"
 	"heapdeck/internal/email"
 	"heapdeck/internal/enricher"
 	httpapi "heapdeck/internal/http"
@@ -26,6 +27,7 @@ import (
 	"heapdeck/internal/store"
 	"heapdeck/internal/webhooks"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -138,7 +140,17 @@ func main() {
 
 	// Background enrich queue (Wave 4.5 §16.9) — handlers that need
 	// async metadata fetches (capture + create repo) push jobs here.
-	enrichQueue := jobs.NewEnrichQueue(st, en, aiSvc, 128)
+	// With billing on, the worker spends cloud AI only on Pro users;
+	// Free users get the deterministic heuristic ($0). Self-host keeps
+	// the legacy behavior where everyone uses the configured provider.
+	var isPro jobs.PlanResolver
+	if cfg.BillingEnabled {
+		isPro = func(ctx context.Context, userID uuid.UUID) bool {
+			return st.GetUserPlan(ctx, userID) == auth.PlanPro
+		}
+		logger.Info("pro gating enabled: cloud AI is Pro-only")
+	}
+	enrichQueue := jobs.NewEnrichQueue(st, en, aiSvc, 128, isPro)
 	enrichQueue.Start(ctx)
 
 	router := httpapi.NewRouterWithDeps(cfg, httpapi.Deps{

@@ -10,6 +10,12 @@
 // across restarts or horizontal scaling, this package is the seam to swap
 // for a real queue (NATS, Postgres LISTEN/NOTIFY, etc.) without touching
 // handlers.
+//
+// When a plan resolver is wired (cloud with BILLING_ENABLED=true), the AI
+// stage branches per user: Pro users get the configured cloud AI, Free
+// users get the deterministic heuristic so background enrichment never
+// spends model budget on them. Metadata fetching (GitHub/OG) runs for
+// everyone — it costs no AI budget.
 package jobs
 
 import (
@@ -48,20 +54,27 @@ type EnrichJob struct {
 	Type   items.Type
 }
 
+// PlanResolver reports whether a user may use the cloud AI service.
+// Main wires it to the billing plan when BILLING_ENABLED=true; a nil
+// resolver means everyone may (self-host / billing-off behavior).
+type PlanResolver func(ctx context.Context, userID uuid.UUID) bool
+
 // EnrichQueue is the producer-facing handle. Handlers call Enqueue;
 // the worker loop runs in a goroutine started by Start.
 type EnrichQueue struct {
 	ch       chan EnrichJob
 	store    *store.Store
 	ai       *ai.Service
+	freeAI   *ai.Service
 	enricher *enricher.Service
 	timeout  time.Duration
+	isPro    PlanResolver
 }
 
 // NewEnrichQueue allocates a queue with the given buffer size. A buffer
 // of 64 is plenty for a single-node deployment; enqueues beyond that
 // drop the oldest waiting job instead of blocking the handler.
-func NewEnrichQueue(st *store.Store, en *enricher.Service, aiSvc *ai.Service, buffer int) *EnrichQueue {
+func NewEnrichQueue(st *store.Store, en *enricher.Service, aiSvc *ai.Service, buffer int, isPro PlanResolver) *EnrichQueue {
 	if buffer <= 0 {
 		buffer = 64
 	}
@@ -69,8 +82,10 @@ func NewEnrichQueue(st *store.Store, en *enricher.Service, aiSvc *ai.Service, bu
 		ch:       make(chan EnrichJob, buffer),
 		store:    st,
 		ai:       aiSvc,
+		freeAI:   ai.NewHeuristic(),
 		enricher: en,
 		timeout:  15 * time.Second,
+		isPro:    isPro,
 	}
 }
 
@@ -177,7 +192,7 @@ func (q *EnrichQueue) run(parent context.Context, job EnrichJob) {
 			slog.Warn("enrich: load item for ai failed", "err", err, "id", job.ID)
 			hadError = true
 		} else {
-			out, err := q.ai.EnrichItem(ctx, it)
+			out, err := q.aiFor(job).EnrichItem(ctx, it)
 			if err != nil {
 				slog.Warn("enrich: ai enrich failed", "err", err, "id", job.ID)
 				hadError = true
@@ -201,7 +216,29 @@ func (q *EnrichQueue) run(parent context.Context, job EnrichJob) {
 }
 
 func (q *EnrichQueue) canRunAI(job EnrichJob) bool {
-	return q != nil && job.Kind == KindItem && q.ai != nil && q.ai.Enabled() && canAutoEnrichItemType(job.Type)
+	if q == nil || job.Kind != KindItem || !canAutoEnrichItemType(job.Type) {
+		return false
+	}
+	svc := q.aiFor(job)
+	return svc != nil && svc.Enabled()
+}
+
+// aiFor picks the AI service for a job. Pro users (or everyone when no
+// plan resolver is wired) get the configured cloud AI; Free users get the
+// deterministic heuristic so background enrichment costs $0 on them.
+func (q *EnrichQueue) aiFor(job EnrichJob) *ai.Service {
+	if q == nil {
+		return nil
+	}
+	if q.isPro == nil {
+		return q.ai
+	}
+	resolveCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	if q.isPro(resolveCtx, job.UserID) {
+		return q.ai
+	}
+	return q.freeAI
 }
 
 func (q *EnrichQueue) canFetchMetadata(job EnrichJob) bool {

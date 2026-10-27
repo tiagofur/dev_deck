@@ -84,6 +84,12 @@ type Config struct {
 	// the config has no dedicated environment/debug indicator.
 	AuthCookieSecure bool `env:"AUTH_COOKIE_SECURE" envDefault:"true"`
 
+	// ─── Pro billing (Free/Pro gating) ───
+	// BillingEnabled turns on per-user Free/Pro gating for cloud AI
+	// surfaces. Default off so self-hosted deployments — where the
+	// operator pays for their own provider — behave exactly as before.
+	BillingEnabled bool `env:"BILLING_ENABLED" envDefault:"false"`
+
 	// ─── Wave 5 Fase 18: local AI enrichment ───
 	AIProvider      string `env:"AI_PROVIDER" envDefault:"heuristic"`
 	OpenAIAPIKey    string `env:"OPENAI_API_KEY"`

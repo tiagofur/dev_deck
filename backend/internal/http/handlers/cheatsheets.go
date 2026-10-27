@@ -22,10 +22,18 @@ import (
 type CheatsheetsHandler struct {
 	store      *store.Store
 	embeddings *ai.EmbeddingsService
+	pro        proChecker
 }
 
-func NewCheatsheetsHandler(s *store.Store, emb *ai.EmbeddingsService) *CheatsheetsHandler {
-	return &CheatsheetsHandler{store: s, embeddings: emb}
+// proChecker reports whether the request's user may use Pro AI surfaces.
+// The production implementation is *middleware.ProGater; the interface
+// keeps this package decoupled from the middleware package.
+type proChecker interface {
+	IsPro(r *http.Request) bool
+}
+
+func NewCheatsheetsHandler(s *store.Store, emb *ai.EmbeddingsService, pro proChecker) *CheatsheetsHandler {
+	return &CheatsheetsHandler{store: s, embeddings: emb, pro: pro}
 }
 
 // GET /api/cheatsheets
@@ -297,6 +305,19 @@ func (h *CheatsheetsHandler) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Semantic search spends embedding budget, so it's Pro-only when
+	// billing is on. Vector-only fails closed for Free users; hybrid
+	// degrades to text with a flag so clients can show an upsell.
+	downgraded := false
+	if mode != store.SearchModeText && h.pro != nil && !h.pro.IsPro(r) {
+		if mode == store.SearchModeVector {
+			writeError(w, http.StatusPaymentRequired, "PRO_REQUIRED", "semantic search requires the Pro plan")
+			return
+		}
+		mode = store.SearchModeText
+		downgraded = true
+	}
+
 	var embedding []float32
 	if (mode == store.SearchModeVector || mode == store.SearchModeHybrid) && h.embeddings != nil && h.embeddings.Enabled() {
 		emb, err := h.embeddings.EmbedSearch(r.Context(), q)
@@ -307,6 +328,7 @@ func (h *CheatsheetsHandler) Search(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			mode = store.SearchModeText
+			downgraded = true
 		} else {
 			embedding = emb
 		}
@@ -321,9 +343,10 @@ func (h *CheatsheetsHandler) Search(w http.ResponseWriter, r *http.Request) {
 		results = []store.SearchResult{}
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
-		"query":   q,
-		"mode":    mode,
-		"results": results,
+		"query":        q,
+		"mode":         mode,
+		"ai_downgraded": downgraded,
+		"results":      results,
 	})
 }
 
