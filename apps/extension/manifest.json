@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "HeapDeck \u2014 Browser Extension",
   "description": "Capture repositories, documentation, and technical notes with a single click. The browser companion for your Knowledge OS.",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "action": {
     "default_popup": "src/popup/index.html"
   },

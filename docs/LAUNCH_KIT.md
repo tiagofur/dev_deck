@@ -8,7 +8,7 @@ HeapDeck is not being positioned as a finished enterprise platform. The launch a
 
 ## Version framing
 
-HeapDeck should be presented as **0.5.0 Public Beta**. Do not call it stable or 1.0 yet. The honest message is: useful today, actively polished, and looking for early users/contributors before a stable release.
+HeapDeck should be presented as **0.6.0 Public Beta, live at https://heapdeck.com**. Do not call it stable or 1.0 yet. The honest message is: useful today, actively polished, and looking for early users/contributors before a stable release.
 
 ---
 
@@ -44,6 +44,8 @@ Developers discover useful tools every week and then lose them across chats, boo
 
 Hey folks — I’m building **HeapDeck**, an open-source developer memory app.
 
+**You can try the live beta right now: https://heapdeck.com** — free email signup, no install, your first repo/CLI/snippet saved in under a minute.
+
 The problem I’m trying to solve: I keep finding useful repos, CLIs, snippets, prompts, shortcuts, and workflow notes, but weeks later I can’t remember where I saw them or why they mattered. Bookmarks become a graveyard. GitHub stars are too broad. Chat history disappears.
 
 HeapDeck is my attempt to make that memory reusable:
@@ -59,7 +61,7 @@ It’s built with Go, React, Electron, Postgres, pgvector, pnpm workspaces, and 
 I’m not claiming it’s perfect yet. I’m actively polishing the onboarding, UI, docs, demo flow, and contributor experience. I’d love feedback from developers who collect tools/workflows or participate in dev communities.
 
 Repo: https://github.com/tiagofur/heapdeck
-Site: https://heapdeck.com
+Try it: https://heapdeck.com (free signup)
 Discussions: https://github.com/tiagofur/heapdeck/discussions
 Call for contributors: https://github.com/tiagofur/heapdeck/discussions/100
 Support: https://www.buymeacoffee.com/tiagofur
@@ -81,6 +83,8 @@ I’m building HeapDeck: an open-source memory layer for repos, CLIs, snippets, 
 
 Looking for feedback + contributors.
 
+Try the live beta: https://heapdeck.com
+
 https://github.com/tiagofur/heapdeck
 
 ---
@@ -93,7 +97,7 @@ Prioritize communities where people already discuss developer workflow, tooling,
 | Channel | Angle | Call to action | Notes |
 | --- | --- | --- | --- |
 | GitHub Discussions | Contributor coordination and early product feedback. | Reply to the [Call for contributors](https://github.com/tiagofur/heapdeck/discussions/100). | Keep this as the home base for rough ideas. |
-| Reddit `r/selfhosted` | Self-hostable developer memory with Docker Compose + Caddy. | Ask for deployment feedback and VPS docs review. | Be transparent that HeapDeck is 0.5.0 Public Beta. |
+| Reddit `r/selfhosted` | Self-hostable developer memory with Docker Compose + Caddy. | Ask for deployment feedback and VPS docs review. | Be transparent that HeapDeck is 0.6.0 Public Beta. |
 | Reddit `r/opensource` | Open-source developer tooling looking for early contributors. | Ask for small PRs and architecture/doc feedback. | Emphasize contribution flow and good-first-issues. |
 | Reddit `r/programming` or language/tooling subs | Rediscovering useful dev artifacts by context. | Ask whether the problem resonates. | Avoid overclaiming AI; lead with workflow pain. |
 | Hacker News `Show HN` | Practical app for developer memory and shared findings. | Ask for critical feedback. | Only post once the README and self-hosting path are verified. |
@@ -110,7 +114,8 @@ Before posting widely:
 1. Confirm `main` CI is green after the latest docs and launch-readiness PRs.
 2. Confirm README screenshots and demo GIF render correctly on GitHub.
 3. Confirm [docs/SELF_HOSTING.md](SELF_HOSTING.md) matches the current Docker Compose stack.
-4. Confirm [docs/SUPPORT.md](SUPPORT.md) has a working support link.
+4. Confirm the live beta signup works: https://heapdeck.com/register.
+5. Confirm [docs/SUPPORT.md](SUPPORT.md) has a working support link.
 5. Confirm [GitHub Discussions](https://github.com/tiagofur/heapdeck/discussions) has starter threads.
 6. Confirm the [Call for contributors](https://github.com/tiagofur/heapdeck/discussions/100) is visible.
 7. Confirm at least five `good first issue` tasks are open or recently completed with clear examples.

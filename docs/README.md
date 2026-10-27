@@ -15,7 +15,7 @@
 | [DEV_WORKBENCH.md](DEV_WORKBENCH.md) | **Developer Workbench.** From memory to contextual action: local utilities, palette, reusable requests, product boundaries, and per-phase status. |
 | [CIRCLES_COMMUNITY.md](CIRCLES_COMMUNITY.md) | **Circles and community contribution.** Product model for turning individual findings into reusable memory for groups/communities of developers. |
 | [COMPETITIVE_ANALYSIS.md](COMPETITIVE_ANALYSIS.md) | **Competitive analysis.** Comparison against GitHub Stars, Raindrop, Pocket, Notion, Obsidian, and Raycast. |
-| [LIMITATIONS.md](LIMITATIONS.md) | **Known limitations.** Honest list of what the 0.5.0 Public Beta does not do yet. |
+| [LIMITATIONS.md](LIMITATIONS.md) | **Known limitations.** Honest list of what the 0.6.0 live Public Beta does not do yet. |
 
 ---
 

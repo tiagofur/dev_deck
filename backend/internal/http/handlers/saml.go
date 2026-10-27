@@ -25,7 +25,7 @@ type SAMLHandler struct {
 type SAMLHandlerConfig struct {
 	EntityID    string // HeapDeck SP Entity ID
 	BaseURL     string // ej: https://api.heapdeck.com
-	FrontendURL string // ej: https://app.heapdeck.com
+	FrontendURL string // ej: https://heapdeck.com
 }
 
 func NewSAMLHandler(s *store.Store, as *authservice.Service, cfg SAMLHandlerConfig) *SAMLHandler {

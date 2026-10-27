@@ -1057,12 +1057,12 @@
     "passwords_dont_match": "Las contraseñas no coinciden",
     "password_too_short": "La contraseña debe tener al menos 8 caracteres",
     "register_error": "Error al crear la cuenta",
-    "almost_ready": "¡Casi listo!",
-    "verification_sent": "Hemos enviado un email de verificación a {{email}}. Revisa tu bandeja de entrada para activar tu cuenta.",
+    "almost_ready": "¡Cuenta creada!",
+    "verification_sent": "Tu cuenta {{email}} está lista. Iniciá sesión para empezar tu vault.",
     "register_me": "Registrarme",
     "invite_code_label": "Código de invitación",
     "invite_code_placeholder": "Ej: HEAPDECK-XXXX-XXXX",
-    "waitlist_hint": "Si no tienes uno, únete a la lista de espera en la web."
+    "waitlist_hint": "Invitación de beta opcional. Dejalo vacío salvo que hayas recibido una."
   },
   "workspace": {
     "personal": "Personal",

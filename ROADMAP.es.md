@@ -1,8 +1,8 @@
 # HeapDeck — Roadmap
 
-> 🌐 [heapdeck.com](https://heapdeck.com) — Tu memoria externa para desarrollo, asistida por IA.
+> 🌐 [heapdeck.com](https://heapdeck.com) — Tu memoria externa para desarrollo, asistida por IA. **Beta 0.6.0 viva: [creá tu cuenta gratis](https://heapdeck.com/register).**
 >
-> 📝 **Actualizado Mayo 2026:** roadmap vivo del producto.
+> 📝 **Actualizado Octubre 2026:** roadmap vivo del producto. Histórico de olas abajo intacto.
 
 ## Dirección actual
 
@@ -15,8 +15,8 @@ Ver [docs/DEV_WORKBENCH.es.md](docs/DEV_WORKBENCH.es.md) para la propuesta de pr
 ### Ola 4.5 a 17 — Cerradas
 - ✅ §16.5 Higiene de repo (ADRs, docs, licensing)
 - ✅ §16.9 `POST /api/items/capture` con detección, dedupe y enrich async
-- ✅ §16.10 CLI `heapdeck` (v0.5.0 Beta Pública)
-- ✅ §16.11 Extensión de browser (v0.5.0 Beta Pública)
+- ✅ §16.10 CLI `heapdeck` (Beta Pública 0.6)
+- ✅ §16.11 Extensión de browser (Beta Pública 0.6)
 - ✅ Wave 5-12: Features avanzadas, sync y social
 - ✅ Wave 13-16: Enterprise identity y Agentes autónomos
 - ✅ Wave 17: Lanzamiento y Onboarding
@@ -67,13 +67,13 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - Response incluye `duplicate_of` cuando aplica y `enrichment_status`. ✅
 - Tests end-to-end con los 9 tipos de input + dedupe intra-tabla + dedupe cross-table contra `repos` legacy. ✅
 
-### Fase 16.10 — CLI `heapdeck` (v0.5.0 Beta Pública) ✅
+### Fase 16.10 — CLI `heapdeck` (Beta Pública 0.6) ✅
 - Localizado en `cli/` (Go con Cobra).
 - Soporte para `login`, `logout`, `add`, `search`, `list`, `open`, `status`, `import`.
 - Nuevo comando interactivo: `heapdeck agent` para chatear con el vault.
 - Almacenamiento seguro de tokens en el Keychain del sistema.
 
-### Fase 16.11 — Extensión de browser (v0.5.0 Beta Pública) ✅
+### Fase 16.11 — Extensión de browser (Beta Pública 0.6) ✅
 - Localizada en `apps/extension/` (React + manifest v3).
 - Atajo `Cmd/Ctrl+Shift+D` para captura inmediata.
 - Menús contextuales para guardar links y fragmentos de texto como notas.
@@ -117,8 +117,8 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - [x] ≥ 5 flows E2E pasando en Electron (Playwright skeleton con los 5 flows).
 - [x] Endpoint `/api/items/capture` en producción con tests.
 - [x] Web client migrado a React y compartiendo código con desktop (§16.13).
-- [x] CLI `heapdeck` en release v0.5.0 Beta Pública con distribución global.
-- [x] Extensión Chrome en Chrome Web Store (v0.5.0 Beta Pública). ✅
+- [x] CLI `heapdeck` en release Beta Pública 0.6 con distribución global.
+- [x] Extensión de browser lista para empaquetar (Beta Pública 0.6; Chrome Web Store pendiente). ✅
 - [x] README con screenshots (enlace a [heapdeck.com](https://heapdeck.com)). ✅
 - [x] `api.exe` fuera del repo.
 - [x] ADRs 0001, 0002 y 0003 con decisión final ("Aceptadas").
@@ -410,14 +410,14 @@ Fortalecer la captura, recuperación y reutilización diaria del conocimiento gu
 - CRUD endpoints: `GET|POST /api/decks`, `GET|PATCH|DELETE /api/decks/:id`
 - Endpoint `GET /api/decks/:slug/public` — público, sin auth; devuelve deck + items (metadata pública solamente)
 - Endpoint `POST /api/decks/:id/import` — importa items de un deck público al vault del usuario autenticado
-- Open Graph: `GET /deck/:slug` en landing (heapdeck.com) con meta tags `og:title`, `og:description`, `og:image` (preview del deck)
+- Open Graph: `GET /deck/:slug` en la app web (heapdeck.com) con meta tags `og:title`, `og:description`, `og:image` (preview del deck)
 - Frontend app: UI de "Crear deck", selector de items, toggle público/privado, copy link button
-- Frontend landing (heapdeck.com): página `heapdeck.com/deck/:slug` — preview del deck con lista de items + CTA "Importar a mi HeapDeck"
+- Preview público: página `heapdeck.com/deck/:slug` — preview del deck con lista de items + CTA "Importar a mi HeapDeck"
 
 ### Fase 24 — Perfil público + Multi-usuario completo
 
 - `GET /api/users/:username/public` — perfil público: nombre, bio, decks públicos
-- Landing: `heapdeck.com/@username` — página de perfil con decks públicos del usuario
+- Perfil público: `heapdeck.com/u/:username` — página con decks públicos del usuario
 - Auth: ampliar allowlist de usuarios (pasar de 1 username a N usernames en `ALLOWED_GITHUB_LOGINS`)
 - Admin: `GET /api/admin/users` — listar usuarios (solo para el owner); gestión de permisos
 - Rate limiting por usuario para endpoints de IA (proteger contra abuso de costos)

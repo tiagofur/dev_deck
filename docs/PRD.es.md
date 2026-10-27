@@ -14,11 +14,12 @@
 
 | Subdominio | Propósito |
 |------------|-----------|
-| `heapdeck.com` | Landing page + marketing + descargas |
-| `app.heapdeck.com` | Web app |
-| `api.heapdeck.com` | Backend REST + sync |
-| `docs.heapdeck.com` | Documentación |
-| `download.heapdeck.com` | Descargas de la app desktop |
+| `heapdeck.com` | Web app (React, es lo que corre en producción) + futura landing/marketing |
+| `api.heapdeck.com` | Backend REST + sync (vivo en producción) |
+| `docs.heapdeck.com` | Documentación (a futuro — hoy los docs viven en el repo) |
+| `download.heapdeck.com` | Descargas de la app desktop (a futuro — hoy vía GitHub Releases) |
+
+> Nota (Oct 2026): la idea original de `app.heapdeck.com` para la web app se descartó — la app corre directamente en el apex `heapdeck.com`. La tabla histórica incluía `app.heapdeck.com` como web app.
 
 El `.ai` no debe ser decorativo. La IA en HeapDeck existe para clasificar, resumir, enriquecer, recuperar por intención y sugerir relaciones útiles dentro del vault.
 

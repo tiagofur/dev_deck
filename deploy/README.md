@@ -21,7 +21,7 @@ sudo usermod -aG docker $USER
 ## 1. Clonar el repo
 
 ```bash
-git clone https://github.com/tu-usuario/heapdeck.git
+git clone https://github.com/tiagofur/heapdeck.git
 cd heapdeck/deploy
 ```
 
@@ -53,13 +53,16 @@ PG_PASS=<password-segura>
 AUTH_MODE=jwt
 GITHUB_CLIENT_ID=...
 GITHUB_CLIENT_SECRET=...
-GITHUB_OAUTH_CALLBACK_URL=https://heapdeck.com/api/auth/callback
+# Exact callback registered in the GitHub OAuth app (provider-specific path):
+GITHUB_OAUTH_CALLBACK_URL=https://heapdeck.com/api/auth/github/callback
+# Where the API sends the browser after provider login (web frontend route):
+WEB_OAUTH_REDIRECT_URL=https://heapdeck.com/auth/callback
 
 # JWT Secrets
 JWT_SECRET=<hex-32-chars>
 REFRESH_SECRET=<hex-32-chars>
 
-# IA (Opcional, pero recomendado para v0.5 beta)
+# IA (Opcional, pero recomendado para la beta 0.6)
 AI_PROVIDER=openai
 OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-4o
@@ -92,9 +95,9 @@ docker compose logs -f api
 docker compose logs -f web
 ```
 
-## 5. Aplicar migraciones (0.5.0 beta)
+## 5. Aplicar migraciones (beta 0.6)
 
-HeapDeck 0.5.0 beta requiere aplicar las migraciones del core disponibles:
+HeapDeck 0.6 beta requiere aplicar las migraciones del core disponibles:
 
 ```bash
 for f in ../backend/migrations/*.sql; do
@@ -106,7 +109,7 @@ done
 ## 6. Probar que está vivo
 
 ```bash
-# Health (público - incluye DB ping en v0.5 beta)
+# Health (público - incluye DB ping en beta 0.6)
 curl https://heapdeck.com/healthz
 
 # Métricas (Prometheus)
@@ -116,12 +119,15 @@ docker compose exec prometheus wget -qO- http://api:8080/metrics | head -5
 
 Si todo está bien, vas a ver `{"status":"ok"}` y una lista de métricas que incluyen `heapdeck_agent_tool_calls_total`.
 
-## 7. Observabilidad (0.5.0 beta)
+## 7. Observabilidad (beta 0.6)
 
 HeapDeck incluye un stack de monitoreo integrado:
 
 - **Prometheus**: Recolecta métricas de la API y de los Agentes.
-- **Grafana**: Visualización en `https://monitor.heapdeck.com`.
+- **Grafana**: Visualización en el subdominio que definas con
+  `GF_SERVER_ROOT_URL` en `.env` (ej. `https://monitor.tudominio.com`, con su
+  registro DNS apuntando al VPS) — ver el bloque `monitor.{$DOMAIN}` del
+  Caddyfile.
   - Usuario por defecto: `admin`
   - Password: La que definas en `GF_PASS` (.env).
 

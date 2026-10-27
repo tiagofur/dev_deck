@@ -40,6 +40,7 @@ If you find a security vulnerability in HeapDeck, **please do not open a public 
 - Vulnerabilities requiring physical access to the device.
 - Resource-based DoS (e.g., sending 10k concurrent items). Rate limits are in the roadmap.
 - Self-hosted deployments with insecure configurations.
+- The hosted beta at heapdeck.com as an attack target: test against your own self-hosted instance or a local checkout instead. Do not probe, scrape, or load-test the production host.
 - Vulnerabilities in dependencies without a clear exploit vector in HeapDeck.
 
 ---

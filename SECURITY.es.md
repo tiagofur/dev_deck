@@ -38,6 +38,7 @@ Si encontrás una vulnerabilidad de seguridad en HeapDeck, **por favor no abras 
 - Vulnerabilidades que requieren acceso físico al device.
 - DoS por recursos (ej: mandar 10k items concurrentes). Tenemos rate limits y circuit breakers en roadmap.
 - Deployments self-hosted con config insegura (responsabilidad del operador).
+- La beta hosteada en heapdeck.com como objetivo de ataque: probá contra tu propia instancia self-hosteada o un checkout local. No hagas probing, scraping ni load-testing contra el host de producción.
 - Vulnerabilidades en dependencias sin vector de explotación en HeapDeck.
 - Spam, phishing, social engineering.
 

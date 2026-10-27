@@ -124,7 +124,7 @@ Binario Go único. El estado actual del repo soporta `go install`/`go build`; Ho
 
 ```bash
 heapdeck login --token <api-token>          # guarda token en OS keychain
-heapdeck config set api-url https://api.heapdeck.com
+heapdeck config set api-url https://api.heapdeck.com   # beta hosteada
 heapdeck config set api-url http://localhost:8080   # self-hosters
 
 heapdeck add https://github.com/foo/bar     # repo

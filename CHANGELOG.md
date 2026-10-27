@@ -9,17 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
 ### Changed
 
-### Deprecated
-
-### Removed
+- Docs point at the live 0.6.0 beta: README hero CTA to
+  `https://heapdeck.com/register`, live-beta badges, and screenshots in both
+  `README.md` and `README.es.md`; landing CTAs now target the live beta and
+  use the `.com` wordmark.
+- Corrected production URLs across docs: web app at `heapdeck.com`, API at
+  `api.heapdeck.com`; removed references to the never-created `app.`,
+  `docs.`, and `download.` subdomains (marked as future where still planned).
+- `deploy/README.md`: real clone URL, OAuth callback
+  `/api/auth/github/callback`, and corrected version references.
+- Aligned user-facing version strings to `0.6.0` (docs, extension manifest
+  and footer) and added description/Open Graph tags to the web app so shared
+  links render a preview.
 
 ### Fixed
 
-### Security
+- Registration success copy no longer promises a verification email that the
+  beta does not send; the invite field is labeled as an optional beta invite.
 
 ---
 

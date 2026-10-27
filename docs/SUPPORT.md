@@ -8,7 +8,7 @@ Support is not required to use HeapDeck. It helps keep the project moving faster
 
 ## Why support matters
 
-HeapDeck is being built in public as a `0.5.0 Public Beta`. That means the project is already useful, but still needs polish before a stable 1.0 release:
+HeapDeck is being built in public as a `0.6.0 Public Beta`, live at [heapdeck.com](https://heapdeck.com). That means the project is already useful, but still needs polish before a stable 1.0 release:
 
 - clearer onboarding,
 - better screenshots and demo assets,
@@ -96,8 +96,8 @@ Sponsorship from developer-tooling companies that align with the project and do 
 
 ## Current launch-readiness work
 
-The current milestone is focused on getting HeapDeck ready for public community promotion:
+The hosted beta is live, so launch work now means polish and growth: better onboarding, demo assets, honest docs, and contributor-friendly issues.
 
-- [0.5.0 Launch Readiness](https://github.com/tiagofur/heapdeck/milestone/1)
+- Past milestone: [0.5.0 Launch Readiness](https://github.com/tiagofur/heapdeck/milestone/1)
 
 If you want to contribute, start with issues labeled `good first issue` or `help wanted`.
