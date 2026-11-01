@@ -14,9 +14,9 @@
     "@heapdeck/api-client": "workspace:*",
     "@heapdeck/features": "workspace:*",
     "@heapdeck/ui": "workspace:*",
-    "@tanstack/react-query": "^5.104.5",
-    "framer-motion": "^14.6.0",
-    "lucide-react": "^1.61.0",
+    "@tanstack/react-query": "^5.105.0",
+    "framer-motion": "^14.8.0",
+    "lucide-react": "^1.64.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
